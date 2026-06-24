@@ -1,0 +1,40 @@
+import { useQuery } from "@tanstack/react-query";
+
+import { supabase } from "@/lib/supabase";
+import type { Membership, MemberRole, MemberPermissions, Shop } from "@/types/database";
+import { useAuth } from "./auth-context";
+
+/**
+ * Joriy foydalanuvchining a'zoliklari (do'kon + rol + ruxsat).
+ * Eng yangi birinchi — [0] default faol do'kon. (Web membership.ts ga mos.)
+ */
+export function useMemberships() {
+  const { session } = useAuth();
+
+  return useQuery({
+    queryKey: ["memberships", session?.user.id],
+    enabled: !!session,
+    queryFn: async (): Promise<Membership[]> => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from("shop_members")
+        .select("role, permissions, shop:shops(*)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error || !data) return [];
+
+      return data
+        .filter((d) => d.shop)
+        .map((d) => ({
+          shop: d.shop as unknown as Shop,
+          role: d.role as MemberRole,
+          permissions: (d.permissions ?? {}) as MemberPermissions,
+        }));
+    },
+  });
+}

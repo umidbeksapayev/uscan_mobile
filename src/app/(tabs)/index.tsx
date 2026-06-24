@@ -6,8 +6,12 @@ import { colors } from "@/theme/colors";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/format";
 import { Logo } from "@/components/logo";
+import { useMemberships } from "@/features/auth/use-memberships";
 
 export default function HomeScreen() {
+  const { data: memberships } = useMemberships();
+  const initials = (memberships?.[0]?.shop.name ?? "uS").slice(0, 2).toUpperCase();
+
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <ScrollView className="flex-1">
@@ -16,7 +20,7 @@ export default function HomeScreen() {
           <View className="flex-row items-center justify-between pb-4 pt-2">
             <View className="flex-row items-center gap-3">
               <View className="h-10 w-10 items-center justify-center rounded-full bg-primary-deep">
-                <Text className="font-medium text-white">SS</Text>
+                <Text className="font-medium text-white">{initials}</Text>
               </View>
               <Logo size={22} />
             </View>
