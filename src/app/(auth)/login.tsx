@@ -14,11 +14,9 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [stage, setStage] = useState<string | null>(null);
 
   async function onSubmit() {
     setErrorMsg(null);
-    setStage(null);
     if (!email.trim() || !password) {
       setErrorMsg("Email va parolni kiriting.");
       return;
@@ -29,27 +27,26 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
-    setStage("1. So'rov yuborildi…");
     try {
       const signIn = supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
+      // Tarmoq qotib qolmasligi uchun 15s chegara.
       const timeout = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Vaqt tugadi (15s) — javob kelmadi (hang)")), 15000),
+        setTimeout(() => reject(new Error("Tarmoq javob bermadi. Qayta urinib ko'ring.")), 15000),
       );
       const { data, error } = await Promise.race([signIn, timeout]);
-      setStage("2. Javob keldi");
 
       if (error) {
-        setErrorMsg(`${authErrorMessage(error.message)} (${error.message})`);
+        setErrorMsg(authErrorMessage(error.message));
         return;
       }
       if (!data.session) {
-        setErrorMsg("Sessiya qaytmadi — email tasdiqlanmagan bo'lishi mumkin.");
+        setErrorMsg("Kirib bo'lmadi. Email tasdiqlanmagan bo'lishi mumkin.");
         return;
       }
-      setStage("3. Kirildi ✓ — yo'naltirilmoqda…");
+      // Muvaffaqiyat → AuthGate avtomatik tabs'ga yo'naltiradi.
     } catch (e) {
       setErrorMsg(e instanceof Error ? e.message : String(e));
     } finally {
@@ -98,7 +95,6 @@ export default function LoginScreen() {
             textContentType="none"
           />
           <Button label="Kirish" onPress={onSubmit} loading={loading} />
-          {stage ? <Text className="text-center text-xs text-muted">{stage}</Text> : null}
           {errorMsg ? (
             <Text className="text-center text-sm text-danger">{errorMsg}</Text>
           ) : null}

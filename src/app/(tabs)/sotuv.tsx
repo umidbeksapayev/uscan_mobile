@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, memo } from "react";
-import { View, Text, TextInput, Pressable, FlatList, Alert } from "react-native";
+import { View, Text, TextInput, Pressable, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,6 +13,7 @@ import { searchSellProducts } from "@/features/sell/lookup";
 import { useCart, type CartItem } from "@/features/sell/cart-store";
 import { cartTotal } from "@/features/sell/cart-total";
 import { WeightSheet } from "@/features/sell/weight-sheet";
+import { PaymentSheet } from "@/features/sell/payment-sheet";
 import type { Product } from "@/types/database";
 
 type CartRowProps = { item: CartItem; onEditWeight: (item: CartItem) => void };
@@ -119,6 +120,7 @@ export default function SotuvScreen() {
   const pendingWeight = useCart((s) => s.pendingWeight);
   const setPendingWeight = useCart((s) => s.setPendingWeight);
 
+  const [payOpen, setPayOpen] = useState(false);
   const [search, setSearch] = useState("");
   const debounced = useDebounce(search, 300);
   const searching = search.trim().length > 0;
@@ -166,7 +168,7 @@ export default function SotuvScreen() {
   );
 
   function onCheckout() {
-    Alert.alert("To'lov", "To'lov (checkout) F4 bosqichida quriladi.");
+    setPayOpen(true);
   }
 
   return (
@@ -299,6 +301,16 @@ export default function SotuvScreen() {
           if (weightTarget) add(weightTarget.product, kg);
           setWeightTarget(null);
         }}
+      />
+
+      {/* To'lov oynasi */}
+      <PaymentSheet
+        visible={payOpen}
+        total={total}
+        shopId={shopId}
+        items={items}
+        onClose={() => setPayOpen(false)}
+        onPaid={clear}
       />
     </SafeAreaView>
   );
