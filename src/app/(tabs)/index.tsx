@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/theme/colors";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/format";
+import { Logo } from "@/components/logo";
 
 export default function HomeScreen() {
   return (
@@ -17,7 +18,7 @@ export default function HomeScreen() {
               <View className="h-10 w-10 items-center justify-center rounded-full bg-primary-deep">
                 <Text className="font-medium text-white">SS</Text>
               </View>
-              <Text className="text-xl font-medium text-primary">uscan</Text>
+              <Logo size={22} />
             </View>
             <Ionicons name="notifications-outline" size={22} color={colors.muted} />
           </View>

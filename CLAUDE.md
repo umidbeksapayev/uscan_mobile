@@ -8,7 +8,7 @@ backend qayta qurilmaydi, faqat yangi client.
 
 | Qatlam | Texnologiya |
 |--------|-------------|
-| Framework | Expo (SDK 56) + Expo Router (file-based) |
+| Framework | Expo (SDK 54) + Expo Router (file-based) |
 | Til | TypeScript |
 | Styling | NativeWind (Tailwind) — `tailwind.config.js` brend tokenlari |
 | State | Zustand + TanStack Query |
