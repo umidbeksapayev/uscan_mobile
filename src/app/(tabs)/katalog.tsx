@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight } from "@/lib/format";
@@ -122,6 +123,7 @@ function EmptyState({
 }
 
 export default function KatalogScreen() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState<CategoryFilter>("all");
   const [showFilters, setShowFilters] = useState(false);
@@ -144,7 +146,7 @@ export default function KatalogScreen() {
     Alert.alert("Skaner", "Barcode skaner F3 (Sotuv) bosqichida qo'shiladi.");
   }
   function onAdd() {
-    Alert.alert("Mahsulot qo'shish", "Mahsulot qo'shish ekrani keyingi bosqichda quriladi.");
+    router.push("/product-form");
   }
 
   return (
@@ -255,7 +257,13 @@ export default function KatalogScreen() {
         <FlatList
           data={products}
           keyExtractor={(p) => p.id}
-          renderItem={({ item }) => <ProductRow item={item} />}
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() => router.push({ pathname: "/product-form", params: { id: item.id } })}
+            >
+              <ProductRow item={item} />
+            </Pressable>
+          )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 90 }}
           refreshing={isRefetching}
           onRefresh={() => {

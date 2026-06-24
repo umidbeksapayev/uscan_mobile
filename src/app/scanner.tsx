@@ -5,7 +5,7 @@ import {
   useCameraPermissions,
   type BarcodeScanningResult,
 } from "expo-camera";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -13,14 +13,17 @@ import { colors } from "@/theme/colors";
 import { useMemberships } from "@/features/auth/use-memberships";
 import { findProductsByBarcode } from "@/features/sell/lookup";
 import { useCart } from "@/features/sell/cart-store";
+import { useScanReturn } from "@/features/products/scan-return";
 
 export default function ScannerScreen() {
   const router = useRouter();
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
   const [permission, requestPermission] = useCameraPermissions();
   const { data: memberships } = useMemberships();
   const shopId = memberships?.[0]?.shop.id;
   const add = useCart((s) => s.add);
   const setPendingWeight = useCart((s) => s.setPendingWeight);
+  const setScanCode = useScanReturn((s) => s.setCode);
 
   const locked = useRef(false);
   const [status, setStatus] = useState<{ text: string; error?: boolean } | null>(null);
@@ -32,8 +35,19 @@ export default function ScannerScreen() {
   }, [permission, requestPermission]);
 
   async function onScan(result: BarcodeScanningResult) {
-    if (locked.current || !shopId) return;
+    if (locked.current) return;
     locked.current = true;
+
+    // Forma rejimi: kodni qaytaramiz (savatga qo'shmaymiz).
+    if (mode === "form") {
+      setScanCode(result.data);
+      router.back();
+      return;
+    }
+    if (!shopId) {
+      locked.current = false;
+      return;
+    }
     setStatus({ text: "Qidirilmoqda..." });
     try {
       const found = await findProductsByBarcode(result.data, shopId);
