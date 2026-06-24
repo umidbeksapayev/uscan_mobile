@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { View, Text, ScrollView, Pressable, TextInput, Alert } from "react-native";
+import { View, Text, ScrollView, Pressable, TextInput, Alert, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -13,7 +13,7 @@ import { useCategories } from "@/features/catalog/use-categories";
 import { createProduct, updateProduct, getProduct } from "@/lib/products";
 import { lowStockThreshold } from "@/features/products/low-stock";
 import { useScanReturn } from "@/features/products/scan-return";
-import type { SaleType } from "@/types/database";
+import type { Category, SaleType } from "@/types/database";
 
 const INPUT = "rounded-xl bg-bg px-4 text-base text-ink";
 
@@ -27,6 +27,80 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
         {children}
       </View>
     </View>
+  );
+}
+
+function CategorySheet({
+  visible,
+  categories,
+  selectedId,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  categories: Category[];
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
+  onClose: () => void;
+}) {
+  const options: { id: string | null; name: string }[] = [
+    { id: null, name: "Kategoriyasiz" },
+    ...categories.map((c) => ({ id: c.id, name: c.name })),
+  ];
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable
+        onPress={onClose}
+        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
+      >
+        <View
+          onStartShouldSetResponder={() => true}
+          style={{
+            backgroundColor: colors.surface,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            padding: 20,
+            paddingBottom: 28,
+          }}
+        >
+          <View
+            style={{
+              alignSelf: "center",
+              width: 40,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: colors.line,
+              marginBottom: 12,
+            }}
+          />
+          <Text className="mb-2 text-lg font-medium text-ink">Kategoriya</Text>
+          <ScrollView style={{ maxHeight: 380 }}>
+            {options.map((o) => {
+              const active = selectedId === o.id;
+              return (
+                <Pressable
+                  key={o.id ?? "none"}
+                  onPress={() => {
+                    onSelect(o.id);
+                    onClose();
+                  }}
+                  className="flex-row items-center justify-between px-1"
+                  style={{ height: 52 }}
+                >
+                  <Text
+                    className="text-base"
+                    style={{ color: active ? colors.primary : colors.ink, fontWeight: active ? "500" : "400" }}
+                  >
+                    {o.name}
+                  </Text>
+                  {active ? <Ionicons name="checkmark" size={20} color={colors.primary} /> : null}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </Pressable>
+    </Modal>
   );
 }
 
@@ -47,6 +121,7 @@ export default function ProductFormScreen() {
   const [name, setName] = useState("");
   const [barcode, setBarcode] = useState("");
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [catOpen, setCatOpen] = useState(false);
   const [saleType, setSaleType] = useState<SaleType>("unit");
   const [sellingPrice, setSellingPrice] = useState("");
   const [costPrice, setCostPrice] = useState("");
@@ -83,6 +158,8 @@ export default function ProductFormScreen() {
   const q = num(quantity);
   const profit = sp - cp;
   const unit = saleType === "weight" ? "kg" : "dona";
+  const categoryName =
+    (categories ?? []).find((c) => c.id === categoryId)?.name ?? "Kategoriyasiz";
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -93,7 +170,7 @@ export default function ProductFormScreen() {
         selling_price: sp,
         cost_price: cp,
         quantity: q,
-        low_stock_alert: lowStockThreshold(q, saleType), // avtomatik 20%
+        low_stock_alert: lowStockThreshold(q, saleType),
         barcode: barcode.trim() || null,
         category_id: categoryId,
       };
@@ -134,28 +211,6 @@ export default function ProductFormScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Sotuv turi */}
-        <View
-          className="mb-4 flex-row rounded-2xl bg-surface p-1"
-          style={{ borderWidth: 1, borderColor: colors.line }}
-        >
-          {(["unit", "weight"] as SaleType[]).map((t) => {
-            const active = saleType === t;
-            return (
-              <Pressable
-                key={t}
-                onPress={() => setSaleType(t)}
-                className="flex-1 items-center justify-center rounded-xl"
-                style={{ height: 48, backgroundColor: active ? colors.primary : "transparent" }}
-              >
-                <Text style={{ fontWeight: "500", color: active ? "#fff" : colors.muted }}>
-                  {t === "unit" ? "DONALI (dona)" : "VAZN (kg)"}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
         <Section title="Mahsulot">
           <View style={{ gap: 6 }}>
             <Text className="text-sm font-medium text-ink">Nomi</Text>
@@ -193,18 +248,6 @@ export default function ProductFormScreen() {
 
         <Section title="Narx">
           <View className="flex-row" style={{ gap: 12 }}>
-            <View className="flex-1" style={{ gap: 6 }}>
-              <Text className="text-sm font-medium text-ink">Sotuv narxi</Text>
-              <TextInput
-                value={sellingPrice}
-                onChangeText={setSellingPrice}
-                keyboardType="number-pad"
-                placeholder="0"
-                placeholderTextColor={colors.tabInactive}
-                className={INPUT}
-                style={{ height: 52 }}
-              />
-            </View>
             {isOwner ? (
               <View className="flex-1" style={{ gap: 6 }}>
                 <View className="flex-row items-center gap-1">
@@ -222,6 +265,18 @@ export default function ProductFormScreen() {
                 />
               </View>
             ) : null}
+            <View className="flex-1" style={{ gap: 6 }}>
+              <Text className="text-sm font-medium text-ink">Sotuv narxi</Text>
+              <TextInput
+                value={sellingPrice}
+                onChangeText={setSellingPrice}
+                keyboardType="number-pad"
+                placeholder="0"
+                placeholderTextColor={colors.tabInactive}
+                className={INPUT}
+                style={{ height: 52 }}
+              />
+            </View>
           </View>
           {isOwner && sp > 0 && cp > 0 ? (
             <View className="flex-row items-center gap-2">
@@ -238,6 +293,25 @@ export default function ProductFormScreen() {
         </Section>
 
         <Section title="Qoldiq">
+          {/* Sotuv turi — miqdor ustida */}
+          <View className="flex-row rounded-xl bg-bg p-1">
+            {(["unit", "weight"] as SaleType[]).map((t) => {
+              const active = saleType === t;
+              return (
+                <Pressable
+                  key={t}
+                  onPress={() => setSaleType(t)}
+                  className="flex-1 items-center justify-center rounded-lg"
+                  style={{ height: 42, backgroundColor: active ? colors.primary : "transparent" }}
+                >
+                  <Text style={{ fontWeight: "500", color: active ? "#fff" : colors.muted }}>
+                    {t === "unit" ? "DONALI (dona)" : "VAZN (kg)"}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
           <View style={{ gap: 6 }}>
             <Text className="text-sm font-medium text-ink">Miqdor ({unit})</Text>
             <TextInput
@@ -250,6 +324,7 @@ export default function ProductFormScreen() {
               style={{ height: 52 }}
             />
           </View>
+
           <View className="flex-row items-center gap-2">
             <Ionicons name="notifications-outline" size={15} color={colors.muted} />
             <Text className="text-xs text-muted">
@@ -260,34 +335,18 @@ export default function ProductFormScreen() {
           </View>
         </Section>
 
-        <View className="mb-2">
-          <Text className="mb-2 ml-1 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>
-            Kategoriya
-          </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-            {[{ id: null as string | null, name: "Kategoriyasiz" }, ...(categories ?? [])].map((c) => {
-              const active = categoryId === c.id;
-              return (
-                <Pressable
-                  key={c.id ?? "none"}
-                  onPress={() => setCategoryId(c.id)}
-                  style={{
-                    backgroundColor: active ? colors.primary : colors.surface,
-                    borderColor: active ? colors.primary : colors.line,
-                    borderWidth: 1,
-                    paddingHorizontal: 14,
-                    paddingVertical: 9,
-                    borderRadius: 999,
-                  }}
-                >
-                  <Text style={{ fontSize: 13, fontWeight: "500", color: active ? "#fff" : colors.muted }}>
-                    {c.name}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
+        {/* Kategoriya — bosiladigan qator */}
+        <Pressable
+          onPress={() => setCatOpen(true)}
+          className="mb-2 flex-row items-center justify-between rounded-2xl border border-line bg-surface p-4"
+          style={{ height: 56 }}
+        >
+          <Text className="text-base font-medium text-ink">Kategoriya</Text>
+          <View className="flex-row items-center gap-1">
+            <Text className="text-base text-muted">{categoryName}</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+          </View>
+        </Pressable>
 
         {mutation.isError ? (
           <Text className="mt-2 text-center text-sm text-danger">
@@ -296,7 +355,6 @@ export default function ProductFormScreen() {
         ) : null}
       </ScrollView>
 
-      {/* Sticky saqlash — thumb zone */}
       <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 8 }}>
         <Button
           label={isEdit ? "Saqlash" : "Qo'shish"}
@@ -304,6 +362,14 @@ export default function ProductFormScreen() {
           loading={mutation.isPending}
         />
       </View>
+
+      <CategorySheet
+        visible={catOpen}
+        categories={categories ?? []}
+        selectedId={categoryId}
+        onSelect={setCategoryId}
+        onClose={() => setCatOpen(false)}
+      />
     </SafeAreaView>
   );
 }
