@@ -32,7 +32,7 @@ export default function RegisterScreen() {
     setLoading(true);
     // Do'kon nomi metadata orqali → DB trigger shops + owner a'zoligini yaratadi.
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       password,
       options: { data: { shop_name: shopName.trim() } },
     });
@@ -47,7 +47,7 @@ export default function RegisterScreen() {
     // darhol login/parol bilan kirishga harakat qilamiz.
     if (!data.session) {
       const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: email.trim().toLowerCase(),
         password,
       });
       if (signInErr) {

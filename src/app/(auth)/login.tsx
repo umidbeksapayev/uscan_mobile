@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Alert } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -13,29 +13,39 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   async function onSubmit() {
+    setErrorMsg(null);
     if (!email.trim() || !password) {
-      Alert.alert("Ma'lumot yetishmaydi", "Email va parolni kiriting.");
+      setErrorMsg("Email va parolni kiriting.");
       return;
     }
     if (!isSupabaseConfigured) {
-      Alert.alert("Supabase sozlanmagan", ".env fayliga web bilan bir xil Supabase URL va anon key qo'shing.");
+      setErrorMsg("Supabase sozlanmagan (.env).");
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-    setLoading(false);
-
-    if (error) {
-      Alert.alert("Kirish amalga oshmadi", authErrorMessage(error.message));
-      return;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (error) {
+        setErrorMsg(authErrorMessage(error.message));
+        return;
+      }
+      if (!data.session) {
+        setErrorMsg("Kirib bo'lmadi. Email tasdiqlanmagan bo'lishi mumkin.");
+        return;
+      }
+      // Muvaffaqiyat → AuthGate avtomatik tabs'ga yo'naltiradi.
+    } catch (e) {
+      setErrorMsg(authErrorMessage(e instanceof Error ? e.message : null));
+    } finally {
+      setLoading(false);
     }
-    // Sessiya o'zgaradi → AuthGate avtomatik tabs'ga yo'naltiradi.
   }
 
   return (
@@ -57,7 +67,10 @@ export default function LoginScreen() {
           <Field
             label="Email"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(t) => {
+              setEmail(t);
+              if (errorMsg) setErrorMsg(null);
+            }}
             placeholder="email@misol.uz"
             autoCapitalize="none"
             keyboardType="email-address"
@@ -66,12 +79,18 @@ export default function LoginScreen() {
           <Field
             label="Parol"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(t) => {
+              setPassword(t);
+              if (errorMsg) setErrorMsg(null);
+            }}
             placeholder="••••••••"
             secureTextEntry
             autoComplete="current-password"
           />
           <Button label="Kirish" onPress={onSubmit} loading={loading} />
+          {errorMsg ? (
+            <Text className="text-center text-sm text-danger">{errorMsg}</Text>
+          ) : null}
         </View>
 
         <View className="mt-6 flex-row justify-center">

@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import { Modal, View, Text, TextInput, Pressable } from "react-native";
 
 import { colors } from "@/theme/colors";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatWeight } from "@/lib/format";
 import { kgFromAmount, amountFromKg } from "./weight-math";
 import type { Product } from "@/types/database";
 
-const PRESETS = [0.5, 1, 2];
+type Mode = "som" | "kg";
+const SOM_PRESETS = [10000, 20000, 50000];
+const KG_PRESETS = [0.5, 1, 2];
+
+function groupSom(n: number): string {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
 
 type Props = {
   product: Product | null;
@@ -15,38 +21,40 @@ type Props = {
   onConfirm: (kg: number) => void;
 };
 
-/** VAZN mahsulot uchun tezkor oyna: so'm ⇄ kg ikki tomonlama. */
+/**
+ * VAZN tezkor oynasi: Summa (so'm) YOKI Vazn (kg) — bittasini tanlab kiritasiz,
+ * ikkinchisi avtomatik ko'rsatiladi. Mijoz "20 000 so'mlik" desa → Summa rejimi.
+ */
 export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
   const price = product?.selling_price ?? 0;
-  const [kgText, setKgText] = useState("");
-  const [somText, setSomText] = useState("");
+  const [mode, setMode] = useState<Mode>("som");
+  const [text, setText] = useState("");
 
   useEffect(() => {
     if (product) {
-      const kg = initialKg ?? 0;
-      setKgText(kg ? String(kg) : "");
-      setSomText(kg ? String(amountFromKg(kg, price)) : "");
+      if (initialKg && initialKg > 0) {
+        setMode("kg");
+        setText(String(initialKg));
+      } else {
+        setMode("som");
+        setText("");
+      }
     }
-  }, [product, initialKg, price]);
+  }, [product, initialKg]);
 
-  function onKg(t: string) {
-    setKgText(t);
-    const kg = parseFloat(t.replace(",", "."));
-    setSomText(!Number.isNaN(kg) && kg > 0 ? String(amountFromKg(kg, price)) : "");
-  }
-  function onSom(t: string) {
-    setSomText(t);
-    const som = parseFloat(t.replace(",", "."));
-    setKgText(!Number.isNaN(som) && som > 0 ? String(kgFromAmount(som, price)) : "");
-  }
-  function preset(kg: number) {
-    setKgText(String(kg));
-    setSomText(String(amountFromKg(kg, price)));
+  const raw = parseFloat(text.replace(/\s/g, "").replace(",", ".")) || 0;
+  const kg = mode === "kg" ? raw : kgFromAmount(raw, price);
+  const finalKg = Math.round(kg * 1000) / 1000;
+  const amount = amountFromKg(finalKg, price);
+  const valid = finalKg > 0;
+
+  function switchMode(next: Mode) {
+    if (next === mode) return;
+    setText(next === "kg" ? (finalKg ? String(finalKg) : "") : amount ? String(amount) : "");
+    setMode(next);
   }
 
-  const kg = parseFloat(kgText.replace(",", "."));
-  const valid = !Number.isNaN(kg) && kg > 0;
-  const finalKg = valid ? Math.round(kg * 1000) / 1000 : 0;
+  const presets = mode === "som" ? SOM_PRESETS : KG_PRESETS;
 
   return (
     <Modal visible={!!product} transparent animationType="slide" onRequestClose={onClose}>
@@ -78,51 +86,71 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
           {product ? (
             <>
               <Text className="text-lg font-medium text-ink">{product.name}</Text>
-              <Text className="mb-4 text-sm text-muted">{formatCurrency(price)} / kg</Text>
+              <Text className="text-sm text-muted">{formatCurrency(price)} / kg</Text>
 
-              <Text className="mb-1 text-sm font-medium text-ink">Summa (so'm)</Text>
+              {/* Rejim tanlash */}
+              <View className="mb-4 mt-4 flex-row rounded-2xl bg-bg p-1">
+                {(["som", "kg"] as Mode[]).map((m) => {
+                  const active = mode === m;
+                  return (
+                    <Pressable
+                      key={m}
+                      onPress={() => switchMode(m)}
+                      className="flex-1 items-center justify-center rounded-xl"
+                      style={{ height: 44, backgroundColor: active ? colors.primary : "transparent" }}
+                    >
+                      <Text style={{ fontWeight: "500", color: active ? "#fff" : colors.muted }}>
+                        {m === "som" ? "Summa (so'm)" : "Vazn (kg)"}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {/* Bitta input */}
               <TextInput
-                value={somText}
-                onChangeText={onSom}
-                keyboardType="number-pad"
-                placeholder="Masalan: 15000"
+                value={text}
+                onChangeText={setText}
+                keyboardType={mode === "som" ? "number-pad" : "decimal-pad"}
+                placeholder={mode === "som" ? "Masalan: 20000" : "Masalan: 1.5"}
                 placeholderTextColor={colors.tabInactive}
-                className="mb-3 rounded-2xl border border-line bg-bg px-4 text-lg text-ink"
-                style={{ height: 52 }}
+                autoFocus
+                className="rounded-2xl border border-line bg-bg px-4 text-2xl font-medium text-ink"
+                style={{ height: 60 }}
               />
 
-              <Text className="mb-1 text-sm font-medium text-ink">Vazn (kg)</Text>
-              <TextInput
-                value={kgText}
-                onChangeText={onKg}
-                keyboardType="decimal-pad"
-                placeholder="Masalan: 1.5"
-                placeholderTextColor={colors.tabInactive}
-                className="mb-3 rounded-2xl border border-line bg-bg px-4 text-lg text-ink"
-                style={{ height: 52 }}
-              />
+              {/* Ekvivalent (faqat ko'rsatish) */}
+              <Text className="mt-2 text-sm" style={{ color: valid ? colors.muted : "transparent" }}>
+                {mode === "som"
+                  ? `≈ ${formatWeight(finalKg)}`
+                  : `= ${formatCurrency(amount)}`}
+              </Text>
 
-              <View className="mb-5 flex-row gap-2">
-                {PRESETS.map((p) => (
+              {/* Tezkor tugmalar */}
+              <View className="mt-3 flex-row gap-2">
+                {presets.map((p) => (
                   <Pressable
                     key={p}
-                    onPress={() => preset(p)}
+                    onPress={() => setText(String(p))}
                     className="flex-1 items-center justify-center rounded-xl bg-bg"
                     style={{ height: 44 }}
                   >
-                    <Text className="text-sm font-medium text-ink">{p.toFixed(1)} kg</Text>
+                    <Text className="text-sm font-medium text-ink">
+                      {mode === "som" ? groupSom(p) : `${p.toFixed(1)} kg`}
+                    </Text>
                   </Pressable>
                 ))}
               </View>
 
+              {/* Tasdiqlash */}
               <Pressable
                 disabled={!valid}
                 onPress={() => onConfirm(finalKg)}
-                className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
+                className="mt-6 flex-row items-center justify-center rounded-2xl bg-primary"
                 style={{ height: 54, opacity: valid ? 1 : 0.5 }}
               >
                 <Text className="text-base font-medium text-white">
-                  Savatga qo'shish{valid ? ` · ${formatCurrency(amountFromKg(finalKg, price))}` : ""}
+                  Savatga qo'shish{valid ? ` · ${formatCurrency(amount)}` : ""}
                 </Text>
               </Pressable>
             </>
