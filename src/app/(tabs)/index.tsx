@@ -66,13 +66,13 @@ export default function HomeScreen() {
             <View className="flex-1 rounded-2xl border border-line bg-surface p-4">
               <Text className="mb-1 text-xs text-muted">Bugungi savdo</Text>
               <Text className="text-lg font-medium text-primary-deep">
-                {formatCurrency(245_000_000)}
+                {formatCurrency(2_450_000)}
               </Text>
             </View>
             <View className="flex-1 rounded-2xl border border-line bg-surface p-4">
               <Text className="mb-1 text-xs text-muted">Sof foyda</Text>
               <Text className="text-lg font-medium text-success">
-                {formatCurrency(38_000_000)}
+                {formatCurrency(380_000)}
               </Text>
             </View>
           </View>

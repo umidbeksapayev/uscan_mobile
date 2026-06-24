@@ -31,8 +31,9 @@ src/
 
 ## Muhim qoidalar
 
-- **Pul = `int` tiyinda** saqlanadi/uzatiladi (float drift yo'q). Ko'rsatishda
-  `formatCurrency()` so'mga aylantiradi. Vazn = `int` gramm, `formatWeight()`.
+- **Pul DB'da `DECIMAL` so'm** (tiyin EMAS), vazn `DECIMAL` kg.
+  `formatCurrency(som)` / `formatWeight(kg)` — web `utils.ts` ga mos.
+  Savat summasi (F3/F4) client'da tiyinda yaxlitlanadi (float drift uchun).
 - **`cost_price` (tan narxi)** kassir ekranida HECH QACHON ko'rsatilmaydi.
 - **RLS** avtomatik `shop_id` bo'yicha filtrlaydi + faol-do'kon almashtirish.
 - Offline sotuvda **`client_id` idempotency** (DB migration 019) qayta ishlatiladi.
