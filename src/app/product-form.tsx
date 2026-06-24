@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, TextInput, Alert, Modal, ActivityInd
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -237,9 +238,11 @@ export default function ProductFormScreen() {
         </Text>
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={24}
       >
         {/* Rasm */}
         <Pressable onPress={chooseImage} className="mb-4 self-center" style={{ width: 120, height: 120 }}>
@@ -414,7 +417,7 @@ export default function ProductFormScreen() {
             {(mutation.error as Error)?.message ?? "Saqlashda xatolik"}
           </Text>
         ) : null}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 8 }}>
         <Button

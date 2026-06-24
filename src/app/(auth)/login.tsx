@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, TextInput, Pressable } from "react-native";
 import { Link } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { colors } from "@/theme/colors";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { Logo } from "@/components/logo";
@@ -12,6 +14,7 @@ import { Field } from "@/components/ui/field";
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -32,7 +35,6 @@ export default function LoginScreen() {
         email: email.trim().toLowerCase(),
         password,
       });
-      // Tarmoq qotib qolmasligi uchun 15s chegara.
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Tarmoq javob bermadi. Qayta urinib ko'ring.")), 15000),
       );
@@ -82,20 +84,39 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoComplete="email"
           />
-          <Field
-            label="Parol"
-            value={password}
-            onChangeText={(t) => {
-              setPassword(t);
-              if (errorMsg) setErrorMsg(null);
-            }}
-            placeholder="••••••••"
-            secureTextEntry
-            autoComplete="off"
-            textContentType="none"
-            importantForAutofill="no"
-            autoCorrect={false}
-          />
+
+          <View style={{ gap: 6 }}>
+            <Text className="text-sm font-medium text-ink">Parol</Text>
+            <View
+              className="flex-row items-center rounded-2xl border border-line bg-surface px-4"
+              style={{ height: 52 }}
+            >
+              <TextInput
+                value={password}
+                onChangeText={(t) => {
+                  setPassword(t);
+                  if (errorMsg) setErrorMsg(null);
+                }}
+                placeholder="••••••••"
+                placeholderTextColor={colors.tabInactive}
+                secureTextEntry={!showPass}
+                autoComplete="off"
+                textContentType="none"
+                importantForAutofill="no"
+                autoCorrect={false}
+                className="flex-1 text-base text-ink"
+                style={{ height: 52 }}
+              />
+              <Pressable onPress={() => setShowPass((v) => !v)} hitSlop={10}>
+                <Ionicons
+                  name={showPass ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color={colors.tabInactive}
+                />
+              </Pressable>
+            </View>
+          </View>
+
           <Button label="Kirish" onPress={onSubmit} loading={loading} />
           {errorMsg ? (
             <Text className="text-center text-sm text-danger">{errorMsg}</Text>

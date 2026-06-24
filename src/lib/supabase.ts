@@ -1,6 +1,7 @@
 import "react-native-url-polyfill/auto";
+import { AppState } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, processLock } from "@supabase/supabase-js";
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -16,9 +17,20 @@ export const supabase = createClient(
   {
     auth: {
       storage: AsyncStorage,
+      lock: processLock, // RN: auth amallarini ketma-ket bajaradi (race/goh-ishlash yo'q)
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
     },
   },
 );
+
+// Supabase RN rasmiy sozlamasi: token yangilashni faqat ilova faol bo'lganda
+// ishlatamiz — bu lock to'qnashuvini (login goh ishlab goh ishlamasligini) yo'qotadi.
+AppState.addEventListener("change", (state) => {
+  if (state === "active") {
+    void supabase.auth.startAutoRefresh();
+  } else {
+    void supabase.auth.stopAutoRefresh();
+  }
+});
