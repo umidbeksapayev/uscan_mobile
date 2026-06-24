@@ -60,22 +60,9 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               key={route.key}
               onPress={onPress}
               className="flex-1 items-center justify-center"
-              style={{ gap: 4 }}
+              style={{ gap: 3 }}
             >
-              <View
-                style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 5,
-                  borderRadius: 14,
-                  backgroundColor: focused ? colors.primary : "transparent",
-                }}
-              >
-                <Ionicons
-                  name={icon}
-                  size={22}
-                  color={focused ? "#fff" : colors.tabInactive}
-                />
-              </View>
+              <Ionicons name={icon} size={22} color={color} />
               <Text
                 style={{ fontSize: 11, color, fontWeight: focused ? "500" : "400" }}
               >
