@@ -19,6 +19,7 @@ export default function RootLayout() {
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="scanner" options={{ presentation: "fullScreenModal" }} />
             </Stack>
           </AuthGate>
         </AuthProvider>

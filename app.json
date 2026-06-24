@@ -36,6 +36,12 @@
             "imageWidth": 76
           }
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Mahsulot shtrix-kodini skanerlash uchun kamera kerak."
+        }
       ]
     ],
     "experiments": {
