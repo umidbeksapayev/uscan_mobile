@@ -1,4 +1,4 @@
-import { useCallback, useState, memo } from "react";
+import { useCallback, useEffect, useState, memo } from "react";
 import { View, Text, TextInput, Pressable, FlatList, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -6,18 +6,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 
 import { colors } from "@/theme/colors";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useMemberships } from "@/features/auth/use-memberships";
 import { searchSellProducts } from "@/features/sell/lookup";
 import { useCart, type CartItem } from "@/features/sell/cart-store";
 import { cartTotal } from "@/features/sell/cart-total";
+import { WeightSheet } from "@/features/sell/weight-sheet";
 import type { Product } from "@/types/database";
 
-const WEIGHT_PRESETS = [0.5, 1, 2] as const;
+type CartRowProps = { item: CartItem; onEditWeight: (item: CartItem) => void };
 
-const CartRow = memo(function CartRow({ item }: { item: CartItem }) {
-  const setQuantity = useCart((s) => s.setQuantity);
+const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
   const increment = useCart((s) => s.increment);
   const decrement = useCart((s) => s.decrement);
   const remove = useCart((s) => s.remove);
@@ -25,13 +25,6 @@ const CartRow = memo(function CartRow({ item }: { item: CartItem }) {
   const isWeight = item.product.sale_type === "weight";
   const accent = isWeight ? "#0F6E56" : colors.primary;
   const lineTotal = cartTotal([item]);
-
-  const [kgText, setKgText] = useState(String(item.quantity));
-
-  function applyKg(value: number) {
-    setKgText(String(value));
-    setQuantity(item.product.id, value);
-  }
 
   return (
     <View className="mb-3 rounded-2xl border border-line bg-surface p-4">
@@ -76,47 +69,16 @@ const CartRow = memo(function CartRow({ item }: { item: CartItem }) {
       <View className="my-3 h-px bg-line" />
 
       {isWeight ? (
-        <View>
-          <View className="flex-row items-center justify-between">
-            <Text className="text-sm text-muted">Og'irlik (kg)</Text>
-            <View
-              className="flex-row items-center rounded-xl bg-bg px-3"
-              style={{ height: 44, minWidth: 120 }}
-            >
-              <TextInput
-                value={kgText}
-                onChangeText={(t) => {
-                  setKgText(t);
-                  const v = parseFloat(t.replace(",", "."));
-                  setQuantity(item.product.id, Number.isNaN(v) ? 0 : v);
-                }}
-                keyboardType="decimal-pad"
-                className="flex-1 text-right text-base font-medium text-ink"
-                style={{ height: 44 }}
-              />
-              <Text className="ml-1 text-xs text-muted">kg</Text>
-            </View>
-          </View>
-
-          <View className="mt-2 flex-row gap-2">
-            {WEIGHT_PRESETS.map((kg) => (
-              <Pressable
-                key={kg}
-                onPress={() => applyKg(kg)}
-                className="flex-1 items-center justify-center rounded-xl bg-bg"
-                style={{ height: 40 }}
-              >
-                <Text className="text-sm font-medium text-ink">{kg.toFixed(1)} kg</Text>
-              </Pressable>
-            ))}
-            <Pressable
-              onPress={() => applyKg(item.product.quantity)}
-              className="flex-1 items-center justify-center rounded-xl bg-bg"
-              style={{ height: 40 }}
-            >
-              <Text className="text-sm font-medium text-primary">Max</Text>
-            </Pressable>
-          </View>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-sm text-muted">Og'irlik</Text>
+          <Pressable
+            onPress={() => onEditWeight(item)}
+            className="flex-row items-center gap-2 rounded-xl bg-bg px-3"
+            style={{ height: 44 }}
+          >
+            <Text className="text-base font-medium text-ink">{formatWeight(item.quantity)}</Text>
+            <Ionicons name="create-outline" size={16} color={colors.muted} />
+          </Pressable>
         </View>
       ) : (
         <View className="flex-row items-center justify-between">
@@ -154,10 +116,25 @@ export default function SotuvScreen() {
   const items = useCart((s) => s.items);
   const add = useCart((s) => s.add);
   const clear = useCart((s) => s.clear);
+  const pendingWeight = useCart((s) => s.pendingWeight);
+  const setPendingWeight = useCart((s) => s.setPendingWeight);
 
   const [search, setSearch] = useState("");
   const debounced = useDebounce(search, 300);
   const searching = search.trim().length > 0;
+
+  // VAZN tezkor oynasi uchun mahsulot (+ tahrirlashda boshlang'ich kg)
+  const [weightTarget, setWeightTarget] = useState<{ product: Product; initialKg?: number } | null>(
+    null,
+  );
+
+  // Skanerда topilgan VAZN mahsulot → tezkor oynani ochamiz
+  useEffect(() => {
+    if (pendingWeight) {
+      setWeightTarget({ product: pendingWeight });
+      setPendingWeight(null);
+    }
+  }, [pendingWeight, setPendingWeight]);
 
   const { data: results } = useQuery({
     queryKey: ["sell-search", debounced.trim(), shopId],
@@ -169,15 +146,23 @@ export default function SotuvScreen() {
 
   const onPick = useCallback(
     (p: Product) => {
-      add(p);
+      if (p.sale_type === "weight") {
+        setWeightTarget({ product: p });
+      } else {
+        add(p);
+      }
       setSearch("");
     },
     [add],
   );
 
+  const onEditWeight = useCallback((it: CartItem) => {
+    setWeightTarget({ product: it.product, initialKg: it.quantity });
+  }, []);
+
   const renderCartItem = useCallback(
-    ({ item }: { item: CartItem }) => <CartRow item={item} />,
-    [],
+    ({ item }: { item: CartItem }) => <CartRow item={item} onEditWeight={onEditWeight} />,
+    [onEditWeight],
   );
 
   function onCheckout() {
@@ -202,7 +187,7 @@ export default function SotuvScreen() {
           className="mb-3 flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
           style={{ height: 56 }}
         >
-          <Ionicons name="scan-outline" size={24} color="#fff" />
+          <Ionicons name="barcode-outline" size={26} color="#fff" />
           <Text className="text-base font-medium text-white">Skaner</Text>
         </Pressable>
 
@@ -285,7 +270,7 @@ export default function SotuvScreen() {
         />
       )}
 
-      {/* Pastki to'lov paneli — thumb zone, to'liq kenglik */}
+      {/* Pastki to'lov paneli */}
       {items.length > 0 && !searching ? (
         <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 14 }}>
           <View className="mb-3 flex-row items-center justify-between">
@@ -304,6 +289,17 @@ export default function SotuvScreen() {
           </Pressable>
         </View>
       ) : null}
+
+      {/* VAZN tezkor oynasi */}
+      <WeightSheet
+        product={weightTarget?.product ?? null}
+        initialKg={weightTarget?.initialKg}
+        onClose={() => setWeightTarget(null)}
+        onConfirm={(kg) => {
+          if (weightTarget) add(weightTarget.product, kg);
+          setWeightTarget(null);
+        }}
+      />
     </SafeAreaView>
   );
 }

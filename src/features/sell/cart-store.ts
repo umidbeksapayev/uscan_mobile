@@ -10,33 +10,35 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
-  add: (product: Product) => void;
+  /** Skanerда topilgan VAZN mahsulot — Sotuv ekrani uni tezkor oynada so'raydi. */
+  pendingWeight: Product | null;
+  add: (product: Product, quantity?: number) => void;
   setQuantity: (productId: string, quantity: number) => void;
   increment: (productId: string) => void;
   decrement: (productId: string) => void;
   remove: (productId: string) => void;
   clear: () => void;
+  setPendingWeight: (product: Product | null) => void;
 }
 
 export const useCart = create<CartState>((set) => ({
   items: [],
+  pendingWeight: null,
 
-  add: (product) =>
+  add: (product, quantity) =>
     set((s) => {
       const existing = s.items.find((i) => i.product.id === product.id);
-      if (existing) {
-        // DONALI → +1; VAZN → savatdagi qoladi (foydalanuvchi kg ni o'zi tahrirlaydi)
-        if (product.sale_type === "unit") {
-          return {
-            items: s.items.map((i) =>
-              i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i,
-            ),
-          };
-        }
-        return s;
+      const rest = s.items.filter((i) => i.product.id !== product.id);
+      let qty: number;
+      if (quantity !== undefined) {
+        qty = quantity; // VAZN: tezkor oynadan kelgan kg (yangilanadi)
+      } else if (existing && product.sale_type === "unit") {
+        qty = existing.quantity + 1; // DONALI: mavjudga +1
+      } else {
+        qty = 1;
       }
-      // Yangi element: DONALI=1 dona, VAZN=1.000 kg (tahrirlanadi)
-      return { items: [...s.items, { product, quantity: 1 }] };
+      // Yangi/yangilangan element DOIM ro'yxat boshida
+      return { items: [{ product, quantity: qty }, ...rest] };
     }),
 
   setQuantity: (productId, quantity) =>
@@ -66,4 +68,6 @@ export const useCart = create<CartState>((set) => ({
     set((s) => ({ items: s.items.filter((i) => i.product.id !== productId) })),
 
   clear: () => set({ items: [] }),
+
+  setPendingWeight: (product) => set({ pendingWeight: product }),
 }));

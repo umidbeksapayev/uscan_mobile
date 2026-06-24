@@ -20,6 +20,7 @@ export default function ScannerScreen() {
   const { data: memberships } = useMemberships();
   const shopId = memberships?.[0]?.shop.id;
   const add = useCart((s) => s.add);
+  const setPendingWeight = useCart((s) => s.setPendingWeight);
 
   const locked = useRef(false);
   const [status, setStatus] = useState<{ text: string; error?: boolean } | null>(null);
@@ -44,7 +45,13 @@ export default function ScannerScreen() {
         }, 1500);
         return;
       }
-      add(found[0]);
+      const product = found[0];
+      // VAZN mahsulot → Sotuv ekrani tezkor oynada kg/so'm so'raydi.
+      if (product.sale_type === "weight") {
+        setPendingWeight(product);
+      } else {
+        add(product);
+      }
       router.back();
     } catch {
       setStatus({ text: "Xatolik yuz berdi", error: true });
