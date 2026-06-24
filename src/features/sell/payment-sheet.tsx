@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency } from "@/lib/format";
+import { uuidv4 } from "@/lib/uuid";
 import { changeAmount } from "./payment-math";
 import { processCartSale, type PaymentMethod } from "./checkout";
 import type { CartItem } from "./cart-store";
@@ -20,10 +21,6 @@ const QUICK = [50000, 100000, 200000];
 function groupSom(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
-function newClientId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
 type Props = {
   visible: boolean;
   total: number;
@@ -38,7 +35,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
   const [method, setMethod] = useState<PaymentMethod>("cash");
   const [givenText, setGivenText] = useState("");
   const [phase, setPhase] = useState<"form" | "success">("form");
-  const [clientId, setClientId] = useState(newClientId());
+  const [clientId, setClientId] = useState(uuidv4());
 
   const mutation = useMutation({
     mutationFn: () => processCartSale({ shopId: shopId as string, items, clientId }),
@@ -55,7 +52,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
       setMethod("cash");
       setGivenText("");
       setPhase("form");
-      setClientId(newClientId());
+      setClientId(uuidv4());
       mutation.reset();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

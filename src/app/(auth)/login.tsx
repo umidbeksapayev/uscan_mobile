@@ -93,6 +93,8 @@ export default function LoginScreen() {
             secureTextEntry
             autoComplete="off"
             textContentType="none"
+            importantForAutofill="no"
+            autoCorrect={false}
           />
           <Button label="Kirish" onPress={onSubmit} loading={loading} />
           {errorMsg ? (
