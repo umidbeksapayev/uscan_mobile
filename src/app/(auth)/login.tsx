@@ -33,7 +33,7 @@ export default function LoginScreen() {
         password,
       });
       if (error) {
-        setErrorMsg(authErrorMessage(error.message));
+        setErrorMsg(`${authErrorMessage(error.message)} (${error.message})`);
         return;
       }
       if (!data.session) {
@@ -85,7 +85,8 @@ export default function LoginScreen() {
             }}
             placeholder="••••••••"
             secureTextEntry
-            autoComplete="current-password"
+            autoComplete="off"
+            textContentType="none"
           />
           <Button label="Kirish" onPress={onSubmit} loading={loading} />
           {errorMsg ? (

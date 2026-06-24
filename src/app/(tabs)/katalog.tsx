@@ -20,8 +20,6 @@ import { useProducts, type CategoryFilter } from "@/features/catalog/use-product
 import { useCategories } from "@/features/catalog/use-categories";
 import type { Product } from "@/types/database";
 
-const BARCODE_TINT = "#A98467";
-
 function StockBadge({ item }: { item: Product }) {
   const isWeight = item.sale_type === "weight";
   const q = item.quantity;
@@ -86,17 +84,10 @@ function ProductRow({ item }: { item: Product }) {
       )}
 
       <View className="flex-1">
-        <Text className="text-base font-medium text-ink" numberOfLines={1}>
+        <Text className="text-lg font-medium text-ink" numberOfLines={2}>
           {item.name}
         </Text>
-        {item.barcode ? (
-          <View className="mt-1 flex-row items-center gap-1.5">
-            <Ionicons name="barcode-outline" size={14} color={BARCODE_TINT} />
-            <Text style={{ fontSize: 12, color: BARCODE_TINT }} numberOfLines={1}>
-              {item.barcode}
-            </Text>
-          </View>
-        ) : item.category?.name ? (
+        {item.category?.name ? (
           <Text className="mt-1 text-xs text-muted" numberOfLines={1}>
             {item.category.name}
           </Text>
