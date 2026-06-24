@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { View, Text, ScrollView, Pressable, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -6,13 +6,29 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { colors } from "@/theme/colors";
-import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/format";
 import { useMemberships } from "@/features/auth/use-memberships";
 import { useCategories } from "@/features/catalog/use-categories";
 import { createProduct, updateProduct, getProduct } from "@/lib/products";
+import { lowStockThreshold } from "@/features/products/low-stock";
 import { useScanReturn } from "@/features/products/scan-return";
 import type { SaleType } from "@/types/database";
+
+const INPUT = "rounded-xl bg-bg px-4 text-base text-ink";
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <View className="mb-4">
+      <Text className="mb-2 ml-1 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>
+        {title}
+      </Text>
+      <View className="rounded-2xl border border-line bg-surface p-4" style={{ gap: 12 }}>
+        {children}
+      </View>
+    </View>
+  );
+}
 
 export default function ProductFormScreen() {
   const router = useRouter();
@@ -35,7 +51,6 @@ export default function ProductFormScreen() {
   const [sellingPrice, setSellingPrice] = useState("");
   const [costPrice, setCostPrice] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [lowStock, setLowStock] = useState("");
 
   const { data: existing } = useQuery({
     queryKey: ["product", id],
@@ -52,11 +67,9 @@ export default function ProductFormScreen() {
       setSellingPrice(String(existing.selling_price));
       setCostPrice(String(existing.cost_price));
       setQuantity(String(existing.quantity));
-      setLowStock(String(existing.low_stock_alert));
     }
   }, [existing]);
 
-  // Skanerdan qaytgan kod → shtrix-kod maydoni
   useEffect(() => {
     if (scanCode) {
       setBarcode(scanCode);
@@ -65,6 +78,11 @@ export default function ProductFormScreen() {
   }, [scanCode, setScanCode]);
 
   const num = (s: string) => parseFloat(s.replace(/\s/g, "").replace(",", ".")) || 0;
+  const sp = num(sellingPrice);
+  const cp = num(costPrice);
+  const q = num(quantity);
+  const profit = sp - cp;
+  const unit = saleType === "weight" ? "kg" : "dona";
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -72,10 +90,10 @@ export default function ProductFormScreen() {
         shop_id: shopId as string,
         name: name.trim(),
         sale_type: saleType,
-        selling_price: num(sellingPrice),
-        cost_price: num(costPrice),
-        quantity: num(quantity),
-        low_stock_alert: num(lowStock),
+        selling_price: sp,
+        cost_price: cp,
+        quantity: q,
+        low_stock_alert: lowStockThreshold(q, saleType), // avtomatik 20%
         barcode: barcode.trim() || null,
         category_id: categoryId,
       };
@@ -93,7 +111,7 @@ export default function ProductFormScreen() {
       Alert.alert("Nomi kerak", "Mahsulot nomini kiriting.");
       return;
     }
-    if (num(sellingPrice) <= 0) {
+    if (sp <= 0) {
       Alert.alert("Narx kerak", "Sotuv narxini kiriting.");
       return;
     }
@@ -101,53 +119,153 @@ export default function ProductFormScreen() {
     mutation.mutate();
   }
 
-  const inputCls = "rounded-2xl border border-line bg-surface px-4 text-base text-ink";
-
   return (
-    <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-bg" edges={["top", "bottom"]}>
       <View className="flex-row items-center gap-3 px-4 py-2">
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <Ionicons name="arrow-back" size={24} color={colors.ink} />
         </Pressable>
         <Text className="text-xl font-medium text-ink">
-          {isEdit ? "Mahsulotni tahrirlash" : "Mahsulot qo'shish"}
+          {isEdit ? "Tahrirlash" : "Mahsulot qo'shish"}
         </Text>
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
         keyboardShouldPersistTaps="handled"
       >
-        <Field label="Nomi" value={name} onChangeText={setName} placeholder="Mahsulot nomi" />
-
-        {/* Shtrix-kod + skaner */}
-        <View style={{ gap: 6 }}>
-          <Text className="text-sm font-medium text-ink">Shtrix-kod</Text>
-          <View className="flex-row gap-2">
-            <TextInput
-              value={barcode}
-              onChangeText={setBarcode}
-              placeholder="Kod yoki skanerlang"
-              placeholderTextColor={colors.tabInactive}
-              className={`flex-1 ${inputCls}`}
-              style={{ height: 52 }}
-              autoCapitalize="none"
-            />
-            <Pressable
-              onPress={() => router.push("/scanner?mode=form")}
-              className="items-center justify-center rounded-2xl bg-primary-tint"
-              style={{ width: 52, height: 52 }}
-            >
-              <Ionicons name="barcode-outline" size={24} color={colors.primary} />
-            </Pressable>
-          </View>
+        {/* Sotuv turi */}
+        <View
+          className="mb-4 flex-row rounded-2xl bg-surface p-1"
+          style={{ borderWidth: 1, borderColor: colors.line }}
+        >
+          {(["unit", "weight"] as SaleType[]).map((t) => {
+            const active = saleType === t;
+            return (
+              <Pressable
+                key={t}
+                onPress={() => setSaleType(t)}
+                className="flex-1 items-center justify-center rounded-xl"
+                style={{ height: 48, backgroundColor: active ? colors.primary : "transparent" }}
+              >
+                <Text style={{ fontWeight: "500", color: active ? "#fff" : colors.muted }}>
+                  {t === "unit" ? "DONALI (dona)" : "VAZN (kg)"}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
-        {/* Kategoriya */}
-        <View style={{ gap: 6 }}>
-          <Text className="text-sm font-medium text-ink">Kategoriya</Text>
+        <Section title="Mahsulot">
+          <View style={{ gap: 6 }}>
+            <Text className="text-sm font-medium text-ink">Nomi</Text>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="Mahsulot nomi"
+              placeholderTextColor={colors.tabInactive}
+              className={INPUT}
+              style={{ height: 52 }}
+            />
+          </View>
+          <View style={{ gap: 6 }}>
+            <Text className="text-sm font-medium text-ink">Shtrix-kod</Text>
+            <View className="flex-row gap-2">
+              <TextInput
+                value={barcode}
+                onChangeText={setBarcode}
+                placeholder="Kod yoki skanerlang"
+                placeholderTextColor={colors.tabInactive}
+                className={`flex-1 ${INPUT}`}
+                style={{ height: 52 }}
+                autoCapitalize="none"
+              />
+              <Pressable
+                onPress={() => router.push("/scanner?mode=form")}
+                className="items-center justify-center rounded-xl bg-primary-tint"
+                style={{ width: 52, height: 52 }}
+              >
+                <Ionicons name="barcode-outline" size={24} color={colors.primary} />
+              </Pressable>
+            </View>
+          </View>
+        </Section>
+
+        <Section title="Narx">
+          <View className="flex-row" style={{ gap: 12 }}>
+            <View className="flex-1" style={{ gap: 6 }}>
+              <Text className="text-sm font-medium text-ink">Sotuv narxi</Text>
+              <TextInput
+                value={sellingPrice}
+                onChangeText={setSellingPrice}
+                keyboardType="number-pad"
+                placeholder="0"
+                placeholderTextColor={colors.tabInactive}
+                className={INPUT}
+                style={{ height: 52 }}
+              />
+            </View>
+            {isOwner ? (
+              <View className="flex-1" style={{ gap: 6 }}>
+                <View className="flex-row items-center gap-1">
+                  <Text className="text-sm font-medium text-ink">Tan narxi</Text>
+                  <Ionicons name="lock-closed" size={11} color={colors.muted} />
+                </View>
+                <TextInput
+                  value={costPrice}
+                  onChangeText={setCostPrice}
+                  keyboardType="number-pad"
+                  placeholder="0"
+                  placeholderTextColor={colors.tabInactive}
+                  className={INPUT}
+                  style={{ height: 52 }}
+                />
+              </View>
+            ) : null}
+          </View>
+          {isOwner && sp > 0 && cp > 0 ? (
+            <View className="flex-row items-center gap-2">
+              <Ionicons
+                name="trending-up"
+                size={16}
+                color={profit >= 0 ? colors.success : colors.danger}
+              />
+              <Text className="text-sm" style={{ color: profit >= 0 ? colors.success : colors.danger }}>
+                Foyda: {formatCurrency(profit)} ({Math.round((profit / cp) * 100)}%)
+              </Text>
+            </View>
+          ) : null}
+        </Section>
+
+        <Section title="Qoldiq">
+          <View style={{ gap: 6 }}>
+            <Text className="text-sm font-medium text-ink">Miqdor ({unit})</Text>
+            <TextInput
+              value={quantity}
+              onChangeText={setQuantity}
+              keyboardType={saleType === "weight" ? "decimal-pad" : "number-pad"}
+              placeholder="0"
+              placeholderTextColor={colors.tabInactive}
+              className={INPUT}
+              style={{ height: 52 }}
+            />
+          </View>
+          <View className="flex-row items-center gap-2">
+            <Ionicons name="notifications-outline" size={15} color={colors.muted} />
+            <Text className="text-xs text-muted">
+              {q > 0
+                ? `${lowStockThreshold(q, saleType)} ${unit} (20%) qolganda avtomatik ogohlantiriladi`
+                : "Qoldiq 20% ga yetganda avtomatik ogohlantiriladi"}
+            </Text>
+          </View>
+        </Section>
+
+        <View className="mb-2">
+          <Text className="mb-2 ml-1 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>
+            Kategoriya
+          </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-            {[{ id: null, name: "Kategoriyasiz" }, ...(categories ?? [])].map((c) => {
+            {[{ id: null as string | null, name: "Kategoriyasiz" }, ...(categories ?? [])].map((c) => {
               const active = categoryId === c.id;
               return (
                 <Pressable
@@ -171,89 +289,21 @@ export default function ProductFormScreen() {
           </ScrollView>
         </View>
 
-        {/* Sotuv turi */}
-        <View style={{ gap: 6 }}>
-          <Text className="text-sm font-medium text-ink">Sotuv turi</Text>
-          <View className="flex-row rounded-2xl bg-surface p-1" style={{ borderWidth: 1, borderColor: colors.line }}>
-            {(["unit", "weight"] as SaleType[]).map((t) => {
-              const active = saleType === t;
-              return (
-                <Pressable
-                  key={t}
-                  onPress={() => setSaleType(t)}
-                  className="flex-1 items-center justify-center rounded-xl"
-                  style={{ height: 44, backgroundColor: active ? colors.primary : "transparent" }}
-                >
-                  <Text style={{ fontWeight: "500", color: active ? "#fff" : colors.muted }}>
-                    {t === "unit" ? "DONALI" : "VAZN"}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        <Field
-          label="Sotuv narxi (so'm)"
-          value={sellingPrice}
-          onChangeText={setSellingPrice}
-          placeholder="0"
-          keyboardType="number-pad"
-        />
-
-        {/* Tan narxi — faqat egasi */}
-        {isOwner ? (
-          <View style={{ gap: 6 }}>
-            <View className="flex-row items-center gap-2">
-              <Text className="text-sm font-medium text-ink">Tan narxi (so'm)</Text>
-              <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: "#E7F6EE" }}>
-                <Text style={{ fontSize: 10, fontWeight: "500", color: "#0F6E56" }}>
-                  Faqat do'kon egasi uchun
-                </Text>
-              </View>
-            </View>
-            <TextInput
-              value={costPrice}
-              onChangeText={setCostPrice}
-              placeholder="0"
-              placeholderTextColor={colors.tabInactive}
-              keyboardType="number-pad"
-              className={inputCls}
-              style={{ height: 52 }}
-            />
-          </View>
-        ) : null}
-
-        <Field
-          label={saleType === "weight" ? "Miqdor (kg)" : "Miqdor (dona)"}
-          value={quantity}
-          onChangeText={setQuantity}
-          placeholder="0"
-          keyboardType={saleType === "weight" ? "decimal-pad" : "number-pad"}
-        />
-
-        <Field
-          label="Kam qoldiq ogohlantirishi (ixtiyoriy)"
-          value={lowStock}
-          onChangeText={setLowStock}
-          placeholder="0"
-          keyboardType={saleType === "weight" ? "decimal-pad" : "number-pad"}
-        />
-
         {mutation.isError ? (
-          <Text className="text-center text-sm text-danger">
+          <Text className="mt-2 text-center text-sm text-danger">
             {(mutation.error as Error)?.message ?? "Saqlashda xatolik"}
           </Text>
         ) : null}
-
-        <View className="mt-2">
-          <Button
-            label={isEdit ? "Saqlash" : "Qo'shish"}
-            onPress={onSave}
-            loading={mutation.isPending}
-          />
-        </View>
       </ScrollView>
+
+      {/* Sticky saqlash — thumb zone */}
+      <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 8 }}>
+        <Button
+          label={isEdit ? "Saqlash" : "Qo'shish"}
+          onPress={onSave}
+          loading={mutation.isPending}
+        />
+      </View>
     </SafeAreaView>
   );
 }
