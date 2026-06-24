@@ -6,6 +6,8 @@
 export type MemberRole = "owner" | "cashier";
 export type MemberPermissions = Record<string, boolean>;
 export type SaleType = "unit" | "weight";
+/** Sotuvda mahsulot qanday topilgan: shtrix-kod yoki qo'lda. ('visual' eski yozuvlar.) */
+export type SearchMethod = "barcode" | "visual" | "manual";
 
 export interface Shop {
   id: string;
@@ -42,4 +44,68 @@ export interface Product {
   is_active: boolean;
   created_at: string;
   category?: { name: string } | null;
+}
+
+/** Sotuvdagi bitta qator (sale_items). */
+export interface SaleItem {
+  id: string;
+  sale_id: string;
+  shop_id: string;
+  product_id: string;
+  sale_type: SaleType;
+  quantity_sold: number;
+  cost_price_snapshot: number; // maxfiy — kassir ekraniga chiqarilmaydi
+  selling_price_snapshot: number;
+  total_revenue: number;
+  total_profit: number;
+  search_method: SearchMethod;
+  sold_at: string;
+  product?: Pick<Product, "name" | "image_url" | "sale_type">;
+}
+
+/** Sotuvga biriktirilgan qaytarish qisqacha (tarix badge'i uchun). */
+export interface SaleReturnSummary {
+  id: string;
+  total_refund: number;
+}
+
+/** Sotuv sarlavhasi (header): bitta sotuv = bitta yozuv, ichida sale_items. */
+export interface Sale {
+  id: string;
+  shop_id: string;
+  customer_id: string | null;
+  total_revenue: number;
+  total_profit: number;
+  item_count: number;
+  paid_amount: number;
+  search_method: SearchMethod;
+  sold_at: string;
+  items?: SaleItem[];
+  returns?: SaleReturnSummary[];
+}
+
+/** Qaytarish sarlavhasi (return/refund). */
+export interface Return {
+  id: string;
+  shop_id: string;
+  sale_id: string;
+  total_refund: number;
+  total_profit: number;
+  reason: string | null;
+  created_at: string;
+  items?: ReturnItem[];
+}
+
+/** Qaytarilgan qator. */
+export interface ReturnItem {
+  id: string;
+  return_id: string;
+  sale_item_id: string;
+  product_id: string;
+  shop_id: string;
+  sale_id: string;
+  quantity: number;
+  refund_amount: number;
+  profit_amount: number;
+  created_at: string;
 }
