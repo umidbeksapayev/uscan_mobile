@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState, memo } from "react";
 import { View, Text, TextInput, Pressable, FlatList, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -14,85 +14,137 @@ import { useCart, type CartItem } from "@/features/sell/cart-store";
 import { cartTotal } from "@/features/sell/cart-total";
 import type { Product } from "@/types/database";
 
-function CartRow({ item }: { item: CartItem }) {
+const WEIGHT_PRESETS = [0.5, 1, 2] as const;
+
+const CartRow = memo(function CartRow({ item }: { item: CartItem }) {
   const setQuantity = useCart((s) => s.setQuantity);
   const increment = useCart((s) => s.increment);
   const decrement = useCart((s) => s.decrement);
   const remove = useCart((s) => s.remove);
 
   const isWeight = item.product.sale_type === "weight";
+  const accent = isWeight ? "#0F6E56" : colors.primary;
   const lineTotal = cartTotal([item]);
 
+  const [kgText, setKgText] = useState(String(item.quantity));
+
+  function applyKg(value: number) {
+    setKgText(String(value));
+    setQuantity(item.product.id, value);
+  }
+
   return (
-    <View className="mb-2 rounded-2xl border border-line bg-surface p-3">
+    <View className="mb-3 rounded-2xl border border-line bg-surface p-4">
       <View className="flex-row items-start justify-between">
-        <View className="flex-1 pr-2">
+        <View className="flex-1 pr-3">
           <View
             style={{
               alignSelf: "flex-start",
               backgroundColor: isWeight ? "#E1F5EE" : colors.primaryTint,
-              paddingHorizontal: 8,
-              paddingVertical: 2,
-              borderRadius: 999,
+              paddingHorizontal: 9,
+              paddingVertical: 3,
+              borderRadius: 6,
             }}
           >
-            <Text style={{ fontSize: 11, fontWeight: "500", color: isWeight ? "#0F6E56" : "#185FA5" }}>
-              {isWeight ? "Kg" : "Dona"}
+            <Text style={{ fontSize: 11, fontWeight: "500", letterSpacing: 0.5, color: accent }}>
+              {isWeight ? "VAZN" : "DONALI"}
             </Text>
           </View>
-          <Text className="mt-1.5 text-base font-medium text-ink" numberOfLines={1}>
+          <Text className="mt-2 text-base font-medium text-ink" numberOfLines={1}>
             {item.product.name}
           </Text>
           <Text className="text-xs text-muted">
             {formatCurrency(item.product.selling_price)} / {isWeight ? "kg" : "dona"}
           </Text>
         </View>
+
         <View className="items-end">
-          <Text className="text-base font-medium text-primary-deep">{formatCurrency(lineTotal)}</Text>
-          <Pressable onPress={() => remove(item.product.id)} hitSlop={8} className="mt-1">
-            <Ionicons name="trash-outline" size={18} color={colors.danger} />
+          <Text className="text-base font-medium" style={{ color: accent }}>
+            {formatCurrency(lineTotal)}
+          </Text>
+          <Pressable
+            onPress={() => remove(item.product.id)}
+            hitSlop={12}
+            className="mt-2"
+            accessibilityLabel="O'chirish"
+          >
+            <Ionicons name="trash-outline" size={20} color="#DB2777" />
           </Pressable>
         </View>
       </View>
 
-      <View className="mt-3">
-        {isWeight ? (
-          <View className="flex-row items-center gap-2">
-            <Text className="text-sm text-muted">Vazn (kg):</Text>
-            <TextInput
-              defaultValue={String(item.quantity)}
-              onChangeText={(t) => {
-                const v = parseFloat(t.replace(",", "."));
-                setQuantity(item.product.id, Number.isNaN(v) ? 0 : v);
-              }}
-              keyboardType="decimal-pad"
-              className="rounded-xl border border-line bg-bg px-3 text-base text-ink"
-              style={{ height: 40, minWidth: 96, textAlign: "center" }}
-            />
+      <View className="my-3 h-px bg-line" />
+
+      {isWeight ? (
+        <View>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-sm text-muted">Og'irlik (kg)</Text>
+            <View
+              className="flex-row items-center rounded-xl bg-bg px-3"
+              style={{ height: 44, minWidth: 120 }}
+            >
+              <TextInput
+                value={kgText}
+                onChangeText={(t) => {
+                  setKgText(t);
+                  const v = parseFloat(t.replace(",", "."));
+                  setQuantity(item.product.id, Number.isNaN(v) ? 0 : v);
+                }}
+                keyboardType="decimal-pad"
+                className="flex-1 text-right text-base font-medium text-ink"
+                style={{ height: 44 }}
+              />
+              <Text className="ml-1 text-xs text-muted">kg</Text>
+            </View>
           </View>
-        ) : (
+
+          <View className="mt-2 flex-row gap-2">
+            {WEIGHT_PRESETS.map((kg) => (
+              <Pressable
+                key={kg}
+                onPress={() => applyKg(kg)}
+                className="flex-1 items-center justify-center rounded-xl bg-bg"
+                style={{ height: 40 }}
+              >
+                <Text className="text-sm font-medium text-ink">{kg.toFixed(1)} kg</Text>
+              </Pressable>
+            ))}
+            <Pressable
+              onPress={() => applyKg(item.product.quantity)}
+              className="flex-1 items-center justify-center rounded-xl bg-bg"
+              style={{ height: 40 }}
+            >
+              <Text className="text-sm font-medium text-primary">Max</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : (
+        <View className="flex-row items-center justify-between">
+          <Text className="text-sm text-muted">Miqdor</Text>
           <View className="flex-row items-center gap-3">
             <Pressable
               onPress={() => decrement(item.product.id)}
-              className="h-9 w-9 items-center justify-center rounded-xl bg-primary-tint"
+              className="items-center justify-center rounded-xl bg-bg"
+              style={{ height: 44, width: 44 }}
             >
-              <Ionicons name="remove" size={18} color={colors.primary} />
+              <Ionicons name="remove" size={20} color={colors.ink} />
             </Pressable>
             <Text className="text-base font-medium text-ink" style={{ minWidth: 28, textAlign: "center" }}>
               {item.quantity}
             </Text>
             <Pressable
               onPress={() => increment(item.product.id)}
-              className="h-9 w-9 items-center justify-center rounded-xl bg-primary-tint"
+              className="items-center justify-center rounded-xl bg-primary-tint"
+              style={{ height: 44, width: 44 }}
             >
-              <Ionicons name="add" size={18} color={colors.primary} />
+              <Ionicons name="add" size={20} color={colors.primary} />
             </Pressable>
           </View>
-        )}
-      </View>
+        </View>
+      )}
     </View>
   );
-}
+});
 
 export default function SotuvScreen() {
   const router = useRouter();
@@ -115,10 +167,18 @@ export default function SotuvScreen() {
 
   const total = cartTotal(items);
 
-  function onPick(p: Product) {
-    add(p);
-    setSearch("");
-  }
+  const onPick = useCallback(
+    (p: Product) => {
+      add(p);
+      setSearch("");
+    },
+    [add],
+  );
+
+  const renderCartItem = useCallback(
+    ({ item }: { item: CartItem }) => <CartRow item={item} />,
+    [],
+  );
 
   function onCheckout() {
     Alert.alert("To'lov", "To'lov (checkout) F4 bosqichida quriladi.");
@@ -130,7 +190,7 @@ export default function SotuvScreen() {
         <View className="flex-row items-center justify-between pb-3">
           <Text className="text-2xl font-medium text-primary-deep">Sotuv</Text>
           {items.length > 0 ? (
-            <Pressable onPress={clear} hitSlop={8}>
+            <Pressable onPress={clear} hitSlop={10}>
               <Text className="text-sm text-danger">Tozalash</Text>
             </Pressable>
           ) : null}
@@ -139,15 +199,11 @@ export default function SotuvScreen() {
         {/* Skaner tugmasi */}
         <Pressable
           onPress={() => router.push("/scanner")}
-          className="mb-3 flex-row items-center gap-3 rounded-2xl bg-primary p-4"
+          className="mb-3 flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
+          style={{ height: 56 }}
         >
-          <Ionicons name="scan-outline" size={26} color="#fff" />
-          <View>
-            <Text className="text-base font-medium text-white">Mahsulot skanerlash</Text>
-            <Text className="text-xs" style={{ color: "#EAF2FE" }}>
-              Shtrix-kodni kameraga tuting
-            </Text>
-          </View>
+          <Ionicons name="scan-outline" size={24} color="#fff" />
+          <Text className="text-base font-medium text-white">Skaner</Text>
         </Pressable>
 
         {/* Qidiruv */}
@@ -201,7 +257,7 @@ export default function SotuvScreen() {
               <Text className="text-base font-medium text-primary-deep">
                 {formatCurrency(item.selling_price)}
               </Text>
-              <Ionicons name="add-circle" size={26} color={colors.primary} />
+              <Ionicons name="add-circle" size={28} color={colors.primary} />
             </Pressable>
           )}
         />
@@ -218,28 +274,30 @@ export default function SotuvScreen() {
         <FlatList
           data={items}
           keyExtractor={(i) => i.product.id}
+          renderItem={renderCartItem}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 12 }}
           ListHeaderComponent={
-            <Text className="pb-2 text-sm text-muted">Savat · {items.length} ta</Text>
+            <Text className="pb-2 text-base font-medium text-ink">
+              Savatcha <Text className="text-muted">({items.length})</Text>
+            </Text>
           }
-          renderItem={({ item }) => <CartRow item={item} />}
+          removeClippedSubviews
         />
       )}
 
-      {/* Pastki to'lov paneli */}
+      {/* Pastki to'lov paneli — thumb zone, to'liq kenglik */}
       {items.length > 0 && !searching ? (
-        <View
-          className="flex-row items-center justify-between border-t border-line bg-surface px-4"
-          style={{ paddingTop: 12, paddingBottom: 12 }}
-        >
-          <View>
-            <Text className="text-xs text-muted">Jami</Text>
-            <Text className="text-xl font-medium text-primary-deep">{formatCurrency(total)}</Text>
+        <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 14 }}>
+          <View className="mb-3 flex-row items-center justify-between">
+            <Text className="text-xs text-muted" style={{ letterSpacing: 0.5 }}>
+              JAMI SUMMA
+            </Text>
+            <Text className="text-xl font-medium text-ink">{formatCurrency(total)}</Text>
           </View>
           <Pressable
             onPress={onCheckout}
-            className="flex-row items-center gap-2 rounded-2xl bg-primary"
-            style={{ paddingHorizontal: 22, paddingVertical: 13 }}
+            className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
+            style={{ height: 54 }}
           >
             <Text className="text-base font-medium text-white">To'lov</Text>
             <Ionicons name="arrow-forward" size={18} color="#fff" />
