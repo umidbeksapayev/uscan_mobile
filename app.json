@@ -42,6 +42,13 @@
         {
           "cameraPermission": "Mahsulot shtrix-kodini skanerlash uchun kamera kerak."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Mahsulot rasmini galereyadan tanlash uchun ruxsat kerak.",
+          "cameraPermission": "Mahsulot rasmini kamerada olish uchun ruxsat kerak."
+        }
       ]
     ],
     "experiments": {

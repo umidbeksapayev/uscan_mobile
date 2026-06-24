@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { View, Text, ScrollView, Pressable, TextInput, Alert, Modal } from "react-native";
+import { View, Text, ScrollView, Pressable, TextInput, Alert, Modal, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,6 +14,7 @@ import { useCategories } from "@/features/catalog/use-categories";
 import { createProduct, updateProduct, getProduct } from "@/lib/products";
 import { lowStockThreshold } from "@/features/products/low-stock";
 import { useScanReturn } from "@/features/products/scan-return";
+import { pickAndUpload } from "@/features/products/upload-image";
 import type { Category, SaleType } from "@/types/database";
 
 const INPUT = "rounded-xl bg-bg px-4 text-base text-ink";
@@ -126,6 +128,8 @@ export default function ProductFormScreen() {
   const [sellingPrice, setSellingPrice] = useState("");
   const [costPrice, setCostPrice] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const { data: existing } = useQuery({
     queryKey: ["product", id],
@@ -142,6 +146,7 @@ export default function ProductFormScreen() {
       setSellingPrice(String(existing.selling_price));
       setCostPrice(String(existing.cost_price));
       setQuantity(String(existing.quantity));
+      setImageUrl(existing.image_url ?? null);
     }
   }, [existing]);
 
@@ -173,6 +178,7 @@ export default function ProductFormScreen() {
         low_stock_alert: lowStockThreshold(q, saleType),
         barcode: barcode.trim() || null,
         category_id: categoryId,
+        image_url: imageUrl,
       };
       return isEdit ? updateProduct(id as string, payload) : createProduct(payload);
     },
@@ -182,6 +188,30 @@ export default function ProductFormScreen() {
       router.back();
     },
   });
+
+  async function doPick(source: "camera" | "library") {
+    if (!shopId) return;
+    setUploading(true);
+    try {
+      const url = await pickAndUpload(source, shopId);
+      if (url) setImageUrl(url);
+    } catch (e) {
+      Alert.alert("Xato", e instanceof Error ? e.message : "Rasm yuklanmadi");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function chooseImage() {
+    Alert.alert("Mahsulot rasmi", undefined, [
+      { text: "Kamera", onPress: () => doPick("camera") },
+      { text: "Galereyadan", onPress: () => doPick("library") },
+      ...(imageUrl
+        ? [{ text: "Rasmni o'chirish", style: "destructive" as const, onPress: () => setImageUrl(null) }]
+        : []),
+      { text: "Bekor", style: "cancel" as const },
+    ]);
+  }
 
   function onSave() {
     if (!name.trim()) {
@@ -211,6 +241,37 @@ export default function ProductFormScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Rasm */}
+        <Pressable onPress={chooseImage} className="mb-4 self-center" style={{ width: 120, height: 120 }}>
+          {uploading ? (
+            <View className="h-full w-full items-center justify-center rounded-2xl border border-line bg-surface">
+              <ActivityIndicator color={colors.primary} />
+            </View>
+          ) : imageUrl ? (
+            <View>
+              <Image
+                source={{ uri: imageUrl }}
+                style={{ width: 120, height: 120, borderRadius: 16 }}
+                contentFit="cover"
+              />
+              <View
+                className="absolute bottom-1 right-1 h-7 w-7 items-center justify-center rounded-full bg-primary"
+                style={{ borderWidth: 2, borderColor: "#fff" }}
+              >
+                <Ionicons name="camera" size={14} color="#fff" />
+              </View>
+            </View>
+          ) : (
+            <View
+              className="h-full w-full items-center justify-center rounded-2xl bg-primary-tint"
+              style={{ borderWidth: 1, borderColor: colors.line, borderStyle: "dashed" }}
+            >
+              <Ionicons name="camera-outline" size={28} color={colors.primary} />
+              <Text className="mt-1 text-xs text-muted">Rasm qo'shish</Text>
+            </View>
+          )}
+        </Pressable>
+
         <Section title="Mahsulot">
           <View style={{ gap: 6 }}>
             <Text className="text-sm font-medium text-ink">Nomi</Text>
