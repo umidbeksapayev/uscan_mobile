@@ -17,12 +17,14 @@ type MenuItem = {
   note?: string;
   /** manage_debt ruxsati shart (yo'q bo'lsa menyuda ko'rinmaydi). */
   debtGated?: boolean;
+  /** purchase ruxsati shart (yo'q bo'lsa menyuda ko'rinmaydi). */
+  purchaseGated?: boolean;
 };
 
 const MENU: MenuItem[] = [
   { icon: "stats-chart-outline", label: "Statistika", route: "/statistika" }, // F6 — to'liq tahlil
   { icon: "book-outline", label: "Nasiya daftari", route: "/nasiya", debtGated: true }, // F7a
-  { icon: "cube-outline", label: "Kirim / Ta'minotchi", note: "F7" },
+  { icon: "cube-outline", label: "Kirim / Ta'minotchi", route: "/supply", purchaseGated: true }, // F7b
   { icon: "pricetags-outline", label: "Kategoriyalar", note: "F8" },
   { icon: "settings-outline", label: "Sozlamalar", note: "F8" },
 ];
@@ -31,10 +33,12 @@ export default function KoproqScreen() {
   const router = useRouter();
   const { session } = useAuth();
   const { data: memberships } = useMemberships();
-  const { canManageDebt } = useActivePermissions();
+  const { canManageDebt, canPurchase } = useActivePermissions();
   const active = memberships?.[0];
-  // manage_debt yo'q bo'lsa "Nasiya daftari" menyudan yashiriladi
-  const menu = MENU.filter((m) => !m.debtGated || canManageDebt);
+  // Ruxsatga qarab gate qilingan bandlarni yashiramiz
+  const menu = MENU.filter(
+    (m) => (!m.debtGated || canManageDebt) && (!m.purchaseGated || canPurchase),
+  );
 
   function onItem(item: MenuItem) {
     if (item.route) {

@@ -10,6 +10,8 @@ export const colors = {
   success: "#16A34A",
   danger: "#DC2626",
   warning: "#F59E0B",
+  kirim: "#0E9F6E", // Kirim (zumrad) — sotuv/nasiyadan ajratish uchun
+  kirimTint: "#E6F7F0",
   bg: "#F5F8FF",
   surface: "#FFFFFF",
   ink: "#0F172A",

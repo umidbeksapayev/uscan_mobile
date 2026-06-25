@@ -54,6 +54,7 @@ export interface ActivePermissions {
   canViewReports: boolean;
   canViewCost: boolean;
   canManageDebt: boolean;
+  canPurchase: boolean;
 }
 
 /**
@@ -70,5 +71,6 @@ export function useActivePermissions(): ActivePermissions {
     canViewReports: isOwner || !!m?.permissions?.view_reports,
     canViewCost: isOwner || !!m?.permissions?.view_cost,
     canManageDebt: isOwner || !!m?.permissions?.manage_debt,
+    canPurchase: isOwner || !!m?.permissions?.purchase,
   };
 }

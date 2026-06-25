@@ -162,6 +162,16 @@ export interface SalesStats {
   can_view_cost: boolean;
 }
 
+/** Ta'minotchi (kirim manbai). */
+export interface Supplier {
+  id: string;
+  shop_id: string;
+  name: string;
+  phone: string | null;
+  note: string | null;
+  created_at: string;
+}
+
 /** Nasiya mijozi. */
 export interface Customer {
   id: string;
