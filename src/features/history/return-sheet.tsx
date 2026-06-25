@@ -7,6 +7,8 @@ import {
   Pressable,
   ScrollView,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -134,6 +136,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
       <Pressable
         onPress={onClose}
         style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
@@ -225,6 +228,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
           </View>
         </View>
       </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
