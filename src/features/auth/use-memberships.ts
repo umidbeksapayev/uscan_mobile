@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import type { Membership, MemberRole, MemberPermissions, Shop } from "@/types/database";
 import { useAuth } from "./auth-context";
+import { canDo } from "./permissions";
 
 /**
  * Joriy foydalanuvchining a'zoliklari (do'kon + rol + ruxsat).
@@ -51,10 +52,12 @@ export function useActiveShopId(): string | undefined {
 
 export interface ActivePermissions {
   isOwner: boolean;
+  canManageProducts: boolean;
   canViewReports: boolean;
   canViewCost: boolean;
   canManageDebt: boolean;
   canPurchase: boolean;
+  canReturn: boolean;
 }
 
 /**
@@ -65,12 +68,13 @@ export interface ActivePermissions {
 export function useActivePermissions(): ActivePermissions {
   const { data } = useMemberships();
   const m = data?.[0];
-  const isOwner = m?.role === "owner";
   return {
-    isOwner,
-    canViewReports: isOwner || !!m?.permissions?.view_reports,
-    canViewCost: isOwner || !!m?.permissions?.view_cost,
-    canManageDebt: isOwner || !!m?.permissions?.manage_debt,
-    canPurchase: isOwner || !!m?.permissions?.purchase,
+    isOwner: m?.role === "owner",
+    canManageProducts: canDo(m?.role, m?.permissions, "manage_products"),
+    canViewReports: canDo(m?.role, m?.permissions, "view_reports"),
+    canViewCost: canDo(m?.role, m?.permissions, "view_cost"),
+    canManageDebt: canDo(m?.role, m?.permissions, "manage_debt"),
+    canPurchase: canDo(m?.role, m?.permissions, "purchase"),
+    canReturn: canDo(m?.role, m?.permissions, "returns"),
   };
 }
