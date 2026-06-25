@@ -38,9 +38,10 @@
         }
       ],
       [
-        "expo-camera",
+        "react-native-vision-camera",
         {
-          "cameraPermission": "Mahsulot shtrix-kodini skanerlash uchun kamera kerak."
+          "cameraPermissionText": "Mahsulot shtrix-kodini skanerlash uchun kamera kerak.",
+          "enableCodeScanner": true
         }
       ],
       [
