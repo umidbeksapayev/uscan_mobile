@@ -109,3 +109,30 @@ export interface ReturnItem {
   profit_amount: number;
   created_at: string;
 }
+
+/** Dashboard bugungi ko'rsatkichlari (get_dashboard_stats RPC). */
+export interface DashboardStats {
+  today_revenue: number;
+  today_profit: number;
+  today_sales_count: number;
+  low_stock_count: number;
+}
+
+/** Kunlik trend nuqtasi (get_sales_trend RPC). */
+export interface SalesTrendPoint {
+  day: string; // "YYYY-MM-DD"
+  revenue: number;
+  profit: number;
+  sales_count: number;
+}
+
+/** Eng ko'p / eng kam sotilgan mahsulot (get_top_products / get_slow_products RPC). */
+export interface TopProduct {
+  product_id: string;
+  name: string;
+  image_url: string | null;
+  sale_type: SaleType;
+  units_sold: number;
+  revenue: number;
+  profit: number;
+}
