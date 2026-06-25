@@ -14,6 +14,7 @@ import { useMemberships } from "@/features/auth/use-memberships";
 import { useCategories } from "@/features/catalog/use-categories";
 import { createProduct, updateProduct, getProduct } from "@/lib/products";
 import { lowStockThreshold } from "@/features/products/low-stock";
+import { validateProductInput } from "@/features/products/validate-product";
 import { useScanReturn } from "@/features/products/scan-return";
 import { pickAndUpload } from "@/features/products/upload-image";
 import type { Category, SaleType } from "@/types/database";
@@ -215,12 +216,9 @@ export default function ProductFormScreen() {
   }
 
   function onSave() {
-    if (!name.trim()) {
-      Alert.alert("Nomi kerak", "Mahsulot nomini kiriting.");
-      return;
-    }
-    if (sp <= 0) {
-      Alert.alert("Narx kerak", "Sotuv narxini kiriting.");
+    const err = validateProductInput({ name, sellingPrice: sp, costPrice: cp, quantity: q });
+    if (err) {
+      Alert.alert(err.title, err.message);
       return;
     }
     if (!shopId) return;

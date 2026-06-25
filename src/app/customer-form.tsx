@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 import { colors } from "@/theme/colors";
@@ -87,9 +88,11 @@ export default function CustomerFormScreen() {
         </Text>
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={24}
       >
         <Field label="Ism *" value={name} onChangeText={setName} placeholder="Mijoz ismi" />
         <Field
@@ -113,7 +116,7 @@ export default function CustomerFormScreen() {
             <Text className="text-base font-semibold text-white">Saqlash</Text>
           )}
         </Pressable>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

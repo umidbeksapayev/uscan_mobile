@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { Modal, View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { useRecordPayment } from "./use-customers";
@@ -42,6 +42,7 @@ export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalanc
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
       <Pressable
         onPress={onClose}
         style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
@@ -102,6 +103,7 @@ export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalanc
           </Pressable>
         </View>
       </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

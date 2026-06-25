@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { Modal, View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -96,6 +96,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
   return (
     <>
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
       <Pressable
         onPress={phase === "form" ? onClose : undefined}
         style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
@@ -295,6 +296,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
           )}
         </View>
       </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
 
     {shopId ? (

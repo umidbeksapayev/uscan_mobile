@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable } from "react-native";
+import { Modal, View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform } from "react-native";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight, formatNumber } from "@/lib/format";
@@ -54,6 +54,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
 
   return (
     <Modal visible={!!product} transparent animationType="slide" onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
       <Pressable
         onPress={onClose}
         style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
@@ -153,6 +154,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
           ) : null}
         </View>
       </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
