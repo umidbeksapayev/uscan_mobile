@@ -4,7 +4,27 @@
  */
 
 export type MemberRole = "owner" | "cashier";
-export type MemberPermissions = Record<string, boolean>;
+
+/** Kassirga yoqib/o'chiriladigan ruxsatlar (ega = hammasi). Web bilan bir xil. */
+export type PermissionKey =
+  | "manage_products"
+  | "purchase"
+  | "returns"
+  | "manage_debt"
+  | "view_reports"
+  | "view_cost";
+
+export type MemberPermissions = Partial<Record<PermissionKey, boolean>>;
+
+/** Xodim ro'yxati qatori (list_shop_members RPC). */
+export interface ShopMemberRow {
+  user_id: string;
+  email: string;
+  role: MemberRole;
+  permissions: MemberPermissions;
+  created_at: string;
+}
+
 export type SaleType = "unit" | "weight";
 /** Sotuvda mahsulot qanday topilgan: shtrix-kod yoki qo'lda. ('visual' eski yozuvlar.) */
 export type SearchMethod = "barcode" | "visual" | "manual";
@@ -27,6 +47,11 @@ export interface Category {
   shop_id: string;
   name: string;
   created_at?: string;
+}
+
+/** Kategoriya + unga tegishli mahsulotlar soni (boshqaruv ekrani uchun). */
+export interface CategoryWithCount extends Category {
+  product_count: number;
 }
 
 export interface Product {

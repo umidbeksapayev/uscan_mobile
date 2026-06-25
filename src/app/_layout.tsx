@@ -29,6 +29,8 @@ export default function RootLayout() {
                 <Stack.Screen name="customer-detail" />
                 <Stack.Screen name="supply" />
                 <Stack.Screen name="suppliers" />
+                <Stack.Screen name="categories" />
+                <Stack.Screen name="settings" />
               </Stack>
             </AuthGate>
           </AuthProvider>
