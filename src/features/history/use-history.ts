@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { useActiveShopId } from "@/features/auth/use-memberships";
 import {
   getSalesHistory,
   getReturnedQuantities,
@@ -7,11 +8,13 @@ import {
   type ProcessReturnInput,
 } from "./history-api";
 
-/** Sotuv tarixi (eng yangi N ta sotuv). */
+/** Sotuv tarixi (eng yangi N ta sotuv) — FAOL do'kon bo'yicha cheklangan. */
 export function useSalesHistory(limit = 50) {
+  const shopId = useActiveShopId();
   return useQuery({
-    queryKey: ["sales", "history", limit],
-    queryFn: () => getSalesHistory(limit),
+    queryKey: ["sales", "history", shopId, limit],
+    enabled: !!shopId,
+    queryFn: () => getSalesHistory(shopId!, limit),
     staleTime: 15_000,
   });
 }

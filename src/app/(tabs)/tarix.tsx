@@ -198,7 +198,7 @@ export default function TarixScreen() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [returnSale, setReturnSale] = useState<Sale | null>(null);
 
-  const { data: memberships } = useMemberships();
+  const { data: memberships, isLoading: membershipsLoading } = useMemberships();
   const active = memberships?.[0];
   const isOwner = active?.role === "owner";
   const shopId = active?.shop.id;
@@ -222,7 +222,7 @@ export default function TarixScreen() {
         </View>
       </View>
 
-      {isLoading ? (
+      {isLoading || membershipsLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.primary} />
         </View>

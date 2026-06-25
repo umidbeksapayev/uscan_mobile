@@ -44,6 +44,7 @@ export async function updateProduct(
   fields: Partial<Omit<ProductInput, "shop_id">>,
 ): Promise<Product> {
   const patch: Record<string, unknown> = { ...fields };
+  if (typeof patch.name === "string") patch.name = patch.name.trim();
   if ("barcode" in patch) {
     patch.barcode = patch.barcode ? normalizeBarcode(patch.barcode as string) : null;
   }

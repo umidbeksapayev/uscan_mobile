@@ -19,6 +19,7 @@ import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useProducts, type CategoryFilter } from "@/features/catalog/use-products";
 import { useCategories } from "@/features/catalog/use-categories";
+import { useMemberships } from "@/features/auth/use-memberships";
 import type { Product } from "@/types/database";
 
 function StockBadge({ item }: { item: Product }) {
@@ -134,6 +135,8 @@ export default function KatalogScreen() {
     categoryId: cat,
   });
   const { data: categories } = useCategories();
+  // Faol do'kon yuklanmaguncha so'rovlar o'chiq — bo'sh-holat chaqnashini oldini olamiz
+  const { isLoading: membershipsLoading } = useMemberships();
 
   const chips: { id: CategoryFilter; name: string }[] = [
     { id: "all", name: "Barchasi" },
@@ -239,7 +242,7 @@ export default function KatalogScreen() {
       </View>
 
       {/* Ro'yxat */}
-      {isLoading ? (
+      {isLoading || membershipsLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.primary} />
         </View>

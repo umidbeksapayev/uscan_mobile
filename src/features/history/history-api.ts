@@ -2,13 +2,15 @@ import { supabase } from "@/lib/supabase";
 import type { Sale } from "@/types/database";
 
 /** Sotuv tarixi — eng yangi sotuvlar (mahsulot nomi/rasmi + qaytarish qisqacha bilan).
- *  RLS avtomatik shop_id bo'yicha filtrlaydi. (Web getSalesHistory ga mos.) */
-export async function getSalesHistory(limit = 50): Promise<Sale[]> {
+ *  FAOL do'kon bo'yicha cheklangan (RLS a'zo bo'lgan barcha do'konlarni qaytaradi).
+ *  (Web getSalesHistory ga mos.) */
+export async function getSalesHistory(shopId: string, limit = 50): Promise<Sale[]> {
   const { data, error } = await supabase
     .from("sales")
     .select(
       "*, items:sale_items(*, product:products(name, image_url, sale_type)), returns(id, total_refund)"
     )
+    .eq("shop_id", shopId)
     .order("sold_at", { ascending: false })
     .limit(limit);
 

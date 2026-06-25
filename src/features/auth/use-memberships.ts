@@ -38,3 +38,13 @@ export function useMemberships() {
     },
   });
 }
+
+/**
+ * Faol do'kon id (default = eng yangi a'zolik). Ma'lumot so'rovlarini shu do'konga
+ * cheklash uchun — RLS a'zo bo'lgan BARCHA do'konlarni qaytaradi, shuning uchun
+ * ko'p-do'konli foydalanuvchida aniq filtr shart. F8 switcher shu yerga ulanadi.
+ */
+export function useActiveShopId(): string | undefined {
+  const { data } = useMemberships();
+  return data?.[0]?.shop.id;
+}
