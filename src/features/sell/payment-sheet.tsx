@@ -9,6 +9,9 @@ import { uuidv4 } from "@/lib/uuid";
 import { changeAmount } from "./payment-math";
 import { processCartSale, type PaymentMethod } from "./checkout";
 import type { CartItem } from "./cart-store";
+import { useActivePermissions } from "@/features/auth/use-memberships";
+import { CustomerPickerSheet, type PickedCustomer } from "@/features/customers/customer-picker-sheet";
+import { debtFromSale } from "@/features/customers/debt-math";
 
 const METHODS: { id: PaymentMethod; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { id: "cash", label: "Naqd", icon: "cash-outline" },
@@ -32,13 +35,29 @@ type Props = {
 
 export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }: Props) {
   const qc = useQueryClient();
+  const { canManageDebt } = useActivePermissions();
   const [method, setMethod] = useState<PaymentMethod>("cash");
   const [givenText, setGivenText] = useState("");
   const [phase, setPhase] = useState<"form" | "success">("form");
   const [clientId, setClientId] = useState(uuidv4());
+  // Nasiya holati (faqat method === "debt" da ishlatiladi)
+  const [customer, setCustomer] = useState<PickedCustomer | null>(null);
+  const [debtPaidText, setDebtPaidText] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const methods = canManageDebt ? METHODS : METHODS.filter((m) => m.id !== "debt");
+  const debtPaid = parseFloat(debtPaidText.replace(/\s/g, "")) || 0;
 
   const mutation = useMutation({
-    mutationFn: () => processCartSale({ shopId: shopId as string, items, clientId }),
+    mutationFn: () =>
+      processCartSale({
+        shopId: shopId as string,
+        items,
+        clientId,
+        // Naqd/Karta/QR uchun null — mavjud oqim o'zgarmaydi
+        customerId: method === "debt" ? customer?.id ?? null : null,
+        paidAmount: method === "debt" ? debtPaid : null,
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["sell-search"] });
@@ -53,6 +72,9 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
       setGivenText("");
       setPhase("form");
       setClientId(uuidv4());
+      setCustomer(null);
+      setDebtPaidText("");
+      setPickerOpen(false);
       mutation.reset();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,7 +84,9 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
   const given = parseFloat(givenText.replace(/\s/g, "")) || 0;
   const change = changeAmount(given, effectiveTotal);
   const cashShort = method === "cash" && given > 0 && given < total;
-  const canPay = !!shopId && items.length > 0 && method !== "debt" && !mutation.isPending;
+  // Nasiya uchun mijoz tanlangan bo'lishi shart; Naqd/Karta/QR uchun avvalgidek
+  const debtReady = method === "debt" ? !!customer : true;
+  const canPay = !!shopId && items.length > 0 && debtReady && !mutation.isPending;
 
   const sheet = {
     backgroundColor: colors.surface,
@@ -73,6 +97,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
   } as const;
 
   return (
+    <>
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable
         onPress={phase === "form" ? onClose : undefined}
@@ -92,6 +117,11 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
               {method === "cash" && change > 0 ? (
                 <Text className="mt-1 text-base font-medium text-success">
                   Qaytim: {formatCurrency(change)}
+                </Text>
+              ) : null}
+              {method === "debt" ? (
+                <Text className="mt-1 text-base font-medium" style={{ color: "#B42318" }}>
+                  Nasiyaga yozildi: {formatCurrency(debtFromSale(effectiveTotal, debtPaid))}
                 </Text>
               ) : null}
               <Pressable
@@ -124,7 +154,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
 
               <Text className="mb-2 text-sm font-medium text-ink">To'lov turi</Text>
               <View className="mb-4 flex-row gap-2">
-                {METHODS.map((m) => {
+                {methods.map((m) => {
                   const active = method === m.id;
                   return (
                     <Pressable
@@ -203,13 +233,46 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                   ) : null}
                 </View>
               ) : method === "debt" ? (
-                <View
-                  className="mb-4 rounded-2xl px-4 py-3"
-                  style={{ backgroundColor: colors.primaryTint }}
-                >
-                  <Text className="text-sm" style={{ color: "#185FA5" }}>
-                    Nasiya uchun mijoz tanlash F7 (Nasiya) bosqichida quriladi.
-                  </Text>
+                <View className="mb-4" style={{ gap: 10 }}>
+                  {/* Mijoz tanlash */}
+                  <Pressable
+                    onPress={() => setPickerOpen(true)}
+                    className="flex-row items-center justify-between rounded-2xl border border-line bg-bg px-4"
+                    style={{ height: 56 }}
+                  >
+                    <View className="flex-row items-center gap-2">
+                      <Ionicons name="person-outline" size={20} color={colors.primary} />
+                      <Text className="text-base" style={{ color: customer ? colors.ink : colors.muted }}>
+                        {customer ? customer.name : "Mijoz tanlang"}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
+                  </Pressable>
+
+                  {/* To'langan summa (qisman to'lov; bo'sh = to'liq nasiya) */}
+                  <View>
+                    <Text className="mb-1 text-sm font-medium text-ink">To'langan summa (ixtiyoriy)</Text>
+                    <TextInput
+                      value={debtPaidText}
+                      onChangeText={setDebtPaidText}
+                      keyboardType="number-pad"
+                      placeholder="0 — to'liq nasiya"
+                      placeholderTextColor={colors.tabInactive}
+                      className="rounded-2xl border border-line bg-bg px-4 text-xl font-medium text-ink"
+                      style={{ height: 56 }}
+                    />
+                  </View>
+
+                  {/* Qarz preview */}
+                  <View
+                    className="flex-row items-center justify-between rounded-2xl px-4 py-3"
+                    style={{ backgroundColor: "#FDECEC" }}
+                  >
+                    <Text className="text-sm" style={{ color: "#B42318" }}>Qarzga yoziladi</Text>
+                    <Text className="text-base font-medium" style={{ color: "#B42318" }}>
+                      {formatCurrency(debtFromSale(total, debtPaid))}
+                    </Text>
+                  </View>
                 </View>
               ) : null}
 
@@ -236,5 +299,18 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
         </View>
       </Pressable>
     </Modal>
+
+    {shopId ? (
+      <CustomerPickerSheet
+        visible={pickerOpen}
+        shopId={shopId}
+        onSelect={(c) => {
+          setCustomer(c);
+          setPickerOpen(false);
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
+    ) : null}
+    </>
   );
 }

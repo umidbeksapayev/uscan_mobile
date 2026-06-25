@@ -5,7 +5,7 @@ import { useRouter, type Href } from "expo-router";
 
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/features/auth/auth-context";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useMemberships, useActivePermissions } from "@/features/auth/use-memberships";
 import { colors } from "@/theme/colors";
 
 type MenuItem = {
@@ -15,11 +15,13 @@ type MenuItem = {
   route?: Href;
   /** Hali tayyor emas bo'lsa — qaysi fazada chiqishi. */
   note?: string;
+  /** manage_debt ruxsati shart (yo'q bo'lsa menyuda ko'rinmaydi). */
+  debtGated?: boolean;
 };
 
 const MENU: MenuItem[] = [
   { icon: "stats-chart-outline", label: "Statistika", route: "/statistika" }, // F6 — to'liq tahlil
-  { icon: "book-outline", label: "Nasiya daftari", note: "F7" },
+  { icon: "book-outline", label: "Nasiya daftari", route: "/nasiya", debtGated: true }, // F7a
   { icon: "cube-outline", label: "Kirim / Ta'minotchi", note: "F7" },
   { icon: "pricetags-outline", label: "Kategoriyalar", note: "F8" },
   { icon: "settings-outline", label: "Sozlamalar", note: "F8" },
@@ -29,7 +31,10 @@ export default function KoproqScreen() {
   const router = useRouter();
   const { session } = useAuth();
   const { data: memberships } = useMemberships();
+  const { canManageDebt } = useActivePermissions();
   const active = memberships?.[0];
+  // manage_debt yo'q bo'lsa "Nasiya daftari" menyudan yashiriladi
+  const menu = MENU.filter((m) => !m.debtGated || canManageDebt);
 
   function onItem(item: MenuItem) {
     if (item.route) {
@@ -76,7 +81,7 @@ export default function KoproqScreen() {
 
           {/* Menyu */}
           <View className="mb-3 rounded-2xl border border-line bg-surface">
-            {MENU.map((item, i) => {
+            {menu.map((item, i) => {
               const ready = !!item.route;
               return (
                 <Pressable

@@ -161,3 +161,34 @@ export interface SalesStats {
   prev_profit: number | null;
   can_view_cost: boolean;
 }
+
+/** Nasiya mijozi. */
+export interface Customer {
+  id: string;
+  shop_id: string;
+  name: string;
+  phone: string | null;
+  note: string | null;
+  created_at: string;
+}
+
+/** Mijoz + joriy qarz balansi (get_customers_with_balance RPC).
+ *  balance > 0 = mijoz bizga qarzdor. */
+export interface CustomerWithBalance {
+  id: string;
+  name: string;
+  phone: string | null;
+  note: string | null;
+  created_at: string;
+  balance: number;
+}
+
+/** Mijoz to'lovi (qarz to'lash). */
+export interface CustomerPayment {
+  id: string;
+  shop_id: string;
+  customer_id: string;
+  amount: number;
+  paid_at: string;
+  note: string | null;
+}
