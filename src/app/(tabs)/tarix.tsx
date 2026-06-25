@@ -5,20 +5,11 @@ import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "@/theme/colors";
-import { formatCurrency, formatWeight } from "@/lib/format";
+import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
 import { useMemberships } from "@/features/auth/use-memberships";
 import { useSalesHistory } from "@/features/history/use-history";
 import { ReturnSheet } from "@/features/history/return-sheet";
-
-/** "2026-06-07T09:18:33Z" -> "07.06 14:18" (Asia/Tashkent = UTC+5, DST yo'q). */
-function formatSaleTime(iso: string): string {
-  const t = new Date(new Date(iso).getTime() + 5 * 60 * 60 * 1000);
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${p(t.getUTCDate())}.${p(t.getUTCMonth() + 1)} ${p(t.getUTCHours())}:${p(
-    t.getUTCMinutes()
-  )}`;
-}
 
 const METHOD: Record<
   SearchMethod,
@@ -98,7 +89,7 @@ function SaleCard({
         <View className="min-w-0 flex-1">
           <Text className="text-base font-medium text-ink">{sale.item_count} mahsulot</Text>
           <View className="mt-1 flex-row flex-wrap items-center" style={{ gap: 8 }}>
-            <Text className="text-xs text-muted">{formatSaleTime(sale.sold_at)}</Text>
+            <Text className="text-xs text-muted">{formatDateTime(sale.sold_at)}</Text>
             <View
               className="flex-row items-center rounded-full px-2 py-0.5"
               style={{ gap: 3, backgroundColor: colors.primaryTint }}

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { escapeLike } from "@/lib/escape-like";
 import type { Product } from "@/types/database";
 
 /** Kirim uchun mahsulot qidirish — nom yoki shtrix-kod; QOLDIQ shart EMAS
@@ -6,12 +7,13 @@ import type { Product } from "@/types/database";
 export async function searchSupplyProducts(term: string, shopId: string): Promise<Product[]> {
   const t = term.trim();
   if (!t) return [];
+  const e = escapeLike(t);
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("shop_id", shopId)
     .eq("is_active", true)
-    .or(`name.ilike.%${t}%,barcode.ilike.%${t}%`)
+    .or(`name.ilike.%${e}%,barcode.ilike.%${e}%`)
     .order("name", { ascending: true })
     .limit(10);
   if (error) throw new Error(error.message);

@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import { Modal, View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { colors } from "@/theme/colors";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatNumber } from "@/lib/format";
 import { useRecordPayment } from "./use-customers";
-
-function groupSom(n: number): string {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
 
 type Props = {
   visible: boolean;
@@ -82,7 +78,7 @@ export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalanc
               className="mt-2 self-start rounded-xl bg-bg px-4 py-2"
               style={{ borderWidth: 1, borderColor: colors.line }}
             >
-              <Text className="text-sm font-medium text-ink">Hammasi ({groupSom(maxDebt)})</Text>
+              <Text className="text-sm font-medium text-ink">Hammasi ({formatNumber(maxDebt)})</Text>
             </Pressable>
           ) : null}
 

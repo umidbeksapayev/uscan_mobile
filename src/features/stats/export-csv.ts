@@ -2,14 +2,15 @@ import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
 import { supabase } from "@/lib/supabase";
+import { TASHKENT_OFFSET_MS } from "@/lib/format";
 import { buildSalesCsv, type SalesCsvRow } from "./csv-format";
 
 /** (today − (days−1)) mahalliy yarim tunining UTC instanti (eksport oynasi). */
 function periodStartIso(days: number): string {
-  const nowTash = new Date(Date.now() + 5 * 60 * 60 * 1000);
+  const nowTash = new Date(Date.now() + TASHKENT_OFFSET_MS);
   const ms =
     Date.UTC(nowTash.getUTCFullYear(), nowTash.getUTCMonth(), nowTash.getUTCDate() - (days - 1)) -
-    5 * 60 * 60 * 1000;
+    TASHKENT_OFFSET_MS;
   return new Date(ms).toISOString();
 }
 
