@@ -6,7 +6,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { colors } from "@/theme/colors";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatDateTime } from "@/lib/format";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import {
   useCustomer,
@@ -17,13 +17,6 @@ import { customerBalance } from "@/features/customers/debt-math";
 import { ReceivePaymentSheet } from "@/features/customers/receive-payment-sheet";
 import type { CustomerPayment } from "@/types/database";
 import type { CustomerSaleRow } from "@/features/customers/customers-api";
-
-/** "2026-06-07T09:18:33Z" → "07.06 14:18" (Asia/Tashkent). */
-function fmt(iso: string): string {
-  const t = new Date(new Date(iso).getTime() + 5 * 60 * 60 * 1000);
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${p(t.getUTCDate())}.${p(t.getUTCMonth() + 1)} ${p(t.getUTCHours())}:${p(t.getUTCMinutes())}`;
-}
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -40,7 +33,7 @@ function SaleRow({ s }: { s: CustomerSaleRow }) {
     <View className="flex-row items-center justify-between py-2" style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}>
       <View>
         <Text className="text-sm text-ink">{s.item_count} mahsulot</Text>
-        <Text className="text-xs text-muted">{fmt(s.sold_at)}</Text>
+        <Text className="text-xs text-muted">{formatDateTime(s.sold_at)}</Text>
       </View>
       <View className="items-end">
         <Text className="text-sm font-medium text-ink">{formatCurrency(s.total_revenue)}</Text>
@@ -59,7 +52,7 @@ function PaymentRow({ p }: { p: CustomerPayment }) {
     <View className="flex-row items-center justify-between py-2" style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}>
       <View className="flex-row items-center gap-2">
         <Ionicons name="arrow-down-circle" size={18} color={colors.success} />
-        <Text className="text-xs text-muted">{fmt(p.paid_at)}</Text>
+        <Text className="text-xs text-muted">{formatDateTime(p.paid_at)}</Text>
       </View>
       <Text className="text-sm font-medium text-success">+ {formatCurrency(p.amount)}</Text>
     </View>

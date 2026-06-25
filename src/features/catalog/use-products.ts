@@ -2,7 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 
 import { supabase } from "@/lib/supabase";
 import { useActiveShopId } from "@/features/auth/use-memberships";
+import { escapeLike } from "@/lib/escape-like";
 import type { Product } from "@/types/database";
+
+/**
+ * Katalog uchun aniq ustunlar — `cost_price` (tan narxi, MAXFIY) ataylab YO'Q.
+ * `select("*")` cost_price'ni kassir qurilmasiga yuborardi (UI yashirsa ham
+ * React DevTools/tarmoqda ko'rinardi). Bu ro'yxat uni payload'dan butunlay olib
+ * tashlaydi. (Foyda/tan narx faqat RPC'lar orqali, has_perm bilan.)
+ */
+const CATALOG_COLUMNS =
+  "id, shop_id, name, sale_type, selling_price, quantity, low_stock_alert, barcode, image_url, category_id, is_active, created_at, category:categories(name)";
 
 export type CategoryFilter = string | "all" | "none";
 
@@ -24,12 +34,12 @@ export function useProducts(filters: ProductFilters) {
     queryFn: async (): Promise<Product[]> => {
       let q = supabase
         .from("products")
-        .select("*, category:categories(name)")
+        .select(CATALOG_COLUMNS)
         .eq("shop_id", shopId!)
         .eq("is_active", true);
 
       const search = filters.search?.trim();
-      if (search) q = q.ilike("name", `%${search}%`);
+      if (search) q = q.ilike("name", `%${escapeLike(search)}%`);
 
       if (filters.categoryId && filters.categoryId !== "all") {
         q =
@@ -42,7 +52,9 @@ export function useProducts(filters: ProductFilters) {
 
       const { data, error } = await q;
       if (error) throw new Error(error.message);
-      return (data ?? []) as Product[];
+      // cost_price ataylab tanlanmagan (maxfiy) — UI uni o'qimaydi. Codebase
+      // idiomiga mos `unknown` orqali Product[] ga keltiramiz.
+      return (data ?? []) as unknown as Product[];
     },
   });
 }

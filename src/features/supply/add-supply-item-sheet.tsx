@@ -6,16 +6,12 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 
 import { colors } from "@/theme/colors";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatNumber } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useScanReturn } from "@/features/products/scan-return";
 import type { Product } from "@/types/database";
 import { searchSupplyProducts } from "./supply-api";
 import { useSupplyCart } from "./supply-store";
-
-function group(n: number): string {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
 
 type Props = { visible: boolean; shopId: string; onClose: () => void };
 
@@ -186,7 +182,7 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
                 value={costText}
                 onChangeText={setCostText}
                 keyboardType="number-pad"
-                placeholder={group(picked.cost_price || 0)}
+                placeholder={formatNumber(picked.cost_price || 0)}
                 placeholderTextColor={colors.tabInactive}
                 className="rounded-2xl border border-line bg-bg px-4 text-xl font-medium text-ink"
                 style={{ height: 54 }}

@@ -15,10 +15,6 @@ import { processPurchase } from "@/features/supply/supply-api";
 import { AddSupplyItemSheet } from "@/features/supply/add-supply-item-sheet";
 import { SupplierPickerSheet, type PickedSupplier } from "@/features/suppliers/supplier-picker-sheet";
 
-function group(n: number): string {
-  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
-
 function SupplyCartRow({ item }: { item: SupplyItem }) {
   const setQty = useSupplyCart((s) => s.setQty);
   const setCost = useSupplyCart((s) => s.setCost);

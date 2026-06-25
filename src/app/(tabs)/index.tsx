@@ -8,7 +8,7 @@ import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { colors } from "@/theme/colors";
-import { formatCurrency, formatWeight } from "@/lib/format";
+import { formatCurrency, formatWeight, formatNumber } from "@/lib/format";
 import { Logo } from "@/components/logo";
 import { useMemberships } from "@/features/auth/use-memberships";
 import {
@@ -26,13 +26,6 @@ const GRAD = {
   navy: ["#1B4B82", "#0F3D6E"],
   green: ["#1FA85C", "#15803D"],
 } as const;
-
-/** 2450000 → "2 450 000" */
-function groupSom(n: number): string {
-  return Math.round(n)
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
 
 function DeltaPill({ delta, suffix }: { delta: number; suffix: string }) {
   const up = delta >= 0;
@@ -406,7 +399,7 @@ export default function HomeScreen() {
             <GradientStat
               tone={GRAD.blue}
               label={period === 1 ? "BUGUNGI SAVDO" : "TUSHUM"}
-              value={groupSom(cur.revenue)}
+              value={formatNumber(cur.revenue)}
               suffix="so'm"
               icon="wallet-outline"
               delta={pctChange(cur.revenue, prev.revenue)}
@@ -416,7 +409,7 @@ export default function HomeScreen() {
             <GradientStat
               tone={GRAD.navy}
               label="SOF FOYDA"
-              value={groupSom(cur.profit)}
+              value={formatNumber(cur.profit)}
               suffix="so'm"
               icon="trending-up-outline"
               delta={pctChange(cur.profit, prev.profit)}

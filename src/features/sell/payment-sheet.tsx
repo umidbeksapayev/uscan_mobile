@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { colors } from "@/theme/colors";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatNumber } from "@/lib/format";
 import { uuidv4 } from "@/lib/uuid";
 import { changeAmount } from "./payment-math";
 import { processCartSale, type PaymentMethod } from "./checkout";
@@ -21,9 +21,6 @@ const METHODS: { id: PaymentMethod; label: string; icon: keyof typeof Ionicons.g
 ];
 const QUICK = [50000, 100000, 200000];
 
-function groupSom(n: number): string {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
 type Props = {
   visible: boolean;
   total: number;
@@ -191,7 +188,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                     value={givenText}
                     onChangeText={setGivenText}
                     keyboardType="number-pad"
-                    placeholder={groupSom(total)}
+                    placeholder={formatNumber(total)}
                     placeholderTextColor={colors.tabInactive}
                     className="rounded-2xl border border-line bg-bg px-4 text-xl font-medium text-ink"
                     style={{ height: 56 }}
@@ -211,7 +208,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                         className="flex-1 items-center justify-center rounded-xl bg-bg"
                         style={{ height: 40 }}
                       >
-                        <Text className="text-sm font-medium text-ink">{groupSom(q)}</Text>
+                        <Text className="text-sm font-medium text-ink">{formatNumber(q)}</Text>
                       </Pressable>
                     ))}
                   </View>

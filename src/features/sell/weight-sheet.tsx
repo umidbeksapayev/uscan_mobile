@@ -2,17 +2,13 @@ import { useEffect, useState } from "react";
 import { Modal, View, Text, TextInput, Pressable } from "react-native";
 
 import { colors } from "@/theme/colors";
-import { formatCurrency, formatWeight } from "@/lib/format";
+import { formatCurrency, formatWeight, formatNumber } from "@/lib/format";
 import { kgFromAmount, amountFromKg } from "./weight-math";
 import type { Product } from "@/types/database";
 
 type Mode = "som" | "kg";
 const SOM_PRESETS = [10000, 20000, 50000];
 const KG_PRESETS = [0.5, 1, 2];
-
-function groupSom(n: number): string {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
 
 type Props = {
   product: Product | null;
@@ -136,7 +132,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
                     style={{ height: 44 }}
                   >
                     <Text className="text-sm font-medium text-ink">
-                      {mode === "som" ? groupSom(p) : `${p.toFixed(1)} kg`}
+                      {mode === "som" ? formatNumber(p) : `${p.toFixed(1)} kg`}
                     </Text>
                   </Pressable>
                 ))}

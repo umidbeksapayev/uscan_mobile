@@ -35,8 +35,9 @@ export default function LoginScreen() {
         email: email.trim().toLowerCase(),
         password,
       });
+      // Sekin internet (3G / qishloq) uchun keng oraliq.
       const timeout = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Tarmoq javob bermadi. Qayta urinib ko'ring.")), 15000),
+        setTimeout(() => reject(new Error("Tarmoq javob bermadi. Qayta urinib ko'ring.")), 30000),
       );
       const { data, error } = await Promise.race([signIn, timeout]);
 
