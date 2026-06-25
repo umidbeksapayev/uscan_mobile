@@ -136,3 +136,28 @@ export interface TopProduct {
   revenue: number;
   profit: number;
 }
+
+/** Ombor qiymati (get_inventory_stats RPC). cost_* faqat view_cost'da (aks holda null). */
+export interface InventoryStats {
+  product_count: number;
+  total_unit_qty: number;
+  total_weight_kg: number;
+  retail_value: number;
+  cost_value: number | null;
+  potential_profit: number | null;
+  low_stock_count: number;
+  out_of_stock_count: number;
+  can_view_cost: boolean;
+}
+
+/** Davr savdo statistikasi (get_sales_stats RPC). profit faqat view_cost'da (null). */
+export interface SalesStats {
+  revenue: number;
+  sales_count: number;
+  avg_check: number;
+  profit: number | null;
+  prev_revenue: number;
+  prev_sales_count: number;
+  prev_profit: number | null;
+  can_view_cost: boolean;
+}

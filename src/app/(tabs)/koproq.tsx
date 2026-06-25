@@ -1,24 +1,43 @@
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter, type Href } from "expo-router";
 
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/features/auth/auth-context";
 import { useMemberships } from "@/features/auth/use-memberships";
 import { colors } from "@/theme/colors";
 
-const MENU: { icon: keyof typeof Ionicons.glyphMap; label: string; note: string }[] = [
+type MenuItem = {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  /** Tayyor bo'lsa — bosilganda shu route'ga o'tadi. */
+  route?: Href;
+  /** Hali tayyor emas bo'lsa — qaysi fazada chiqishi. */
+  note?: string;
+};
+
+const MENU: MenuItem[] = [
+  { icon: "stats-chart-outline", label: "Statistika", route: "/statistika" }, // F6 — to'liq tahlil
   { icon: "book-outline", label: "Nasiya daftari", note: "F7" },
-  { icon: "bar-chart-outline", label: "Hisobotlar", note: "F6" },
   { icon: "cube-outline", label: "Kirim / Ta'minotchi", note: "F7" },
   { icon: "pricetags-outline", label: "Kategoriyalar", note: "F8" },
   { icon: "settings-outline", label: "Sozlamalar", note: "F8" },
 ];
 
 export default function KoproqScreen() {
+  const router = useRouter();
   const { session } = useAuth();
   const { data: memberships } = useMemberships();
   const active = memberships?.[0];
+
+  function onItem(item: MenuItem) {
+    if (item.route) {
+      router.navigate(item.route);
+    } else {
+      Alert.alert(item.label, `Bu bo'lim ${item.note ?? "keyingi"} bosqichida tayyor bo'ladi.`);
+    }
+  }
 
   function logout() {
     Alert.alert("Chiqish", "Rostdan ham chiqmoqchimisiz?", [
@@ -55,18 +74,30 @@ export default function KoproqScreen() {
             ) : null}
           </View>
 
-          {/* Menyu (keyingi fazalarda to'ladi) */}
+          {/* Menyu */}
           <View className="mb-3 rounded-2xl border border-line bg-surface">
-            {MENU.map((item, i) => (
-              <View
-                key={item.label}
-                className={`flex-row items-center gap-3 p-4 ${i > 0 ? "border-t border-line" : ""}`}
-              >
-                <Ionicons name={item.icon} size={20} color={colors.primary} />
-                <Text className="flex-1 text-base text-ink">{item.label}</Text>
-                <Text className="text-xs text-muted">{item.note}</Text>
-              </View>
-            ))}
+            {MENU.map((item, i) => {
+              const ready = !!item.route;
+              return (
+                <Pressable
+                  key={item.label}
+                  onPress={() => onItem(item)}
+                  android_ripple={{ color: colors.line }}
+                  className={`flex-row items-center gap-3 p-4 ${i > 0 ? "border-t border-line" : ""}`}
+                  style={{ opacity: ready ? 1 : 0.55 }}
+                >
+                  <Ionicons name={item.icon} size={20} color={colors.primary} />
+                  <Text className="flex-1 text-base text-ink">{item.label}</Text>
+                  {ready ? (
+                    <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
+                  ) : (
+                    <View className="rounded-full bg-bg px-2 py-0.5">
+                      <Text className="text-xs text-muted">{item.note}</Text>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
           </View>
 
           {/* Chiqish */}

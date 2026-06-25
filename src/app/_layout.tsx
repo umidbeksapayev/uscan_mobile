@@ -21,6 +21,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="scanner" options={{ presentation: "fullScreenModal" }} />
               <Stack.Screen name="product-form" />
+              <Stack.Screen name="statistika" />
             </Stack>
           </AuthGate>
         </AuthProvider>

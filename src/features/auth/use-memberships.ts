@@ -48,3 +48,25 @@ export function useActiveShopId(): string | undefined {
   const { data } = useMemberships();
   return data?.[0]?.shop.id;
 }
+
+export interface ActivePermissions {
+  isOwner: boolean;
+  canViewReports: boolean;
+  canViewCost: boolean;
+}
+
+/**
+ * Faol do'kondagi ruxsatlar (RBAC). Egasi = hammasi. Kassir = `permissions`
+ * jadvalidagi bayroqlar. UI shu asosda tan narx/foyda/savdo moliyani yashiradi
+ * (server ham has_perm bilan majburlaydi — bu faqat UX qatlami).
+ */
+export function useActivePermissions(): ActivePermissions {
+  const { data } = useMemberships();
+  const m = data?.[0];
+  const isOwner = m?.role === "owner";
+  return {
+    isOwner,
+    canViewReports: isOwner || !!m?.permissions?.view_reports,
+    canViewCost: isOwner || !!m?.permissions?.view_cost,
+  };
+}
