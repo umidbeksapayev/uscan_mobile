@@ -7,8 +7,10 @@ import { colors } from "@/theme/colors";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { uuidv4 } from "@/lib/uuid";
 import { changeAmount } from "./payment-math";
-import { processCartSale, type PaymentMethod } from "./checkout";
+import { submitSale, type PaymentMethod } from "./checkout";
 import type { CartItem } from "./cart-store";
+import { unsyncedCount } from "@/lib/offline/sale-queue-db";
+import { useOfflineStore } from "@/lib/offline/offline-store";
 import { useActivePermissions } from "@/features/auth/use-memberships";
 import { CustomerPickerSheet, type PickedCustomer } from "@/features/customers/customer-picker-sheet";
 import { debtFromSale } from "@/features/customers/debt-math";
@@ -33,6 +35,7 @@ type Props = {
 export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }: Props) {
   const qc = useQueryClient();
   const { canManageDebt } = useActivePermissions();
+  const setQueueCount = useOfflineStore((s) => s.setCount);
   const [method, setMethod] = useState<PaymentMethod>("cash");
   const [givenText, setGivenText] = useState("");
   const [phase, setPhase] = useState<"form" | "success">("form");
@@ -47,17 +50,20 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
 
   const mutation = useMutation({
     mutationFn: () =>
-      processCartSale({
+      submitSale({
         shopId: shopId as string,
         items,
         clientId,
+        method,
         // Naqd/Karta/QR uchun null — mavjud oqim o'zgarmaydi
         customerId: method === "debt" ? customer?.id ?? null : null,
         paidAmount: method === "debt" ? debtPaid : null,
       }),
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["sell-search"] });
+      // Offline'da navbatga yozildi → badge sanog'ini yangilaymiz
+      if (data.offline && shopId) unsyncedCount(shopId).then(setQueueCount).catch(() => {});
       onPaid(); // savatni tozalaydi (qayta sotuv oldini oladi)
       setPhase("success");
     },
@@ -110,8 +116,18 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
               >
                 <Ionicons name="checkmark" size={44} color={colors.success} />
               </View>
-              <Text className="text-xl font-medium text-ink">Sotuv muvaffaqiyatli</Text>
+              <Text className="text-xl font-medium text-ink">
+                {mutation.data?.offline ? "Sotuv saqlandi" : "Sotuv muvaffaqiyatli"}
+              </Text>
               <Text className="mt-1 text-base text-muted">{formatCurrency(effectiveTotal)}</Text>
+              {mutation.data?.offline ? (
+                <View className="mt-2 flex-row items-center gap-1.5 rounded-full bg-bg px-3 py-1">
+                  <Ionicons name="cloud-offline-outline" size={14} color={colors.warning} />
+                  <Text className="text-xs font-medium" style={{ color: colors.warning }}>
+                    Offline — ulanganda yuboriladi
+                  </Text>
+                </View>
+              ) : null}
               {method === "cash" && change > 0 ? (
                 <Text className="mt-1 text-base font-medium text-success">
                   Qaytim: {formatCurrency(change)}

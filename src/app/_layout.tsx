@@ -2,17 +2,18 @@ import "@/global.css";
 
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { queryClient } from "@/lib/query-client";
+import { persistOptions } from "@/lib/offline/persister";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { AuthGate } from "@/features/auth/auth-gate";
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
       <SafeAreaProvider>
         <ErrorBoundary onReset={() => queryClient.resetQueries()}>
           <AuthProvider>
@@ -31,11 +32,12 @@ export default function RootLayout() {
                 <Stack.Screen name="suppliers" />
                 <Stack.Screen name="categories" />
                 <Stack.Screen name="settings" />
+                <Stack.Screen name="offline-sales" />
               </Stack>
             </AuthGate>
           </AuthProvider>
         </ErrorBoundary>
       </SafeAreaProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }

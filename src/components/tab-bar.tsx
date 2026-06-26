@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 import { colors } from "@/theme/colors";
+import { QueueBadge } from "./queue-badge";
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   index: "home-outline",
@@ -62,7 +63,10 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               className="flex-1 items-center justify-center"
               style={{ gap: 3 }}
             >
-              <Ionicons name={icon} size={22} color={color} />
+              <View>
+                <Ionicons name={icon} size={22} color={color} />
+                {route.name === "koproq" ? <QueueBadge size={16} /> : null}
+              </View>
               <Text
                 style={{ fontSize: 11, color, fontWeight: focused ? "500" : "400" }}
               >

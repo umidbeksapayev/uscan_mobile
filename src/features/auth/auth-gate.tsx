@@ -3,6 +3,8 @@ import { useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 
 import { useAuth } from "./auth-context";
+import { OfflineBanner } from "@/components/offline-banner";
+import { SyncManager } from "@/components/sync-manager";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -30,5 +32,11 @@ export function AuthGate({ children }: { children: ReactNode }) {
     }
   }, [session, initializing, segments, router]);
 
-  return <>{children}</>;
+  return (
+    <>
+      <OfflineBanner />
+      {children}
+      {session ? <SyncManager /> : null}
+    </>
+  );
 }
