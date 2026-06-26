@@ -14,7 +14,7 @@ backend qayta qurilmaydi, faqat yangi client.
 | State | Zustand + TanStack Query |
 | Backend | `@supabase/supabase-js` (web bilan bir xil loyiha) |
 | Barcode | expo-camera (F3) — ML Kit |
-| Offline | expo-sqlite + (keyin) MMKV — F9 |
+| Offline | expo-sqlite + react-native-mmkv + NetInfo — F9 ✅ |
 | Build | EAS Build (bulut) |
 
 ## Struktura
@@ -56,4 +56,4 @@ npm start              # Expo dev server (Expo Go yoki dev build)
 
 F0 Poydevor ✅ · F1 Auth · F2 Katalog · F3 Sotuv+Skaner · F4 Checkout (MVP) ·
 F5 Tarix+Qaytarish · F6 Dashboard+Hisobot · F7 Nasiya+Kirim · F8 Kategoriya+RBAC ·
-F9 Offline · F10 Print+QR · F11 Release
+F9 Offline ✅ · F10 Print+QR · F11 Release

@@ -57,7 +57,8 @@
           "photosPermission": "Mahsulot rasmini galereyadan tanlash uchun ruxsat kerak.",
           "cameraPermission": "Mahsulot rasmini kamerada olish uchun ruxsat kerak."
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true

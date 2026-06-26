@@ -6,6 +6,7 @@ import { useRouter, type Href } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/features/auth/auth-context";
 import { useMemberships, useActivePermissions } from "@/features/auth/use-memberships";
+import { useOfflineStore } from "@/lib/offline/offline-store";
 import { colors } from "@/theme/colors";
 
 type MenuItem = {
@@ -36,6 +37,7 @@ export default function KoproqScreen() {
   const { session } = useAuth();
   const { data: memberships } = useMemberships();
   const { canManageDebt, canPurchase, canManageProducts } = useActivePermissions();
+  const pendingCount = useOfflineStore((s) => s.pendingCount);
   const active = memberships?.[0];
   // Ruxsatga qarab gate qilingan bandlarni yashiramiz
   const menu = MENU.filter(
@@ -87,6 +89,22 @@ export default function KoproqScreen() {
               </View>
             ) : null}
           </View>
+
+          {/* Yuborilmagan sotuvlar (offline navbat) */}
+          {pendingCount > 0 ? (
+            <Pressable
+              onPress={() => router.navigate("/offline-sales" as Href)}
+              className="mb-3 flex-row items-center gap-3 rounded-2xl border p-4"
+              style={{ borderColor: colors.warning, backgroundColor: "#FEF6E7" }}
+            >
+              <Ionicons name="cloud-upload-outline" size={20} color={colors.warning} />
+              <Text className="flex-1 text-base font-medium text-ink">Yuborilmagan sotuvlar</Text>
+              <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: colors.warning }}>
+                <Text className="text-xs font-bold text-white">{pendingCount}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
+            </Pressable>
+          ) : null}
 
           {/* Menyu */}
           <View className="mb-3 rounded-2xl border border-line bg-surface">

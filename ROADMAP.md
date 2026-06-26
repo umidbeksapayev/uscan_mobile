@@ -114,9 +114,10 @@ weight-math, low-stock, uuid, returnable). CI: har push'da `tsc` + `jest`.
 - Sozlamalar ekrani, do'kon almashtirish, kassir rollari/ruxsatlari (016/017)
 - "Ko'proq" menyusini to'ldirish
 
-### F9 — Offline-first
-- `expo-sqlite` (navbat + cache) + `react-native-mmkv`
+### F9 — Offline-first ✅
+- `expo-sqlite` (navbat + cache) + `react-native-mmkv` + `@react-native-community/netinfo`
 - Internetsiz katalog + sotuv navbati, reconnect sync (idempotent `client_id` = 019)
+- ⚠️ Native modullar → yangi EAS dev build kerak. DB migration YO'Q.
 
 ### F10 — Print + QR to'lov *(dev build kerak)*
 - Termal/HTML chek printi (expo-print yoki ESC-POS Bluetooth)
