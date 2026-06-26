@@ -119,12 +119,11 @@ weight-math, low-stock, uuid, returnable). CI: har push'da `tsc` + `jest`.
 - Internetsiz katalog + sotuv navbati, reconnect sync (idempotent `client_id` = 019)
 - ⚠️ Native modullar → yangi EAS dev build kerak. DB migration YO'Q.
 
-### F10 — Print + QR to'lov *(dev build kerak)*
-- Termal/HTML chek printi (expo-print yoki ESC-POS Bluetooth)
-- QR/ekvayring to'lov (migration 029)
-- Skanerni **react-native-vision-camera** (ichki MLKit) ga ko'chirish — kichik/hira
-  barcode uchun fokus + rezolyutsiya + zoom nazorati
-- `expo-dev-client` custom build
+### F10 — Print + QR to'lov ✅ *(dev build kerak)*
+- ✅ Chek printi — **expo-print** 58mm HTML chek (tizim print dialogi); sotuv success + (keyin) tarixdan qayta chek. ESC-POS Bluetooth = keyingi faza.
+- ✅ QR/ekvayring to'lov (029) — web API mirror (`createPaymentIntent`/`getIntentStatus`/`markIntentFinalized`) + QR oyna + polling + idempotent yakunlash; **progressive** (`acquiringHasCredentials` bo'lsa yoqiladi). ⚠️ Payme sandbox kutadi.
+- ✅ Skaner → **react-native-vision-camera** (alohida PR'da TUGADI)
+- ✅ `expo-dev-client` custom build
 
 ### F11 — Release
 - **EAS Build** (bulut APK/AAB) + OTA yangilanishlar
