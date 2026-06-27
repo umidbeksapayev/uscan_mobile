@@ -200,6 +200,7 @@ export default function SotuvScreen() {
         >
           <Ionicons name="search" size={18} color={colors.tabInactive} />
           <TextInput
+            testID="sell-search"
             value={search}
             onChangeText={setSearch}
             placeholder="Mahsulot qidirish..."
@@ -225,8 +226,9 @@ export default function SotuvScreen() {
           ListEmptyComponent={
             <Text className="px-2 py-8 text-center text-muted">Topilmadi yoki qoldiq yo'q.</Text>
           }
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <Pressable
+              testID={index === 0 ? "sell-result-first" : undefined}
               onPress={() => onPick(item)}
               className="mb-2 flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-3"
             >

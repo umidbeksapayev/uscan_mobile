@@ -1,0 +1,11 @@
+# Eng oddiy duda: ilova ishga tushadimi va (chiqilgan holatda) login ekrani
+# ko'rinadimi. Hisob ma'lumoti SHART EMAS — CI/lokal har joyda ishlaydi.
+appId: uz.uscan.app
+name: 00-smoke
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Xush kelibsiz"
+- assertVisible: "Kirish"

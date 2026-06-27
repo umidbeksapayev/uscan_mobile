@@ -8,14 +8,17 @@ type Props = {
   loading?: boolean;
   disabled?: boolean;
   variant?: "primary" | "ghost";
+  /** E2E (Maestro) selektori uchun. */
+  testID?: string;
 };
 
-export function Button({ label, onPress, loading, disabled, variant = "primary" }: Props) {
+export function Button({ label, onPress, loading, disabled, variant = "primary", testID }: Props) {
   const isPrimary = variant === "primary";
   const blocked = disabled || loading;
 
   return (
     <Pressable
+      testID={testID}
       onPress={onPress}
       disabled={blocked}
       className={`flex-row items-center justify-center rounded-2xl ${isPrimary ? "bg-primary" : "bg-transparent"}`}

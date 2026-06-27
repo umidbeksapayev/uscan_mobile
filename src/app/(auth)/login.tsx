@@ -74,6 +74,7 @@ export default function LoginScreen() {
 
         <View style={{ gap: 16 }}>
           <Field
+            testID="login-email"
             label="Email"
             value={email}
             onChangeText={(t) => {
@@ -93,6 +94,7 @@ export default function LoginScreen() {
               style={{ height: 52 }}
             >
               <TextInput
+                testID="login-password"
                 value={password}
                 onChangeText={(t) => {
                   setPassword(t);
@@ -118,7 +120,7 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          <Button label="Kirish" onPress={onSubmit} loading={loading} />
+          <Button testID="login-submit" label="Kirish" onPress={onSubmit} loading={loading} />
           {errorMsg ? (
             <Text className="text-center text-sm text-danger">{errorMsg}</Text>
           ) : null}
