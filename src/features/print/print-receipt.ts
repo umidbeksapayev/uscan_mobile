@@ -1,5 +1,6 @@
 import * as Print from "expo-print";
-import { Alert } from "react-native";
+
+import { toast } from "@/lib/toast";
 
 import { buildReceiptHtml } from "./receipt-template";
 import { getPrinterConfig } from "./printer-settings";
@@ -23,7 +24,7 @@ export async function printReceipt(data: ReceiptData): Promise<boolean> {
   } catch (error) {
     const msg = error instanceof Error ? error.message : "Print xatosi";
     if (/cancel|dismiss/i.test(msg)) return false; // foydalanuvchi bekor qildi
-    Alert.alert("Chek chiqarish", `Xatolik: ${msg}`);
+    toast.error("Chek chiqarish", `Xatolik: ${msg}`);
     return false;
   }
 }

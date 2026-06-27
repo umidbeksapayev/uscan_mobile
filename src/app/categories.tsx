@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -115,7 +116,7 @@ export default function CategoriesScreen() {
     if (!name) return;
     createMut.mutate(name, {
       onSuccess: () => setNewName(""),
-      onError: (e) => Alert.alert("Qo'shilmadi", (e as Error)?.message ?? "Xatolik"),
+      onError: (e) => toast.error("Qo'shilmadi", (e as Error)?.message ?? "Xatolik"),
     });
   }
 
@@ -125,7 +126,7 @@ export default function CategoriesScreen() {
       { id: editing.id, name },
       {
         onSuccess: () => setEditing(null),
-        onError: (e) => Alert.alert("O'zgarmadi", (e as Error)?.message ?? "Xatolik"),
+        onError: (e) => toast.error("O'zgarmadi", (e as Error)?.message ?? "Xatolik"),
       },
     );
   }
@@ -142,7 +143,7 @@ export default function CategoriesScreen() {
         style: "destructive",
         onPress: () =>
           deleteMut.mutate(c.id, {
-            onError: (e) => Alert.alert("O'chmadi", (e as Error)?.message ?? "Xatolik"),
+            onError: (e) => toast.error("O'chmadi", (e as Error)?.message ?? "Xatolik"),
           }),
       },
     ]);

@@ -1,4 +1,5 @@
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, type Href } from "expo-router";
@@ -51,7 +52,7 @@ export default function KoproqScreen() {
     if (item.route) {
       router.navigate(item.route);
     } else {
-      Alert.alert(item.label, `Bu bo'lim ${item.note ?? "keyingi"} bosqichida tayyor bo'ladi.`);
+      toast.info(item.label, `Bu bo'lim ${item.note ?? "keyingi"} bosqichida tayyor bo'ladi.`);
     }
   }
 

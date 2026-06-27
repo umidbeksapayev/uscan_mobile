@@ -1,7 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
-import { Alert } from "react-native";
-
+import { toast } from "@/lib/toast";
 import { uploadProductImage } from "@/lib/storage";
 
 /** Maksimal yon (px) — katta telefon rasmlari yuklashdan oldin shu o'lchamga siqiladi. */
@@ -39,7 +38,7 @@ export async function pickAndUpload(
   if (source === "camera") {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert("Ruxsat kerak", "Kameraga ruxsat bering.");
+      toast.error("Ruxsat kerak", "Kameraga ruxsat bering.");
       return null;
     }
     res = await ImagePicker.launchCameraAsync(opts);

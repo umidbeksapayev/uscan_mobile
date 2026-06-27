@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -73,7 +74,7 @@ export default function CustomerFormScreen() {
       }
       router.back();
     } catch (e) {
-      Alert.alert("Xatolik", e instanceof Error ? e.message : "Saqlab bo'lmadi");
+      toast.error("Xatolik", e instanceof Error ? e.message : "Saqlab bo'lmadi");
     }
   }
 

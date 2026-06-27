@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable, RefreshControl, ActivityIndicator, Alert } from "react-native";
+import { View, Text, ScrollView, Pressable, RefreshControl, ActivityIndicator } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -189,10 +190,10 @@ export default function StatistikaScreen() {
         includeProfit: canViewCost,
         periodLabel: p.file,
       });
-      if (res === "empty") Alert.alert("Eksport", "Bu davrda sotuv yo'q.");
-      else if (res === "unavailable") Alert.alert("Eksport", "Ulashish bu qurilmada mavjud emas.");
+      if (res === "empty") toast.info("Eksport", "Bu davrda sotuv yo'q.");
+      else if (res === "unavailable") toast.info("Eksport", "Ulashish bu qurilmada mavjud emas.");
     } catch (e) {
-      Alert.alert("Xatolik", e instanceof Error ? e.message : "Eksport amalga oshmadi");
+      toast.error("Xatolik", e instanceof Error ? e.message : "Eksport amalga oshmadi");
     } finally {
       setExporting(false);
     }
