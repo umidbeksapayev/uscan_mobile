@@ -194,6 +194,21 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* Printer */}
+        <Text className="mb-2 ml-1 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>
+          QURILMA
+        </Text>
+        <Pressable
+          onPress={() => router.push("/printer-settings")}
+          className="mb-5 flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4"
+        >
+          <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
+            <Ionicons name="print-outline" size={20} color={colors.primary} />
+          </View>
+          <Text className="flex-1 text-base text-ink">Printer (chek)</Text>
+          <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
+        </Pressable>
+
         {!isOwner ? (
           <View className="flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4">
             <Ionicons name="information-circle-outline" size={20} color={colors.muted} />
