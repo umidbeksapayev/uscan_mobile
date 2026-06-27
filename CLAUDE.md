@@ -56,4 +56,5 @@ npm start              # Expo dev server (Expo Go yoki dev build)
 
 F0 Poydevor ✅ · F1 Auth · F2 Katalog · F3 Sotuv+Skaner · F4 Checkout (MVP) ·
 F5 Tarix+Qaytarish · F6 Dashboard+Hisobot · F7 Nasiya+Kirim · F8 Kategoriya+RBAC ·
-F9 Offline ✅ · F10 Print+QR ✅ (expo-print 58mm HTML chek + QR ekvayring, progressive) · F11 Release
+F9 Offline ✅ · F10 Print+QR ✅ (expo-print + Bluetooth ESC-POS chek + QR ekvayring) ·
+F11 Release ✅ config (eas.json AAB/IPA + expo-updates OTA + production env; Play+App Store qo'lda yuklash)

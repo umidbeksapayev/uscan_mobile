@@ -125,10 +125,13 @@ weight-math, low-stock, uuid, returnable). CI: har push'da `tsc` + `jest`.
 - ✅ Skaner → **react-native-vision-camera** (alohida PR'da TUGADI)
 - ✅ `expo-dev-client` custom build
 
-### F11 — Release
-- **EAS Build** (bulut APK/AAB) + OTA yangilanishlar
-- App icon / splash, Play Store listing, staged rollout
-- E2E (Maestro) relizdan oldin
+### F11 — Release ✅ (config tayyor)
+- ✅ `eas.json`: `appVersionSource: remote`, production → **AAB (Android) + IPA (iOS)**, preview → APK
+- ✅ **OTA**: `expo-updates` + `runtimeVersion: fingerprint` + `updates.url`; `eas update --branch production`
+- ✅ Production env runbook (`EXPO_PUBLIC_*` EAS env) + `RECORD_AUDIO` olib tashlandi (mic yo'q)
+- ✅ Maxfiylik siyosati + listing + Data Safety qoralama: `docs/release/`
+- ⏳ Siz: Play/Apple akkaunt, env set, build→qo'lda yuklash, skrinshot, review
+- ⚠️ iOS Bluetooth termal printer ishlamaydi (Apple MFi) — iOS'da AirPrint/PDF; E2E (Maestro) keyin
 
 ---
 
