@@ -1,20 +1,30 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import {
-  getSalesHistory,
+  getSalesHistoryPage,
   getReturnedQuantities,
   processReturn,
+  SALES_PAGE_SIZE,
   type ProcessReturnInput,
 } from "./history-api";
 
-/** Sotuv tarixi (eng yangi N ta sotuv) — FAOL do'kon bo'yicha cheklangan. */
-export function useSalesHistory(limit = 50) {
+/** Sotuv tarixi — FAOL do'kon bo'yicha, sahifa-sahifa (infinite scroll).
+ *  Oxirgi sahifa to'liq bo'lmasa (< PAGE_SIZE) — keyingi sahifa yo'q. */
+export function useSalesHistoryInfinite() {
   const shopId = useActiveShopId();
-  return useQuery({
-    queryKey: ["sales", "history", shopId, limit],
+  return useInfiniteQuery({
+    queryKey: ["sales", "history", shopId],
     enabled: !!shopId,
-    queryFn: () => getSalesHistory(shopId!, limit),
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) => getSalesHistoryPage(shopId!, pageParam, SALES_PAGE_SIZE),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < SALES_PAGE_SIZE ? undefined : allPages.length * SALES_PAGE_SIZE,
     staleTime: 15_000,
   });
 }

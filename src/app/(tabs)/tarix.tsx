@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -8,7 +8,7 @@ import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
 import { useMemberships } from "@/features/auth/use-memberships";
-import { useSalesHistory } from "@/features/history/use-history";
+import { useSalesHistoryInfinite } from "@/features/history/use-history";
 import { ReturnSheet } from "@/features/history/return-sheet";
 
 const METHOD: Record<
@@ -194,9 +194,18 @@ export default function TarixScreen() {
   const isOwner = active?.role === "owner";
   const shopId = active?.shop.id;
 
-  const { data: sales, isLoading, isError, refetch, isRefetching } = useSalesHistory(50);
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useSalesHistoryInfinite();
 
-  const list = sales ?? [];
+  const list = useMemo(() => data?.pages.flat() ?? [], [data]);
   const total = list.reduce((sum, s) => sum + s.total_revenue, 0);
 
   return (
@@ -206,7 +215,8 @@ export default function TarixScreen() {
           <Text className="text-2xl font-medium text-primary-deep">Tarix</Text>
           {list.length > 0 ? (
             <Text className="text-sm text-muted">
-              {list.length} sotuv ·{" "}
+              {list.length}
+              {hasNextPage ? "+" : ""} sotuv ·{" "}
               <Text className="font-medium text-ink">{formatCurrency(total)}</Text>
             </Text>
           ) : null}
@@ -241,6 +251,17 @@ export default function TarixScreen() {
           onRefresh={() => {
             void refetch();
           }}
+          onEndReachedThreshold={0.4}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+          }}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View className="py-4">
+                <ActivityIndicator color={colors.primary} />
+              </View>
+            ) : null
+          }
         />
       )}
 

@@ -1,10 +1,17 @@
 import { supabase } from "@/lib/supabase";
 import type { Sale } from "@/types/database";
 
-/** Sotuv tarixi — eng yangi sotuvlar (mahsulot nomi/rasmi + qaytarish qisqacha bilan).
- *  FAOL do'kon bo'yicha cheklangan (RLS a'zo bo'lgan barcha do'konlarni qaytaradi).
- *  (Web getSalesHistory ga mos.) */
-export async function getSalesHistory(shopId: string, limit = 50): Promise<Sale[]> {
+/** Bir sahifadagi sotuvlar soni (infinite pagination). */
+export const SALES_PAGE_SIZE = 30;
+
+/** Sotuv tarixi sahifasi — eng yangi sotuvlar (mahsulot nomi/rasmi + qaytarish
+ *  qisqacha bilan). FAOL do'kon bo'yicha cheklangan (RLS a'zo bo'lgan barcha
+ *  do'konlarni qaytaradi). `offset` dan boshlab `limit` ta yozuv qaytaradi. */
+export async function getSalesHistoryPage(
+  shopId: string,
+  offset: number,
+  limit = SALES_PAGE_SIZE
+): Promise<Sale[]> {
   const { data, error } = await supabase
     .from("sales")
     .select(
@@ -12,7 +19,7 @@ export async function getSalesHistory(shopId: string, limit = 50): Promise<Sale[
     )
     .eq("shop_id", shopId)
     .order("sold_at", { ascending: false })
-    .limit(limit);
+    .range(offset, offset + limit - 1);
 
   if (error) throw new Error(error.message);
   return (data ?? []) as Sale[];
