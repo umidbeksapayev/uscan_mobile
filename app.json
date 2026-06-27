@@ -3,6 +3,12 @@
     "name": "uscan",
     "slug": "uscan",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/554a4a4a-43a6-4972-9a4f-2f76a0d7970a"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "uscan",
@@ -10,6 +16,7 @@
     "ios": {
       "bundleIdentifier": "uz.uscan.app",
       "supportsTablet": false,
+      "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "Mahsulot shtrix-kodini skanerlash uchun kamera kerak."
       }
@@ -23,9 +30,9 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
+      "versionCode": 1,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_CONNECT",
@@ -52,7 +59,8 @@
         "react-native-vision-camera",
         {
           "cameraPermissionText": "Mahsulot shtrix-kodini skanerlash uchun kamera kerak.",
-          "enableCodeScanner": true
+          "enableCodeScanner": true,
+          "enableMicrophonePermission": false
         }
       ],
       [
