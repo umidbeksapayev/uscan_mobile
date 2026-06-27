@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Alert } from "react-native";
+import { View, Text, ScrollView } from "react-native";
+import { toast } from "@/lib/toast";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -17,15 +18,15 @@ export default function RegisterScreen() {
 
   async function onSubmit() {
     if (!shopName.trim() || !email.trim() || !password) {
-      Alert.alert("Ma'lumot yetishmaydi", "Barcha maydonlarni to'ldiring.");
+      toast.error("Ma'lumot yetishmaydi", "Barcha maydonlarni to'ldiring.");
       return;
     }
     if (password.length < 6) {
-      Alert.alert("Parol qisqa", "Parol kamida 6 belgidan iborat bo'lsin.");
+      toast.error("Parol qisqa", "Parol kamida 6 belgidan iborat bo'lsin.");
       return;
     }
     if (!isSupabaseConfigured) {
-      Alert.alert("Supabase sozlanmagan", ".env fayliga web bilan bir xil Supabase URL va anon key qo'shing.");
+      toast.error("Supabase sozlanmagan", ".env fayliga web bilan bir xil Supabase URL va anon key qo'shing.");
       return;
     }
 
@@ -39,7 +40,7 @@ export default function RegisterScreen() {
 
     if (error) {
       setLoading(false);
-      Alert.alert("Ro'yxatdan o'tish amalga oshmadi", authErrorMessage(error.message));
+      toast.error("Ro'yxatdan o'tish amalga oshmadi", authErrorMessage(error.message));
       return;
     }
 
@@ -52,7 +53,7 @@ export default function RegisterScreen() {
       });
       if (signInErr) {
         setLoading(false);
-        Alert.alert(
+        toast.info(
           "Avtomatik kirish bo'lmadi",
           "Akkaunt yaratildi. Iltimos, kirish sahifasidan qo'lda kiring.",
         );

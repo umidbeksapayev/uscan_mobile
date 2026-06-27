@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 import { queryClient } from "@/lib/query-client";
 import { persistOptions } from "@/lib/offline/persister";
@@ -38,6 +39,7 @@ export default function RootLayout() {
             </AuthGate>
           </AuthProvider>
         </ErrorBoundary>
+        <Toast />
       </SafeAreaProvider>
     </PersistQueryClientProvider>
   );

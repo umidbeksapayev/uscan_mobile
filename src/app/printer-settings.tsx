@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -57,9 +58,9 @@ export default function PrinterSettingsScreen() {
     try {
       const found = (await listBluetoothDevices()) as Device[];
       setDevices(found);
-      if (found.length === 0) Alert.alert("Qurilma topilmadi", "Printer yoqilgan va telefon bilan ulangan (paired) ekanini tekshiring.");
+      if (found.length === 0) toast.info("Qurilma topilmadi", "Printer yoqilgan va telefon bilan ulangan (paired) ekanini tekshiring.");
     } catch (e) {
-      Alert.alert("Bluetooth xatosi", e instanceof Error ? e.message : "Qidirib bo'lmadi");
+      toast.error("Bluetooth xatosi", e instanceof Error ? e.message : "Qidirib bo'lmadi");
     } finally {
       setScanning(false);
     }

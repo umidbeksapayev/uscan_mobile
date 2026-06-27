@@ -7,8 +7,8 @@ import {
   Pressable,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -146,7 +146,7 @@ export default function KatalogScreen() {
   const filterActive = showFilters || cat !== "all";
 
   function onScan() {
-    Alert.alert("Skaner", "Barcode skaner F3 (Sotuv) bosqichida qo'shiladi.");
+    toast.info("Skaner", "Barcode skaner F3 (Sotuv) bosqichida qo'shiladi.");
   }
   function onAdd() {
     router.push("/product-form");

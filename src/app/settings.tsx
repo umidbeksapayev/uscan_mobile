@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -133,7 +134,7 @@ export default function SettingsScreen() {
     if (!e) return;
     addMut.mutate(e, {
       onSuccess: () => setEmail(""),
-      onError: (err) => Alert.alert("Qo'shilmadi", (err as Error)?.message ?? "Foydalanuvchi topilmadi"),
+      onError: (err) => toast.error("Qo'shilmadi", (err as Error)?.message ?? "Foydalanuvchi topilmadi"),
     });
   }
 
@@ -143,7 +144,7 @@ export default function SettingsScreen() {
       { userId: editing.user_id, permissions },
       {
         onSuccess: () => setEditing(null),
-        onError: (err) => Alert.alert("Saqlanmadi", (err as Error)?.message ?? "Xatolik"),
+        onError: (err) => toast.error("Saqlanmadi", (err as Error)?.message ?? "Xatolik"),
       },
     );
   }
@@ -159,7 +160,7 @@ export default function SettingsScreen() {
         onPress: () =>
           removeMut.mutate(m.user_id, {
             onSuccess: () => setEditing(null),
-            onError: (err) => Alert.alert("Chiqmadi", (err as Error)?.message ?? "Xatolik"),
+            onError: (err) => toast.error("Chiqmadi", (err as Error)?.message ?? "Xatolik"),
           }),
       },
     ]);

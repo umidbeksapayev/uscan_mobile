@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { View, Text, Pressable, TextInput, Alert, ActivityIndicator } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -125,7 +126,7 @@ export default function ProductFormScreen() {
       const url = await pickAndUpload(source, shopId);
       if (url) setImageUrl(url);
     } catch (e) {
-      Alert.alert("Xato", e instanceof Error ? e.message : "Rasm yuklanmadi");
+      toast.error("Xato", e instanceof Error ? e.message : "Rasm yuklanmadi");
     } finally {
       setUploading(false);
     }
@@ -145,7 +146,7 @@ export default function ProductFormScreen() {
   function onSave() {
     const err = validateProductInput({ name, sellingPrice: sp, costPrice: cp, quantity: q });
     if (err) {
-      Alert.alert(err.title, err.message);
+      toast.error(err.title, err.message);
       return;
     }
     if (!shopId) return;

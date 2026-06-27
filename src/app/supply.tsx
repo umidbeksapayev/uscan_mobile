@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, Alert } from "react-native";
+import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -116,9 +117,9 @@ export default function SupplyScreen() {
       qc.invalidateQueries({ queryKey: ["dashboard"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       clear();
-      Alert.alert("Kirim saqlandi", "Mahsulotlar omborga qo'shildi.");
+      toast.success("Kirim saqlandi", "Mahsulotlar omborga qo'shildi.");
     },
-    onError: (e) => Alert.alert("Xatolik", (e as Error)?.message ?? "Kirimni saqlab bo'lmadi"),
+    onError: (e) => toast.error("Xatolik", (e as Error)?.message ?? "Kirimni saqlab bo'lmadi"),
   });
 
   if (!canPurchase) {

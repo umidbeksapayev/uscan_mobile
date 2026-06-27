@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, FlatList, ActivityIndicator, Alert } from "react-native";
+import { Modal, View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from "react-native";
+import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 
 import { colors } from "@/theme/colors";
@@ -40,7 +41,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
       setNewPhone("");
       onSelect({ id: c.id, name: c.name });
     } catch (e) {
-      Alert.alert("Xatolik", e instanceof Error ? e.message : "Qo'shib bo'lmadi");
+      toast.error("Xatolik", e instanceof Error ? e.message : "Qo'shib bo'lmadi");
     }
   }
 

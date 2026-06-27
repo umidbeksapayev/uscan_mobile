@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
+import { Modal, View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { toast } from "@/lib/toast";
 
 import { colors } from "@/theme/colors";
 import type { Supplier } from "@/types/database";
@@ -44,7 +45,7 @@ export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props)
       }
       onClose();
     } catch (e) {
-      Alert.alert("Xatolik", e instanceof Error ? e.message : "Saqlab bo'lmadi");
+      toast.error("Xatolik", e instanceof Error ? e.message : "Saqlab bo'lmadi");
     }
   }
 
