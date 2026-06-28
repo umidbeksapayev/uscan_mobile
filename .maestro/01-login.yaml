@@ -1,0 +1,26 @@
+# Login oqimi: toza holatdan email/parol bilan kirish → dashboard.
+# Bu Supabase'ga real ulanishni va auth'ni tekshiradi (30s osilish regressiyasi
+# uchun ham qorovul). Ishga tushirish:
+#   maestro test -e MAESTRO_EMAIL=... -e MAESTRO_PASSWORD=... .maestro/01-login.yaml
+appId: uz.uscan.app
+name: 01-login
+tags:
+  - auth
+env:
+  MAESTRO_EMAIL: ""
+  MAESTRO_PASSWORD: ""
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Xush kelibsiz"
+- tapOn:
+    id: "login-email"
+- inputText: "${MAESTRO_EMAIL}"
+- tapOn:
+    id: "login-password"
+- inputText: "${MAESTRO_PASSWORD}"
+- hideKeyboard
+- tapOn:
+    id: "login-submit"
+# Dashboard yuklandi — "Sotuvni boshlash" CTA doimo bor.
+- assertVisible: "Sotuvni boshlash"

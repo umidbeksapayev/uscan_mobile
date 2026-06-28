@@ -1,0 +1,9 @@
+# Maestro workspace konfiguratsiyasi (uscan_mobile E2E).
+# `maestro test .maestro/` ishga tushirilganda flow'lar shu tartibda yuriydi.
+# 00-smoke hisob ma'lumotisiz; 01/02 uchun -e bilan MAESTRO_* env bering.
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - 00-smoke
+    - 01-login
+    - 02-sell-checkout

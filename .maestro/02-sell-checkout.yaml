@@ -1,0 +1,32 @@
+# Kritik POS yo'li: login → mahsulot qidirish → savatga → naqd to'lov → muvaffaqiyat.
+# MAESTRO_PRODUCT — qoldig'i bor, DONALI (dona) mahsulot nomi (yagona moslik uchun
+# aniq nom bering; VAZN mahsulot og'irlik oynasini ochadi va bu oqimga mos kelmaydi).
+#   maestro test -e MAESTRO_EMAIL=... -e MAESTRO_PASSWORD=... -e MAESTRO_PRODUCT="Coca Cola" .maestro/02-sell-checkout.yaml
+appId: uz.uscan.app
+name: 02-sell-checkout
+tags:
+  - sell
+env:
+  MAESTRO_EMAIL: ""
+  MAESTRO_PASSWORD: ""
+  MAESTRO_PRODUCT: ""
+---
+- runFlow: 01-login.yaml
+- tapOn: "Sotuvni boshlash"
+- assertVisible:
+    id: "sell-search"
+- tapOn:
+    id: "sell-search"
+- inputText: "${MAESTRO_PRODUCT}"
+# Birinchi qidiruv natijasini bosamiz (matn to'qnashuvini oldini olib).
+- tapOn:
+    id: "sell-result-first"
+# Savatga qo'shildi → pastki "To'lov" paneli chiqadi.
+- assertVisible: "To'lov"
+- tapOn: "To'lov"
+# To'lov oynasi (naqd default).
+- assertVisible: "JAMI TO'LOV"
+- tapOn: "To'lovni yakunlash"
+# Online → "Sotuv muvaffaqiyatli", offline → "Sotuv saqlandi".
+- assertVisible:
+    text: "Sotuv (muvaffaqiyatli|saqlandi)"
