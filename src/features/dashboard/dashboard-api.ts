@@ -59,14 +59,35 @@ export async function getSlowProducts(
   return (data ?? []) as TopProduct[];
 }
 
-/** Kam qolgan mahsulotlar (quantity <= low_stock_alert) — FAOL do'kon. */
+/** Kam qoldiq mahsulot ustunlari — `cost_price` (MAXFIY) ataylab YO'Q
+ *  (fallback yo'lida select("*") cost_price'ni oqizardi). */
+const LOW_STOCK_COLUMNS =
+  "id, shop_id, name, sale_type, selling_price, quantity, low_stock_alert, barcode, image_url, category_id, is_active, created_at";
+
+/**
+ * Kam qolgan mahsulotlar (quantity <= low_stock_alert) — FAOL do'kon.
+ * ASOSIY: `get_low_stock_products` RPC (migration 031) — server filtrlaydi,
+ * faqat kam qoldiqlar, cost_price'siz (butun katalog tortilmaydi).
+ * FALLBACK: 031 hali ishga tushmagan bo'lsa — xavfsiz client so'rovi
+ * (LOW_STOCK_COLUMNS, cost_price'siz) + client filtri. Shu bois maxfiylik
+ * tuzatuvi migratsiyaga bog'liq emas — JS bilan darhol kuchga kiradi.
+ */
 export async function getLowStockProducts(shopId: string): Promise<Product[]> {
-  const { data, error } = await supabase
+  const { data, error } = await supabase.rpc("get_low_stock_products", { p_shop_id: shopId });
+  if (!error) return (data ?? []) as Product[];
+
+  const missing =
+    error.code === "PGRST202" ||
+    /could not find the function|does not exist/i.test(error.message);
+  if (!missing) throw new Error(error.message);
+
+  // Migration 031 hali yo'q — xavfsiz client fallback (cost_price'siz).
+  const fb = await supabase
     .from("products")
-    .select("*")
+    .select(LOW_STOCK_COLUMNS)
     .eq("shop_id", shopId)
     .eq("is_active", true)
     .order("quantity", { ascending: true });
-  if (error) throw new Error(error.message);
-  return ((data ?? []) as Product[]).filter((p) => p.quantity <= p.low_stock_alert);
+  if (fb.error) throw new Error(fb.error.message);
+  return ((fb.data ?? []) as unknown as Product[]).filter((p) => p.quantity <= p.low_stock_alert);
 }
