@@ -93,14 +93,23 @@ describe("encodeLabel", () => {
     expect(b.every((n) => Number.isInteger(n) && n >= 0 && n <= 255)).toBe(true);
   });
 
-  it("barcode bo'lsa GS k (CODE128) + '{B' selektori chiqadi", () => {
+  it("barcode bo'lsa GS k (CODE128) chiqadi + nom baytlari", () => {
     const b = encodeLabel(labels);
     expect(includesSeq(b, [0x1d, 0x6b, 73])).toBe(true); // GS k 73
-    expect(includesSeq(b, [0x7b, 0x42])).toBe(true); // "{B"
-    // barcode qiymati baytlari
     const ascii = b.filter((n) => n >= 32 && n <= 126).map((n) => String.fromCharCode(n)).join("");
-    expect(ascii).toContain("20000001");
     expect(ascii).toContain("Coca Cola 0.5L");
+  });
+
+  it("juft-raqamli barcode Code C ('{C') bilan kodlanadi", () => {
+    const b = encodeLabel([{ name: "X", price: 1000, barcode: "20000001" }]);
+    expect(includesSeq(b, [0x7b, 0x43])).toBe(true); // "{C"
+    // juft raqamlar bayt sifatida: 20,00,00,01
+    expect(includesSeq(b, [20, 0, 0, 1])).toBe(true);
+  });
+
+  it("raqamli bo'lmagan barcode Code B ('{B')", () => {
+    const b = encodeLabel([{ name: "X", price: 1000, barcode: "ABC123" }]);
+    expect(includesSeq(b, [0x7b, 0x42])).toBe(true); // "{B"
   });
 
   it("barcode'siz yorliqda GS k chiqmaydi (faqat shu yorliq uchun)", () => {

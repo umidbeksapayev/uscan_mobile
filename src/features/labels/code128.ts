@@ -1,13 +1,12 @@
 /**
- * Sof CODE128-B enkoder (DOM/canvas YO'Q → RN'da va testda ishlaydi).
- * Yorliq barcode'ini SVG yoki boshqa renderga berish uchun "binary" modul
- * satrini ("1"=qora chiziq, "0"=oq) qaytaradi. CODE128-B barcha printable
- * ASCII (32–126) ni kodlaydi va skaner xuddi shu qiymatni o'qiydi → checkout
- * lookup mos keladi. (Web jsbarcode "CODE128" o'rnini bosadi.)
+ * Sof CODE128 enkoder (DOM/canvas YO'Q → RN'da va testda ishlaydi). Avto B/C:
+ * raqamlarni Code C bilan JUFTLAB kodlaydi (2 raqam = 1 belgi) → barcode 2 barobar
+ * QISQA bo'ladi (web jsbarcode "CODE128" kabi). Non-raqam yoki toq qoldiq Code B'da.
+ * Skaner xuddi shu qiymatni o'qiydi → checkout lookup mos keladi.
  */
 
-// CODE128 naqsh jadvali (index 0..106). Har biri element kengliklari (bar,space,
-// bar,space,bar,space) — yig'indisi 11 modul; STOP (106) = 7 element, 13 modul.
+// CODE128 naqsh jadvali (index 0..106). Element kengliklari (bar,space,...); 11 modul,
+// STOP (106) = 7 element, 13 modul.
 // prettier-ignore
 const PATTERNS: string[] = [
   "212222","222122","222221","121223","121322","131222","122213","122312","132212","221213",
@@ -23,10 +22,68 @@ const PATTERNS: string[] = [
   "114131","311141","411131","211412","211214","211232","2331112",
 ];
 
+const CODE_C = 99;
+const CODE_B = 100;
 const START_B = 104;
+const START_C = 105;
 const STOP = 106;
 
-/** Element kengliklari satrini ("212222") "1"/"0" modul satriga aylantiradi (bar'dan boshlab). */
+function isDigit(value: string, pos: number): boolean {
+  const c = value.charCodeAt(pos);
+  return c >= 48 && c <= 57;
+}
+
+/** `pos` dan boshlab ketma-ket raqamlar soni. */
+function digitRun(value: string, pos: number): number {
+  let n = 0;
+  while (pos + n < value.length && isDigit(value, pos + n)) n += 1;
+  return n;
+}
+
+/** CODE128 kod qiymatlari (start + ma'lumot + switch'lar + nazorat + stop). */
+function toCodes(value: string): number[] {
+  const len = value.length;
+  const codes: number[] = [];
+  let i = 0;
+
+  // Start kodi: yetarli yetakchi raqam bo'lsa Code C (zichroq)
+  const lead = digitRun(value, 0);
+  let modeC = lead >= 2 && (lead === len || lead >= 4);
+  codes.push(modeC ? START_C : START_B);
+
+  while (i < len) {
+    if (modeC) {
+      if (i + 1 < len && isDigit(value, i) && isDigit(value, i + 1)) {
+        codes.push(Number(value.slice(i, i + 2))); // juft raqam → bitta belgi
+        i += 2;
+      } else {
+        codes.push(CODE_B); // Code B'ga o'tamiz (toq qoldiq yoki non-raqam)
+        modeC = false;
+      }
+    } else {
+      const run = digitRun(value, i);
+      const atEnd = i + run === len;
+      if (run >= 4 || (atEnd && run >= 2 && run % 2 === 0)) {
+        codes.push(CODE_C); // uzun raqam oqimi → Code C
+        modeC = true;
+      } else {
+        const v = value.charCodeAt(i) - 32;
+        if (v < 0 || v > 94) throw new Error(`CODE128-B noto'g'ri belgi: "${value[i]}"`);
+        codes.push(v);
+        i += 1;
+      }
+    }
+  }
+
+  // Nazorat raqami: start + sum(pos*qiymat), pos 1 dan
+  let sum = codes[0];
+  for (let k = 1; k < codes.length; k += 1) sum += codes[k] * k;
+  codes.push(sum % 103);
+  codes.push(STOP);
+  return codes;
+}
+
+/** Element kengliklari satrini ("212222") "1"/"0" modul satriga (bar'dan boshlab). */
 function widthsToBinary(widths: string): string {
   let out = "";
   let bar = true;
@@ -38,22 +95,12 @@ function widthsToBinary(widths: string): string {
 }
 
 /**
- * CODE128-B "binary" modul satrini quradi (quiet zone'siz). Faqat printable
- * ASCII (32–126) qabul qiladi; aks holda xato otadi.
+ * CODE128 "binary" modul satrini quradi (quiet zone'siz). Printable ASCII
+ * (32–126) qabul qiladi; aks holda xato otadi.
  */
 export function code128Binary(value: string): string {
   if (!value) throw new Error("CODE128: bo'sh qiymat");
-  const codes: number[] = [START_B];
-  let sum = START_B;
-  let pos = 1;
-  for (const ch of value) {
-    const v = ch.charCodeAt(0) - 32;
-    if (v < 0 || v > 94) throw new Error(`CODE128-B noto'g'ri belgi: "${ch}"`);
-    codes.push(v);
-    sum += v * pos;
-    pos += 1;
-  }
-  codes.push(sum % 103); // nazorat raqami
-  codes.push(STOP);
-  return codes.map((c) => widthsToBinary(PATTERNS[c])).join("");
+  return toCodes(value)
+    .map((c) => widthsToBinary(PATTERNS[c]))
+    .join("");
 }

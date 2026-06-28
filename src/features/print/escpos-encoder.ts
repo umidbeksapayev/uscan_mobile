@@ -113,13 +113,19 @@ const bcHeight = (n: number): number[] => [GS, 0x68, n]; // GS h — barcode bal
 const bcWidth = (n: number): number[] => [GS, 0x77, n]; // GS w — modul eni (2–6)
 
 /**
- * CODE128 barcode (GS k 73). ESC-POS CODE128 ma'lumoti kod-to'plam selektori
- * bilan boshlanadi: "{B" (code set B). Faqat printable ASCII uzatiladi.
+ * CODE128 barcode (GS k 73). ESC-POS ma'lumoti kod-to'plam selektori bilan
+ * boshlanadi. Juft sonli raqamli kod → "{C" (har bayt 2 raqam = 2× QISQA);
+ * aks holda "{B" (ASCII). Skaner baribir o'sha qiymatni o'qiydi.
  */
 function code128Bytes(value: string): number[] {
-  const payload = `{B${sanitize(value)}`;
-  const data: number[] = [];
-  for (const ch of payload) data.push(ch.charCodeAt(0));
+  const v = sanitize(value);
+  const useC = /^\d+$/.test(v) && v.length % 2 === 0;
+  const data: number[] = [0x7b, useC ? 0x43 : 0x42]; // "{C" yoki "{B"
+  if (useC) {
+    for (let i = 0; i < v.length; i += 2) data.push(Number(v.slice(i, i + 2)));
+  } else {
+    for (const ch of v) data.push(ch.charCodeAt(0));
+  }
   return [GS, 0x6b, 73, data.length, ...data];
 }
 
