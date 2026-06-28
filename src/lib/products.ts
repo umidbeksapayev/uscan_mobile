@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { normalizeBarcode } from "@/lib/barcode";
+import { normalizeBarcode, generateInternalBarcode } from "@/lib/barcode";
 import type { Product, SaleType } from "@/types/database";
 
 export interface ProductInput {
@@ -57,6 +57,42 @@ export async function updateProduct(
 
   if (error) throw new Error(error.message);
   return data as Product;
+}
+
+/**
+ * Barcode'siz mahsulotga ICHKI barcode generatsiya qilib saqlaydi va qaytaradi
+ * (web lib/products.ts assignBarcode ga mos). Yorliq chop etishda chaqiriladi —
+ * chop etilgan kod checkout skanida mahsulotга mos kelishi uchun DB'ga yoziladi.
+ * Do'kon-ichi UNIQUE (uq_products_shop_barcode) to'qnashuvida qayta urinadi.
+ * Mahsulotda barcode bo'lsa — o'shani qaytaradi (ustiga HECH QACHON yozmaydi).
+ */
+export async function assignBarcode(productId: string): Promise<string> {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const code = generateInternalBarcode();
+    const { data, error } = await supabase
+      .from("products")
+      .update({ barcode: code })
+      .eq("id", productId)
+      .is("barcode", null) // mavjud barcode'ni HECH QACHON ustiga yozmaymiz
+      .select("barcode")
+      .maybeSingle();
+
+    if (!error && data?.barcode) return data.barcode as string;
+
+    // 0 qator yangilandi → mahsulotда allaqachon barcode bor: o'shani qaytaramiz
+    if (!error && !data) {
+      const { data: existing } = await supabase
+        .from("products")
+        .select("barcode")
+        .eq("id", productId)
+        .single();
+      if (existing?.barcode) return existing.barcode as string;
+    }
+
+    // 23505 = UNIQUE to'qnashuv → boshqa kod bilan qayta urinamiz
+    if (error && error.code !== "23505") throw new Error(error.message);
+  }
+  throw new Error("Barcode generatsiya qilib bo'lmadi");
 }
 
 /** Bitta mahsulot (tahrirlash uchun). */

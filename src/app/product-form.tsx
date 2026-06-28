@@ -19,6 +19,7 @@ import { validateProductInput } from "@/features/products/validate-product";
 import { useScanReturn } from "@/features/products/scan-return";
 import { pickAndUpload } from "@/features/products/upload-image";
 import { CategorySheet } from "@/features/products/category-sheet";
+import { useLabelPrint } from "@/features/labels/use-print-label";
 import type { SaleType } from "@/types/database";
 
 const INPUT = "rounded-xl bg-bg px-4 text-base text-ink";
@@ -118,6 +119,8 @@ export default function ProductFormScreen() {
       router.back();
     },
   });
+
+  const { print: printLabel, printing: labelPrinting } = useLabelPrint();
 
   async function doPick(source: "camera" | "library") {
     if (!shopId) return;
@@ -346,6 +349,16 @@ export default function ProductFormScreen() {
       </KeyboardAwareScrollView>
 
       <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 8 }}>
+        {isEdit && existing ? (
+          <View className="mb-2">
+            <Button
+              variant="ghost"
+              label="Yorliq chop etish"
+              onPress={() => printLabel([existing])}
+              loading={labelPrinting}
+            />
+          </View>
+        ) : null}
         <Button
           label={isEdit ? "Saqlash" : "Qo'shish"}
           onPress={onSave}

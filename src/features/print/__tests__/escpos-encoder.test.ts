@@ -1,5 +1,14 @@
-import { sanitize, padLine, encodeReceipt } from "../escpos-encoder";
+import { sanitize, padLine, encodeReceipt, encodeLabel } from "../escpos-encoder";
 import type { ReceiptData } from "../types";
+import type { LabelData } from "@/features/labels/barcode-format";
+
+/** baytlar ketma-ketligida sub-array borligini tekshiradi. */
+function includesSeq(arr: number[], seq: number[]): boolean {
+  for (let i = 0; i + seq.length <= arr.length; i += 1) {
+    if (seq.every((v, j) => arr[i + j] === v)) return true;
+  }
+  return false;
+}
 
 describe("sanitize", () => {
   it("o'zbek apostrof variantlarini ' ga moslaydi", () => {
@@ -68,5 +77,39 @@ describe("encodeReceipt", () => {
     expect(ascii).toContain("Dilshod Market");
     expect(ascii).toContain("JAMI");
     expect(ascii).toContain("Shakar 1.250kg");
+  });
+});
+
+const labels: LabelData[] = [
+  { name: "Coca Cola 0.5L", price: 8000, barcode: "20000001", shopName: "Dilshod Market" },
+  { name: "Barcode'siz mahsulot", price: 5000, barcode: null },
+];
+
+describe("encodeLabel", () => {
+  it("INIT bilan boshlanadi, har bayt 0–255", () => {
+    const b = encodeLabel(labels);
+    expect(b[0]).toBe(0x1b);
+    expect(b[1]).toBe(0x40);
+    expect(b.every((n) => Number.isInteger(n) && n >= 0 && n <= 255)).toBe(true);
+  });
+
+  it("barcode bo'lsa GS k (CODE128) + '{B' selektori chiqadi", () => {
+    const b = encodeLabel(labels);
+    expect(includesSeq(b, [0x1d, 0x6b, 73])).toBe(true); // GS k 73
+    expect(includesSeq(b, [0x7b, 0x42])).toBe(true); // "{B"
+    // barcode qiymati baytlari
+    const ascii = b.filter((n) => n >= 32 && n <= 126).map((n) => String.fromCharCode(n)).join("");
+    expect(ascii).toContain("20000001");
+    expect(ascii).toContain("Coca Cola 0.5L");
+  });
+
+  it("barcode'siz yorliqda GS k chiqmaydi (faqat shu yorliq uchun)", () => {
+    const b = encodeLabel([{ name: "X", price: 1000, barcode: null }]);
+    expect(includesSeq(b, [0x1d, 0x6b, 73])).toBe(false);
+  });
+
+  it("har yorliq oxirida CUT", () => {
+    const b = encodeLabel(labels);
+    expect(b.slice(-3)).toEqual([0x1d, 0x56, 0x00]);
   });
 });
