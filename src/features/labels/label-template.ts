@@ -35,7 +35,7 @@ export function buildLabelsHtml(labels: LabelData[], opts: LabelSheetOptions = {
       const shop =
         opts.showShopName && l.shopName ? `<div class="shop">${esc(l.shopName)}</div>` : "";
       const bc = l.barcode
-        ? `<div class="bcwrap">${code128Svg(l.barcode, { moduleWidth: 2, height: 48 })}<div class="bcval">${esc(l.barcode)}</div></div>`
+        ? `<div class="bcwrap">${code128Svg(l.barcode, { moduleMm: 0.33, heightMm: 11 })}<div class="bcval">${esc(l.barcode)}</div></div>`
         : `<div class="nobc">${esc(l.name)}</div>`;
       return `
       <div class="label">
@@ -73,7 +73,7 @@ export function buildLabelsHtml(labels: LabelData[], opts: LabelSheetOptions = {
     }
     .price { font-size: 14pt; font-weight: 800; margin: 0.5mm 0; }
     .bcwrap { width: 100%; display: flex; flex-direction: column; align-items: center; }
-    .bcwrap svg { max-width: 100%; height: auto; max-height: ${Math.max(8, h - 16)}mm; }
+    .bcwrap svg { max-width: 100%; }
     .bcval { font-size: 7pt; letter-spacing: 1px; margin-top: 0.3mm; }
     .nobc { font-size: 7pt; color: #666; }
     @media print {
