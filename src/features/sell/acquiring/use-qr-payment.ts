@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { processSaleRpc, type SaleResult } from "../checkout";
+import { processSaleRpc, type SaleResult } from "@/lib/sale-rpc";
 import {
   createPaymentIntent,
   getIntentStatus,
