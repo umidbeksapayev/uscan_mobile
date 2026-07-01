@@ -124,6 +124,10 @@ export default function LoginScreen() {
           {errorMsg ? (
             <Text className="text-center text-sm text-danger">{errorMsg}</Text>
           ) : null}
+
+          <Link href="/(auth)/forgot-password" className="text-center text-sm text-primary">
+            Parolni unutdingizmi?
+          </Link>
         </View>
 
         <View className="mt-6 flex-row justify-center">
