@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useMemberships, useActiveMembership } from "@/features/auth/use-memberships";
 import { useSalesHistoryInfinite } from "@/features/history/use-history";
 import { ReturnSheet } from "@/features/history/return-sheet";
 import { buildSaleReceiptData } from "@/features/history/sale-receipt";
@@ -205,8 +205,8 @@ export default function TarixScreen() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [returnSale, setReturnSale] = useState<Sale | null>(null);
 
-  const { data: memberships, isLoading: membershipsLoading } = useMemberships();
-  const active = memberships?.[0];
+  const { isLoading: membershipsLoading } = useMemberships();
+  const active = useActiveMembership();
   const isOwner = active?.role === "owner";
   const shopId = active?.shop.id;
   const shopName = active?.shop.name ?? "Do'kon";

@@ -27,7 +27,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "@/theme/colors";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useActiveShopId } from "@/features/auth/use-memberships";
 import { findProductsByBarcode } from "@/features/sell/lookup";
 import { useCart } from "@/features/sell/cart-store";
 import { useScanReturn } from "@/features/products/scan-return";
@@ -63,8 +63,7 @@ export default function ScannerScreen() {
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice("back");
 
-  const { data: memberships } = useMemberships();
-  const shopId = memberships?.[0]?.shop.id;
+  const shopId = useActiveShopId();
   const add = useCart((s) => s.add);
   const setPendingWeight = useCart((s) => s.setPendingWeight);
   const setScanCode = useScanReturn((s) => s.setCode);

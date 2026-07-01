@@ -4,6 +4,8 @@ import { supabase } from "@/lib/supabase";
 import type { Membership, MemberRole, MemberPermissions, Shop } from "@/types/database";
 import { useAuth } from "./auth-context";
 import { canDo } from "./permissions";
+import { useActiveShopStore } from "./active-shop-store";
+import { pickActiveMembership } from "./pick-active-membership";
 
 /**
  * Joriy foydalanuvchining a'zoliklari (do'kon + rol + ruxsat).
@@ -41,13 +43,20 @@ export function useMemberships() {
 }
 
 /**
- * Faol do'kon id (default = eng yangi a'zolik). Ma'lumot so'rovlarini shu do'konga
- * cheklash uchun — RLS a'zo bo'lgan BARCHA do'konlarni qaytaradi, shuning uchun
- * ko'p-do'konli foydalanuvchida aniq filtr shart. F8 switcher shu yerga ulanadi.
+ * Faol a'zolik — foydalanuvchi tanlagan do'kon (MMKV, ilova qayta ochilganda
+ * ham eslab qoladi). Barcha "faol do'kon"ga bog'liq ma'lumot so'rovlari shu
+ * yerdan o'tishi kerak — ko'p-do'konli foydalanuvchida aniq filtr shart (RLS
+ * BARCHA a'zo do'konlarni qaytaradi).
  */
-export function useActiveShopId(): string | undefined {
+export function useActiveMembership(): Membership | undefined {
   const { data } = useMemberships();
-  return data?.[0]?.shop.id;
+  const activeShopId = useActiveShopStore((s) => s.activeShopId);
+  return pickActiveMembership(data ?? [], activeShopId);
+}
+
+/** Faol do'kon id — {@link useActiveMembership} ning qisqartmasi. */
+export function useActiveShopId(): string | undefined {
+  return useActiveMembership()?.shop.id;
 }
 
 export interface ActivePermissions {
@@ -66,8 +75,7 @@ export interface ActivePermissions {
  * (server ham has_perm bilan majburlaydi — bu faqat UX qatlami).
  */
 export function useActivePermissions(): ActivePermissions {
-  const { data } = useMemberships();
-  const m = data?.[0];
+  const m = useActiveMembership();
   return {
     isOwner: m?.role === "owner",
     canManageProducts: canDo(m?.role, m?.permissions, "manage_products"),
