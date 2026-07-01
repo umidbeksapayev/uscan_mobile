@@ -11,7 +11,7 @@ import { submitSale, type PaymentMethod, type SaleResult } from "./checkout";
 import type { CartItem } from "./cart-store";
 import { unsyncedCount } from "@/lib/offline/sale-queue-db";
 import { useOfflineStore } from "@/lib/offline/offline-store";
-import { useActivePermissions, useMemberships } from "@/features/auth/use-memberships";
+import { useActivePermissions, useActiveMembership } from "@/features/auth/use-memberships";
 import { CustomerPickerSheet, type PickedCustomer } from "@/features/customers/customer-picker-sheet";
 import { debtFromSale } from "@/features/customers/debt-math";
 import { printReceipt } from "@/features/print/print-receipt";
@@ -39,8 +39,7 @@ type Props = {
 export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }: Props) {
   const qc = useQueryClient();
   const { canManageDebt } = useActivePermissions();
-  const { data: memberships } = useMemberships();
-  const shop = memberships?.[0]?.shop;
+  const shop = useActiveMembership()?.shop;
   const setQueueCount = useOfflineStore((s) => s.setCount);
   const [method, setMethod] = useState<PaymentMethod>("cash");
   const [givenText, setGivenText] = useState("");

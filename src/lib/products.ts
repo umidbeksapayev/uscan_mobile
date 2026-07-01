@@ -95,9 +95,22 @@ export async function assignBarcode(productId: string): Promise<string> {
   throw new Error("Barcode generatsiya qilib bo'lmadi");
 }
 
-/** Bitta mahsulot (tahrirlash uchun). */
-export async function getProduct(id: string): Promise<Product> {
-  const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
+/**
+ * Mahsulot-forma uchun ustunlar — `cost_price` ataylab YO'Q (maxfiy, faqat
+ * egasi ko'radi). RLS'da `products` SELECT barcha a'zoga ochiq (sotuv/skaner
+ * uchun shart), shuning uchun cost_price maxfiyligi FAQAT shu ustun ro'yxati
+ * bilan ta'minlanadi — `select("*")` uni kassir qurilmasiga yuborardi.
+ */
+const PRODUCT_FORM_COLUMNS =
+  "id, shop_id, name, sale_type, selling_price, quantity, low_stock_alert, barcode, image_url, category_id, is_active, created_at";
+
+/**
+ * Bitta mahsulot (tahrirlash uchun). `includeCostPrice` faqat egasi uchun
+ * true bo'lishi kerak (chaqiruvchi tomondan `isOwner` bilan aniqlanadi).
+ */
+export async function getProduct(id: string, includeCostPrice: boolean): Promise<Product> {
+  const columns = includeCostPrice ? `${PRODUCT_FORM_COLUMNS}, cost_price` : PRODUCT_FORM_COLUMNS;
+  const { data, error } = await supabase.from("products").select(columns).eq("id", id).single();
   if (error) throw new Error(error.message);
-  return data as Product;
+  return data as unknown as Product;
 }

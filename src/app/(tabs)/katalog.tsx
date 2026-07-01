@@ -19,7 +19,7 @@ import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useProducts, type CategoryFilter } from "@/features/catalog/use-products";
 import { useCategories } from "@/features/catalog/use-categories";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useMemberships, useActivePermissions } from "@/features/auth/use-memberships";
 import { useLabelPrint } from "@/features/labels/use-print-label";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/database";
@@ -160,6 +160,7 @@ export default function KatalogScreen() {
   const { data: categories } = useCategories();
   // Faol do'kon yuklanmaguncha so'rovlar o'chiq — bo'sh-holat chaqnashini oldini olamiz
   const { isLoading: membershipsLoading } = useMemberships();
+  const { canManageProducts } = useActivePermissions();
 
   const chips: { id: CategoryFilter; name: string }[] = [
     { id: "all", name: "Barchasi" },
@@ -173,6 +174,13 @@ export default function KatalogScreen() {
   }
   function onAdd() {
     router.push("/product-form");
+  }
+  function onRowPress(item: Product) {
+    if (!canManageProducts) {
+      toast.info("Ruxsat yo'q", "Mahsulotlarni tahrirlash uchun ruxsat kerak.");
+      return;
+    }
+    router.push({ pathname: "/product-form", params: { id: item.id } });
   }
 
   function toggleLabelMode() {
@@ -315,11 +323,7 @@ export default function KatalogScreen() {
           keyExtractor={(p) => p.id}
           renderItem={({ item }) => (
             <Pressable
-              onPress={() =>
-                labelMode
-                  ? toggleSelect(item.id)
-                  : router.push({ pathname: "/product-form", params: { id: item.id } })
-              }
+              onPress={() => (labelMode ? toggleSelect(item.id) : onRowPress(item))}
             >
               <ProductRow item={item} selectionMode={labelMode} selected={selected.has(item.id)} />
             </Pressable>
@@ -374,8 +378,8 @@ export default function KatalogScreen() {
         </View>
       ) : null}
 
-      {/* Mahsulot qo'shish (FAB) — yorliq rejimida yashiriladi */}
-      {!labelMode ? (
+      {/* Mahsulot qo'shish (FAB) — yorliq rejimida yashiriladi, faqat ruxsati bor foydalanuvchiga */}
+      {!labelMode && canManageProducts ? (
         <Pressable
           onPress={onAdd}
           style={{

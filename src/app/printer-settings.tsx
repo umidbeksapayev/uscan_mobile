@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import { colors } from "@/theme/colors";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useActiveMembership } from "@/features/auth/use-memberships";
 import { usePrinterStore, type PrinterType } from "@/features/print/printer-settings";
 import { listBluetoothDevices } from "@/features/print/bt-print";
 import { printReceipt } from "@/features/print/print-receipt";
@@ -39,8 +39,7 @@ function TypeCard({
 
 export default function PrinterSettingsScreen() {
   const router = useRouter();
-  const { data: memberships } = useMemberships();
-  const shopName = memberships?.[0]?.shop.name ?? "uscan";
+  const shopName = useActiveMembership()?.shop.name ?? "uscan";
 
   const type = usePrinterStore((s) => s.type);
   const btAddress = usePrinterStore((s) => s.btAddress);

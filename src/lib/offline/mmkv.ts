@@ -11,6 +11,7 @@ export const MetaKeys = {
   lastProductSyncAt: "lastProductSyncAt",
   queueCount: "queueCount",
   syncRunning: "syncRunning",
+  activeShopId: "activeShopId",
 } as const;
 
 export const meta = {

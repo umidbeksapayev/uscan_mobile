@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,7 +7,13 @@ import { useRouter, type Href } from "expo-router";
 
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/features/auth/auth-context";
-import { useMemberships, useActivePermissions } from "@/features/auth/use-memberships";
+import {
+  useMemberships,
+  useActiveMembership,
+  useActivePermissions,
+} from "@/features/auth/use-memberships";
+import { useActiveShopStore } from "@/features/auth/active-shop-store";
+import { ShopSwitcherSheet } from "@/features/auth/shop-switcher-sheet";
 import { useOfflineStore } from "@/lib/offline/offline-store";
 import { colors } from "@/theme/colors";
 
@@ -37,9 +44,12 @@ export default function KoproqScreen() {
   const router = useRouter();
   const { session } = useAuth();
   const { data: memberships } = useMemberships();
+  const active = useActiveMembership();
+  const setActiveShopId = useActiveShopStore((s) => s.setActiveShopId);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
   const { canManageDebt, canPurchase, canManageProducts } = useActivePermissions();
   const pendingCount = useOfflineStore((s) => s.pendingCount);
-  const active = memberships?.[0];
+  const canSwitchShop = (memberships?.length ?? 0) > 1;
   // Ruxsatga qarab gate qilingan bandlarni yashiramiz
   const menu = MENU.filter(
     (m) =>
@@ -56,6 +66,17 @@ export default function KoproqScreen() {
     }
   }
 
+  function onProfilePress() {
+    if (canSwitchShop) {
+      setSwitcherOpen(true);
+    } else {
+      toast.info(
+        "Faqat bitta do'kon",
+        "Hozircha faqat bitta do'konga a'zosiz. Boshqa do'konga ham a'zo bo'lsangiz, shu yerdan almashtira olasiz.",
+      );
+    }
+  }
+
   function logout() {
     Alert.alert("Chiqish", "Rostdan ham chiqmoqchimisiz?", [
       { text: "Bekor qilish", style: "cancel" },
@@ -69,8 +90,13 @@ export default function KoproqScreen() {
         <View className="px-4 pb-10">
           <Text className="pb-4 pt-2 text-2xl font-medium text-primary-deep">Ko'proq</Text>
 
-          {/* Profil */}
-          <View className="mb-3 flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4">
+          {/* Profil — bosilganda ko'p do'konda almashtirish oynasi, bitta
+              do'konda tushuntiruvchi xabar chiqadi (har doim bosiladigan) */}
+          <Pressable
+            onPress={onProfilePress}
+            android_ripple={{ color: colors.line }}
+            className="mb-3 flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4"
+          >
             <View className="h-12 w-12 items-center justify-center rounded-full bg-primary-deep">
               <Text className="text-base font-medium text-white">
                 {(active?.shop.name ?? "u").slice(0, 2).toUpperCase()}
@@ -89,7 +115,8 @@ export default function KoproqScreen() {
                 </Text>
               </View>
             ) : null}
-          </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
+          </Pressable>
 
           {/* Yuborilmagan sotuvlar (offline navbat) */}
           {pendingCount > 0 ? (
@@ -143,6 +170,14 @@ export default function KoproqScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      <ShopSwitcherSheet
+        visible={switcherOpen}
+        memberships={memberships ?? []}
+        activeShopId={active?.shop.id}
+        onSelect={setActiveShopId}
+        onClose={() => setSwitcherOpen(false)}
+      />
     </SafeAreaView>
   );
 }

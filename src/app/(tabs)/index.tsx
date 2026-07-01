@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { colors } from "@/theme/colors";
 import { formatNumber } from "@/lib/format";
 import { Logo } from "@/components/logo";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useActiveMembership } from "@/features/auth/use-memberships";
 import {
   useSalesTrend,
   useTopProducts,
@@ -45,8 +45,7 @@ export default function HomeScreen() {
   const [period, setPeriod] = useState<1 | 7 | 30>(1);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { data: memberships } = useMemberships();
-  const shop = memberships?.[0]?.shop;
+  const shop = useActiveMembership()?.shop;
   const initials = (shop?.name ?? "uS").slice(0, 2).toUpperCase();
 
   // 2× oyna: joriy + oldingi davr (foiz o'zgarish uchun)

@@ -4,6 +4,16 @@ import type { Sale } from "@/types/database";
 /** Bir sahifadagi sotuvlar soni (infinite pagination). */
 export const SALES_PAGE_SIZE = 30;
 
+/**
+ * Tarix ekrani ustunlari — `total_profit`/`cost_price_snapshot` ataylab YO'Q
+ * (maxfiy, faqat egasi ko'radi). Tarix barcha rolga ochiq bo'lgani uchun
+ * `select("*")` bu ustunlarni kassir cache'iga tushirardi (UI ko'rsatmasa ham).
+ */
+const SALE_COLUMNS =
+  "id, shop_id, customer_id, total_revenue, item_count, paid_amount, search_method, sold_at";
+const SALE_ITEM_COLUMNS =
+  "id, sale_id, shop_id, product_id, sale_type, quantity_sold, selling_price_snapshot, total_revenue, search_method, sold_at";
+
 /** Sotuv tarixi sahifasi — eng yangi sotuvlar (mahsulot nomi/rasmi + qaytarish
  *  qisqacha bilan). FAOL do'kon bo'yicha cheklangan (RLS a'zo bo'lgan barcha
  *  do'konlarni qaytaradi). `offset` dan boshlab `limit` ta yozuv qaytaradi. */
@@ -15,14 +25,14 @@ export async function getSalesHistoryPage(
   const { data, error } = await supabase
     .from("sales")
     .select(
-      "*, items:sale_items(*, product:products(name, image_url, sale_type)), returns(id, total_refund)"
+      `${SALE_COLUMNS}, items:sale_items(${SALE_ITEM_COLUMNS}, product:products(name, image_url, sale_type)), returns(id, total_refund)`
     )
     .eq("shop_id", shopId)
     .order("sold_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (error) throw new Error(error.message);
-  return (data ?? []) as Sale[];
+  return (data ?? []) as unknown as Sale[];
 }
 
 /** Sotuv bo'yicha har bir sale_item uchun allaqachon qaytarilgan jami miqdor.

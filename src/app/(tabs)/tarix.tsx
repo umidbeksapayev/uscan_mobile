@@ -7,9 +7,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useMemberships, useActiveMembership } from "@/features/auth/use-memberships";
 import { useSalesHistoryInfinite } from "@/features/history/use-history";
 import { ReturnSheet } from "@/features/history/return-sheet";
+import { buildSaleReceiptData } from "@/features/history/sale-receipt";
+import { printReceipt } from "@/features/print/print-receipt";
 
 const METHOD: Record<
   SearchMethod,
@@ -58,15 +60,21 @@ function SaleCard({
   open,
   onToggle,
   onReturn,
+  shopName,
 }: {
   sale: Sale;
   open: boolean;
   onToggle: () => void;
   onReturn?: () => void;
+  shopName: string;
 }) {
   const meta = METHOD[sale.search_method] ?? METHOD.manual;
   const refunded = refundedTotal(sale);
   const hasReturns = refunded > 0;
+
+  function onReprint() {
+    void printReceipt(buildSaleReceiptData(sale, shopName));
+  }
 
   return (
     <View
@@ -133,21 +141,29 @@ function SaleCard({
             <ItemLine key={it.id} it={it} />
           ))}
 
-          {hasReturns || onReturn ? (
-            <View
-              className="flex-row items-center justify-between px-3 py-2.5"
-              style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}
-            >
-              {hasReturns ? (
-                <Text className="text-xs text-muted">
-                  Qaytarilgan:{" "}
-                  <Text style={{ fontWeight: "500", color: "#B42318" }}>
-                    {formatCurrency(refunded)}
-                  </Text>
+          <View
+            className="px-3 py-2.5"
+            style={{ borderTopWidth: 0.5, borderTopColor: colors.line, gap: 8 }}
+          >
+            {hasReturns ? (
+              <Text className="text-xs text-muted">
+                Qaytarilgan:{" "}
+                <Text style={{ fontWeight: "500", color: "#B42318" }}>
+                  {formatCurrency(refunded)}
                 </Text>
-              ) : (
-                <View />
-              )}
+              </Text>
+            ) : null}
+            <View className="flex-row items-center justify-end" style={{ gap: 8 }}>
+              <Pressable
+                onPress={onReprint}
+                className="flex-row items-center rounded-xl px-3 py-2"
+                style={{ gap: 5, borderWidth: 1, borderColor: colors.primary }}
+              >
+                <Ionicons name="print-outline" size={15} color={colors.primary} />
+                <Text className="text-sm font-medium" style={{ color: colors.primary }}>
+                  Chek
+                </Text>
+              </Pressable>
               {onReturn ? (
                 <Pressable
                   onPress={onReturn}
@@ -161,7 +177,7 @@ function SaleCard({
                 </Pressable>
               ) : null}
             </View>
-          ) : null}
+          </View>
         </View>
       ) : null}
     </View>
@@ -189,10 +205,11 @@ export default function TarixScreen() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [returnSale, setReturnSale] = useState<Sale | null>(null);
 
-  const { data: memberships, isLoading: membershipsLoading } = useMemberships();
-  const active = memberships?.[0];
+  const { isLoading: membershipsLoading } = useMemberships();
+  const active = useActiveMembership();
   const isOwner = active?.role === "owner";
   const shopId = active?.shop.id;
+  const shopName = active?.shop.name ?? "Do'kon";
 
   const {
     data,
@@ -244,6 +261,7 @@ export default function TarixScreen() {
               open={openId === item.id}
               onToggle={() => setOpenId(openId === item.id ? null : item.id)}
               onReturn={isOwner && shopId ? () => setReturnSale(item) : undefined}
+              shopName={shopName}
             />
           )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 90 }}

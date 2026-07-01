@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useActiveShopId } from "@/features/auth/use-memberships";
 import { searchSellProducts } from "@/features/sell/lookup";
 import { useCart, type CartItem } from "@/features/sell/cart-store";
 import { cartTotal } from "@/features/sell/cart-total";
@@ -111,8 +111,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
 
 export default function SotuvScreen() {
   const router = useRouter();
-  const { data: memberships } = useMemberships();
-  const shopId = memberships?.[0]?.shop.id;
+  const shopId = useActiveShopId();
 
   const items = useCart((s) => s.items);
   const add = useCart((s) => s.add);
