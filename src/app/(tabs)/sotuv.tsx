@@ -1,20 +1,59 @@
 import { useCallback, useEffect, useState, memo } from "react";
-import { View, Text, TextInput, Pressable, FlatList } from "react-native";
+import { View, Text, TextInput, Pressable, FlatList, ScrollView } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 
+import { toast } from "@/lib/toast";
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
-import { useActiveShopId } from "@/features/auth/use-memberships";
+import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
 import { searchSellProducts } from "@/features/sell/lookup";
+import { useFrequentProducts } from "@/features/sell/use-frequent-products";
 import { useCart, type CartItem } from "@/features/sell/cart-store";
 import { cartTotal } from "@/features/sell/cart-total";
 import { WeightSheet } from "@/features/sell/weight-sheet";
 import { PaymentSheet } from "@/features/sell/payment-sheet";
+import { QuickPriceSheet } from "@/features/sell/quick-price-sheet";
+import { priceMiscProduct, isMiscProduct } from "@/features/sell/misc-product";
 import type { Product } from "@/types/database";
+
+const FrequentTile = memo(function FrequentTile({
+  product,
+  onPress,
+}: {
+  product: Product;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      className="items-center rounded-2xl border border-line bg-surface p-2"
+      style={{ width: 92 }}
+    >
+      {product.image_url ? (
+        <Image
+          source={{ uri: product.image_url }}
+          style={{ width: 48, height: 48, borderRadius: 12 }}
+          contentFit="cover"
+        />
+      ) : (
+        <View className="h-12 w-12 items-center justify-center rounded-xl bg-primary-tint">
+          <Ionicons name="cube-outline" size={22} color={colors.primary} />
+        </View>
+      )}
+      <Text className="mt-1.5 text-center text-xs text-ink" numberOfLines={1}>
+        {product.name}
+      </Text>
+      <Text className="text-center text-xs font-medium text-primary-deep">
+        {formatCurrency(product.selling_price)}
+      </Text>
+    </Pressable>
+  );
+});
 
 type CartRowProps = { item: CartItem; onEditWeight: (item: CartItem) => void };
 
@@ -112,6 +151,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
 export default function SotuvScreen() {
   const router = useRouter();
   const shopId = useActiveShopId();
+  const { canManageProducts } = useActivePermissions();
 
   const items = useCart((s) => s.items);
   const add = useCart((s) => s.add);
@@ -123,6 +163,10 @@ export default function SotuvScreen() {
   const [search, setSearch] = useState("");
   const debounced = useDebounce(search, 300);
   const searching = search.trim().length > 0;
+
+  // Tezkor narx (P9) — shtrix-kodsiz/katalogsiz tovar
+  const [quickPriceOpen, setQuickPriceOpen] = useState(false);
+  const [quickPriceSaving, setQuickPriceSaving] = useState(false);
 
   // VAZN tezkor oynasi uchun mahsulot (+ tahrirlashda boshlang'ich kg)
   const [weightTarget, setWeightTarget] = useState<{ product: Product; initialKg?: number } | null>(
@@ -143,6 +187,8 @@ export default function SotuvScreen() {
     queryFn: () => searchSellProducts(debounced, shopId as string),
   });
 
+  const { data: frequentProducts } = useFrequentProducts();
+
   const total = cartTotal(items);
 
   const onPick = useCallback(
@@ -160,6 +206,29 @@ export default function SotuvScreen() {
   const onEditWeight = useCallback((it: CartItem) => {
     setWeightTarget({ product: it.product, initialKg: it.quantity });
   }, []);
+
+  async function onQuickPriceConfirm(amount: number) {
+    if (!shopId) return;
+    // Savatda allaqachon boshqa narxli "Boshqa tovar" bo'lsa — bir xil mahsulot
+    // id'ida ikki xil narx to'qnashib, savat summasi noto'g'ri hisoblanib qoladi.
+    if (items.some((i) => isMiscProduct(i.product))) {
+      toast.info(
+        "Savatda allaqachon bor",
+        "Bir vaqtda faqat bitta tezkor-narxli tovar qo'shish mumkin. Avval to'lovni yakunlang yoki uni o'chiring.",
+      );
+      return;
+    }
+    setQuickPriceSaving(true);
+    try {
+      const product = await priceMiscProduct(shopId, amount);
+      add(product);
+      setQuickPriceOpen(false);
+    } catch (e) {
+      toast.error("Xatolik", e instanceof Error ? e.message : "Narx belgilab bo'lmadi");
+    } finally {
+      setQuickPriceSaving(false);
+    }
+  }
 
   const renderCartItem = useCallback(
     ({ item }: { item: CartItem }) => <CartRow item={item} onEditWeight={onEditWeight} />,
@@ -182,15 +251,29 @@ export default function SotuvScreen() {
           ) : null}
         </View>
 
-        {/* Skaner tugmasi */}
-        <Pressable
-          onPress={() => router.push("/scanner")}
-          className="mb-3 flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
-          style={{ height: 56 }}
-        >
-          <Ionicons name="barcode-outline" size={26} color="#fff" />
-          <Text className="text-base font-medium text-white">Skaner</Text>
-        </Pressable>
+        {/* Skaner (+ Tezkor narx — faqat manage_products ruxsati bor foydalanuvchiga) */}
+        <View className="mb-3 flex-row gap-2">
+          <Pressable
+            onPress={() => router.push("/scanner")}
+            className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
+            style={{ height: 56 }}
+          >
+            <Ionicons name="barcode-outline" size={26} color="#fff" />
+            <Text className="text-base font-medium text-white">Skaner</Text>
+          </Pressable>
+          {canManageProducts ? (
+            <Pressable
+              onPress={() => setQuickPriceOpen(true)}
+              className="flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary-tint px-3"
+              style={{ height: 56 }}
+            >
+              <Ionicons name="cash-outline" size={22} color={colors.primary} />
+              <Text className="text-sm font-medium" style={{ color: colors.primary }}>
+                Narx
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
 
         {/* Qidiruv */}
         <View
@@ -214,6 +297,24 @@ export default function SotuvScreen() {
             </Pressable>
           ) : null}
         </View>
+
+        {/* Tez-tez sotiladigan — shtrix-kodsiz/qidiruvsiz bir bosishda savatga */}
+        {!searching && frequentProducts && frequentProducts.length > 0 ? (
+          <View className="mb-1">
+            <Text className="mb-2 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>
+              TEZ-TEZ SOTILADIGAN
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, paddingBottom: 4 }}
+            >
+              {frequentProducts.map((p) => (
+                <FrequentTile key={p.id} product={p} onPress={() => onPick(p)} />
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
       </View>
 
       {searching ? (
@@ -292,6 +393,14 @@ export default function SotuvScreen() {
           </Pressable>
         </View>
       ) : null}
+
+      {/* Tezkor narx oynasi (P9) */}
+      <QuickPriceSheet
+        visible={quickPriceOpen}
+        loading={quickPriceSaving}
+        onClose={() => setQuickPriceOpen(false)}
+        onConfirm={onQuickPriceConfirm}
+      />
 
       {/* VAZN tezkor oynasi */}
       <WeightSheet
