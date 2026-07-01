@@ -11,7 +11,7 @@ import type { Product } from "@/types/database";
  * React DevTools/tarmoqda ko'rinardi). Bu ro'yxat uni payload'dan butunlay olib
  * tashlaydi. (Foyda/tan narx faqat RPC'lar orqali, has_perm bilan.)
  */
-const CATALOG_COLUMNS =
+export const CATALOG_COLUMNS =
   "id, shop_id, name, sale_type, selling_price, quantity, low_stock_alert, barcode, image_url, category_id, is_active, created_at, category:categories(name)";
 
 export type CategoryFilter = string | "all" | "none";
