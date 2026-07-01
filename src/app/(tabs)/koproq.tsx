@@ -66,6 +66,17 @@ export default function KoproqScreen() {
     }
   }
 
+  function onProfilePress() {
+    if (canSwitchShop) {
+      setSwitcherOpen(true);
+    } else {
+      toast.info(
+        "Faqat bitta do'kon",
+        "Hozircha faqat bitta do'konga a'zosiz. Boshqa do'konga ham a'zo bo'lsangiz, shu yerdan almashtira olasiz.",
+      );
+    }
+  }
+
   function logout() {
     Alert.alert("Chiqish", "Rostdan ham chiqmoqchimisiz?", [
       { text: "Bekor qilish", style: "cancel" },
@@ -79,9 +90,11 @@ export default function KoproqScreen() {
         <View className="px-4 pb-10">
           <Text className="pb-4 pt-2 text-2xl font-medium text-primary-deep">Ko'proq</Text>
 
-          {/* Profil (ko'p do'konga a'zo bo'lsa — bosib almashtiriladi) */}
+          {/* Profil — bosilganda ko'p do'konda almashtirish oynasi, bitta
+              do'konda tushuntiruvchi xabar chiqadi (har doim bosiladigan) */}
           <Pressable
-            onPress={() => canSwitchShop && setSwitcherOpen(true)}
+            onPress={onProfilePress}
+            android_ripple={{ color: colors.line }}
             className="mb-3 flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4"
           >
             <View className="h-12 w-12 items-center justify-center rounded-full bg-primary-deep">
@@ -102,9 +115,7 @@ export default function KoproqScreen() {
                 </Text>
               </View>
             ) : null}
-            {canSwitchShop ? (
-              <Ionicons name="swap-vertical-outline" size={18} color={colors.tabInactive} />
-            ) : null}
+            <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
           </Pressable>
 
           {/* Yuborilmagan sotuvlar (offline navbat) */}
