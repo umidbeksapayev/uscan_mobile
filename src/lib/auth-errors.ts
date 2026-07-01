@@ -29,6 +29,8 @@ export function authErrorMessage(message?: string | null): string {
     m.includes("load failed")
   )
     return "Internet yo'q yoki Supabase sozlanmagan (.env).";
+  if (m.includes("expired") || m.includes("invalid") || m.includes("otp"))
+    return "Havola muddati o'tgan yoki noto'g'ri. Qaytadan so'rang.";
 
   return "Xatolik yuz berdi. Qayta urinib ko'ring.";
 }

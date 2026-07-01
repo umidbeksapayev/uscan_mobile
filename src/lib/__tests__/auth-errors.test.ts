@@ -19,6 +19,15 @@ describe("authErrorMessage", () => {
     );
   });
 
+  it("muddati o'tgan/yaroqsiz havola (parolni tiklash)", () => {
+    expect(authErrorMessage("Email link is invalid or has expired")).toBe(
+      "Havola muddati o'tgan yoki noto'g'ri. Qaytadan so'rang.",
+    );
+    expect(authErrorMessage("Token has expired or is invalid")).toBe(
+      "Havola muddati o'tgan yoki noto'g'ri. Qaytadan so'rang.",
+    );
+  });
+
   it("noma'lum xato → umumiy matn", () => {
     const generic = "Xatolik yuz berdi. Qayta urinib ko'ring.";
     expect(authErrorMessage("nimadir g'alati")).toBe(generic);
