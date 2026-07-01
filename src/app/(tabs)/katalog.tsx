@@ -19,7 +19,7 @@ import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useProducts, type CategoryFilter } from "@/features/catalog/use-products";
 import { useCategories } from "@/features/catalog/use-categories";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useMemberships, useActivePermissions } from "@/features/auth/use-memberships";
 import type { Product } from "@/types/database";
 
 function StockBadge({ item }: { item: Product }) {
@@ -137,6 +137,7 @@ export default function KatalogScreen() {
   const { data: categories } = useCategories();
   // Faol do'kon yuklanmaguncha so'rovlar o'chiq — bo'sh-holat chaqnashini oldini olamiz
   const { isLoading: membershipsLoading } = useMemberships();
+  const { canManageProducts } = useActivePermissions();
 
   const chips: { id: CategoryFilter; name: string }[] = [
     { id: "all", name: "Barchasi" },
@@ -150,6 +151,13 @@ export default function KatalogScreen() {
   }
   function onAdd() {
     router.push("/product-form");
+  }
+  function onRowPress(item: Product) {
+    if (!canManageProducts) {
+      toast.info("Ruxsat yo'q", "Mahsulotlarni tahrirlash uchun ruxsat kerak.");
+      return;
+    }
+    router.push({ pathname: "/product-form", params: { id: item.id } });
   }
 
   return (
@@ -261,9 +269,7 @@ export default function KatalogScreen() {
           data={products}
           keyExtractor={(p) => p.id}
           renderItem={({ item }) => (
-            <Pressable
-              onPress={() => router.push({ pathname: "/product-form", params: { id: item.id } })}
-            >
+            <Pressable onPress={() => onRowPress(item)}>
               <ProductRow item={item} />
             </Pressable>
           )}
@@ -276,28 +282,30 @@ export default function KatalogScreen() {
         />
       )}
 
-      {/* Mahsulot qo'shish (FAB) */}
-      <Pressable
-        onPress={onAdd}
-        style={{
-          position: "absolute",
-          right: 20,
-          bottom: 20,
-          width: 56,
-          height: 56,
-          borderRadius: 18,
-          backgroundColor: colors.primary,
-          alignItems: "center",
-          justifyContent: "center",
-          shadowColor: "#0F172A",
-          shadowOpacity: 0.18,
-          shadowRadius: 10,
-          shadowOffset: { width: 0, height: 4 },
-          elevation: 6,
-        }}
-      >
-        <Ionicons name="add" size={30} color="#fff" />
-      </Pressable>
+      {/* Mahsulot qo'shish (FAB) — faqat ruxsati bor foydalanuvchiga */}
+      {canManageProducts ? (
+        <Pressable
+          onPress={onAdd}
+          style={{
+            position: "absolute",
+            right: 20,
+            bottom: 20,
+            width: 56,
+            height: 56,
+            borderRadius: 18,
+            backgroundColor: colors.primary,
+            alignItems: "center",
+            justifyContent: "center",
+            shadowColor: "#0F172A",
+            shadowOpacity: 0.18,
+            shadowRadius: 10,
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 6,
+          }}
+        >
+          <Ionicons name="add" size={30} color="#fff" />
+        </Pressable>
+      ) : null}
     </SafeAreaView>
   );
 }
