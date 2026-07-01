@@ -11,9 +11,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { colors } from "@/theme/colors";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
 import { useCategories } from "@/features/catalog/use-categories";
-import { createProduct, updateProduct, getProduct } from "@/lib/products";
+import { createProduct, updateProduct, getProduct, type ProductInput } from "@/lib/products";
 import { lowStockThreshold } from "@/features/products/low-stock";
 import { validateProductInput } from "@/features/products/validate-product";
 import { useScanReturn } from "@/features/products/scan-return";
@@ -42,9 +42,8 @@ export default function ProductFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEdit = !!id;
 
-  const { data: memberships } = useMemberships();
-  const shopId = memberships?.[0]?.shop.id;
-  const isOwner = memberships?.[0]?.role !== "cashier";
+  const shopId = useActiveShopId();
+  const { isOwner, canManageProducts } = useActivePermissions();
   const { data: categories } = useCategories();
 
   const scanCode = useScanReturn((s) => s.code);
@@ -62,9 +61,9 @@ export default function ProductFormScreen() {
   const [uploading, setUploading] = useState(false);
 
   const { data: existing } = useQuery({
-    queryKey: ["product", id],
-    enabled: isEdit,
-    queryFn: () => getProduct(id as string),
+    queryKey: ["product", id, isOwner],
+    enabled: isEdit && canManageProducts,
+    queryFn: () => getProduct(id as string, isOwner),
   });
 
   useEffect(() => {
@@ -74,7 +73,8 @@ export default function ProductFormScreen() {
       setCategoryId(existing.category_id);
       setSaleType(existing.sale_type);
       setSellingPrice(String(existing.selling_price));
-      setCostPrice(String(existing.cost_price));
+      // cost_price faqat egasi uchun so'ralgan (lib/products.ts) — kassirda undefined.
+      setCostPrice(existing.cost_price != null ? String(existing.cost_price) : "");
       setQuantity(String(existing.quantity));
       setImageUrl(existing.image_url ?? null);
     }
@@ -98,19 +98,26 @@ export default function ProductFormScreen() {
 
   const mutation = useMutation({
     mutationFn: () => {
-      const payload = {
-        shop_id: shopId as string,
+      const fields = {
         name: name.trim(),
         sale_type: saleType,
         selling_price: sp,
-        cost_price: cp,
         quantity: q,
         low_stock_alert: lowStockThreshold(q, saleType),
         barcode: barcode.trim() || null,
         category_id: categoryId,
         image_url: imageUrl,
       };
-      return isEdit ? updateProduct(id as string, payload) : createProduct(payload);
+      if (isEdit) {
+        // cost_price faqat egasi tahrirlaganda yuboriladi — aks holda kassir
+        // qurilmasidagi bo'sh qiymat DB'dagi haqiqiy tan narxini 0'ga tekislab
+        // qo'yardi (cost_price kassirga hech qachon fetch qilinmaydi).
+        const patch: Partial<Omit<ProductInput, "shop_id">> = isOwner
+          ? { ...fields, cost_price: cp }
+          : fields;
+        return updateProduct(id as string, patch);
+      }
+      return createProduct({ shop_id: shopId as string, cost_price: cp, ...fields });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["products"] });
@@ -118,6 +125,28 @@ export default function ProductFormScreen() {
       router.back();
     },
   });
+
+  if (!canManageProducts) {
+    return (
+      <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
+        <View className="flex-row items-center gap-3 px-4 py-2">
+          <Pressable onPress={() => router.back()} hitSlop={10}>
+            <Ionicons name="arrow-back" size={24} color={colors.ink} />
+          </Pressable>
+          <Text className="text-xl font-medium text-ink">
+            {isEdit ? "Tahrirlash" : "Mahsulot qo'shish"}
+          </Text>
+        </View>
+        <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
+          <Ionicons name="lock-closed" size={36} color={colors.muted} />
+          <Text className="text-center text-sm text-muted">
+            Mahsulotlarni qo'shish/tahrirlash faqat egasi yoki "Mahsulotlar" ruxsati bor xodimga
+            ko'rinadi.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   async function doPick(source: "camera" | "library") {
     if (!shopId) return;

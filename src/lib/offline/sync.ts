@@ -1,4 +1,4 @@
-import { processSaleRpc } from "@/features/sell/checkout";
+import { processSaleRpc } from "@/lib/sale-rpc";
 import { incrementLocalQty } from "./product-cache";
 import { classifySaleError } from "./sync-math";
 import { MAX_ATTEMPTS } from "./sale-queue";
