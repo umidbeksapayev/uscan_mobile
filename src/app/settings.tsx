@@ -18,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import { colors } from "@/theme/colors";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useActiveMembership } from "@/features/auth/use-memberships";
 import { PERMISSION_LABELS } from "@/features/auth/permissions";
 import { useStaff, useAddMember, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
 import type { MemberPermissions, ShopMemberRow } from "@/types/database";
@@ -116,8 +116,7 @@ function PermissionsSheet({
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { data: memberships } = useMemberships();
-  const active = memberships?.[0];
+  const active = useActiveMembership();
   const shopId = active?.shop.id;
   const isOwner = active?.role === "owner";
 
