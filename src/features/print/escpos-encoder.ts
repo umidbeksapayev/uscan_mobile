@@ -1,5 +1,6 @@
-import { formatNumber, formatDateTimeFull } from "@/lib/format";
+import { formatNumber, formatCurrency, formatDateTimeFull } from "@/lib/format";
 import type { ReceiptData, ReceiptLine } from "./types";
+import type { LabelData } from "@/features/labels/barcode-format";
 
 /**
  * ESC-POS bayt enkoderi — termal printer (58/80mm) uchun. SOF funksiyalar
@@ -101,5 +102,51 @@ export function encodeReceipt(data: ReceiptData, width = 32): number[] {
   }
 
   add(ALIGN_CENTER, feed(1), line("Rahmat! Xayrli kun!"), feed(3), CUT);
+  return out;
+}
+
+// ── Yorliq (narx etiketkasi) ────────────────────────────────────────────────
+
+const HRI_BELOW = [GS, 0x48, 0x02]; // barcode raqamini chiziq OSTIDA ko'rsatish
+const HRI_FONT_A = [GS, 0x66, 0x00];
+const bcHeight = (n: number): number[] => [GS, 0x68, n]; // GS h — barcode balandligi
+const bcWidth = (n: number): number[] => [GS, 0x77, n]; // GS w — modul eni (2–6)
+
+/**
+ * CODE128 barcode (GS k 73). ESC-POS ma'lumoti kod-to'plam selektori bilan
+ * boshlanadi. Juft sonli raqamli kod → "{C" (har bayt 2 raqam = 2× QISQA);
+ * aks holda "{B" (ASCII). Skaner baribir o'sha qiymatni o'qiydi.
+ */
+function code128Bytes(value: string): number[] {
+  const v = sanitize(value);
+  const useC = /^\d+$/.test(v) && v.length % 2 === 0;
+  const data: number[] = [0x7b, useC ? 0x43 : 0x42]; // "{C" yoki "{B"
+  if (useC) {
+    for (let i = 0; i < v.length; i += 2) data.push(Number(v.slice(i, i + 2)));
+  } else {
+    for (const ch of v) data.push(ch.charCodeAt(0));
+  }
+  return [GS, 0x6b, 73, data.length, ...data];
+}
+
+/**
+ * Yorliqlar → ESC-POS baytlar. Har yorliq: (do'kon) nom + yirik narx + barcode
+ * (printer GS k bilan o'zi chizadi — aniq/skanerlanadigan) + kesish. cost_price YO'Q.
+ */
+export function encodeLabel(labels: LabelData[]): number[] {
+  const out: number[] = [];
+  const add = (...chunks: number[][]) => chunks.forEach((c) => out.push(...c));
+
+  add(INIT);
+  for (const l of labels) {
+    add(ALIGN_CENTER);
+    if (l.shopName) add(line(l.shopName));
+    add(BOLD_ON, line(l.name), BOLD_OFF);
+    add(BOLD_ON, SIZE_DOUBLE, line(formatCurrency(l.price)), SIZE_NORMAL, BOLD_OFF);
+    if (l.barcode) {
+      add(HRI_BELOW, HRI_FONT_A, bcHeight(70), bcWidth(2), code128Bytes(l.barcode), [LF]);
+    }
+    add(feed(1), CUT);
+  }
   return out;
 }

@@ -20,6 +20,8 @@ import { useDebounce } from "@/lib/use-debounce";
 import { useProducts, type CategoryFilter } from "@/features/catalog/use-products";
 import { useCategories } from "@/features/catalog/use-categories";
 import { useMemberships, useActivePermissions } from "@/features/auth/use-memberships";
+import { useLabelPrint } from "@/features/labels/use-print-label";
+import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/database";
 
 function StockBadge({ item }: { item: Product }) {
@@ -59,13 +61,21 @@ function StockBadge({ item }: { item: Product }) {
   );
 }
 
-function ProductRow({ item }: { item: Product }) {
+function ProductRow({
+  item,
+  selectionMode,
+  selected,
+}: {
+  item: Product;
+  selectionMode?: boolean;
+  selected?: boolean;
+}) {
   return (
     <View
       className="mb-3 flex-row items-center gap-3 rounded-2xl bg-surface p-3"
       style={{
-        borderWidth: 0.5,
-        borderColor: colors.line,
+        borderWidth: selected ? 1.5 : 0.5,
+        borderColor: selected ? colors.primary : colors.line,
         shadowColor: "#0F172A",
         shadowOpacity: 0.05,
         shadowRadius: 8,
@@ -73,6 +83,13 @@ function ProductRow({ item }: { item: Product }) {
         elevation: 2,
       }}
     >
+      {selectionMode ? (
+        <Ionicons
+          name={selected ? "checkmark-circle" : "ellipse-outline"}
+          size={24}
+          color={selected ? colors.primary : colors.tabInactive}
+        />
+      ) : null}
       {item.image_url ? (
         <Image
           source={{ uri: item.image_url }}
@@ -130,6 +147,12 @@ export default function KatalogScreen() {
   const [showFilters, setShowFilters] = useState(false);
   const debounced = useDebounce(search, 300);
 
+  // Yorliq (label) tanlash rejimi
+  const [labelMode, setLabelMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [copies, setCopies] = useState(1);
+  const { print: printLabels, printing } = useLabelPrint();
+
   const { data: products, isLoading, isError, refetch, isRefetching } = useProducts({
     search: debounced,
     categoryId: cat,
@@ -160,10 +183,40 @@ export default function KatalogScreen() {
     router.push({ pathname: "/product-form", params: { id: item.id } });
   }
 
+  function toggleLabelMode() {
+    setLabelMode((v) => !v);
+    setSelected(new Set());
+    setCopies(1);
+  }
+  function toggleSelect(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+  async function onPrintSelected() {
+    const chosen = (products ?? []).filter((p) => selected.has(p.id));
+    const ok = await printLabels(chosen, copies);
+    if (ok) toggleLabelMode();
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
-        <Text className="pb-3 text-2xl font-medium text-primary-deep">Mahsulotlar</Text>
+        <View className="flex-row items-center justify-between pb-3">
+          <Text className="text-2xl font-medium text-primary-deep">
+            {labelMode ? `Yorliq: ${selected.size} ta` : "Mahsulotlar"}
+          </Text>
+          <Pressable onPress={toggleLabelMode} hitSlop={10}>
+            <Ionicons
+              name={labelMode ? "close" : "pricetags-outline"}
+              size={24}
+              color={colors.primary}
+            />
+          </Pressable>
+        </View>
 
         {/* Qidiruv + skaner + filter */}
         <View className="mb-3 flex-row items-center gap-2">
@@ -269,11 +322,17 @@ export default function KatalogScreen() {
           data={products}
           keyExtractor={(p) => p.id}
           renderItem={({ item }) => (
-            <Pressable onPress={() => onRowPress(item)}>
-              <ProductRow item={item} />
+            <Pressable
+              onPress={() => (labelMode ? toggleSelect(item.id) : onRowPress(item))}
+            >
+              <ProductRow item={item} selectionMode={labelMode} selected={selected.has(item.id)} />
             </Pressable>
           )}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 90 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingTop: 4,
+            paddingBottom: labelMode ? 160 : 90,
+          }}
           refreshing={isRefetching}
           onRefresh={() => {
             void refetch();
@@ -282,8 +341,45 @@ export default function KatalogScreen() {
         />
       )}
 
-      {/* Mahsulot qo'shish (FAB) — faqat ruxsati bor foydalanuvchiga */}
-      {canManageProducts ? (
+      {/* Yorliq chop etish paneli (tanlash rejimi) */}
+      {labelMode && selected.size > 0 ? (
+        <View
+          className="absolute bottom-0 left-0 right-0 border-t border-line bg-surface px-4 pt-3"
+          style={{ paddingBottom: 16, gap: 10 }}
+        >
+          <View className="flex-row items-center justify-between">
+            <Text className="text-sm text-muted">Har biri uchun nusxa</Text>
+            <View className="flex-row items-center gap-3">
+              <Pressable
+                onPress={() => setCopies((c) => Math.max(1, c - 1))}
+                className="h-9 w-9 items-center justify-center rounded-xl bg-bg"
+              >
+                <Ionicons name="remove" size={18} color={colors.ink} />
+              </Pressable>
+              <Text
+                className="text-base font-medium text-ink"
+                style={{ minWidth: 24, textAlign: "center" }}
+              >
+                {copies}
+              </Text>
+              <Pressable
+                onPress={() => setCopies((c) => Math.min(50, c + 1))}
+                className="h-9 w-9 items-center justify-center rounded-xl bg-primary-tint"
+              >
+                <Ionicons name="add" size={18} color={colors.primary} />
+              </Pressable>
+            </View>
+          </View>
+          <Button
+            label={`Yorliq chop etish (${selected.size})`}
+            onPress={onPrintSelected}
+            loading={printing}
+          />
+        </View>
+      ) : null}
+
+      {/* Mahsulot qo'shish (FAB) — yorliq rejimida yashiriladi, faqat ruxsati bor foydalanuvchiga */}
+      {!labelMode && canManageProducts ? (
         <Pressable
           onPress={onAdd}
           style={{
