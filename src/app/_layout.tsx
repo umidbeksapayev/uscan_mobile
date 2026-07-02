@@ -32,6 +32,7 @@ export default function RootLayout() {
                 <Stack.Screen name="supply" />
                 <Stack.Screen name="suppliers" />
                 <Stack.Screen name="categories" />
+                <Stack.Screen name="import-products" />
                 <Stack.Screen name="settings" />
                 <Stack.Screen name="offline-sales" />
                 <Stack.Screen name="printer-settings" />

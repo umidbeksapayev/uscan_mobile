@@ -37,6 +37,7 @@ const MENU: MenuItem[] = [
   { icon: "book-outline", label: "Nasiya daftari", route: "/nasiya", debtGated: true }, // F7a
   { icon: "cube-outline", label: "Kirim / Ta'minotchi", route: "/supply", purchaseGated: true }, // F7b
   { icon: "pricetags-outline", label: "Kategoriyalar", route: "/categories", productsGated: true }, // F8
+  { icon: "cloud-upload-outline", label: "Mahsulot import (CSV)", route: "/import-products", productsGated: true }, // Sprint 4
   { icon: "settings-outline", label: "Sozlamalar", route: "/settings" }, // F8
 ];
 
