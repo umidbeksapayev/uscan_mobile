@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +16,7 @@ import {
   useLowStockProducts,
 } from "@/features/dashboard/use-dashboard";
 import { trendTotals, periodSplit, pctChange } from "@/features/dashboard/dashboard-math";
+import { maybeScheduleLowStockReminder } from "@/features/notifications/notify";
 import { TrendChart } from "@/features/dashboard/trend-chart";
 import {
   GradientStat,
@@ -58,6 +59,14 @@ export default function HomeScreen() {
   const { data: top, isLoading: topLoading } = useTopProducts(period, 5);
   const { data: slow } = useSlowProducts(period, 5);
   const { data: lowStock } = useLowStockProducts();
+
+  // Kam qoldiq bo'lsa — ertaga 08:00 ga lokal eslatma (kuniga 1 marta, jim:
+  // ruxsat faqat Sozlamalarda so'raladi; bermagan bo'lsa hech narsa qilmaydi)
+  useEffect(() => {
+    if (lowStock && lowStock.length > 0) {
+      void maybeScheduleLowStockReminder(lowStock.length);
+    }
+  }, [lowStock]);
 
   const { current, previous } = periodSplit(trend ?? [], period);
   const cur = trendTotals(current);

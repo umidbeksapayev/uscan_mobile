@@ -21,6 +21,8 @@ import { colors } from "@/theme/colors";
 import { useActiveMembership } from "@/features/auth/use-memberships";
 import { PERMISSION_LABELS } from "@/features/auth/permissions";
 import { useStaff, useAddMember, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
+import { TelegramSummaryCard } from "@/features/telegram/telegram-summary-card";
+import { LocalReminderCard } from "@/features/notifications/local-reminder-card";
 import type { MemberPermissions, ShopMemberRow } from "@/types/database";
 
 /** Kassir ruxsatlari oynasi (6 toggle) + o'chirish. */
@@ -208,6 +210,16 @@ export default function SettingsScreen() {
           <Text className="flex-1 text-base text-ink">Printer (chek)</Text>
           <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
         </Pressable>
+
+        {/* Bildirishnomalar: lokal eslatma — hammaga; Telegram xulosa — faqat
+            egaga (RPC/RLS ham owner-gated) */}
+        <Text className="mb-2 ml-1 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>
+          BILDIRISHNOMALAR
+        </Text>
+        <View className="mb-5" style={{ gap: 10 }}>
+          <LocalReminderCard />
+          {isOwner && active?.shop ? <TelegramSummaryCard shop={active.shop} /> : null}
+        </View>
 
         {!isOwner ? (
           <View className="flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4">
