@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
-import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
 
 import { colors } from "@/theme/colors";
@@ -127,6 +126,16 @@ export default function ImportProductsScreen() {
 
   async function pickFile() {
     setErrorMsg(null);
+    // DINAMIK import: eski dev build'da (native modul yo'q) eager import butun
+    // ilovani quladi — expo-router BARCHA route'larni startup'da yuklaydi
+    // (#21 ExpoCrypto bilan bir xil sinf). Modul bo'lmasa faqat shu tugma o'chadi.
+    let DocumentPicker: typeof import("expo-document-picker");
+    try {
+      DocumentPicker = await import("expo-document-picker");
+    } catch {
+      setErrorMsg("Bu build'da fayl tanlash moduli yo'q — Expo Go yoki yangi dev build kerak.");
+      return;
+    }
     const picked = await DocumentPicker.getDocumentAsync({ type: "*/*", copyToCacheDirectory: true });
     if (picked.canceled || !picked.assets?.[0]) return;
     const asset = picked.assets[0];
