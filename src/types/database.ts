@@ -29,11 +29,17 @@ export type SaleType = "unit" | "weight";
 /** Sotuvda mahsulot qanday topilgan: shtrix-kod yoki qo'lda. ('visual' eski yozuvlar.) */
 export type SearchMethod = "barcode" | "visual" | "manual";
 
+/** Egaga kunlik Telegram xulosa vaqti (migration 027). */
+export type SummaryTime = "morning" | "evening" | "off";
+
 export interface Shop {
   id: string;
   name: string;
   logo_url?: string | null;
   created_at?: string;
+  /** Eganing Telegram chat id'si — null = hali ulanmagan (migration 027). */
+  owner_telegram_chat_id?: number | null;
+  summary_time?: SummaryTime;
 }
 
 export interface Membership {
