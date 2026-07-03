@@ -12,7 +12,9 @@ import { formatCurrency, formatWeight } from "@/lib/format";
 import { pctChange } from "@/features/dashboard/dashboard-math";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
 import { useInventoryStats, useSalesStats } from "@/features/stats/use-stats";
+import { useCashierStats } from "@/features/stats/use-cashier-stats";
 import { useTopProducts, useSlowProducts } from "@/features/dashboard/use-dashboard";
+import { useStaff } from "@/features/auth/use-staff";
 import { exportPeriodSales } from "@/features/stats/export-csv";
 import { StatsCard } from "@/components/ui/stats-card";
 import type { TopProduct } from "@/types/database";
@@ -139,6 +141,52 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
   );
 }
 
+/** Kassir bo'yicha savdo — FAQAT egaga mount bo'ladi (email'lar owner-gated
+ *  list_shop_members RPC'dan; kassirlar bir-birining natijasini ko'rmaydi). */
+function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string }) {
+  const { data: aggs, isLoading } = useCashierStats(period);
+  const { data: staff } = useStaff(shopId);
+
+  const emailById = new Map((staff ?? []).map((m) => [m.user_id, m.email]));
+  const roleById = new Map((staff ?? []).map((m) => [m.user_id, m.role]));
+
+  return (
+    <ListCard title="Kassirlar bo'yicha">
+      {isLoading ? (
+        <ActivityIndicator color={colors.primary} />
+      ) : (aggs?.length ?? 0) === 0 ? (
+        <Text className="py-3 text-center text-sm text-muted">Bu davrda sotuv yo'q</Text>
+      ) : (
+        aggs!.map((a) => {
+          const email = a.cashierId ? emailById.get(a.cashierId) : null;
+          const isShopOwner = a.cashierId ? roleById.get(a.cashierId) === "owner" : false;
+          return (
+            <View key={a.cashierId ?? "unknown"} className="flex-row items-center gap-3 py-1.5">
+              <View className="h-9 w-9 items-center justify-center rounded-full bg-primary-tint">
+                <Ionicons
+                  name={isShopOwner ? "star-outline" : "person-outline"}
+                  size={16}
+                  color={colors.primary}
+                />
+              </View>
+              <View className="min-w-0 flex-1">
+                <Text className="text-sm font-medium text-ink" numberOfLines={1}>
+                  {email ?? "Noma'lum (eski sotuvlar)"}
+                </Text>
+                <Text className="text-xs text-muted">
+                  {isShopOwner ? "Egasi · " : ""}
+                  {a.salesCount} ta sotuv
+                </Text>
+              </View>
+              <Text className="text-sm font-semibold text-ink">{formatCurrency(a.revenue)}</Text>
+            </View>
+          );
+        })
+      )}
+    </ListCard>
+  );
+}
+
 function LockedSalesSection() {
   return (
     <View
@@ -159,7 +207,7 @@ export default function StatistikaScreen() {
   const router = useRouter();
   const qc = useQueryClient();
   const shopId = useActiveShopId();
-  const { canViewReports, canViewCost } = useActivePermissions();
+  const { canViewReports, canViewCost, isOwner } = useActivePermissions();
 
   const [period, setPeriod] = useState<1 | 7 | 30>(7);
   const [refreshing, setRefreshing] = useState(false);
@@ -322,6 +370,8 @@ export default function StatistikaScreen() {
           ) : (
             <LockedSalesSection />
           )}
+
+          {isOwner && shopId ? <CashierSection period={period} shopId={shopId} /> : null}
         </View>
 
         {/* 3. Eksport (CSV) — faqat view_reports */}
