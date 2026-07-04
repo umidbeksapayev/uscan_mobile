@@ -34,6 +34,7 @@ type MenuItem = {
 
 const MENU: MenuItem[] = [
   { icon: "stats-chart-outline", label: "Statistika", route: "/statistika" }, // F6 — to'liq tahlil
+  { icon: "calculator-outline", label: "Kassani yopish", route: "/shift-close" }, // Sprint 6 — Z-hisobot
   { icon: "book-outline", label: "Nasiya daftari", route: "/nasiya", debtGated: true }, // F7a
   { icon: "cube-outline", label: "Kirim / Ta'minotchi", route: "/supply", purchaseGated: true }, // F7b
   { icon: "pricetags-outline", label: "Kategoriyalar", route: "/categories", productsGated: true }, // F8

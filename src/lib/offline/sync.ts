@@ -47,6 +47,7 @@ export async function syncQueue(shopId: string): Promise<SyncResult> {
           clientId: sale.client_id,
           customerId: sale.customer_id,
           paidAmount: sale.paid_amount,
+          method: sale.method,
         });
         await removeSale(sale.client_id); // 'done' saqlanmaydi
         synced++;
