@@ -1,5 +1,11 @@
 # uscan_mobile — Audit, Gap Analysis va Roadmap (2026-07)
 
+> **HOLAT (2026-07-03): Sprint 1–5 BAJARILDI** (PR #10–#24). S1–S3 xavfsizlik,
+> A1/A4 texnik qarz yopildi; switcher, reprint, parol tiklash, tezkor sotuv,
+> CSV import, bildirishnomalar (Telegram + lokal + kassir hisoboti) ishlab
+> chiqildi. Qolgan ishlar (Sprint 6–8) uchun yangilangan reja:
+> **`SPRINT_PLAN_2026-07.md`**.
+
 > Ushbu hujjat CLAUDE.md'dagi 4-bosqichli topshiriq (audit → gap analysis →
 > product taklif → roadmap) natijasi. 5-bosqich (real kod, sprint-by-sprint,
 > branch+PR) ushbu hujjat tasdiqlangandan keyin, alohida sessiyalarda boshlanadi.
