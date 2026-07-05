@@ -3,6 +3,7 @@ import { View, Text, ScrollView } from "react-native";
 import { toast } from "@/lib/toast";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const [shopName, setShopName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,20 +76,20 @@ export default function RegisterScreen() {
           <Logo size={34} />
         </View>
 
-        <Text className="text-center text-2xl font-medium text-ink">Ro'yxatdan o'tish</Text>
+        <Text className="text-center text-2xl font-medium text-ink">{t("auth.registerBtn")}</Text>
         <Text className="mb-6 mt-1 text-center text-sm text-muted">
-          Do'koningizni yarating va boshlang
+          {t("auth.registerSubtitle")}
         </Text>
 
         <View style={{ gap: 16 }}>
           <Field
-            label="Do'kon nomi"
+            label={t("auth.shopName")}
             value={shopName}
             onChangeText={setShopName}
-            placeholder="Masalan: Aziz Market"
+            placeholder={t("auth.shopNamePlaceholder")}
           />
           <Field
-            label="Email"
+            label={t("auth.email")}
             value={email}
             onChangeText={setEmail}
             placeholder="email@misol.uz"
@@ -96,20 +98,20 @@ export default function RegisterScreen() {
             autoComplete="email"
           />
           <Field
-            label="Parol"
+            label={t("auth.password")}
             value={password}
             onChangeText={setPassword}
-            placeholder="Kamida 6 belgi"
+            placeholder={t("auth.passwordHint")}
             secureTextEntry
             autoComplete="new-password"
           />
-          <Button label="Ro'yxatdan o'tish" onPress={onSubmit} loading={loading} />
+          <Button label={t("auth.registerBtn")} onPress={onSubmit} loading={loading} />
         </View>
 
         <View className="mt-6 flex-row justify-center">
-          <Text className="text-sm text-muted">Akkauntingiz bormi? </Text>
+          <Text className="text-sm text-muted">{t("auth.haveAccount")} </Text>
           <Link href="/(auth)/login" className="text-sm font-medium text-primary">
-            Kirish
+            {t("auth.goLogin")}
           </Link>
         </View>
       </ScrollView>

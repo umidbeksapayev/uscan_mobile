@@ -4,6 +4,7 @@ import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, type Href } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/features/auth/auth-context";
@@ -19,7 +20,8 @@ import { colors } from "@/theme/colors";
 
 type MenuItem = {
   icon: keyof typeof Ionicons.glyphMap;
-  label: string;
+  /** i18n kaliti (label render paytida t() bilan olinadi). */
+  labelKey: string;
   /** Tayyor bo'lsa — bosilganda shu route'ga o'tadi. */
   route?: Href;
   /** Hali tayyor emas bo'lsa — qaysi fazada chiqishi. */
@@ -35,18 +37,19 @@ type MenuItem = {
 };
 
 const MENU: MenuItem[] = [
-  { icon: "stats-chart-outline", label: "Statistika", route: "/statistika" }, // F6 — to'liq tahlil
-  { icon: "calculator-outline", label: "Kassani yopish", route: "/shift-close" }, // Sprint 6 — Z-hisobot
-  { icon: "wallet-outline", label: "Xarajatlar", route: "/expenses", ownerGated: true }, // Sprint 6 — P5
-  { icon: "book-outline", label: "Nasiya daftari", route: "/nasiya", debtGated: true }, // F7a
-  { icon: "cube-outline", label: "Kirim / Ta'minotchi", route: "/supply", purchaseGated: true }, // F7b
-  { icon: "pricetags-outline", label: "Kategoriyalar", route: "/categories", productsGated: true }, // F8
-  { icon: "cloud-upload-outline", label: "Mahsulot import (CSV)", route: "/import-products", productsGated: true }, // Sprint 4
-  { icon: "settings-outline", label: "Sozlamalar", route: "/settings" }, // F8
+  { icon: "stats-chart-outline", labelKey: "menu.stats", route: "/statistika" }, // F6 — to'liq tahlil
+  { icon: "calculator-outline", labelKey: "menu.shiftClose", route: "/shift-close" }, // Sprint 6 — Z-hisobot
+  { icon: "wallet-outline", labelKey: "menu.expenses", route: "/expenses", ownerGated: true }, // Sprint 6 — P5
+  { icon: "book-outline", labelKey: "menu.debtBook", route: "/nasiya", debtGated: true }, // F7a
+  { icon: "cube-outline", labelKey: "menu.supply", route: "/supply", purchaseGated: true }, // F7b
+  { icon: "pricetags-outline", labelKey: "category.manageTitle", route: "/categories", productsGated: true }, // F8
+  { icon: "cloud-upload-outline", labelKey: "menu.importCsv", route: "/import-products", productsGated: true }, // Sprint 4
+  { icon: "settings-outline", labelKey: "settings.title", route: "/settings" }, // F8
 ];
 
 export default function KoproqScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { session } = useAuth();
   const { data: memberships } = useMemberships();
   const active = useActiveMembership();
@@ -68,7 +71,7 @@ export default function KoproqScreen() {
     if (item.route) {
       router.navigate(item.route);
     } else {
-      toast.info(item.label, `Bu bo'lim ${item.note ?? "keyingi"} bosqichida tayyor bo'ladi.`);
+      toast.info(t(item.labelKey), `Bu bo'lim ${item.note ?? "keyingi"} bosqichida tayyor bo'ladi.`);
     }
   }
 
@@ -76,17 +79,14 @@ export default function KoproqScreen() {
     if (canSwitchShop) {
       setSwitcherOpen(true);
     } else {
-      toast.info(
-        "Faqat bitta do'kon",
-        "Hozircha faqat bitta do'konga a'zosiz. Boshqa do'konga ham a'zo bo'lsangiz, shu yerdan almashtira olasiz.",
-      );
+      toast.info(t("menu.oneShopTitle"), t("menu.oneShopDesc"));
     }
   }
 
   function logout() {
-    Alert.alert("Chiqish", "Rostdan ham chiqmoqchimisiz?", [
-      { text: "Bekor qilish", style: "cancel" },
-      { text: "Chiqish", style: "destructive", onPress: () => supabase.auth.signOut() },
+    Alert.alert(t("nav.logout"), t("menu.logoutConfirm"), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("nav.logout"), style: "destructive", onPress: () => supabase.auth.signOut() },
     ]);
   }
 
@@ -94,7 +94,7 @@ export default function KoproqScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <ScrollView className="flex-1">
         <View className="px-4 pb-10">
-          <Text className="pb-4 pt-2 text-2xl font-medium text-primary-deep">Ko'proq</Text>
+          <Text className="pb-4 pt-2 text-2xl font-medium text-primary-deep">{t("nav.more")}</Text>
 
           {/* Profil — bosilganda ko'p do'konda almashtirish oynasi, bitta
               do'konda tushuntiruvchi xabar chiqadi (har doim bosiladigan) */}
@@ -117,7 +117,7 @@ export default function KoproqScreen() {
             {active ? (
               <View className="rounded-full bg-primary-tint px-3 py-1">
                 <Text className="text-xs font-medium text-primary">
-                  {active.role === "owner" ? "Egasi" : "Kassir"}
+                  {active.role === "owner" ? t("staff.owner") : t("staff.cashier")}
                 </Text>
               </View>
             ) : null}
@@ -132,7 +132,7 @@ export default function KoproqScreen() {
               style={{ borderColor: colors.warning, backgroundColor: "#FEF6E7" }}
             >
               <Ionicons name="cloud-upload-outline" size={20} color={colors.warning} />
-              <Text className="flex-1 text-base font-medium text-ink">Yuborilmagan sotuvlar</Text>
+              <Text className="flex-1 text-base font-medium text-ink">{t("menu.unsyncedSales")}</Text>
               <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: colors.warning }}>
                 <Text className="text-xs font-bold text-white">{pendingCount}</Text>
               </View>
@@ -146,14 +146,14 @@ export default function KoproqScreen() {
               const ready = !!item.route;
               return (
                 <Pressable
-                  key={item.label}
+                  key={item.labelKey}
                   onPress={() => onItem(item)}
                   android_ripple={{ color: colors.line }}
                   className={`flex-row items-center gap-3 p-4 ${i > 0 ? "border-t border-line" : ""}`}
                   style={{ opacity: ready ? 1 : 0.55 }}
                 >
                   <Ionicons name={item.icon} size={20} color={colors.primary} />
-                  <Text className="flex-1 text-base text-ink">{item.label}</Text>
+                  <Text className="flex-1 text-base text-ink">{t(item.labelKey)}</Text>
                   {ready ? (
                     <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
                   ) : (
@@ -172,7 +172,7 @@ export default function KoproqScreen() {
             className="flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4"
           >
             <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-            <Text className="text-base font-medium text-danger">Chiqish</Text>
+            <Text className="text-base font-medium text-danger">{t("nav.logout")}</Text>
           </Pressable>
         </View>
       </ScrollView>

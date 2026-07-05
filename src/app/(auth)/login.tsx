@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TextInput, Pressable } from "react-native";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -67,15 +69,15 @@ export default function LoginScreen() {
           <Logo size={34} />
         </View>
 
-        <Text className="text-center text-2xl font-medium text-ink">Xush kelibsiz</Text>
+        <Text className="text-center text-2xl font-medium text-ink">{t("auth.welcome")}</Text>
         <Text className="mb-6 mt-1 text-center text-sm text-muted">
-          Tizimga kirish uchun ma'lumotlarni kiriting
+          {t("auth.loginSubtitle")}
         </Text>
 
         <View style={{ gap: 16 }}>
           <Field
             testID="login-email"
-            label="Email"
+            label={t("auth.email")}
             value={email}
             onChangeText={(t) => {
               setEmail(t);
@@ -88,7 +90,7 @@ export default function LoginScreen() {
           />
 
           <View style={{ gap: 6 }}>
-            <Text className="text-sm font-medium text-ink">Parol</Text>
+            <Text className="text-sm font-medium text-ink">{t("auth.password")}</Text>
             <View
               className="flex-row items-center rounded-2xl border border-line bg-surface px-4"
               style={{ height: 52 }}
@@ -120,20 +122,20 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          <Button testID="login-submit" label="Kirish" onPress={onSubmit} loading={loading} />
+          <Button testID="login-submit" label={t("auth.loginBtn")} onPress={onSubmit} loading={loading} />
           {errorMsg ? (
             <Text className="text-center text-sm text-danger">{errorMsg}</Text>
           ) : null}
 
           <Link href="/(auth)/forgot-password" className="text-center text-sm text-primary">
-            Parolni unutdingizmi?
+            {t("auth.forgotPassword")}
           </Link>
         </View>
 
         <View className="mt-6 flex-row justify-center">
-          <Text className="text-sm text-muted">Akkauntingiz yo'qmi? </Text>
+          <Text className="text-sm text-muted">{t("auth.noAccount")} </Text>
           <Link href="/(auth)/register" className="text-sm font-medium text-primary">
-            Ro'yxatdan o'tish
+            {t("auth.registerBtn")}
           </Link>
         </View>
       </ScrollView>
