@@ -19,8 +19,9 @@ import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useProducts, type CategoryFilter } from "@/features/catalog/use-products";
 import { useCategories } from "@/features/catalog/use-categories";
-import { useMemberships, useActivePermissions } from "@/features/auth/use-memberships";
+import { useMemberships, useActivePermissions, useActiveShopId } from "@/features/auth/use-memberships";
 import { useLabelPrint } from "@/features/labels/use-print-label";
+import { exportProductsCsv } from "@/features/products/export-products";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/database";
 
@@ -160,7 +161,9 @@ export default function KatalogScreen() {
   const { data: categories } = useCategories();
   // Faol do'kon yuklanmaguncha so'rovlar o'chiq — bo'sh-holat chaqnashini oldini olamiz
   const { isLoading: membershipsLoading } = useMemberships();
-  const { canManageProducts } = useActivePermissions();
+  const { canManageProducts, canViewCost } = useActivePermissions();
+  const shopId = useActiveShopId();
+  const [exporting, setExporting] = useState(false);
 
   const chips: { id: CategoryFilter; name: string }[] = [
     { id: "all", name: "Barchasi" },
@@ -202,6 +205,21 @@ export default function KatalogScreen() {
     if (ok) toggleLabelMode();
   }
 
+  /** Katalogni CSV qilib ulashish — tan narx faqat view_cost bo'lsa (S1). */
+  async function onExport() {
+    if (!shopId || exporting) return;
+    setExporting(true);
+    try {
+      const res = await exportProductsCsv({ shopId, includeCost: canViewCost });
+      if (res === "empty") toast.info("Eksport", "Katalogda mahsulot yo'q.");
+      if (res === "unavailable") toast.error("Eksport", "Ulashish bu qurilmada mavjud emas.");
+    } catch (e) {
+      toast.error("Eksport xatosi", e instanceof Error ? e.message : "Xatolik yuz berdi");
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
@@ -209,13 +227,33 @@ export default function KatalogScreen() {
           <Text className="text-2xl font-medium text-primary-deep">
             {labelMode ? `Yorliq: ${selected.size} ta` : "Mahsulotlar"}
           </Text>
-          <Pressable onPress={toggleLabelMode} hitSlop={10}>
-            <Ionicons
-              name={labelMode ? "close" : "pricetags-outline"}
-              size={24}
-              color={colors.primary}
-            />
-          </Pressable>
+          <View className="flex-row items-center gap-5">
+            {!labelMode && canManageProducts ? (
+              <Pressable
+                onPress={onExport}
+                hitSlop={10}
+                disabled={exporting}
+                accessibilityLabel="Katalogni CSV eksport qilish"
+              >
+                {exporting ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <Ionicons name="download-outline" size={24} color={colors.primary} />
+                )}
+              </Pressable>
+            ) : null}
+            <Pressable
+              onPress={toggleLabelMode}
+              hitSlop={10}
+              accessibilityLabel={labelMode ? "Yorliq rejimini yopish" : "Yorliq rejimi"}
+            >
+              <Ionicons
+                name={labelMode ? "close" : "pricetags-outline"}
+                size={24}
+                color={colors.primary}
+              />
+            </Pressable>
+          </View>
         </View>
 
         {/* Qidiruv + skaner + filter */}
