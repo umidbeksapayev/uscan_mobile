@@ -7,9 +7,6 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
-  Modal,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import { colors } from "@/theme/colors";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useActivePermissions } from "@/features/auth/use-memberships";
 import {
   useCategoriesWithCount,
@@ -50,25 +48,7 @@ function RenameSheet({
   const valid = name.trim().length > 0 && name.trim() !== category?.name;
 
   return (
-    <Modal visible={!!category} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <Pressable
-          onPress={onClose}
-          style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-        >
-          <View
-            onStartShouldSetResponder={() => true}
-            style={{
-              backgroundColor: colors.surface,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              padding: 20,
-              paddingBottom: 32,
-            }}
-          >
-            <View
-              style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line, marginBottom: 16 }}
-            />
+    <BottomSheet visible={!!category} onClose={onClose} keyboardAvoiding>
             <Text className="mb-3 text-lg font-medium text-ink">Kategoriya nomi</Text>
             <TextInput
               value={name}
@@ -91,10 +71,7 @@ function RenameSheet({
                 <Text className="text-base font-medium text-white">Saqlash</Text>
               )}
             </Pressable>
-          </View>
-        </Pressable>
-      </KeyboardAvoidingView>
-    </Modal>
+    </BottomSheet>
   );
 }
 

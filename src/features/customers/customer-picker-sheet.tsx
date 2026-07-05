@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from "react-native";
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency } from "@/lib/format";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useCustomersWithBalance, useCreateCustomer } from "./use-customers";
 
 export type PickedCustomer = { id: string; name: string };
@@ -46,23 +47,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-      >
-        <View
-          onStartShouldSetResponder={() => true}
-          style={{
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            padding: 20,
-            paddingBottom: 28,
-            maxHeight: "80%",
-          }}
-        >
-          <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line, marginBottom: 14 }} />
+    <BottomSheet visible={visible} onClose={onClose} contentStyle={{ maxHeight: "80%" }}>
           <Text className="mb-3 text-lg font-medium text-ink">Mijoz tanlash</Text>
 
           {adding ? (
@@ -173,8 +158,6 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
               )}
             </>
           )}
-        </View>
-      </Pressable>
-    </Modal>
+    </BottomSheet>
   );
 }

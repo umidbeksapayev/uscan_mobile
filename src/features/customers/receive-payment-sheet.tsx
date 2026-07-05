@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { Text, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatNumber } from "@/lib/format";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useRecordPayment } from "./use-customers";
 
 type Props = {
@@ -41,25 +42,7 @@ export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalanc
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-      <Pressable
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-      >
-        <View
-          onStartShouldSetResponder={() => true}
-          style={{
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            padding: 20,
-            paddingBottom: 28,
-          }}
-        >
-          <View
-            style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line, marginBottom: 16 }}
-          />
+    <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding>
           <Text className="mb-1 text-lg font-medium text-ink">To'lov qabul qilish</Text>
           <Text className="mb-3 text-sm text-muted">Joriy qarz: {formatCurrency(maxDebt)}</Text>
 
@@ -101,9 +84,6 @@ export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalanc
               <Text className="text-base font-semibold text-white">Qabul qilish</Text>
             )}
           </Pressable>
-        </View>
-      </Pressable>
-      </KeyboardAvoidingView>
-    </Modal>
+    </BottomSheet>
   );
 }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, Pressable } from "react-native";
 
 import { colors } from "@/theme/colors";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { formatCurrency, formatWeight, formatNumber } from "@/lib/format";
 import { kgFromAmount, amountFromKg } from "./weight-math";
 import type { Product } from "@/types/database";
@@ -53,33 +54,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
   const presets = mode === "som" ? SOM_PRESETS : KG_PRESETS;
 
   return (
-    <Modal visible={!!product} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-      <Pressable
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-      >
-        <View
-          onStartShouldSetResponder={() => true}
-          style={{
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            padding: 20,
-            paddingBottom: 32,
-          }}
-        >
-          <View
-            style={{
-              alignSelf: "center",
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              backgroundColor: colors.line,
-              marginBottom: 16,
-            }}
-          />
-
+    <BottomSheet visible={!!product} onClose={onClose} keyboardAvoiding>
           {product ? (
             <>
               <Text className="text-lg font-medium text-ink">{product.name}</Text>
@@ -152,9 +127,6 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
               </Pressable>
             </>
           ) : null}
-        </View>
-      </Pressable>
-      </KeyboardAvoidingView>
-    </Modal>
+    </BottomSheet>
   );
 }

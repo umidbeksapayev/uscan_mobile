@@ -1,8 +1,9 @@
-import { Modal, View, Text, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 
 import { colors } from "@/theme/colors";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { formatCurrency } from "@/lib/format";
 import { useQrPayment } from "./acquiring/use-qr-payment";
 import { acquiringStatusUI } from "./acquiring/acquiring-status";
@@ -24,19 +25,7 @@ export function QrPaymentSheet({ visible, shopId, items, amount, clientId, onPai
   const ui = acquiringStatusUI(status);
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-      >
-        <View
-          onStartShouldSetResponder={() => true}
-          style={{
-            backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
-            padding: 20, paddingBottom: 28, alignItems: "center",
-          }}
-        >
-          <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line, marginBottom: 16 }} />
+    <BottomSheet visible={visible} onClose={onClose} contentStyle={{ alignItems: "center" }}>
           <Text className="mb-1 text-lg font-medium text-ink">QR orqali to'lov</Text>
           <Text className="mb-4 text-2xl font-bold" style={{ color: colors.primary }}>{formatCurrency(amount)}</Text>
 
@@ -67,8 +56,6 @@ export function QrPaymentSheet({ visible, shopId, items, amount, clientId, onPai
               {status === "paid" ? "Yopish" : "Bekor qilish"}
             </Text>
           </Pressable>
-        </View>
-      </Pressable>
-    </Modal>
+    </BottomSheet>
   );
 }

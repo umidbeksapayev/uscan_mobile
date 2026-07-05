@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { colors } from "@/theme/colors";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { toast } from "@/lib/toast";
 import { formatNumber } from "@/lib/format";
 import { parseAmount } from "@/features/shift/shift-math";
@@ -87,23 +88,7 @@ export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-      >
-        <View
-          onStartShouldSetResponder={() => true}
-          style={{
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            padding: 20,
-            paddingBottom: 28,
-            gap: 10,
-          }}
-        >
-          <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line, marginBottom: 8 }} />
+    <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding contentStyle={{ gap: 10 }}>
           <Text className="mb-1 text-lg font-medium text-ink">
             {expense ? "Xarajatni tahrirlash" : "Yangi xarajat"}
           </Text>
@@ -180,8 +165,6 @@ export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
               <Text className="text-base font-medium text-danger">O'chirish</Text>
             </Pressable>
           ) : null}
-        </View>
-      </Pressable>
-    </Modal>
+    </BottomSheet>
   );
 }

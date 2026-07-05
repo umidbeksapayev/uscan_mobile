@@ -1,7 +1,8 @@
-import { View, Text, ScrollView, Pressable, Modal } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { colors } from "@/theme/colors";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import type { Membership } from "@/types/database";
 
 export function ShopSwitcherSheet({
@@ -18,31 +19,7 @@ export function ShopSwitcherSheet({
   onClose: () => void;
 }) {
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-      >
-        <View
-          onStartShouldSetResponder={() => true}
-          style={{
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            padding: 20,
-            paddingBottom: 28,
-          }}
-        >
-          <View
-            style={{
-              alignSelf: "center",
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              backgroundColor: colors.line,
-              marginBottom: 12,
-            }}
-          />
+    <BottomSheet visible={visible} onClose={onClose}>
           <Text className="mb-2 text-lg font-medium text-ink">Do'konni tanlang</Text>
           <ScrollView style={{ maxHeight: 380 }}>
             {memberships.map((m) => {
@@ -78,8 +55,6 @@ export function ShopSwitcherSheet({
               );
             })}
           </ScrollView>
-        </View>
-      </Pressable>
-    </Modal>
+    </BottomSheet>
   );
 }

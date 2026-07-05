@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { Text, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { toast } from "@/lib/toast";
 
 import { colors } from "@/theme/colors";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import type { Supplier } from "@/types/database";
 import { useCreateSupplier, useUpdateSupplier } from "./use-suppliers";
 
@@ -54,23 +55,7 @@ export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props)
   } as const;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-      >
-        <View
-          onStartShouldSetResponder={() => true}
-          style={{
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            padding: 20,
-            paddingBottom: 28,
-            gap: 10,
-          }}
-        >
-          <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line, marginBottom: 8 }} />
+    <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding contentStyle={{ gap: 10 }}>
           <Text className="mb-1 text-lg font-medium text-ink">
             {supplier ? "Ta'minotchini tahrirlash" : "Yangi ta'minotchi"}
           </Text>
@@ -112,8 +97,6 @@ export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props)
               <Text className="text-base font-semibold text-white">Saqlash</Text>
             )}
           </Pressable>
-        </View>
-      </Pressable>
-    </Modal>
+    </BottomSheet>
   );
 }
