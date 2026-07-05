@@ -13,8 +13,10 @@ import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
+import { LANGUAGES, setLanguage, type LangCode } from "@/i18n";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useActiveMembership } from "@/features/auth/use-memberships";
 import { PERMISSION_LABELS } from "@/features/auth/permissions";
@@ -98,6 +100,7 @@ export default function SettingsScreen() {
   const active = useActiveMembership();
   const shopId = active?.shop.id;
   const isOwner = active?.role === "owner";
+  const { t, i18n } = useTranslation();
 
   const { data: staff, isLoading, isError, error } = useStaff(isOwner ? shopId : undefined);
   const addMut = useAddMember(shopId);
@@ -153,7 +156,7 @@ export default function SettingsScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
-        <Text className="text-xl font-semibold text-ink">Sozlamalar</Text>
+        <Text className="text-xl font-semibold text-ink">{t("settings.title")}</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
@@ -169,8 +172,38 @@ export default function SettingsScreen() {
           </View>
           <View className="flex-1">
             <Text className="text-base font-medium text-ink">{active?.shop.name ?? "Do'kon"}</Text>
-            <Text className="text-sm text-muted">{isOwner ? "Egasi" : "Kassir"}</Text>
+            <Text className="text-sm text-muted">{isOwner ? t("staff.owner") : t("staff.cashier")}</Text>
           </View>
+        </View>
+
+        {/* Til (P4) — MMKV'da saqlanadi, darhol qo'llanadi */}
+        <Text className="mb-2 ml-1 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>
+          {t("language.label").toUpperCase()}
+        </Text>
+        <View className="mb-5 flex-row gap-2">
+          {LANGUAGES.map((l) => {
+            const activeLang = i18n.language === l.code;
+            return (
+              <Pressable
+                key={l.code}
+                onPress={() => setLanguage(l.code as LangCode)}
+                accessibilityLabel={l.label}
+                className="flex-1 items-center justify-center rounded-2xl"
+                style={{
+                  height: 48,
+                  backgroundColor: activeLang ? colors.primary : colors.surface,
+                  borderWidth: 1,
+                  borderColor: activeLang ? colors.primary : colors.line,
+                }}
+              >
+                <Text
+                  style={{ fontSize: 14, fontWeight: "500", color: activeLang ? "#fff" : colors.ink }}
+                >
+                  {l.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         {/* Printer */}

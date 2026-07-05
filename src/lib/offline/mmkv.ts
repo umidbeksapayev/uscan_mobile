@@ -12,6 +12,7 @@ export const MetaKeys = {
   queueCount: "queueCount",
   syncRunning: "syncRunning",
   activeShopId: "activeShopId",
+  language: "language", // i18n (P4): uz-Latn | uz-Cyrl | ru
 } as const;
 
 export const meta = {

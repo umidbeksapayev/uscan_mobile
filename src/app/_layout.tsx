@@ -1,4 +1,5 @@
 import "@/global.css";
+import "@/i18n"; // i18next init (til MMKV'dan yuklanadi) — birinchi renderdan oldin
 
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
