@@ -27,6 +27,7 @@ export default function RootLayout() {
                 <Stack.Screen name="product-form" />
                 <Stack.Screen name="statistika" />
                 <Stack.Screen name="shift-close" />
+                <Stack.Screen name="expenses" />
                 <Stack.Screen name="nasiya" />
                 <Stack.Screen name="customer-form" />
                 <Stack.Screen name="customer-detail" />

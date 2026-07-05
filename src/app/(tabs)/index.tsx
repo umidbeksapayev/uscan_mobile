@@ -6,9 +6,11 @@ import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { colors } from "@/theme/colors";
-import { formatNumber } from "@/lib/format";
+import { formatCurrency, formatNumber } from "@/lib/format";
 import { Logo } from "@/components/logo";
-import { useActiveMembership } from "@/features/auth/use-memberships";
+import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
+import { useExpenses } from "@/features/expenses/use-expenses";
+import { expensesTotal, netProfit } from "@/features/expenses/expense-math";
 import {
   useSalesTrend,
   useTopProducts,
@@ -47,6 +49,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const shop = useActiveMembership()?.shop;
+  const { isOwner } = useActivePermissions();
   const initials = (shop?.name ?? "uS").slice(0, 2).toUpperCase();
 
   // 2× oyna: joriy + oldingi davr (foiz o'zgarish uchun)
@@ -59,6 +62,8 @@ export default function HomeScreen() {
   const { data: top, isLoading: topLoading } = useTopProducts(period, 5);
   const { data: slow } = useSlowProducts(period, 5);
   const { data: lowStock } = useLowStockProducts();
+  // Xarajatlar (P5) — hook faqat egasida so'rov yuboradi (RLS ham owner-only)
+  const { data: expenses } = useExpenses(period);
 
   // Kam qoldiq bo'lsa — ertaga 08:00 ga lokal eslatma (kuniga 1 marta, jim:
   // ruxsat faqat Sozlamalarda so'raladi; bermagan bo'lsa hech narsa qilmaydi)
@@ -72,6 +77,7 @@ export default function HomeScreen() {
   const cur = trendTotals(current);
   const prev = trendTotals(previous);
   const deltaSuffix = period === 1 ? "kechaga" : "oldingi davrga";
+  const expTotal = expensesTotal(expenses ?? []);
 
   async function onRefresh() {
     setRefreshing(true);
@@ -151,7 +157,7 @@ export default function HomeScreen() {
             />
             <GradientStat
               tone={GRAD.navy}
-              label="SOF FOYDA"
+              label="SAVDO FOYDASI"
               value={formatNumber(cur.profit)}
               suffix="so'm"
               icon="trending-up-outline"
@@ -171,6 +177,33 @@ export default function HomeScreen() {
             />
           </View>
         )}
+
+        {/* Sof foyda (xarajatlardan keyin) — faqat egasi (P5) */}
+        {isOwner && !isError ? (
+          <Pressable onPress={() => router.push("/expenses")}>
+            <Card>
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="wallet-outline" size={16} color={colors.danger} />
+                  <Text className="text-sm text-muted">Xarajatlar</Text>
+                </View>
+                <Text className="text-sm font-semibold" style={{ color: colors.danger }}>
+                  −{formatCurrency(expTotal)}
+                </Text>
+              </View>
+              <View className="my-2.5 border-t border-line" />
+              <View className="flex-row items-center justify-between">
+                <Text className="text-sm font-medium text-ink">Sof foyda (xarajatlardan keyin)</Text>
+                <Text
+                  className="text-base font-semibold"
+                  style={{ color: netProfit(cur.profit, expTotal) < 0 ? colors.danger : colors.success }}
+                >
+                  {formatCurrency(netProfit(cur.profit, expTotal))}
+                </Text>
+              </View>
+            </Card>
+          </Pressable>
+        ) : null}
 
         {/* Eng ko'p sotilgan */}
         <View>

@@ -36,11 +36,12 @@
 
 ## 3. Sprint 6 — Kassa/smena nazorati (~5–6 kun)
 
-> **Holat:** P3 (Z-hisobot) `feat/shift-close` PR'da bajarildi — migration
-> `030_shift_close.sql` (web repo, qo'lda ishga tushirilishi kerak) +
-> `features/shift` + "Kassani yopish" ekrani. Qo'shimcha: `sales.payment_method`
-> ustuni kiritildi (naqd/karta/QR/nasiya endi DB'da ajratiladi). P5 (xarajatlar)
-> — keyingi PR.
+> **Holat:** Sprint 6 BAJARILDI. P3 (Z-hisobot) — `feat/shift-close` PR:
+> migration `030_shift_close.sql` + `features/shift` + "Kassani yopish" ekrani;
+> qo'shimcha `sales.payment_method` ustuni kiritildi. P5 (xarajatlar) —
+> `feat/expenses` PR: migration `031_expenses.sql` (owner-only RLS) +
+> `features/expenses` + Xarajatlar ekrani + dashboardda "Sof foyda
+> (xarajatlardan keyin)". Ikkala migration web repo'da, qo'lda ishga tushiriladi.
 
 **Goal:** Kun oxirida kassani yopish (Z-hisobot) — kutilgan naqd vs sanalgan
 naqd, farqni qayd etish. Vaqt yetsa — xarajat kundaligi.

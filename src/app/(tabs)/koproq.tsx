@@ -30,11 +30,14 @@ type MenuItem = {
   purchaseGated?: boolean;
   /** manage_products ruxsati shart (yo'q bo'lsa menyuda ko'rinmaydi). */
   productsGated?: boolean;
+  /** Faqat egasi (yo'q bo'lsa menyuda ko'rinmaydi). */
+  ownerGated?: boolean;
 };
 
 const MENU: MenuItem[] = [
   { icon: "stats-chart-outline", label: "Statistika", route: "/statistika" }, // F6 — to'liq tahlil
   { icon: "calculator-outline", label: "Kassani yopish", route: "/shift-close" }, // Sprint 6 — Z-hisobot
+  { icon: "wallet-outline", label: "Xarajatlar", route: "/expenses", ownerGated: true }, // Sprint 6 — P5
   { icon: "book-outline", label: "Nasiya daftari", route: "/nasiya", debtGated: true }, // F7a
   { icon: "cube-outline", label: "Kirim / Ta'minotchi", route: "/supply", purchaseGated: true }, // F7b
   { icon: "pricetags-outline", label: "Kategoriyalar", route: "/categories", productsGated: true }, // F8
@@ -49,7 +52,7 @@ export default function KoproqScreen() {
   const active = useActiveMembership();
   const setActiveShopId = useActiveShopStore((s) => s.setActiveShopId);
   const [switcherOpen, setSwitcherOpen] = useState(false);
-  const { canManageDebt, canPurchase, canManageProducts } = useActivePermissions();
+  const { canManageDebt, canPurchase, canManageProducts, isOwner } = useActivePermissions();
   const pendingCount = useOfflineStore((s) => s.pendingCount);
   const canSwitchShop = (memberships?.length ?? 0) > 1;
   // Ruxsatga qarab gate qilingan bandlarni yashiramiz
@@ -57,7 +60,8 @@ export default function KoproqScreen() {
     (m) =>
       (!m.debtGated || canManageDebt) &&
       (!m.purchaseGated || canPurchase) &&
-      (!m.productsGated || canManageProducts),
+      (!m.productsGated || canManageProducts) &&
+      (!m.ownerGated || isOwner),
   );
 
   function onItem(item: MenuItem) {
