@@ -33,7 +33,7 @@ export async function submitSale(params: {
 
   if (await isOnlineNow()) {
     try {
-      const res = await processSaleRpc({ shopId, items: payload, clientId, customerId, paidAmount });
+      const res = await processSaleRpc({ shopId, items: payload, clientId, customerId, paidAmount, method });
       await decrementLocal();
       return res;
     } catch (e) {

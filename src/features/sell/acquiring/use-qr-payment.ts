@@ -70,7 +70,7 @@ export function useQrPayment(args: {
     const s = mapIntentStatus(data.status);
     if (s === "paid" && !finalizing.current) {
       finalizing.current = true;
-      processSaleRpc({ shopId, items, clientId })
+      processSaleRpc({ shopId, items, clientId, method: "qr" })
         .then(async (res) => {
           await markIntentFinalized(intentId).catch(() => {});
           setStatus("paid");

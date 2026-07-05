@@ -89,14 +89,14 @@ versiyasi alohida loyihada; ikkalasi ham **bir xil Supabase backend**ga ulanadi.
 - **Qaytarish faqat egasiga** (role gating — `returns` RLS egasi-only)
 - Backend: migration 014 allaqachon shared DB'da (yangi migratsiya yo'q)
 
-**Test holati:** 34 unit test (format, auth-errors, barcode, cart-total, payment-math,
-weight-math, low-stock, uuid, returnable). CI: har push'da `tsc` + `jest`.
+**Test holati:** 191 test case / 30 fayl (jest) + Maestro E2E (login,
+sell-checkout). CI: har push'da `tsc` + `jest`.
 
 ---
 
-## ⏳ Keyingi ishlar (F6–F11)
+## ✅ F6–F11 (barchasi bajarilgan)
 
-### F6 — Dashboard + Hisobot *(reja tayyor)*
+### F6 — Dashboard + Hisobot ✅
 - "Bosh" ekranini qayta qurish (hozir Faza-0 placeholder)
 - **Bugun** stat kartalari: tushum · foyda · sotuv soni · kam qoldiq
 - Davr toggle (7 / 30 kun) + **trend grafigi** (react-native-svg)
@@ -104,14 +104,15 @@ weight-math, low-stock, uuid, returnable). CI: har push'da `tsc` + `jest`.
 - RPC'lar shared DB'da bor: `get_dashboard_stats`, `get_sales_trend`,
   `get_top_products`, `get_slow_products` (yangi migratsiya yo'q)
 
-### F7 — Nasiya (qarz daftari) + Kirim
+### F7 — Nasiya (qarz daftari) + Kirim ✅
 - Mijozlar + nasiya qoldig'i, qarz to'lash (migration 013/025/026)
 - Checkout'dagi "Nasiya" to'lovni mijozga bog'lash
 - Kirim / ta'minotchi (migration 015)
 
-### F8 — Kategoriya + Sozlama + RBAC + "Ko'proq"
+### F8 — Kategoriya + Sozlama + RBAC + "Ko'proq" ✅
 - Kategoriya CRUD (migration 018)
-- Sozlamalar ekrani, do'kon almashtirish, kassir rollari/ruxsatlari (016/017)
+- Sozlamalar ekrani, do'kon almashtirish (multi-shop switcher), kassir
+  rollari/ruxsatlari (016/017)
 - "Ko'proq" menyusini to'ldirish
 
 ### F9 — Offline-first ✅
@@ -132,6 +133,21 @@ weight-math, low-stock, uuid, returnable). CI: har push'da `tsc` + `jest`.
 - ✅ Maxfiylik siyosati + listing + Data Safety qoralama: `docs/release/`
 - ⏳ Siz: Play/Apple akkaunt, env set, build→qo'lda yuklash, skrinshot, review
 - ⚠️ iOS Bluetooth termal printer ishlamaydi (Apple MFi) — iOS'da AirPrint/PDF; E2E (Maestro) keyin
+
+---
+
+## 🔄 F11'dan keyin — Audit sprintlari (2026-07)
+
+To'liq audit: `docs/AUDIT_AND_ROADMAP_2026-07.md` · Joriy reja: `docs/SPRINT_PLAN_2026-07.md`
+
+- ✅ **Sprint 1** — xavfsizlik (`cost_price` oqishi S1–S3) + texnik qarz (#15, #17)
+- ✅ **Sprint 2** — multi-shop switcher (#19), tarixdan reprint (#18), parol tiklash (#20)
+- ✅ **Sprint 3** — tezkor sotuv + tezkor narx (#22), narx yorlig'i (#16)
+- ✅ **Sprint 4** — CSV ommaviy import (#23)
+- ✅ **Sprint 5** — bildirishnomalar: Telegram xulosa + lokal eslatma + kassir hisoboti (#24)
+- ⏳ **Sprint 6** — kassa/smena yopish (Z-hisobot) + xarajat kundaligi (migration 030/031 kerak)
+- ⏳ **Sprint 7** — i18n (kirill/rus), umumiy BottomSheet, a11y, katalog CSV export, dark mode
+- ⏳ **Sprint 8 (backlog)** — EAS remote push, feedback forma (028 backend tayyor), mayda refactorlar
 
 ---
 

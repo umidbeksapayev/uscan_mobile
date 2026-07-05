@@ -30,8 +30,10 @@ export async function processSaleRpc(params: {
   clientId: string;
   customerId?: string | null;
   paidAmount?: number | null;
+  /** To'lov usuli (030: kassa yopish hisobida ishlatiladi). null = eski konvensiya (naqd). */
+  method?: string | null;
 }): Promise<SaleResult> {
-  const { shopId, items, clientId, customerId = null, paidAmount = null } = params;
+  const { shopId, items, clientId, customerId = null, paidAmount = null, method = null } = params;
   const { data, error } = await supabase.rpc("process_sale_cart", {
     p_shop_id: shopId,
     p_items: items,
@@ -39,6 +41,7 @@ export async function processSaleRpc(params: {
     p_customer_id: customerId,
     p_paid_amount: paidAmount,
     p_client_id: clientId,
+    p_payment_method: method,
   });
   if (error) throw new Error(error.message);
   return data as SaleResult;

@@ -54,7 +54,11 @@ npm start              # Expo dev server (Expo Go yoki dev build)
 
 ## Roadmap
 
-F0 Poydevor ✅ · F1 Auth · F2 Katalog · F3 Sotuv+Skaner · F4 Checkout (MVP) ·
-F5 Tarix+Qaytarish · F6 Dashboard+Hisobot · F7 Nasiya+Kirim · F8 Kategoriya+RBAC ·
-F9 Offline ✅ · F10 Print+QR ✅ (expo-print + Bluetooth ESC-POS chek + QR ekvayring) ·
-F11 Release ✅ config (eas.json AAB/IPA + expo-updates OTA + production env; Play+App Store qo'lda yuklash)
+**F0–F11 barchasi bajarilgan ✅** (F10: expo-print + Bluetooth ESC-POS + QR
+ekvayring; F11: eas.json AAB/IPA + expo-updates OTA; Play+App Store qo'lda yuklash).
+
+F11'dan keyin audit sprintlari (`docs/AUDIT_AND_ROADMAP_2026-07.md`):
+**Sprint 1–5 ✅** (xavfsizlik, switcher/reprint/parol, tezkor sotuv, CSV import,
+bildirishnomalar). **Joriy reja:** `docs/SPRINT_PLAN_2026-07.md` —
+Sprint 6 (kassa yopish/Z-hisobot + xarajatlar, migration 030/031) ·
+Sprint 7 (i18n kirill/rus, BottomSheet, a11y, katalog export) · Sprint 8 backlog.
