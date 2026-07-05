@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -18,6 +18,7 @@ import { printReceipt } from "@/features/print/print-receipt";
 import type { ReceiptData, ReceiptLine } from "@/features/print/types";
 import { QrPaymentSheet } from "./qr-payment-sheet";
 import { acquiringHasCredentials } from "./acquiring/acquiring-api";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 
 const METHODS: { id: PaymentMethod; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { id: "cash", label: "Naqd", icon: "cash-outline" },
@@ -155,23 +156,15 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
     void printReceipt(data);
   }
 
-  const sheet = {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    paddingBottom: 32,
-  } as const;
-
   return (
     <>
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-      <Pressable
-        onPress={phase === "form" ? onClose : undefined}
-        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-      >
-        <View onStartShouldSetResponder={() => true} style={sheet}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      keyboardAvoiding
+      dismissOnBackdrop={phase === "form"}
+      handle={phase !== "success"}
+    >
           {phase === "success" ? (
             <View className="items-center" style={{ paddingVertical: 8 }}>
               <View
@@ -222,17 +215,6 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
             </View>
           ) : (
             <>
-              <View
-                style={{
-                  alignSelf: "center",
-                  width: 40,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: colors.line,
-                  marginBottom: 16,
-                }}
-              />
-
               <Text className="text-center text-xs text-muted" style={{ letterSpacing: 0.5 }}>
                 JAMI TO'LOV
               </Text>
@@ -386,10 +368,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
               </Pressable>
             </>
           )}
-        </View>
-      </Pressable>
-      </KeyboardAvoidingView>
-    </Modal>
+    </BottomSheet>
 
     {shopId ? (
       <CustomerPickerSheet

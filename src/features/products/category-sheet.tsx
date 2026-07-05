@@ -1,7 +1,8 @@
-import { View, Text, ScrollView, Pressable, Modal } from "react-native";
+import { Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { colors } from "@/theme/colors";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import type { Category } from "@/types/database";
 
 export function CategorySheet({
@@ -22,31 +23,7 @@ export function CategorySheet({
     ...categories.map((c) => ({ id: c.id, name: c.name })),
   ];
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-      >
-        <View
-          onStartShouldSetResponder={() => true}
-          style={{
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            padding: 20,
-            paddingBottom: 28,
-          }}
-        >
-          <View
-            style={{
-              alignSelf: "center",
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              backgroundColor: colors.line,
-              marginBottom: 12,
-            }}
-          />
+    <BottomSheet visible={visible} onClose={onClose}>
           <Text className="mb-2 text-lg font-medium text-ink">Kategoriya</Text>
           <ScrollView style={{ maxHeight: 380 }}>
             {options.map((o) => {
@@ -72,8 +49,6 @@ export function CategorySheet({
               );
             })}
           </ScrollView>
-        </View>
-      </Pressable>
-    </Modal>
+    </BottomSheet>
   );
 }

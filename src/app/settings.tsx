@@ -7,10 +7,7 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
-  Modal,
   Switch,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import { colors } from "@/theme/colors";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useActiveMembership } from "@/features/auth/use-memberships";
 import { PERMISSION_LABELS } from "@/features/auth/permissions";
 import { useStaff, useAddMember, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
@@ -49,25 +47,7 @@ function PermissionsSheet({
   }
 
   return (
-    <Modal visible={!!member} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <Pressable
-          onPress={onClose}
-          style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-        >
-          <View
-            onStartShouldSetResponder={() => true}
-            style={{
-              backgroundColor: colors.surface,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              padding: 20,
-              paddingBottom: 28,
-            }}
-          >
-            <View
-              style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line, marginBottom: 16 }}
-            />
+    <BottomSheet visible={!!member} onClose={onClose} keyboardAvoiding>
             <Text className="text-lg font-medium text-ink" numberOfLines={1}>
               {member?.email}
             </Text>
@@ -109,10 +89,7 @@ function PermissionsSheet({
               <Ionicons name="person-remove-outline" size={18} color={colors.danger} />
               <Text className="text-base font-medium text-danger">Xodimni chiqarish</Text>
             </Pressable>
-          </View>
-        </Pressable>
-      </KeyboardAvoidingView>
-    </Modal>
+    </BottomSheet>
   );
 }
 
