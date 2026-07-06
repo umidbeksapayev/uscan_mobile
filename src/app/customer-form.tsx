@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { useActiveShopId } from "@/features/auth/use-memberships";
@@ -41,6 +42,7 @@ function Field({
 
 export default function CustomerFormScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const shopId = useActiveShopId();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const editing = !!id;
@@ -74,7 +76,7 @@ export default function CustomerFormScreen() {
       }
       router.back();
     } catch (e) {
-      toast.error("Xatolik", e instanceof Error ? e.message : "Saqlab bo'lmadi");
+      toast.error(t("common.error"), e instanceof Error ? e.message : t("common.saveFailed"));
     }
   }
 
@@ -85,7 +87,7 @@ export default function CustomerFormScreen() {
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
         <Text className="text-xl font-semibold text-ink">
-          {editing ? "Mijozni tahrirlash" : "Yangi mijoz"}
+          {editing ? t("customers.editTitle") : t("customers.newCustomer")}
         </Text>
       </View>
 
@@ -95,15 +97,25 @@ export default function CustomerFormScreen() {
         enableOnAndroid
         extraScrollHeight={24}
       >
-        <Field label="Ism *" value={name} onChangeText={setName} placeholder="Mijoz ismi" />
         <Field
-          label="Telefon"
+          label={`${t("customers.name")} *`}
+          value={name}
+          onChangeText={setName}
+          placeholder={t("customers.namePlaceholder")}
+        />
+        <Field
+          label={t("customers.phone")}
           value={phone}
           onChangeText={setPhone}
-          placeholder="+998 90 123 45 67"
+          placeholder={t("customers.phonePlaceholder")}
           keyboardType="phone-pad"
         />
-        <Field label="Izoh" value={note} onChangeText={setNote} placeholder="Ixtiyoriy" />
+        <Field
+          label={t("customers.note")}
+          value={note}
+          onChangeText={setNote}
+          placeholder={t("common.optional")}
+        />
 
         <Pressable
           disabled={!canSave}
@@ -114,7 +126,7 @@ export default function CustomerFormScreen() {
           {pending ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text className="text-base font-semibold text-white">Saqlash</Text>
+            <Text className="text-base font-semibold text-white">{t("common.save")}</Text>
           )}
         </Pressable>
       </KeyboardAwareScrollView>

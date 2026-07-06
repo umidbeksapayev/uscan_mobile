@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatDateTime } from "@/lib/format";
@@ -28,19 +29,22 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 function SaleRow({ s }: { s: CustomerSaleRow }) {
+  const { t } = useTranslation();
   const debt = Math.max(0, s.total_revenue - s.paid_amount);
   return (
     <View className="flex-row items-center justify-between py-2" style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}>
       <View>
-        <Text className="text-sm text-ink">{s.item_count} mahsulot</Text>
+        <Text className="text-sm text-ink">{t("history.itemCount", { count: s.item_count })}</Text>
         <Text className="text-xs text-muted">{formatDateTime(s.sold_at)}</Text>
       </View>
       <View className="items-end">
         <Text className="text-sm font-medium text-ink">{formatCurrency(s.total_revenue)}</Text>
         {debt > 0 ? (
-          <Text className="text-xs" style={{ color: "#B42318" }}>qarz: {formatCurrency(debt)}</Text>
+          <Text className="text-xs" style={{ color: "#B42318" }}>
+            {t("customers.debt").toLowerCase()}: {formatCurrency(debt)}
+          </Text>
         ) : (
-          <Text className="text-xs text-success">to'langan</Text>
+          <Text className="text-xs text-success">{t("customers.paidShort")}</Text>
         )}
       </View>
     </View>
@@ -61,6 +65,7 @@ function PaymentRow({ p }: { p: CustomerPayment }) {
 
 export default function CustomerDetailScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const shopId = useActiveShopId();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -91,7 +96,7 @@ export default function CustomerDetailScreen() {
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
         <Text className="flex-1 text-xl font-semibold text-ink" numberOfLines={1}>
-          {customer?.name ?? "Mijoz"}
+          {customer?.name ?? t("customers.fallback")}
         </Text>
         <Pressable
           onPress={() => router.push({ pathname: "/customer-form", params: { id: String(id) } })}
@@ -109,7 +114,12 @@ export default function CustomerDetailScreen() {
         {/* Balans */}
         <View className="rounded-2xl p-4" style={{ backgroundColor: owes ? "#FDECEC" : colors.primaryTint }}>
           <Text className="text-xs" style={{ color: owes ? "#B42318" : colors.primary, letterSpacing: 0.5 }}>
-            {owes ? "QARZ" : balance < 0 ? "HAQDOR" : "QARZSIZ"}
+            {(owes
+              ? t("customers.debt")
+              : balance < 0
+                ? t("customers.creditor")
+                : t("customers.settled")
+            ).toUpperCase()}
           </Text>
           <Text
             className="mt-1 text-3xl font-bold"
@@ -126,17 +136,17 @@ export default function CustomerDetailScreen() {
           <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} />
         ) : (
           <>
-            <Card title="Sotuvlar tarixi">
+            <Card title={t("customers.salesHistory")}>
               {(sales?.length ?? 0) === 0 ? (
-                <Text className="py-2 text-sm text-muted">Sotuv yo'q</Text>
+                <Text className="py-2 text-sm text-muted">{t("customers.noSalesShort")}</Text>
               ) : (
                 sales!.map((s) => <SaleRow key={s.id} s={s} />)
               )}
             </Card>
 
-            <Card title="To'lovlar tarixi">
+            <Card title={t("customers.paymentsHistory")}>
               {(payments?.length ?? 0) === 0 ? (
-                <Text className="py-2 text-sm text-muted">To'lov yo'q</Text>
+                <Text className="py-2 text-sm text-muted">{t("customers.noPaymentsShort")}</Text>
               ) : (
                 payments!.map((p) => <PaymentRow key={p.id} p={p} />)
               )}
@@ -153,7 +163,7 @@ export default function CustomerDetailScreen() {
           style={{ height: 54, gap: 8 }}
         >
           <Ionicons name="cash-outline" size={20} color="#fff" />
-          <Text className="text-base font-semibold text-white">To'lov qabul qilish</Text>
+          <Text className="text-base font-semibold text-white">{t("customers.recordPayment")}</Text>
         </Pressable>
       </View>
 

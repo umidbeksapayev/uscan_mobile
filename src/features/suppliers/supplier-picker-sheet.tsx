@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from "react-native";
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Props) {
+  const { t } = useTranslation();
   const { data: suppliers, isLoading } = useSuppliers();
   const createMut = useCreateSupplier();
   const [search, setSearch] = useState("");
@@ -40,24 +42,24 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
       setNewPhone("");
       onSelect({ id: s.id, name: s.name });
     } catch (e) {
-      toast.error("Xatolik", e instanceof Error ? e.message : "Qo'shib bo'lmadi");
+      toast.error(t("common.error"), e instanceof Error ? e.message : t("common.addFailed"));
     }
   }
 
   return (
     <BottomSheet visible={visible} onClose={onClose} contentStyle={{ maxHeight: "80%" }}>
-          <Text className="mb-3 text-lg font-medium text-ink">Ta'minotchi tanlash</Text>
+          <Text className="mb-3 text-lg font-medium text-ink">{t("suppliers.pickTitle")}</Text>
 
           {adding ? (
             <View style={{ gap: 10 }}>
-              <TextInput value={newName} onChangeText={setNewName} placeholder="Nomi *" placeholderTextColor={colors.tabInactive} className="rounded-2xl border border-line bg-bg px-4 text-base text-ink" style={{ height: 50 }} autoFocus />
-              <TextInput value={newPhone} onChangeText={setNewPhone} placeholder="Telefon (ixtiyoriy)" placeholderTextColor={colors.tabInactive} keyboardType="phone-pad" className="rounded-2xl border border-line bg-bg px-4 text-base text-ink" style={{ height: 50 }} />
+              <TextInput value={newName} onChangeText={setNewName} placeholder={`${t("suppliers.name")} *`} placeholderTextColor={colors.tabInactive} className="rounded-2xl border border-line bg-bg px-4 text-base text-ink" style={{ height: 50 }} autoFocus />
+              <TextInput value={newPhone} onChangeText={setNewPhone} placeholder={`${t("suppliers.phone")} (${t("common.optional").toLowerCase()})`} placeholderTextColor={colors.tabInactive} keyboardType="phone-pad" className="rounded-2xl border border-line bg-bg px-4 text-base text-ink" style={{ height: 50 }} />
               <View className="flex-row gap-3">
                 <Pressable onPress={() => setAdding(false)} className="flex-1 items-center justify-center rounded-2xl bg-bg" style={{ height: 50, borderWidth: 1, borderColor: colors.line }}>
-                  <Text className="text-base font-medium text-muted">Bekor</Text>
+                  <Text className="text-base font-medium text-muted">{t("common.cancel")}</Text>
                 </Pressable>
                 <Pressable disabled={!newName.trim() || createMut.isPending} onPress={onQuickAdd} className="flex-1 flex-row items-center justify-center rounded-2xl" style={{ height: 50, backgroundColor: colors.kirim, opacity: !newName.trim() || createMut.isPending ? 0.5 : 1 }}>
-                  {createMut.isPending ? <ActivityIndicator color="#fff" /> : <Text className="text-base font-semibold text-white">Qo'shish</Text>}
+                  {createMut.isPending ? <ActivityIndicator color="#fff" /> : <Text className="text-base font-semibold text-white">{t("common.add")}</Text>}
                 </Pressable>
               </View>
             </View>
@@ -65,18 +67,18 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
             <>
               <View className="mb-2 flex-row items-center gap-2 rounded-2xl border border-line bg-bg px-4" style={{ height: 46 }}>
                 <Ionicons name="search" size={18} color={colors.tabInactive} />
-                <TextInput value={search} onChangeText={setSearch} placeholder="Nom yoki telefon..." placeholderTextColor={colors.tabInactive} className="flex-1 text-base text-ink" style={{ height: 46 }} autoCapitalize="none" />
+                <TextInput value={search} onChangeText={setSearch} placeholder={t("suppliers.searchPlaceholder")} placeholderTextColor={colors.tabInactive} className="flex-1 text-base text-ink" style={{ height: 46 }} autoCapitalize="none" />
               </View>
 
               <Pressable onPress={() => setAdding(true)} className="mb-2 flex-row items-center gap-2 rounded-2xl px-4 py-3" style={{ backgroundColor: colors.kirimTint }}>
                 <Ionicons name="add-circle" size={18} color={colors.kirim} />
-                <Text className="text-base font-medium" style={{ color: colors.kirim }}>Yangi ta'minotchi</Text>
+                <Text className="text-base font-medium" style={{ color: colors.kirim }}>{t("suppliers.newSupplier")}</Text>
               </Pressable>
 
               {/* Ta'minotchisiz kirim */}
               <Pressable onPress={() => onSelect(null)} className="mb-1 flex-row items-center gap-2 py-2.5">
                 <Ionicons name="remove-circle-outline" size={20} color={colors.muted} />
-                <Text className="text-base text-muted">Ta'minotchisiz</Text>
+                <Text className="text-base text-muted">{t("purchases.noSupplier")}</Text>
               </Pressable>
 
               {isLoading ? (
@@ -87,7 +89,7 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                   keyExtractor={(s) => s.id}
                   keyboardShouldPersistTaps="handled"
                   style={{ maxHeight: 300 }}
-                  ListEmptyComponent={<Text className="py-6 text-center text-sm text-muted">{search ? "Topilmadi" : "Hali ta'minotchi yo'q"}</Text>}
+                  ListEmptyComponent={<Text className="py-6 text-center text-sm text-muted">{search ? t("suppliers.notFound") : t("suppliers.empty")}</Text>}
                   renderItem={({ item }) => (
                     <Pressable onPress={() => onSelect({ id: item.id, name: item.name })} className="flex-row items-center gap-3 py-2.5" style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}>
                       <View className="h-9 w-9 items-center justify-center rounded-full" style={{ backgroundColor: colors.kirimTint }}>

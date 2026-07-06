@@ -3,6 +3,7 @@ import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { useActiveShopId } from "@/features/auth/use-memberships";
@@ -12,6 +13,7 @@ import type { Supplier } from "@/types/database";
 
 export default function SuppliersScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const shopId = useActiveShopId();
   const { data: suppliers, isLoading, refetch, isRefetching } = useSuppliers();
   const [editing, setEditing] = useState<Supplier | null>(null);
@@ -32,7 +34,7 @@ export default function SuppliersScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
-        <Text className="text-xl font-semibold text-ink">Ta'minotchilar</Text>
+        <Text className="text-xl font-semibold text-ink">{t("suppliers.title")}</Text>
       </View>
 
       {isLoading ? (
@@ -44,7 +46,7 @@ export default function SuppliersScreen() {
           <View className="h-20 w-20 items-center justify-center rounded-3xl" style={{ backgroundColor: colors.kirimTint }}>
             <Ionicons name="people-outline" size={36} color={colors.kirim} />
           </View>
-          <Text className="text-center text-base text-muted">Hali ta'minotchi yo'q. "+" bilan qo'shing.</Text>
+          <Text className="text-center text-base text-muted">{t("suppliers.emptyAddHint")}</Text>
         </View>
       ) : (
         <FlatList

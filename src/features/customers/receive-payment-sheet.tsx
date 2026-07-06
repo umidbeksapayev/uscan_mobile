@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { useTranslation } from "react-i18next";
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -16,6 +17,7 @@ type Props = {
 
 /** Qarz to'lovini qabul qilish (record_customer_payment, optimistik). */
 export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalance, onClose }: Props) {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const mutation = useRecordPayment(customerId);
 
@@ -43,8 +45,10 @@ export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalanc
 
   return (
     <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding>
-          <Text className="mb-1 text-lg font-medium text-ink">To'lov qabul qilish</Text>
-          <Text className="mb-3 text-sm text-muted">Joriy qarz: {formatCurrency(maxDebt)}</Text>
+          <Text className="mb-1 text-lg font-medium text-ink">{t("customers.recordPayment")}</Text>
+          <Text className="mb-3 text-sm text-muted">
+            {t("customers.currentDebt")}: {formatCurrency(maxDebt)}
+          </Text>
 
           <TextInput
             value={text}
@@ -62,13 +66,15 @@ export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalanc
               className="mt-2 self-start rounded-xl bg-bg px-4 py-2"
               style={{ borderWidth: 1, borderColor: colors.line }}
             >
-              <Text className="text-sm font-medium text-ink">Hammasi ({formatNumber(maxDebt)})</Text>
+              <Text className="text-sm font-medium text-ink">
+                {t("common.all")} ({formatNumber(maxDebt)})
+              </Text>
             </Pressable>
           ) : null}
 
           {mutation.isError ? (
             <Text className="mt-3 text-center text-sm text-danger">
-              {(mutation.error as Error)?.message ?? "Xatolik"}
+              {(mutation.error as Error)?.message ?? t("common.error")}
             </Text>
           ) : null}
 
@@ -81,7 +87,7 @@ export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalanc
             {mutation.isPending ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-base font-semibold text-white">Qabul qilish</Text>
+              <Text className="text-base font-semibold text-white">{t("customers.acceptPayment")}</Text>
             )}
           </Pressable>
     </BottomSheet>

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from "react-native";
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency } from "@/lib/format";
@@ -19,6 +20,7 @@ type Props = {
 
 /** Checkout uchun mijoz tanlash: qidiriladigan ro'yxat + tezkor "Yangi mijoz". */
 export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Props) {
+  const { t } = useTranslation();
   const { data: customers, isLoading } = useCustomersWithBalance();
   const createMut = useCreateCustomer();
   const [search, setSearch] = useState("");
@@ -42,20 +44,20 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
       setNewPhone("");
       onSelect({ id: c.id, name: c.name });
     } catch (e) {
-      toast.error("Xatolik", e instanceof Error ? e.message : "Qo'shib bo'lmadi");
+      toast.error(t("common.error"), e instanceof Error ? e.message : t("common.addFailed"));
     }
   }
 
   return (
     <BottomSheet visible={visible} onClose={onClose} contentStyle={{ maxHeight: "80%" }}>
-          <Text className="mb-3 text-lg font-medium text-ink">Mijoz tanlash</Text>
+          <Text className="mb-3 text-lg font-medium text-ink">{t("customers.pickTitle")}</Text>
 
           {adding ? (
             <View style={{ gap: 10 }}>
               <TextInput
                 value={newName}
                 onChangeText={setNewName}
-                placeholder="Ism *"
+                placeholder={`${t("customers.name")} *`}
                 placeholderTextColor={colors.tabInactive}
                 className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
                 style={{ height: 50 }}
@@ -64,7 +66,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
               <TextInput
                 value={newPhone}
                 onChangeText={setNewPhone}
-                placeholder="Telefon (ixtiyoriy)"
+                placeholder={`${t("customers.phone")} (${t("common.optional").toLowerCase()})`}
                 placeholderTextColor={colors.tabInactive}
                 keyboardType="phone-pad"
                 className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
@@ -76,7 +78,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                   className="flex-1 items-center justify-center rounded-2xl bg-bg"
                   style={{ height: 50, borderWidth: 1, borderColor: colors.line }}
                 >
-                  <Text className="text-base font-medium text-muted">Bekor</Text>
+                  <Text className="text-base font-medium text-muted">{t("common.cancel")}</Text>
                 </Pressable>
                 <Pressable
                   disabled={!newName.trim() || createMut.isPending}
@@ -87,7 +89,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                   {createMut.isPending ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text className="text-base font-semibold text-white">Qo'shish</Text>
+                    <Text className="text-base font-semibold text-white">{t("common.add")}</Text>
                   )}
                 </Pressable>
               </View>
@@ -102,7 +104,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                 <TextInput
                   value={search}
                   onChangeText={setSearch}
-                  placeholder="Ism yoki telefon..."
+                  placeholder={t("customers.searchPlaceholder")}
                   placeholderTextColor={colors.tabInactive}
                   className="flex-1 text-base text-ink"
                   style={{ height: 46 }}
@@ -116,7 +118,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                 style={{ backgroundColor: colors.primaryTint }}
               >
                 <Ionicons name="person-add" size={18} color={colors.primary} />
-                <Text className="text-base font-medium text-primary">Yangi mijoz qo'shish</Text>
+                <Text className="text-base font-medium text-primary">{t("customers.addNew")}</Text>
               </Pressable>
 
               {isLoading ? (
@@ -129,7 +131,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                   style={{ maxHeight: 320 }}
                   ListEmptyComponent={
                     <Text className="py-6 text-center text-sm text-muted">
-                      {search ? "Topilmadi" : "Hali mijoz yo'q"}
+                      {search ? t("customers.notFound") : t("customers.empty")}
                     </Text>
                   }
                   renderItem={({ item }) => (
