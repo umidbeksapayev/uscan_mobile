@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -29,6 +30,7 @@ function ReturnRow({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const { t } = useTranslation();
   const isWeight = item.sale_type === "weight";
   const disabled = max <= 0;
 
@@ -54,7 +56,7 @@ function ReturnRow({
           {item.product?.name ?? "—"}
         </Text>
         <Text className="mt-0.5 text-xs text-muted">
-          Qaytarish mumkin: {isWeight ? formatWeight(max) : `${max} dona`}
+          {t("returns.returnable")}: {isWeight ? formatWeight(max) : `${max} ${t("common.pcs")}`}
         </Text>
       </View>
 
@@ -70,7 +72,7 @@ function ReturnRow({
           style={{ width: 72, height: 40 }}
         />
         <Pressable onPress={() => onChange(String(max))} disabled={disabled} hitSlop={6}>
-          <Text className="text-xs font-medium text-primary">Hammasi</Text>
+          <Text className="text-xs font-medium text-primary">{t("common.all")}</Text>
         </Pressable>
       </View>
     </View>
@@ -82,6 +84,7 @@ function ReturnRow({
  * Faqat egasi ko'radi (returns RLS = egasi) — tugma tarix ekranida gate qilingan.
  */
 export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
+  const { t } = useTranslation();
   const { data: returnedMap } = useReturnedQuantities(visible ? sale?.id : undefined);
   const mutation = useProcessReturn();
   const [qtys, setQtys] = useState<Record<string, string>>({});
@@ -127,7 +130,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
 
   return (
     <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding>
-          <Text className="mb-3 text-lg font-medium text-ink">Mahsulotni qaytarish</Text>
+          <Text className="mb-3 text-lg font-medium text-ink">{t("returns.title")}</Text>
 
           <ScrollView style={{ maxHeight: 280 }} keyboardShouldPersistTaps="handled">
             {items.map((it) => {
@@ -144,11 +147,13 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
             })}
           </ScrollView>
 
-          <Text className="mb-1 mt-3 text-sm font-medium text-ink">Sabab (ixtiyoriy)</Text>
+          <Text className="mb-1 mt-3 text-sm font-medium text-ink">
+            {t("returns.reasonPlaceholder")}
+          </Text>
           <TextInput
             value={reason}
             onChangeText={setReason}
-            placeholder="Masalan: nuqsonli, mijoz qaytardi…"
+            placeholder={t("returns.reasonExample")}
             placeholderTextColor={colors.tabInactive}
             className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
             style={{ height: 48 }}
@@ -158,7 +163,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
             className="mt-4 flex-row items-center justify-between rounded-2xl px-4 py-3"
             style={{ backgroundColor: colors.primaryTint }}
           >
-            <Text className="text-sm text-muted">Qaytariladigan summa</Text>
+            <Text className="text-sm text-muted">{t("returns.refundTotal")}</Text>
             <Text className="text-lg font-medium" style={{ color: colors.primaryDeep }}>
               {formatCurrency(preview)}
             </Text>
@@ -166,7 +171,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
 
           {mutation.isError ? (
             <Text className="mt-3 text-center text-sm text-danger">
-              {(mutation.error as Error)?.message ?? "Xatolik yuz berdi"}
+              {(mutation.error as Error)?.message ?? t("common.unknownError")}
             </Text>
           ) : null}
 
@@ -176,7 +181,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
               className="flex-1 items-center justify-center rounded-2xl bg-bg"
               style={{ height: 54, borderWidth: 1, borderColor: colors.line }}
             >
-              <Text className="text-base font-medium text-muted">Bekor</Text>
+              <Text className="text-base font-medium text-muted">{t("common.cancel")}</Text>
             </Pressable>
             <Pressable
               disabled={!canSubmit}
@@ -187,7 +192,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
               {mutation.isPending ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text className="text-base font-medium text-white">Qaytarishni tasdiqlash</Text>
+                <Text className="text-base font-medium text-white">{t("returns.confirm")}</Text>
               )}
             </Pressable>
           </View>
