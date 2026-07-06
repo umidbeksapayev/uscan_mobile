@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Text, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { toast } from "@/lib/toast";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props) {
+  const { t } = useTranslation();
   const createMut = useCreateSupplier();
   const updateMut = useUpdateSupplier();
   const [name, setName] = useState("");
@@ -46,7 +48,7 @@ export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props)
       }
       onClose();
     } catch (e) {
-      toast.error("Xatolik", e instanceof Error ? e.message : "Saqlab bo'lmadi");
+      toast.error(t("common.error"), e instanceof Error ? e.message : t("common.saveFailed"));
     }
   }
 
@@ -57,12 +59,12 @@ export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props)
   return (
     <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding contentStyle={{ gap: 10 }}>
           <Text className="mb-1 text-lg font-medium text-ink">
-            {supplier ? "Ta'minotchini tahrirlash" : "Yangi ta'minotchi"}
+            {supplier ? t("suppliers.editTitle") : t("suppliers.newSupplier")}
           </Text>
           <TextInput
             value={name}
             onChangeText={setName}
-            placeholder="Nomi *"
+            placeholder={`${t("suppliers.name")} *`}
             placeholderTextColor={colors.tabInactive}
             className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
             style={input}
@@ -71,7 +73,7 @@ export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props)
           <TextInput
             value={phone}
             onChangeText={setPhone}
-            placeholder="Telefon (ixtiyoriy)"
+            placeholder={`${t("suppliers.phone")} (${t("common.optional").toLowerCase()})`}
             placeholderTextColor={colors.tabInactive}
             keyboardType="phone-pad"
             className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
@@ -80,7 +82,7 @@ export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props)
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder="Izoh (ixtiyoriy)"
+            placeholder={`${t("suppliers.note")} (${t("common.optional").toLowerCase()})`}
             placeholderTextColor={colors.tabInactive}
             className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
             style={input}
@@ -94,7 +96,7 @@ export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props)
             {pending ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-base font-semibold text-white">Saqlash</Text>
+              <Text className="text-base font-semibold text-white">{t("common.save")}</Text>
             )}
           </Pressable>
     </BottomSheet>

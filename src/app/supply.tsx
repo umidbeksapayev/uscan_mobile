@@ -6,6 +6,7 @@ import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency } from "@/lib/format";
@@ -17,6 +18,7 @@ import { AddSupplyItemSheet } from "@/features/supply/add-supply-item-sheet";
 import { SupplierPickerSheet, type PickedSupplier } from "@/features/suppliers/supplier-picker-sheet";
 
 function SupplyCartRow({ item }: { item: SupplyItem }) {
+  const { t } = useTranslation();
   const setQty = useSupplyCart((s) => s.setQty);
   const setCost = useSupplyCart((s) => s.setCost);
   const remove = useSupplyCart((s) => s.remove);
@@ -55,7 +57,9 @@ function SupplyCartRow({ item }: { item: SupplyItem }) {
 
       <View className="mt-2.5 flex-row items-center" style={{ gap: 8 }}>
         <View style={{ flex: 1 }}>
-          <Text className="mb-1 text-xs text-muted">Miqdor ({isWeight ? "kg" : "dona"})</Text>
+          <Text className="mb-1 text-xs text-muted">
+            {t("purchases.qty")} ({isWeight ? t("common.kg") : t("common.pcs")})
+          </Text>
           <TextInput
             value={qtyText}
             onChangeText={(t) => {
@@ -69,7 +73,7 @@ function SupplyCartRow({ item }: { item: SupplyItem }) {
         </View>
         <Text className="mt-4 text-muted">×</Text>
         <View style={{ flex: 1.4 }}>
-          <Text className="mb-1 text-xs text-muted">Tan narx</Text>
+          <Text className="mb-1 text-xs text-muted">{t("purchases.costPrice")}</Text>
           <TextInput
             value={costText}
             onChangeText={(t) => {
@@ -83,7 +87,9 @@ function SupplyCartRow({ item }: { item: SupplyItem }) {
       </View>
 
       <View className="mt-2 flex-row items-center justify-between">
-        <Text className="text-xs text-muted">Eski tan narx: {formatCurrency(item.product.oldCost)}</Text>
+        <Text className="text-xs text-muted">
+          {t("purchases.oldCost")}: {formatCurrency(item.product.oldCost)}
+        </Text>
         <Text className="text-sm font-semibold" style={{ color: colors.kirim }}>= {formatCurrency(lineTotal)}</Text>
       </View>
     </View>
@@ -92,6 +98,7 @@ function SupplyCartRow({ item }: { item: SupplyItem }) {
 
 export default function SupplyScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const shopId = useActiveShopId();
   const { canPurchase } = useActivePermissions();
@@ -117,9 +124,9 @@ export default function SupplyScreen() {
       qc.invalidateQueries({ queryKey: ["dashboard"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       clear();
-      toast.success("Kirim saqlandi", "Mahsulotlar omborga qo'shildi.");
+      toast.success(t("purchases.savedTitle"), t("purchases.savedDesc"));
     },
-    onError: (e) => toast.error("Xatolik", (e as Error)?.message ?? "Kirimni saqlab bo'lmadi"),
+    onError: (e) => toast.error(t("common.error"), (e as Error)?.message ?? t("purchases.saveFailed")),
   });
 
   if (!canPurchase) {
@@ -129,13 +136,11 @@ export default function SupplyScreen() {
           <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
             <Ionicons name="chevron-back" size={26} color={colors.ink} />
           </Pressable>
-          <Text className="text-xl font-semibold text-ink">Kirim</Text>
+          <Text className="text-xl font-semibold text-ink">{t("purchases.title")}</Text>
         </View>
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
           <Ionicons name="lock-closed" size={36} color={colors.muted} />
-          <Text className="text-center text-sm text-muted">
-            Kirim faqat egasi yoki "Kirim" ruxsati bor xodimga ko'rinadi.
-          </Text>
+          <Text className="text-center text-sm text-muted">{t("purchases.gatePerm")}</Text>
         </View>
       </SafeAreaView>
     );
@@ -148,7 +153,7 @@ export default function SupplyScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
-        <Text className="flex-1 text-xl font-semibold text-ink">Kirim</Text>
+        <Text className="flex-1 text-xl font-semibold text-ink">{t("purchases.title")}</Text>
         <Pressable onPress={() => router.push("/suppliers")} hitSlop={8} className="h-10 w-10 items-center justify-center">
           <Ionicons name="people-outline" size={22} color={colors.kirim} />
         </Pressable>
@@ -164,7 +169,7 @@ export default function SupplyScreen() {
           <View className="flex-row items-center gap-2">
             <Ionicons name="business-outline" size={20} color={colors.kirim} />
             <Text className="text-base" style={{ color: supplier ? colors.ink : colors.muted }}>
-              {supplier ? supplier.name : "Ta'minotchi tanlang (ixtiyoriy)"}
+              {supplier ? supplier.name : t("purchases.pickSupplierOptional")}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
@@ -176,7 +181,7 @@ export default function SupplyScreen() {
             <View className="h-20 w-20 items-center justify-center rounded-3xl" style={{ backgroundColor: colors.kirimTint }}>
               <Ionicons name="cube-outline" size={36} color={colors.kirim} />
             </View>
-            <Text className="text-center text-base text-muted">Hali mahsulot qo'shilmadi</Text>
+            <Text className="text-center text-base text-muted">{t("purchases.emptyCart")}</Text>
           </View>
         ) : (
           items.map((it) => <SupplyCartRow key={it.product.id} item={it} />)
@@ -189,14 +194,16 @@ export default function SupplyScreen() {
           style={{ height: 52, gap: 8, borderWidth: 1.5, borderColor: colors.kirim, borderStyle: "dashed", backgroundColor: colors.kirimTint }}
         >
           <Ionicons name="add" size={22} color={colors.kirim} />
-          <Text className="text-base font-semibold" style={{ color: colors.kirim }}>Mahsulot qo'shish</Text>
+          <Text className="text-base font-semibold" style={{ color: colors.kirim }}>
+            {t("purchases.addProduct")}
+          </Text>
         </Pressable>
       </ScrollView>
 
       {/* Pastki panel: jami + tasdiqlash */}
       <View className="absolute bottom-0 left-0 right-0 border-t border-line bg-surface px-4 pb-7 pt-3">
         <View className="mb-2 flex-row items-center justify-between">
-          <Text className="text-sm text-muted">{items.length} mahsulot</Text>
+          <Text className="text-sm text-muted">{t("purchases.itemCount", { count: items.length })}</Text>
           <Text className="text-lg font-bold text-ink">{formatCurrency(total)}</Text>
         </View>
         <Pressable
@@ -210,7 +217,7 @@ export default function SupplyScreen() {
           ) : (
             <>
               <Ionicons name="checkmark-circle" size={20} color="#fff" />
-              <Text className="text-base font-semibold text-white">Kirimni tasdiqlash</Text>
+              <Text className="text-base font-semibold text-white">{t("purchases.confirmBtn")}</Text>
             </>
           )}
         </Pressable>

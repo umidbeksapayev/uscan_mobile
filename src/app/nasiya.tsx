@@ -3,6 +3,7 @@ import { View, Text, FlatList, Pressable, ActivityIndicator, TextInput } from "r
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency } from "@/lib/format";
@@ -12,6 +13,7 @@ import { debtTotal } from "@/features/customers/debt-math";
 import type { CustomerWithBalance } from "@/types/database";
 
 function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => void }) {
+  const { t } = useTranslation();
   const owes = c.balance > 0;
   const prepaid = c.balance < 0;
   return (
@@ -37,7 +39,7 @@ function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => vo
           {formatCurrency(Math.abs(c.balance))}
         </Text>
         <Text className="text-xs" style={{ color: owes ? "#B42318" : prepaid ? "#0F6E56" : colors.muted }}>
-          {owes ? "qarzdor" : prepaid ? "haqdor" : "qarzsiz"}
+          {owes ? t("customers.debtor") : prepaid ? t("customers.creditor") : t("customers.settled")}
         </Text>
       </View>
     </Pressable>
@@ -46,6 +48,7 @@ function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => vo
 
 export default function NasiyaScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { canManageDebt } = useActivePermissions();
   const [search, setSearch] = useState("");
   const { data: customers, isLoading, isError, error, refetch, isRefetching } =
@@ -67,15 +70,13 @@ export default function NasiyaScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
-        <Text className="text-xl font-semibold text-ink">Nasiya daftari</Text>
+        <Text className="text-xl font-semibold text-ink">{t("menu.debtBook")}</Text>
       </View>
 
       {!canManageDebt ? (
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
           <Ionicons name="lock-closed" size={36} color={colors.muted} />
-          <Text className="text-center text-sm text-muted">
-            Nasiya daftari faqat egasi yoki "Nasiya" ruxsati bor xodimga ko'rinadi.
-          </Text>
+          <Text className="text-center text-sm text-muted">{t("customers.debtGatePerm")}</Text>
         </View>
       ) : (
         <>
@@ -86,7 +87,7 @@ export default function NasiyaScreen() {
               style={{ backgroundColor: colors.primaryDeep }}
             >
               <Text className="text-xs" style={{ color: "rgba(255,255,255,0.8)", letterSpacing: 0.5 }}>
-                JAMI QARZLAR
+                {t("customers.allDebts").toUpperCase()}
               </Text>
               <Text className="mt-1 text-3xl font-bold text-white" numberOfLines={1} adjustsFontSizeToFit>
                 {formatCurrency(total)}
@@ -102,7 +103,7 @@ export default function NasiyaScreen() {
               <TextInput
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Ism yoki telefon..."
+                placeholder={t("customers.searchPlaceholder")}
                 placeholderTextColor={colors.tabInactive}
                 className="flex-1 text-base text-ink"
                 style={{ height: 48 }}
@@ -124,14 +125,14 @@ export default function NasiyaScreen() {
             <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
               <Ionicons name="cloud-offline-outline" size={36} color={colors.muted} />
               <Text className="text-center text-sm text-muted">
-                {(error as Error)?.message ?? "Yuklab bo'lmadi"}
+                {(error as Error)?.message ?? t("common.loadError")}
               </Text>
             </View>
           ) : filtered.length === 0 ? (
             <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
               <Ionicons name="people-outline" size={36} color={colors.muted} />
               <Text className="text-center text-sm text-muted">
-                {search ? "Topilmadi." : "Hali mijoz yo'q. \"+\" bilan qo'shing."}
+                {search ? t("customers.notFound") : t("customers.emptyAddHint")}
               </Text>
             </View>
           ) : (

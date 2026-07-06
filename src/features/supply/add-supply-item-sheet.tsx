@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -17,6 +18,7 @@ import { useSupplyCart } from "./supply-store";
 type Props = { visible: boolean; shopId: string; onClose: () => void };
 
 export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const add = useSupplyCart((s) => s.add);
   const scanCode = useScanReturn((s) => s.code);
@@ -84,13 +86,13 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
     <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding contentStyle={{ maxHeight: "82%" }}>
           {!picked ? (
             <>
-              <Text className="mb-3 text-lg font-medium text-ink">Mahsulot qo'shish</Text>
+              <Text className="mb-3 text-lg font-medium text-ink">{t("purchases.addProduct")}</Text>
               <View className="mb-2 flex-row items-center gap-2 rounded-2xl border border-line bg-bg px-4" style={{ height: 50 }}>
                 <Ionicons name="search" size={18} color={colors.tabInactive} />
                 <TextInput
                   value={search}
                   onChangeText={setSearch}
-                  placeholder="Nom yoki shtrix-kod..."
+                  placeholder={t("purchases.searchNameBarcode")}
                   placeholderTextColor={colors.tabInactive}
                   className="flex-1 text-base text-ink"
                   style={{ height: 50 }}
@@ -112,9 +114,9 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
                   style={{ maxHeight: 320 }}
                   ListEmptyComponent={
                     debounced.trim() ? (
-                      <Text className="py-6 text-center text-sm text-muted">Topilmadi</Text>
+                      <Text className="py-6 text-center text-sm text-muted">{t("catalog.notFound")}</Text>
                     ) : (
-                      <Text className="py-6 text-center text-sm text-muted">Mahsulot nomini yozing</Text>
+                      <Text className="py-6 text-center text-sm text-muted">{t("purchases.typeProductName")}</Text>
                     )
                   }
                   renderItem={({ item }) => (
@@ -129,7 +131,10 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
                       <View className="min-w-0 flex-1">
                         <Text className="text-base text-ink" numberOfLines={1}>{item.name}</Text>
                         <Text className="text-xs text-muted">
-                          Qoldiq: {item.sale_type === "weight" ? `${item.quantity} kg` : `${item.quantity} dona`}
+                          {t("dashboard.remaining")}:{" "}
+                          {item.sale_type === "weight"
+                            ? `${item.quantity} ${t("common.kg")}`
+                            : `${item.quantity} ${t("common.pcs")}`}
                         </Text>
                       </View>
                     </Pressable>
@@ -150,12 +155,14 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
                 )}
                 <Text className="flex-1 text-base font-medium text-ink" numberOfLines={2}>{picked.name}</Text>
                 <Pressable onPress={() => setPicked(null)} hitSlop={8}>
-                  <Text className="text-sm" style={{ color: colors.kirim }}>O'zgartirish</Text>
+                  <Text className="text-sm" style={{ color: colors.kirim }}>{t("purchases.changeProduct")}</Text>
                 </Pressable>
               </View>
 
               {/* Miqdor */}
-              <Text className="mb-1 text-sm font-medium text-ink">Miqdor ({isWeight ? "kg" : "dona"})</Text>
+              <Text className="mb-1 text-sm font-medium text-ink">
+                {t("purchases.qty")} ({isWeight ? t("common.kg") : t("common.pcs")})
+              </Text>
               <TextInput
                 value={qtyText}
                 onChangeText={setQtyText}
@@ -169,8 +176,10 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
 
               {/* Yangi tan narxi + eski reference */}
               <View className="mb-1 flex-row items-center justify-between">
-                <Text className="text-sm font-medium text-ink">Yangi tan narxi (so'm)</Text>
-                <Text className="text-xs text-muted">Eski: {formatCurrency(picked.cost_price)}</Text>
+                <Text className="text-sm font-medium text-ink">{t("purchases.newCost")}</Text>
+                <Text className="text-xs text-muted">
+                  {t("purchases.oldShort")}: {formatCurrency(picked.cost_price)}
+                </Text>
               </View>
               <TextInput
                 value={costText}
@@ -189,7 +198,7 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
                 style={{ height: 54, gap: 8, backgroundColor: colors.kirim, opacity: canAdd ? 1 : 0.5 }}
               >
                 <Ionicons name="add" size={22} color="#fff" />
-                <Text className="text-base font-semibold text-white">Qo'shish</Text>
+                <Text className="text-base font-semibold text-white">{t("common.add")}</Text>
               </Pressable>
             </>
           )}
