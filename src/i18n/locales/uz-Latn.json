@@ -7,6 +7,14 @@
     "dismiss": "Yopish"
   },
   "common": {
+    "error": "Xatolik",
+    "unknownError": "Noma'lum xato",
+    "loadError": "Ma'lumotni yuklab bo'lmadi. Internetni tekshiring.",
+    "noPermission": "Ruxsat yo'q",
+    "all": "Barchasi",
+    "noData": "Ma'lumot yo'q",
+    "example": "Masalan: {{v}}",
+    "pcsShort": "ta",
     "appName": "uscan",
     "tagline": "Do'kon boshqaruvi",
     "save": "Saqlash",
@@ -122,6 +130,11 @@
     "forgotPassword": "Parolni unutdingizmi?"
   },
   "catalog": {
+    "export": "Eksport",
+    "exportCsv": "Katalogni CSV eksport qilish",
+    "shareUnavailable": "Ulashish bu qurilmada mavjud emas.",
+    "editPermHint": "Mahsulotlarni tahrirlash uchun ruxsat kerak.",
+    "scanInSell": "Skanerlash Sotuv bo'limida ishlaydi.",
     "title": "Mahsulotlar",
     "searchPlaceholder": "Mahsulot nomi bo'yicha qidirish...",
     "allTypes": "Barcha turlar",
@@ -204,6 +217,34 @@
     "vatPercent": "QQS (%)"
   },
   "sell": {
+    "quickPrice": "Tezkor narx",
+    "quickPriceShort": "Narx",
+    "quickPriceDesc": "Shtrix-kodsiz yoki katalogda yo'q tovar uchun narxni kiriting",
+    "quickPriceError": "Narx belgilab bo'lmadi",
+    "miscExistsTitle": "Savatda allaqachon bor",
+    "miscExistsDesc": "Bir vaqtda faqat bitta tezkor-narxli tovar qo'shish mumkin. Avval to'lovni yakunlang yoki uni o'chiring.",
+    "frequent": "Tez-tez sotiladigan",
+    "notFoundOrOut": "Topilmadi yoki qoldiq yo'q.",
+    "weight": "Og'irlik",
+    "payment": "To'lov",
+    "totalDue": "Jami to'lov",
+    "paymentType": "To'lov turi",
+    "givenMoney": "Berilgan pul",
+    "exact": "Aniq",
+    "change": "Qaytim",
+    "notEnough": "Yetishmadi",
+    "pickCustomer": "Mijoz tanlang",
+    "paidOptional": "To'langan summa (ixtiyoriy)",
+    "fullCreditPlaceholder": "0 — to'liq nasiya",
+    "showQr": "QR ko'rsatish",
+    "finishPayment": "To'lovni yakunlash",
+    "saleSuccess": "Sotuv muvaffaqiyatli",
+    "saleSavedOffline": "Sotuv saqlandi",
+    "offlineWillSync": "Offline — ulanganda yuboriladi",
+    "debtRecorded": "Nasiyaga yozildi",
+    "newSale": "Yangi sotuv",
+    "somMode": "Summa (so'm)",
+    "kgMode": "Vazn (kg)",
     "title": "Sotuv",
     "tabBarcode": "Barcode",
     "tabManual": "Qidirish",
@@ -243,6 +284,7 @@
     "notConfigured": "QR to'lov sozlanmagan (Sozlamalar)"
   },
   "labels": {
+    "selectedCount": "Yorliq: {{count}} ta",
     "action": "Narx yorlig'i",
     "title": "Narx yorlig'ini chop etish",
     "copies": "Nusxa soni",
@@ -317,6 +359,14 @@
     "cameraErrorDesc": "Kamera band (boshqa ilova ishlatyapti) yoki qurilmada kamera topilmadi."
   },
   "dashboard": {
+    "grossProfit": "Savdo foydasi",
+    "netAfterExpenses": "Sof foyda (xarajatlardan keyin)",
+    "startSale": "Sotuvni boshlash",
+    "revenueTrend": "Tushum dinamikasi ({{days}} kun)",
+    "vsYesterday": "kechaga",
+    "vsPrevPeriod": "oldingi davrga",
+    "loadFailed": "Hisobotlarni yuklab bo'lmadi",
+    "permHint": "Hisobotlarni ko'rish ruxsati yo'q. Egasi sifatida kiring yoki kassirga \"Hisobotlar\" ruxsatini bering.",
     "title": "Dashboard",
     "todayRevenue": "Bugungi tushum",
     "netProfit": "Sof foyda",
@@ -351,6 +401,7 @@
     "noSales": "Bu davrda sotuvlar yo'q"
   },
   "history": {
+    "countSales": "{{count}} sotuv",
     "title": "Sotuv tarixi",
     "recentSales": "Oxirgi {{count}} ta sotuv",
     "noSales": "Hali sotuvlar yo'q",
@@ -539,6 +590,7 @@
     "dueToday": "bugun"
   },
   "returns": {
+    "reasonExample": "Masalan: nuqsonli, mijoz qaytardi…",
     "title": "Sotuvni qaytarish",
     "action": "Qaytarish",
     "badge": "Qaytarilgan",

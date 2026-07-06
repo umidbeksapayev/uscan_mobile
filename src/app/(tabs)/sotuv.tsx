@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/colors";
@@ -58,6 +59,7 @@ const FrequentTile = memo(function FrequentTile({
 type CartRowProps = { item: CartItem; onEditWeight: (item: CartItem) => void };
 
 const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
+  const { t } = useTranslation();
   const increment = useCart((s) => s.increment);
   const decrement = useCart((s) => s.decrement);
   const remove = useCart((s) => s.remove);
@@ -80,14 +82,15 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
             }}
           >
             <Text style={{ fontSize: 11, fontWeight: "500", letterSpacing: 0.5, color: accent }}>
-              {isWeight ? "VAZN" : "DONALI"}
+              {(isWeight ? t("catalog.weight") : t("catalog.unit")).toUpperCase()}
             </Text>
           </View>
           <Text className="mt-2 text-base font-medium text-ink" numberOfLines={1}>
             {item.product.name}
           </Text>
           <Text className="text-xs text-muted">
-            {formatCurrency(item.product.selling_price)} / {isWeight ? "kg" : "dona"}
+            {formatCurrency(item.product.selling_price)} /{" "}
+            {isWeight ? t("common.kg") : t("common.pcs")}
           </Text>
         </View>
 
@@ -99,7 +102,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
             onPress={() => remove(item.product.id)}
             hitSlop={12}
             className="mt-2"
-            accessibilityLabel="O'chirish"
+            accessibilityLabel={t("common.delete")}
           >
             <Ionicons name="trash-outline" size={20} color="#DB2777" />
           </Pressable>
@@ -110,7 +113,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
 
       {isWeight ? (
         <View className="flex-row items-center justify-between">
-          <Text className="text-sm text-muted">Og'irlik</Text>
+          <Text className="text-sm text-muted">{t("sell.weight")}</Text>
           <Pressable
             onPress={() => onEditWeight(item)}
             className="flex-row items-center gap-2 rounded-xl bg-bg px-3"
@@ -122,7 +125,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
         </View>
       ) : (
         <View className="flex-row items-center justify-between">
-          <Text className="text-sm text-muted">Miqdor</Text>
+          <Text className="text-sm text-muted">{t("addToCart.quantity")}</Text>
           <View className="flex-row items-center gap-3">
             <Pressable
               onPress={() => decrement(item.product.id)}
@@ -150,6 +153,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
 
 export default function SotuvScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const shopId = useActiveShopId();
   const { canManageProducts } = useActivePermissions();
 
@@ -212,10 +216,7 @@ export default function SotuvScreen() {
     // Savatda allaqachon boshqa narxli "Boshqa tovar" bo'lsa — bir xil mahsulot
     // id'ida ikki xil narx to'qnashib, savat summasi noto'g'ri hisoblanib qoladi.
     if (items.some((i) => isMiscProduct(i.product))) {
-      toast.info(
-        "Savatda allaqachon bor",
-        "Bir vaqtda faqat bitta tezkor-narxli tovar qo'shish mumkin. Avval to'lovni yakunlang yoki uni o'chiring.",
-      );
+      toast.info(t("sell.miscExistsTitle"), t("sell.miscExistsDesc"));
       return;
     }
     setQuickPriceSaving(true);
@@ -224,7 +225,7 @@ export default function SotuvScreen() {
       add(product);
       setQuickPriceOpen(false);
     } catch (e) {
-      toast.error("Xatolik", e instanceof Error ? e.message : "Narx belgilab bo'lmadi");
+      toast.error(t("common.error"), e instanceof Error ? e.message : t("sell.quickPriceError"));
     } finally {
       setQuickPriceSaving(false);
     }
@@ -243,10 +244,10 @@ export default function SotuvScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
         <View className="flex-row items-center justify-between pb-3">
-          <Text className="text-2xl font-medium text-primary-deep">Sotuv</Text>
+          <Text className="text-2xl font-medium text-primary-deep">{t("sell.title")}</Text>
           {items.length > 0 ? (
             <Pressable onPress={clear} hitSlop={10}>
-              <Text className="text-sm text-danger">Tozalash</Text>
+              <Text className="text-sm text-danger">{t("common.clear")}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -259,7 +260,7 @@ export default function SotuvScreen() {
             style={{ height: 56 }}
           >
             <Ionicons name="barcode-outline" size={26} color="#fff" />
-            <Text className="text-base font-medium text-white">Skaner</Text>
+            <Text className="text-base font-medium text-white">{t("barcode.scanBtn")}</Text>
           </Pressable>
           {canManageProducts ? (
             <Pressable
@@ -269,7 +270,7 @@ export default function SotuvScreen() {
             >
               <Ionicons name="cash-outline" size={22} color={colors.primary} />
               <Text className="text-sm font-medium" style={{ color: colors.primary }}>
-                Narx
+                {t("sell.quickPriceShort")}
               </Text>
             </Pressable>
           ) : null}
@@ -285,7 +286,7 @@ export default function SotuvScreen() {
             testID="sell-search"
             value={search}
             onChangeText={setSearch}
-            placeholder="Mahsulot qidirish..."
+            placeholder={t("sell.searchPlaceholder")}
             placeholderTextColor={colors.tabInactive}
             className="flex-1 text-base text-ink"
             style={{ height: 48 }}
@@ -302,7 +303,7 @@ export default function SotuvScreen() {
         {!searching && frequentProducts && frequentProducts.length > 0 ? (
           <View className="mb-1">
             <Text className="mb-2 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>
-              TEZ-TEZ SOTILADIGAN
+              {t("sell.frequent").toUpperCase()}
             </Text>
             <ScrollView
               horizontal
@@ -324,7 +325,7 @@ export default function SotuvScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
           ListEmptyComponent={
-            <Text className="px-2 py-8 text-center text-muted">Topilmadi yoki qoldiq yo'q.</Text>
+            <Text className="px-2 py-8 text-center text-muted">{t("sell.notFoundOrOut")}</Text>
           }
           renderItem={({ item, index }) => (
             <Pressable
@@ -340,7 +341,7 @@ export default function SotuvScreen() {
                   {item.name}
                 </Text>
                 <Text className="text-xs text-muted">
-                  {item.sale_type === "weight" ? "Kg" : "Dona"}
+                  {item.sale_type === "weight" ? t("common.kg") : t("common.pcs")}
                 </Text>
               </View>
               <Text className="text-base font-medium text-primary-deep">
@@ -356,7 +357,7 @@ export default function SotuvScreen() {
             <Ionicons name="cart-outline" size={36} color={colors.primary} />
           </View>
           <Text className="text-center text-base text-muted">
-            Savat bo'sh. Skanerlang yoki qidiring.
+            {t("cart.empty")}. {t("cart.emptyHint")}.
           </Text>
         </View>
       ) : (
@@ -367,7 +368,7 @@ export default function SotuvScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 12 }}
           ListHeaderComponent={
             <Text className="pb-2 text-base font-medium text-ink">
-              Savatcha <Text className="text-muted">({items.length})</Text>
+              {t("cart.title")} <Text className="text-muted">({items.length})</Text>
             </Text>
           }
           removeClippedSubviews
@@ -379,7 +380,7 @@ export default function SotuvScreen() {
         <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 14 }}>
           <View className="mb-3 flex-row items-center justify-between">
             <Text className="text-xs text-muted" style={{ letterSpacing: 0.5 }}>
-              JAMI SUMMA
+              {t("cart.total").toUpperCase()}
             </Text>
             <Text className="text-xl font-medium text-ink">{formatCurrency(total)}</Text>
           </View>
@@ -388,7 +389,7 @@ export default function SotuvScreen() {
             className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
             style={{ height: 54 }}
           >
-            <Text className="text-base font-medium text-white">To'lov</Text>
+            <Text className="text-base font-medium text-white">{t("sell.payment")}</Text>
             <Ionicons name="arrow-forward" size={18} color="#fff" />
           </Pressable>
         </View>

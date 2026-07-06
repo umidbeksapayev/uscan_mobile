@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight } from "@/lib/format";
@@ -26,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/database";
 
 function StockBadge({ item }: { item: Product }) {
+  const { t } = useTranslation();
   const isWeight = item.sale_type === "weight";
   const q = item.quantity;
 
@@ -42,7 +44,8 @@ function StockBadge({ item }: { item: Product }) {
     out: { dot: colors.danger, bg: "#FDECEC", text: "#B42318" },
   }[tone];
 
-  const label = tone === "out" ? "Tugagan" : isWeight ? formatWeight(q) : `${q} dona`;
+  const label =
+    tone === "out" ? t("catalog.statusOut") : isWeight ? formatWeight(q) : `${q} ${t("common.pcs")}`;
 
   return (
     <View
@@ -143,6 +146,7 @@ function EmptyState({
 
 export default function KatalogScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState<CategoryFilter>("all");
   const [showFilters, setShowFilters] = useState(false);
@@ -166,21 +170,21 @@ export default function KatalogScreen() {
   const [exporting, setExporting] = useState(false);
 
   const chips: { id: CategoryFilter; name: string }[] = [
-    { id: "all", name: "Barchasi" },
+    { id: "all", name: t("common.all") },
     ...(categories ?? []).map((c) => ({ id: c.id as CategoryFilter, name: c.name })),
   ];
 
   const filterActive = showFilters || cat !== "all";
 
   function onScan() {
-    toast.info("Skaner", "Barcode skaner F3 (Sotuv) bosqichida qo'shiladi.");
+    toast.info(t("barcode.scanBtn"), t("catalog.scanInSell"));
   }
   function onAdd() {
     router.push("/product-form");
   }
   function onRowPress(item: Product) {
     if (!canManageProducts) {
-      toast.info("Ruxsat yo'q", "Mahsulotlarni tahrirlash uchun ruxsat kerak.");
+      toast.info(t("common.noPermission"), t("catalog.editPermHint"));
       return;
     }
     router.push({ pathname: "/product-form", params: { id: item.id } });
@@ -211,10 +215,10 @@ export default function KatalogScreen() {
     setExporting(true);
     try {
       const res = await exportProductsCsv({ shopId, includeCost: canViewCost });
-      if (res === "empty") toast.info("Eksport", "Katalogda mahsulot yo'q.");
-      if (res === "unavailable") toast.error("Eksport", "Ulashish bu qurilmada mavjud emas.");
+      if (res === "empty") toast.info(t("catalog.export"), t("settings.exportEmpty"));
+      if (res === "unavailable") toast.error(t("catalog.export"), t("catalog.shareUnavailable"));
     } catch (e) {
-      toast.error("Eksport xatosi", e instanceof Error ? e.message : "Xatolik yuz berdi");
+      toast.error(t("settings.exportError"), e instanceof Error ? e.message : t("common.unknownError"));
     } finally {
       setExporting(false);
     }
@@ -225,7 +229,7 @@ export default function KatalogScreen() {
       <View className="px-4 pt-2">
         <View className="flex-row items-center justify-between pb-3">
           <Text className="text-2xl font-medium text-primary-deep">
-            {labelMode ? `Yorliq: ${selected.size} ta` : "Mahsulotlar"}
+            {labelMode ? t("labels.selectedCount", { count: selected.size }) : t("catalog.title")}
           </Text>
           <View className="flex-row items-center gap-5">
             {!labelMode && canManageProducts ? (
@@ -233,7 +237,7 @@ export default function KatalogScreen() {
                 onPress={onExport}
                 hitSlop={10}
                 disabled={exporting}
-                accessibilityLabel="Katalogni CSV eksport qilish"
+                accessibilityLabel={t("catalog.exportCsv")}
               >
                 {exporting ? (
                   <ActivityIndicator size="small" color={colors.primary} />
@@ -245,7 +249,7 @@ export default function KatalogScreen() {
             <Pressable
               onPress={toggleLabelMode}
               hitSlop={10}
-              accessibilityLabel={labelMode ? "Yorliq rejimini yopish" : "Yorliq rejimi"}
+              accessibilityLabel={labelMode ? t("common.close") : t("labels.bulkBtn")}
             >
               <Ionicons
                 name={labelMode ? "close" : "pricetags-outline"}
@@ -266,7 +270,7 @@ export default function KatalogScreen() {
             <TextInput
               value={search}
               onChangeText={setSearch}
-              placeholder="Mahsulotlarni qidirish..."
+              placeholder={t("catalog.searchPlaceholder")}
               placeholderTextColor={colors.tabInactive}
               className="flex-1 text-base text-ink"
               style={{ height: 48 }}
@@ -346,14 +350,11 @@ export default function KatalogScreen() {
           <ActivityIndicator color={colors.primary} />
         </View>
       ) : isError ? (
-        <EmptyState
-          icon="cloud-offline-outline"
-          text="Ma'lumotni yuklab bo'lmadi. Internet yoki .env ni tekshiring."
-        />
+        <EmptyState icon="cloud-offline-outline" text={t("common.loadError")} />
       ) : (products?.length ?? 0) === 0 ? (
         <EmptyState
           icon="cube-outline"
-          text={debounced ? "Hech narsa topilmadi." : "Hali mahsulot qo'shilmagan."}
+          text={debounced ? t("catalog.notFound") : t("catalog.empty")}
         />
       ) : (
         <FlatList
@@ -386,7 +387,7 @@ export default function KatalogScreen() {
           style={{ paddingBottom: 16, gap: 10 }}
         >
           <View className="flex-row items-center justify-between">
-            <Text className="text-sm text-muted">Har biri uchun nusxa</Text>
+            <Text className="text-sm text-muted">{t("labels.copiesEach")}</Text>
             <View className="flex-row items-center gap-3">
               <Pressable
                 onPress={() => setCopies((c) => Math.max(1, c - 1))}
@@ -409,7 +410,7 @@ export default function KatalogScreen() {
             </View>
           </View>
           <Button
-            label={`Yorliq chop etish (${selected.size})`}
+            label={`${t("labels.bulkTitle")} (${selected.size})`}
             onPress={onPrintSelected}
             loading={printing}
           />
@@ -420,6 +421,7 @@ export default function KatalogScreen() {
       {!labelMode && canManageProducts ? (
         <Pressable
           onPress={onAdd}
+          accessibilityLabel={t("catalog.newProduct")}
           style={{
             position: "absolute",
             right: 20,

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -23,6 +24,7 @@ type Props = {
  * ikkinchisi avtomatik ko'rsatiladi. Mijoz "20 000 so'mlik" desa → Summa rejimi.
  */
 export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
+  const { t } = useTranslation();
   const price = product?.selling_price ?? 0;
   const [mode, setMode] = useState<Mode>("som");
   const [text, setText] = useState("");
@@ -58,7 +60,9 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
           {product ? (
             <>
               <Text className="text-lg font-medium text-ink">{product.name}</Text>
-              <Text className="text-sm text-muted">{formatCurrency(price)} / kg</Text>
+              <Text className="text-sm text-muted">
+                {formatCurrency(price)} / {t("common.kg")}
+              </Text>
 
               {/* Rejim tanlash */}
               <View className="mb-4 mt-4 flex-row rounded-2xl bg-bg p-1">
@@ -72,7 +76,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
                       style={{ height: 44, backgroundColor: active ? colors.primary : "transparent" }}
                     >
                       <Text style={{ fontWeight: "500", color: active ? "#fff" : colors.muted }}>
-                        {m === "som" ? "Summa (so'm)" : "Vazn (kg)"}
+                        {m === "som" ? t("sell.somMode") : t("sell.kgMode")}
                       </Text>
                     </Pressable>
                   );
@@ -84,7 +88,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
                 value={text}
                 onChangeText={setText}
                 keyboardType={mode === "som" ? "number-pad" : "decimal-pad"}
-                placeholder={mode === "som" ? "Masalan: 20000" : "Masalan: 1.5"}
+                placeholder={t("common.example", { v: mode === "som" ? "20000" : "1.5" })}
                 placeholderTextColor={colors.tabInactive}
                 autoFocus
                 className="rounded-2xl border border-line bg-bg px-4 text-2xl font-medium text-ink"
@@ -108,7 +112,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
                     style={{ height: 44 }}
                   >
                     <Text className="text-sm font-medium text-ink">
-                      {mode === "som" ? formatNumber(p) : `${p.toFixed(1)} kg`}
+                      {mode === "som" ? formatNumber(p) : `${p.toFixed(1)} ${t("common.kg")}`}
                     </Text>
                   </Pressable>
                 ))}
@@ -122,7 +126,8 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
                 style={{ height: 54, opacity: valid ? 1 : 0.5 }}
               >
                 <Text className="text-base font-medium text-white">
-                  Savatga qo'shish{valid ? ` · ${formatCurrency(amount)}` : ""}
+                  {t("addToCart.addToCart")}
+                  {valid ? ` · ${formatCurrency(amount)}` : ""}
                 </Text>
               </Pressable>
             </>

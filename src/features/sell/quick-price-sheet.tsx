@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency } from "@/lib/format";
@@ -20,6 +21,7 @@ type Props = {
  * `features/sell/misc-product.ts`da.
  */
 export function QuickPriceSheet({ visible, loading, onClose, onConfirm }: Props) {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
 
   useEffect(() => {
@@ -31,16 +33,14 @@ export function QuickPriceSheet({ visible, loading, onClose, onConfirm }: Props)
 
   return (
     <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding>
-            <Text className="text-lg font-medium text-ink">Tezkor narx</Text>
-            <Text className="text-sm text-muted">
-              Shtrix-kodsiz yoki katalogda yo'q tovar uchun narxni kiriting
-            </Text>
+            <Text className="text-lg font-medium text-ink">{t("sell.quickPrice")}</Text>
+            <Text className="text-sm text-muted">{t("sell.quickPriceDesc")}</Text>
 
             <TextInput
               value={text}
               onChangeText={setText}
               keyboardType="number-pad"
-              placeholder="Masalan: 15000"
+              placeholder={t("common.example", { v: "15000" })}
               placeholderTextColor={colors.tabInactive}
               autoFocus
               className="mt-4 rounded-2xl border border-line bg-bg px-4 text-2xl font-medium text-ink"
@@ -70,7 +70,8 @@ export function QuickPriceSheet({ visible, loading, onClose, onConfirm }: Props)
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text className="text-base font-medium text-white">
-                  Savatga qo'shish{valid ? ` · ${formatCurrency(amount)}` : ""}
+                  {t("addToCart.addToCart")}
+                  {valid ? ` · ${formatCurrency(amount)}` : ""}
                 </Text>
               )}
             </Pressable>

@@ -2,6 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight } from "@/lib/format";
@@ -124,8 +125,8 @@ function Thumb({ uri }: { uri: string | null }) {
   );
 }
 
-function soldLabel(p: TopProduct): string {
-  return p.sale_type === "weight" ? formatWeight(p.units_sold) : `${p.units_sold} dona`;
+function soldLabel(p: TopProduct, pcs: string): string {
+  return p.sale_type === "weight" ? formatWeight(p.units_sold) : `${p.units_sold} ${pcs}`;
 }
 
 function EmptyRow({ text }: { text: string }) {
@@ -133,8 +134,9 @@ function EmptyRow({ text }: { text: string }) {
 }
 
 export function TopList({ items, loading }: { items: TopProduct[]; loading?: boolean }) {
-  if (loading) return <EmptyRow text="Yuklanmoqda…" />;
-  if (items.length === 0) return <EmptyRow text="Bu davrda sotuv yo'q" />;
+  const { t } = useTranslation();
+  if (loading) return <EmptyRow text={t("common.loading")} />;
+  if (items.length === 0) return <EmptyRow text={t("reports.noSales")} />;
   const max = Math.max(...items.map((p) => p.revenue), 1);
   return (
     <View style={{ gap: 12 }}>
@@ -162,7 +164,7 @@ export function TopList({ items, loading }: { items: TopProduct[]; loading?: boo
           </View>
           <View className="items-end">
             <Text className="text-sm font-semibold text-ink">{formatCurrency(p.revenue)}</Text>
-            <Text className="text-xs text-muted">{soldLabel(p)}</Text>
+            <Text className="text-xs text-muted">{soldLabel(p, t("common.pcs"))}</Text>
           </View>
         </View>
       ))}
@@ -171,7 +173,8 @@ export function TopList({ items, loading }: { items: TopProduct[]; loading?: boo
 }
 
 export function SlowList({ items }: { items: TopProduct[] }) {
-  if (items.length === 0) return <EmptyRow text="Ma'lumot yo'q" />;
+  const { t } = useTranslation();
+  if (items.length === 0) return <EmptyRow text={t("common.noData")} />;
   return (
     <View style={{ gap: 12 }}>
       {items.map((p) => {
@@ -184,17 +187,19 @@ export function SlowList({ items }: { items: TopProduct[] }) {
                 {p.name}
               </Text>
               <Text className="text-xs text-muted">
-                {unsold ? "Sotilmagan" : formatCurrency(p.revenue)}
+                {unsold ? t("dashboard.notSold") : formatCurrency(p.revenue)}
               </Text>
             </View>
             {unsold ? (
               <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: "#FCF1DD" }}>
-                <Text style={{ fontSize: 11, fontWeight: "500", color: "#92600A" }}>Sotilmagan</Text>
+                <Text style={{ fontSize: 11, fontWeight: "500", color: "#92600A" }}>
+                  {t("dashboard.notSold")}
+                </Text>
               </View>
             ) : (
               <View className="items-end">
-                <Text className="text-sm font-semibold text-ink">{soldLabel(p)}</Text>
-                <Text className="text-xs text-muted">sotildi</Text>
+                <Text className="text-sm font-semibold text-ink">{soldLabel(p, t("common.pcs"))}</Text>
+                <Text className="text-xs text-muted">{t("dashboard.sold").toLowerCase()}</Text>
               </View>
             )}
           </View>
@@ -205,18 +210,20 @@ export function SlowList({ items }: { items: TopProduct[] }) {
 }
 
 export function LowStockList({ items, onTap }: { items: Product[]; onTap: () => void }) {
+  const { t } = useTranslation();
   if (items.length === 0)
     return (
       <View className="items-center py-4" style={{ gap: 6 }}>
         <Ionicons name="checkmark-circle" size={28} color={colors.success} />
-        <Text className="text-sm text-muted">Barcha mahsulot yetarli</Text>
+        <Text className="text-sm text-muted">{t("dashboard.allStocked")}</Text>
       </View>
     );
   return (
     <View style={{ gap: 8 }}>
       {items.slice(0, 6).map((p) => {
         const out = p.quantity <= 0;
-        const qty = p.sale_type === "weight" ? formatWeight(p.quantity) : `${p.quantity} dona`;
+        const qty =
+          p.sale_type === "weight" ? formatWeight(p.quantity) : `${p.quantity} ${t("common.pcs")}`;
         return (
           <Pressable
             key={p.id}
@@ -229,7 +236,9 @@ export function LowStockList({ items, onTap }: { items: Product[]; onTap: () => 
               <Text className="text-sm font-medium text-ink" numberOfLines={1}>
                 {p.name}
               </Text>
-              <Text className="text-xs text-muted">Qoldiq: {qty}</Text>
+              <Text className="text-xs text-muted">
+                {t("dashboard.remaining")}: {qty}
+              </Text>
             </View>
             <View
               className="flex-row items-center rounded-full px-2 py-0.5"
@@ -237,7 +246,7 @@ export function LowStockList({ items, onTap }: { items: Product[]; onTap: () => 
             >
               <Ionicons name="alert-circle-outline" size={12} color="#B42318" />
               <Text style={{ fontSize: 11, fontWeight: "500", color: "#B42318" }}>
-                {out ? "Tugagan" : "Kam"}
+                {out ? t("dashboard.out") : t("dashboard.low")}
               </Text>
             </View>
           </Pressable>
@@ -248,10 +257,9 @@ export function LowStockList({ items, onTap }: { items: Product[]; onTap: () => 
 }
 
 export function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const { t } = useTranslation();
   // Ruxsat xatosini foydalanuvchiga tushunarli qilamiz
-  const friendly = /ruxsat|permission|denied/i.test(message)
-    ? "Hisobotlarni ko'rish ruxsati yo'q. Egasi sifatida kiring yoki kassirga \"Hisobotlar\" ruxsatini bering."
-    : message;
+  const friendly = /ruxsat|permission|denied/i.test(message) ? t("dashboard.permHint") : message;
   return (
     <View
       className="rounded-2xl p-4"
@@ -260,7 +268,7 @@ export function ErrorBanner({ message, onRetry }: { message: string; onRetry: ()
       <View className="mb-1 flex-row items-center gap-2">
         <Ionicons name="alert-circle" size={18} color="#B42318" />
         <Text className="text-base font-medium" style={{ color: "#B42318" }}>
-          Hisobotlarni yuklab bo'lmadi
+          {t("dashboard.loadFailed")}
         </Text>
       </View>
       <Text className="mb-3 text-sm" style={{ color: "#8A2A22" }}>
@@ -272,7 +280,7 @@ export function ErrorBanner({ message, onRetry }: { message: string; onRetry: ()
         style={{ gap: 6, backgroundColor: "#B42318" }}
       >
         <Ionicons name="refresh" size={15} color="#fff" />
-        <Text className="text-sm font-medium text-white">Qayta urinish</Text>
+        <Text className="text-sm font-medium text-white">{t("sync.retry")}</Text>
       </Pressable>
     </View>
   );

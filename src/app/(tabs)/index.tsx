@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatNumber } from "@/lib/format";
@@ -37,14 +38,15 @@ const GRAD = {
 } as const;
 
 const PERIODS = [
-  { days: 1, label: "Bugun" },
-  { days: 7, label: "Hafta" },
-  { days: 30, label: "Oy" },
+  { days: 1, labelKey: "dashboard.today" },
+  { days: 7, labelKey: "dashboard.week" },
+  { days: 30, labelKey: "dashboard.month" },
 ] as const;
 
 export default function HomeScreen() {
   const router = useRouter();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const [period, setPeriod] = useState<1 | 7 | 30>(1);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -76,7 +78,7 @@ export default function HomeScreen() {
   const { current, previous } = periodSplit(trend ?? [], period);
   const cur = trendTotals(current);
   const prev = trendTotals(previous);
-  const deltaSuffix = period === 1 ? "kechaga" : "oldingi davrga";
+  const deltaSuffix = period === 1 ? t("dashboard.vsYesterday") : t("dashboard.vsPrevPeriod");
   const expTotal = expensesTotal(expenses ?? []);
 
   async function onRefresh() {
@@ -130,7 +132,7 @@ export default function HomeScreen() {
                     color: active ? "#fff" : colors.muted,
                   }}
                 >
-                  {p.label}
+                  {t(p.labelKey)}
                 </Text>
               </Pressable>
             );
@@ -140,14 +142,14 @@ export default function HomeScreen() {
         {/* Hisobot xatosi (RPC ruxsat/tarmoq) — aks holda kartalar */}
         {isError ? (
           <ErrorBanner
-            message={(error as Error)?.message ?? "Noma'lum xato"}
+            message={(error as Error)?.message ?? t("common.unknownError")}
             onRetry={() => qc.invalidateQueries({ queryKey: ["dashboard"] })}
           />
         ) : (
           <View style={{ gap: 12 }}>
             <GradientStat
               tone={GRAD.blue}
-              label={period === 1 ? "BUGUNGI SAVDO" : "TUSHUM"}
+              label={(period === 1 ? t("dashboard.todayRevenue") : t("reports.revenue")).toUpperCase()}
               value={formatNumber(cur.revenue)}
               suffix="so'm"
               icon="wallet-outline"
@@ -157,7 +159,7 @@ export default function HomeScreen() {
             />
             <GradientStat
               tone={GRAD.navy}
-              label="SAVDO FOYDASI"
+              label={t("dashboard.grossProfit").toUpperCase()}
               value={formatNumber(cur.profit)}
               suffix="so'm"
               icon="trending-up-outline"
@@ -167,9 +169,9 @@ export default function HomeScreen() {
             />
             <GradientStat
               tone={GRAD.green}
-              label="SOTUVLAR SONI"
+              label={t("dashboard.salesCount").toUpperCase()}
               value={`${cur.count}`}
-              suffix="ta"
+              suffix={t("common.pcsShort")}
               icon="cart-outline"
               delta={pctChange(cur.count, prev.count)}
               deltaSuffix={deltaSuffix}
@@ -185,7 +187,7 @@ export default function HomeScreen() {
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
                   <Ionicons name="wallet-outline" size={16} color={colors.danger} />
-                  <Text className="text-sm text-muted">Xarajatlar</Text>
+                  <Text className="text-sm text-muted">{t("menu.expenses")}</Text>
                 </View>
                 <Text className="text-sm font-semibold" style={{ color: colors.danger }}>
                   −{formatCurrency(expTotal)}
@@ -193,7 +195,7 @@ export default function HomeScreen() {
               </View>
               <View className="my-2.5 border-t border-line" />
               <View className="flex-row items-center justify-between">
-                <Text className="text-sm font-medium text-ink">Sof foyda (xarajatlardan keyin)</Text>
+                <Text className="text-sm font-medium text-ink">{t("dashboard.netAfterExpenses")}</Text>
                 <Text
                   className="text-base font-semibold"
                   style={{ color: netProfit(cur.profit, expTotal) < 0 ? colors.danger : colors.success }}
@@ -207,7 +209,7 @@ export default function HomeScreen() {
 
         {/* Eng ko'p sotilgan */}
         <View>
-          <Section title="Eng ko'p sotilgan" />
+          <Section title={t("dashboard.topSelling")} />
           <Card>
             <TopList items={top ?? []} loading={topLoading && !isError} />
           </Card>
@@ -228,13 +230,13 @@ export default function HomeScreen() {
           }}
         >
           <Ionicons name="cart" size={20} color="#fff" />
-          <Text className="text-base font-semibold text-white">Sotuvni boshlash</Text>
+          <Text className="text-base font-semibold text-white">{t("dashboard.startSale")}</Text>
         </Pressable>
 
         {/* Trend grafigi (Hafta/Oy) */}
         {period !== 1 && !isError ? (
           <View>
-            <Section title={`Tushum dinamikasi (${period} kun)`} />
+            <Section title={t("dashboard.revenueTrend", { days: period })} />
             <Card>
               <TrendChart data={current} />
             </Card>
@@ -244,7 +246,7 @@ export default function HomeScreen() {
         {/* Kam sotilyapti */}
         {!isError ? (
           <View>
-            <Section title="Kam sotilyapti" />
+            <Section title={t("dashboard.slowMoving")} />
             <Card>
               <SlowList items={slow ?? []} />
             </Card>
@@ -253,7 +255,7 @@ export default function HomeScreen() {
 
         {/* Kam qoldiq */}
         <View>
-          <Section title={`Kam qoldiq${lowStock && lowStock.length ? ` (${lowStock.length})` : ""}`} />
+          <Section title={`${t("dashboard.lowStock")}${lowStock && lowStock.length ? ` (${lowStock.length})` : ""}`} />
           <Card>
             <LowStockList items={lowStock ?? []} onTap={() => router.push("/katalog")} />
           </Card>

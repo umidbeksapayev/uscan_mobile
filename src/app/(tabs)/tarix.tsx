@@ -3,6 +3,7 @@ import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
@@ -15,11 +16,11 @@ import { printReceipt } from "@/features/print/print-receipt";
 
 const METHOD: Record<
   SearchMethod,
-  { label: string; icon: keyof typeof Ionicons.glyphMap }
+  { labelKey: string; icon: keyof typeof Ionicons.glyphMap }
 > = {
-  barcode: { label: "Shtrix", icon: "barcode-outline" },
-  manual: { label: "Qo'lda", icon: "search-outline" },
-  visual: { label: "Qo'lda", icon: "search-outline" },
+  barcode: { labelKey: "history.methodBarcode", icon: "barcode-outline" },
+  manual: { labelKey: "history.methodManual", icon: "search-outline" },
+  visual: { labelKey: "history.methodManual", icon: "search-outline" },
 };
 
 function refundedTotal(sale: Sale): number {
@@ -27,8 +28,11 @@ function refundedTotal(sale: Sale): number {
 }
 
 function ItemLine({ it }: { it: SaleItem }) {
+  const { t } = useTranslation();
   const qtyLabel =
-    it.sale_type === "weight" ? formatWeight(it.quantity_sold) : `${it.quantity_sold} dona`;
+    it.sale_type === "weight"
+      ? formatWeight(it.quantity_sold)
+      : `${it.quantity_sold} ${t("common.pcs")}`;
   return (
     <View className="flex-row items-center gap-3 px-3 py-2">
       {it.product?.image_url ? (
@@ -68,6 +72,7 @@ function SaleCard({
   onReturn?: () => void;
   shopName: string;
 }) {
+  const { t } = useTranslation();
   const meta = METHOD[sale.search_method] ?? METHOD.manual;
   const refunded = refundedTotal(sale);
   const hasReturns = refunded > 0;
@@ -95,7 +100,9 @@ function SaleCard({
         </View>
 
         <View className="min-w-0 flex-1">
-          <Text className="text-base font-medium text-ink">{sale.item_count} mahsulot</Text>
+          <Text className="text-base font-medium text-ink">
+            {t("history.itemCount", { count: sale.item_count })}
+          </Text>
           <View className="mt-1 flex-row flex-wrap items-center" style={{ gap: 8 }}>
             <Text className="text-xs text-muted">{formatDateTime(sale.sold_at)}</Text>
             <View
@@ -104,7 +111,7 @@ function SaleCard({
             >
               <Ionicons name={meta.icon} size={11} color={colors.primary} />
               <Text style={{ fontSize: 10, fontWeight: "500", color: colors.primary }}>
-                {meta.label}
+                {t(meta.labelKey)}
               </Text>
             </View>
             {hasReturns ? (
@@ -114,7 +121,7 @@ function SaleCard({
               >
                 <Ionicons name="arrow-undo-outline" size={11} color="#B42318" />
                 <Text style={{ fontSize: 10, fontWeight: "500", color: "#B42318" }}>
-                  Qaytarilgan
+                  {t("returns.badge")}
                 </Text>
               </View>
             ) : null}
@@ -147,7 +154,7 @@ function SaleCard({
           >
             {hasReturns ? (
               <Text className="text-xs text-muted">
-                Qaytarilgan:{" "}
+                {t("returns.refunded")}:{" "}
                 <Text style={{ fontWeight: "500", color: "#B42318" }}>
                   {formatCurrency(refunded)}
                 </Text>
@@ -161,7 +168,7 @@ function SaleCard({
               >
                 <Ionicons name="print-outline" size={15} color={colors.primary} />
                 <Text className="text-sm font-medium" style={{ color: colors.primary }}>
-                  Chek
+                  {t("receipt.label")}
                 </Text>
               </Pressable>
               {onReturn ? (
@@ -172,7 +179,7 @@ function SaleCard({
                 >
                   <Ionicons name="arrow-undo-outline" size={15} color={colors.danger} />
                   <Text className="text-sm font-medium" style={{ color: colors.danger }}>
-                    Qaytarish
+                    {t("returns.action")}
                   </Text>
                 </Pressable>
               ) : null}
@@ -202,6 +209,7 @@ function EmptyState({
 }
 
 export default function TarixScreen() {
+  const { t } = useTranslation();
   const [openId, setOpenId] = useState<string | null>(null);
   const [returnSale, setReturnSale] = useState<Sale | null>(null);
 
@@ -229,12 +237,13 @@ export default function TarixScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
         <View className="flex-row items-end justify-between pb-3">
-          <Text className="text-2xl font-medium text-primary-deep">Tarix</Text>
+          <Text className="text-2xl font-medium text-primary-deep">{t("nav.history")}</Text>
           {list.length > 0 ? (
             <Text className="text-sm text-muted">
-              {list.length}
-              {hasNextPage ? "+" : ""} sotuv ·{" "}
-              <Text className="font-medium text-ink">{formatCurrency(total)}</Text>
+              {t("history.countSales", {
+                count: `${list.length}${hasNextPage ? "+" : ""}` as unknown as number,
+              })}{" "}
+              · <Text className="font-medium text-ink">{formatCurrency(total)}</Text>
             </Text>
           ) : null}
         </View>
@@ -245,12 +254,9 @@ export default function TarixScreen() {
           <ActivityIndicator color={colors.primary} />
         </View>
       ) : isError ? (
-        <EmptyState
-          icon="cloud-offline-outline"
-          text="Tarixni yuklab bo'lmadi. Internetni tekshiring."
-        />
+        <EmptyState icon="cloud-offline-outline" text={t("common.loadError")} />
       ) : list.length === 0 ? (
-        <EmptyState icon="receipt-outline" text="Hali sotuvlar yo'q." />
+        <EmptyState icon="receipt-outline" text={t("history.noSales")} />
       ) : (
         <FlatList
           data={list}
