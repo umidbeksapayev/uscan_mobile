@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatDateTime, formatDateTimeFull, formatNumber } from "@/lib/format";
@@ -31,6 +32,7 @@ const DIFF_UI = {
 
 export default function ShiftCloseScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const online = useOnline();
   const { session } = useAuth();
   const shopId = useActiveShopId();
@@ -50,6 +52,7 @@ export default function ShiftCloseScreen() {
   const hasInput = countedText.trim().length > 0;
   const diff = exp ? closureDifference(counted, exp.expectedCash) : 0;
   const dui = DIFF_UI[diffStatus(diff)];
+  const statusLabel = t("shift.status_" + diffStatus(diff), dui.label);
 
   const emailByUser = useMemo(() => {
     const m = new Map<string, string>();
@@ -69,14 +72,16 @@ export default function ShiftCloseScreen() {
   function onClosePress() {
     if (!exp) return;
     Alert.alert(
-      "Kassani yopish",
-      `Kutilgan: ${formatCurrency(exp.expectedCash)}\nSanalgan: ${formatCurrency(counted)}\n${
-        diff === 0 ? "Farq yo'q." : `${dui.label}: ${formatCurrency(Math.abs(diff))}.`
-      }\n\nYopilsinmi?`,
+      t("shift.alertTitle", "Kassani yopish"),
+      t("shift.alertBody", "Kutilgan: {{expected}}\nSanalgan: {{counted}}\n{{diff}}\n\nYopilsinmi?", {
+        expected: formatCurrency(exp.expectedCash),
+        counted: formatCurrency(counted),
+        diff: diff === 0 ? t("shift.alertNoDiff", "Farq yo'q.") : `${statusLabel}: ${formatCurrency(Math.abs(diff))}.`,
+      }),
       [
-        { text: "Bekor qilish", style: "cancel" },
+        { text: t("common.cancel", "Bekor qilish"), style: "cancel" },
         {
-          text: "Yopish",
+          text: t("shift.alertClose", "Yopish"),
           style: diff < 0 ? "destructive" : "default",
           onPress: () =>
             closeShift.mutate(
@@ -101,12 +106,12 @@ export default function ShiftCloseScreen() {
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          accessibilityLabel="Orqaga"
+          accessibilityLabel={t("common.close", "Orqaga")}
           className="h-10 w-10 items-center justify-center"
         >
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
-        <Text className="text-xl font-semibold text-ink">Kassani yopish</Text>
+        <Text className="text-xl font-semibold text-ink">{t("shift.title", "Kassani yopish")}</Text>
       </View>
 
       <ScrollView
@@ -121,7 +126,7 @@ export default function ShiftCloseScreen() {
           >
             <Ionicons name="cloud-offline-outline" size={18} color={colors.warning} />
             <Text className="flex-1 text-sm text-ink">
-              Kassa yopish uchun internet kerak (hisob serverda yuritiladi).
+              {t("shift.offlineNote", "Kassa yopish uchun internet kerak (hisob serverda yuritiladi).")}
             </Text>
           </View>
         ) : null}
@@ -135,14 +140,14 @@ export default function ShiftCloseScreen() {
             >
               <Ionicons name="checkmark" size={30} color={colors.success} />
             </View>
-            <Text className="text-lg font-medium text-ink">Kassa yopildi</Text>
-            <ResultRow label="Kutilgan" value={formatCurrency(result.expected_cash)} />
-            <ResultRow label="Sanalgan" value={formatCurrency(result.counted_cash)} />
+            <Text className="text-lg font-medium text-ink">{t("shift.closedTitle", "Kassa yopildi")}</Text>
+            <ResultRow label={t("shift.expectedLabel", "Kutilgan")} value={formatCurrency(result.expected_cash)} />
+            <ResultRow label={t("shift.countedLabel", "Sanalgan")} value={formatCurrency(result.counted_cash)} />
             <ResultRow
-              label="Farq"
+              label={t("shift.diffLabel", "Farq")}
               value={
                 result.difference === 0
-                  ? "0 so'm"
+                  ? `0 ${t("common.som", "so'm")}`
                   : `${result.difference > 0 ? "+" : "−"}${formatCurrency(Math.abs(result.difference))}`
               }
               color={DIFF_UI[diffStatus(result.difference)].color}
@@ -153,9 +158,9 @@ export default function ShiftCloseScreen() {
         {/* Kutilgan naqd (server hisobi) */}
         <View className="mb-3 rounded-2xl border border-line bg-surface p-4">
           <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-sm font-medium text-ink">Kutilgan naqd</Text>
+            <Text className="text-sm font-medium text-ink">{t("shift.expectedCashTitle", "Kutilgan naqd")}</Text>
             {exp ? (
-              <Text className="text-xs text-muted">{formatDateTime(exp.from)} dan beri</Text>
+              <Text className="text-xs text-muted">{t("shift.since", "{{date}} dan beri", { date: formatDateTime(exp.from) })}</Text>
             ) : null}
           </View>
 
@@ -163,16 +168,16 @@ export default function ShiftCloseScreen() {
             <ActivityIndicator color={colors.primary} style={{ paddingVertical: 16 }} />
           ) : expected.isError ? (
             <Text className="py-2 text-sm text-danger">
-              {(expected.error as Error)?.message ?? "Xatolik yuz berdi"}
+              {(expected.error as Error)?.message ?? t("common.loadError", "Xatolik yuz berdi")}
             </Text>
           ) : exp ? (
             <>
-              <BreakdownRow label="Naqd sotuvlar" value={exp.cashSales} />
-              <BreakdownRow label="Nasiya to'lovlari" value={exp.debtPayments} />
-              <BreakdownRow label="Qaytarishlar" value={-exp.refunds} negative />
+              <BreakdownRow label={t("shift.cashSales", "Naqd sotuvlar")} value={exp.cashSales} />
+              <BreakdownRow label={t("shift.debtPayments", "Nasiya to'lovlari")} value={exp.debtPayments} />
+              <BreakdownRow label={t("shift.refunds", "Qaytarishlar")} value={-exp.refunds} negative />
               <View className="my-2 border-t border-line" />
               <View className="flex-row items-center justify-between">
-                <Text className="text-base font-medium text-ink">Jami kutilgan</Text>
+                <Text className="text-base font-medium text-ink">{t("shift.totalExpected", "Jami kutilgan")}</Text>
                 <Text className="text-lg font-semibold" style={{ color: colors.primary }}>
                   {formatCurrency(exp.expectedCash)}
                 </Text>
@@ -183,24 +188,25 @@ export default function ShiftCloseScreen() {
 
         {/* Sanalgan naqd + farq + izoh */}
         <View className="mb-3 rounded-2xl border border-line bg-surface p-4">
-          <Text className="mb-1 text-sm font-medium text-ink">Sanalgan naqd</Text>
+          <Text className="mb-1 text-sm font-medium text-ink">{t("shift.countedCashTitle", "Sanalgan naqd")}</Text>
           <TextInput
             value={countedText}
             onChangeText={setCountedText}
             keyboardType="number-pad"
-            placeholder={exp ? formatNumber(exp.expectedCash) : "0"}
+            placeholder={exp ? formatNumber(exp.expectedCash) : t("shift.countedPlaceholder", "0")}
             placeholderTextColor={colors.tabInactive}
-            accessibilityLabel="Sanalgan naqd summa"
+            accessibilityLabel={t("shift.countedCashTitle", "Sanalgan naqd summa")}
             className="rounded-2xl border border-line bg-bg px-4 text-xl font-medium text-ink"
             style={{ height: 56 }}
           />
           {exp ? (
             <Pressable
               onPress={() => setCountedText(String(exp.expectedCash))}
+              accessibilityLabel={t("shift.exactBtn", "Aniq (kutilganday)")}
               className="mt-2 items-center justify-center self-start rounded-xl bg-bg px-4"
               style={{ height: 40 }}
             >
-              <Text className="text-sm font-medium text-ink">Aniq (kutilganday)</Text>
+              <Text className="text-sm font-medium text-ink">{t("shift.exactBtn", "Aniq (kutilganday)")}</Text>
             </Pressable>
           ) : null}
 
@@ -210,52 +216,52 @@ export default function ShiftCloseScreen() {
               style={{ backgroundColor: dui.bg }}
             >
               <Text className="text-sm" style={{ color: dui.color }}>
-                {dui.label}
+                {statusLabel}
               </Text>
               <Text className="text-base font-medium" style={{ color: dui.color }}>
-                {diff === 0 ? "0 so'm" : formatCurrency(Math.abs(diff))}
+                {diff === 0 ? `0 ${t("common.som", "so'm")}` : formatCurrency(Math.abs(diff))}
               </Text>
             </View>
           ) : null}
 
-          <Text className="mb-1 mt-3 text-sm font-medium text-ink">Izoh (ixtiyoriy)</Text>
+          <Text className="mb-1 mt-3 text-sm font-medium text-ink">{t("shift.noteLabel", "Izoh (ixtiyoriy)")}</Text>
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder={diff < 0 ? "Kamomad sababi..." : "Izoh..."}
+            placeholder={diff < 0 ? t("shift.noteShortagePlaceholder", "Kamomad sababi...") : t("shift.notePlaceholder", "Izoh...")}
             placeholderTextColor={colors.tabInactive}
-            accessibilityLabel="Yopilish izohi"
+            accessibilityLabel={t("shift.noteLabel", "Yopilish izohi")}
             className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
             style={{ height: 48 }}
           />
 
           {closeShift.isError ? (
             <Text className="mt-3 text-center text-sm text-danger">
-              {(closeShift.error as Error)?.message ?? "Xatolik yuz berdi"}
+              {(closeShift.error as Error)?.message ?? t("common.loadError", "Xatolik yuz berdi")}
             </Text>
           ) : null}
 
           <Pressable
             disabled={!canClose}
             onPress={onClosePress}
-            accessibilityLabel="Kassani yopish"
+            accessibilityLabel={t("shift.closeBtn", "Kassani yopish")}
             className="mt-4 flex-row items-center justify-center rounded-2xl bg-primary"
             style={{ height: 54, opacity: canClose ? 1 : 0.5 }}
           >
             {closeShift.isPending ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-base font-medium text-white">Kassani yopish</Text>
+              <Text className="text-base font-medium text-white">{t("shift.closeBtn", "Kassani yopish")}</Text>
             )}
           </Pressable>
         </View>
 
         {/* Oxirgi yopilishlar */}
-        <Text className="mb-2 mt-1 text-sm font-medium text-muted">OXIRGI YOPILISHLAR</Text>
+        <Text className="mb-2 mt-1 text-sm font-medium text-muted">{t("shift.recentTitle", "OXIRGI YOPILISHLAR")}</Text>
         {closures.isLoading ? (
           <ActivityIndicator color={colors.primary} style={{ paddingVertical: 12 }} />
         ) : visibleClosures.length === 0 ? (
-          <Text className="py-3 text-center text-sm text-muted">Hali yopilish yo'q.</Text>
+          <Text className="py-3 text-center text-sm text-muted">{t("shift.noRecent", "Hali yopilish yo'q.")}</Text>
         ) : (
           visibleClosures.map((c) => (
             <ClosureCard
@@ -294,6 +300,7 @@ function BreakdownRow({ label, value, negative }: { label: string; value: number
 }
 
 function ClosureCard({ closure, cashierEmail }: { closure: CashClosure; cashierEmail?: string }) {
+  const { t } = useTranslation();
   const ui = DIFF_UI[diffStatus(closure.difference)];
   return (
     <View className="mb-2.5 rounded-2xl border border-line bg-surface p-3.5">
@@ -304,14 +311,17 @@ function ClosureCard({ closure, cashierEmail }: { closure: CashClosure; cashierE
         <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: ui.bg }}>
           <Text className="text-xs font-medium" style={{ color: ui.color }}>
             {closure.difference === 0
-              ? "Mos"
+              ? t("shift.status_match_short", "Mos")
               : `${closure.difference > 0 ? "+" : "−"}${formatNumber(Math.abs(closure.difference))}`}
           </Text>
         </View>
       </View>
       <View className="mt-1.5 flex-row items-center justify-between">
         <Text className="text-xs text-muted">
-          Kutilgan {formatNumber(closure.expected_cash)} · Sanalgan {formatNumber(closure.counted_cash)}
+          {t("shift.cardSummary", "Kutilgan {{expected}} · Sanalgan {{counted}}", {
+            expected: formatNumber(closure.expected_cash),
+            counted: formatNumber(closure.counted_cash),
+          })}
         </Text>
       </View>
       {cashierEmail ? <Text className="mt-0.5 text-xs text-muted">{cashierEmail}</Text> : null}

@@ -3,6 +3,7 @@ import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatDateTime } from "@/lib/format";
@@ -11,12 +12,13 @@ import { expensesTotal, categoryLabel, type Expense } from "@/features/expenses/
 import { ExpenseFormSheet, categoryIcon } from "@/features/expenses/expense-form-sheet";
 
 const PERIODS = [
-  { days: 7, label: "Hafta" },
-  { days: 30, label: "Oy" },
+  { days: 7, key: "periodWeek", fallback: "Hafta" },
+  { days: 30, key: "periodMonth", fallback: "Oy" },
 ] as const;
 
 export default function ExpensesScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [days, setDays] = useState<7 | 30>(30);
   const { data: expenses, isLoading, isError, error, refetch, isRefetching } = useExpenses(days);
   const [editing, setEditing] = useState<Expense | null>(null);
@@ -39,12 +41,12 @@ export default function ExpensesScreen() {
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          accessibilityLabel="Orqaga"
+          accessibilityLabel={t("common.close", "Orqaga")}
           className="h-10 w-10 items-center justify-center"
         >
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
-        <Text className="flex-1 text-xl font-semibold text-ink">Xarajatlar</Text>
+        <Text className="flex-1 text-xl font-semibold text-ink">{t("expenses.title", "Xarajatlar")}</Text>
         {/* Davr toggle */}
         <View className="flex-row rounded-full p-0.5" style={{ backgroundColor: colors.primaryTint }}>
           {PERIODS.map((p) => {
@@ -53,11 +55,12 @@ export default function ExpensesScreen() {
               <Pressable
                 key={p.days}
                 onPress={() => setDays(p.days)}
+                accessibilityLabel={t("expenses." + p.key, p.fallback)}
                 className="rounded-full px-4 py-1.5"
                 style={{ backgroundColor: active ? colors.primaryDeep : "transparent" }}
               >
                 <Text style={{ fontSize: 13, fontWeight: "600", color: active ? "#fff" : colors.muted }}>
-                  {p.label}
+                  {t("expenses." + p.key, p.fallback)}
                 </Text>
               </Pressable>
             );
@@ -67,7 +70,7 @@ export default function ExpensesScreen() {
 
       {/* Jami karta */}
       <View className="mx-4 mb-2 flex-row items-center justify-between rounded-2xl border border-line bg-surface p-4">
-        <Text className="text-sm text-muted">Jami xarajat ({days} kun)</Text>
+        <Text className="text-sm text-muted">{t("expenses.totalCard", "Jami xarajat ({{days}} kun)", { days })}</Text>
         <Text className="text-lg font-semibold" style={{ color: colors.danger }}>
           {formatCurrency(total)}
         </Text>
@@ -80,7 +83,7 @@ export default function ExpensesScreen() {
       ) : isError ? (
         <View className="flex-1 items-center justify-center px-10">
           <Text className="text-center text-sm text-danger">
-            {(error as Error)?.message ?? "Xatolik yuz berdi"}
+            {(error as Error)?.message ?? t("common.loadError", "Xatolik yuz berdi")}
           </Text>
         </View>
       ) : (expenses?.length ?? 0) === 0 ? (
@@ -89,7 +92,7 @@ export default function ExpensesScreen() {
             <Ionicons name="wallet-outline" size={36} color={colors.primary} />
           </View>
           <Text className="text-center text-base text-muted">
-            Bu davrda xarajat yo'q. "+" bilan qo'shing.
+            {t("expenses.emptyPeriod", "Bu davrda xarajat yo'q. \"+\" bilan qo'shing.")}
           </Text>
         </View>
       ) : (
@@ -102,6 +105,7 @@ export default function ExpensesScreen() {
           renderItem={({ item }) => (
             <Pressable
               onPress={() => openEdit(item)}
+              accessibilityLabel={`${categoryLabel(item.category, t)}: −${formatCurrency(item.amount)}`}
               className="mb-2.5 flex-row items-center gap-3 rounded-2xl bg-surface p-3.5"
               style={{ borderWidth: 0.5, borderColor: colors.line }}
             >
@@ -110,7 +114,7 @@ export default function ExpensesScreen() {
               </View>
               <View className="min-w-0 flex-1">
                 <Text className="text-base font-medium text-ink" numberOfLines={1}>
-                  {categoryLabel(item.category)}
+                  {categoryLabel(item.category, t)}
                 </Text>
                 <Text className="text-xs text-muted" numberOfLines={1}>
                   {formatDateTime(item.spent_at)}
@@ -127,7 +131,7 @@ export default function ExpensesScreen() {
 
       <Pressable
         onPress={openNew}
-        accessibilityLabel="Xarajat qo'shish"
+        accessibilityLabel={t("expenses.addBtnA11y", "Xarajat qo'shish")}
         style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", shadowColor: "#0F172A", shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
       >
         <Ionicons name="add" size={30} color="#fff" />

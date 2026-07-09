@@ -24,7 +24,14 @@ export const EXPENSE_CATEGORIES = [
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number]["id"];
 
 /** Kategoriya id → o'zbekcha label (noma'lum id → "Boshqa"). */
-export function categoryLabel(id: string): string {
+export function categoryLabel(id: string, t?: (key: string, fallback?: string) => string): string {
+  if (t) {
+    if (id === "rent") return t("expenses.cat_rent", "Ijara");
+    if (id === "utility") return t("expenses.cat_utility", "Kommunal");
+    if (id === "salary") return t("expenses.cat_salary", "Ish haqi");
+    if (id === "transport") return t("expenses.cat_transport", "Transport");
+    return t("expenses.cat_other", "Boshqa");
+  }
   return EXPENSE_CATEGORIES.find((c) => c.id === id)?.label ?? "Boshqa";
 }
 

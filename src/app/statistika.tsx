@@ -6,6 +6,7 @@ import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency, formatWeight } from "@/lib/format";
@@ -20,9 +21,9 @@ import { StatsCard } from "@/components/ui/stats-card";
 import type { TopProduct } from "@/types/database";
 
 const PERIODS = [
-  { days: 1 as const, label: "Bugun", file: "bugun" },
-  { days: 7 as const, label: "Hafta", file: "hafta" },
-  { days: 30 as const, label: "Oy", file: "oy" },
+  { days: 1 as const, key: "today", fallback: "Bugun", file: "bugun" },
+  { days: 7 as const, key: "week", fallback: "Hafta", file: "hafta" },
+  { days: 30 as const, key: "month", fallback: "Oy", file: "oy" },
 ];
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,7 @@ function Row({ children }: { children: React.ReactNode }) {
 }
 
 function ProductStatRow({ p, rank }: { p: TopProduct; rank?: number }) {
+  const { t } = useTranslation();
   const sold = p.sale_type === "weight" ? formatWeight(p.units_sold) : `${p.units_sold} dona`;
   return (
     <View className="flex-row items-center gap-3 py-1.5">
@@ -53,7 +55,7 @@ function ProductStatRow({ p, rank }: { p: TopProduct; rank?: number }) {
         <Text className="text-sm font-medium text-ink" numberOfLines={1}>
           {p.name}
         </Text>
-        <Text className="text-xs text-muted">{p.units_sold <= 0 ? "Sotilmagan" : sold}</Text>
+        <Text className="text-xs text-muted">{p.units_sold <= 0 ? t("statistics.unsold", "Sotilmagan") : sold}</Text>
       </View>
       <Text className="text-sm font-semibold text-ink">{formatCurrency(p.revenue)}</Text>
     </View>
@@ -75,6 +77,7 @@ function ListCard({ title, children }: { title: string; children: React.ReactNod
 /** Savdo statistikasi — faqat view_reports'li foydalanuvchida MOUNT bo'ladi
  *  (shu sababli himoyalangan RPC'lar ruxsatsiz chaqirilmaydi). */
 function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost: boolean }) {
+  const { t } = useTranslation();
   const { data: s, isLoading } = useSalesStats(period);
   const { data: top, isLoading: topLoading } = useTopProducts(period, 5);
   const { data: slow, isLoading: slowLoading } = useSlowProducts(period, 5);
@@ -83,7 +86,7 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
     <View style={{ gap: 10 }}>
       <Row>
         <StatsCard
-          label="Tushum"
+          label={t("reports.revenue", "Tushum")}
           value={formatCurrency(s?.revenue ?? 0)}
           icon="wallet-outline"
           tone="brand"
@@ -91,7 +94,7 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
           loading={isLoading}
         />
         <StatsCard
-          label="Sof foyda"
+          label={t("reports.profit", "Sof foyda")}
           value={formatCurrency(s?.profit ?? 0)}
           icon="trending-up-outline"
           tone="green"
@@ -102,7 +105,7 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
       </Row>
       <Row>
         <StatsCard
-          label="Sotuvlar"
+          label={t("reports.sales", "Sotuvlar")}
           value={`${s?.sales_count ?? 0} ta`}
           icon="cart-outline"
           tone="muted"
@@ -110,7 +113,7 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
           loading={isLoading}
         />
         <StatsCard
-          label="O'rtacha chek"
+          label={t("statistics.avgCheck", "O'rtacha chek")}
           value={formatCurrency(s?.avg_check ?? 0)}
           icon="receipt-outline"
           tone="amber"
@@ -118,21 +121,21 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
         />
       </Row>
 
-      <ListCard title="Eng ko'p sotilgan">
+      <ListCard title={t("statistics.topTitle", "Eng ko'p sotilgan")}>
         {topLoading ? (
           <ActivityIndicator color={colors.primary} />
         ) : (top?.length ?? 0) === 0 ? (
-          <Text className="py-3 text-center text-sm text-muted">Bu davrda sotuv yo'q</Text>
+          <Text className="py-3 text-center text-sm text-muted">{t("statistics.noSalesPeriod", "Bu davrda sotuv yo'q")}</Text>
         ) : (
           top!.map((p, i) => <ProductStatRow key={p.product_id} p={p} rank={i + 1} />)
         )}
       </ListCard>
 
-      <ListCard title="Kam sotilyapti">
+      <ListCard title={t("statistics.slowTitle", "Kam sotilyapti")}>
         {slowLoading ? (
           <ActivityIndicator color={colors.primary} />
         ) : (slow?.length ?? 0) === 0 ? (
-          <Text className="py-3 text-center text-sm text-muted">Ma'lumot yo'q</Text>
+          <Text className="py-3 text-center text-sm text-muted">{t("statistics.noData", "Ma'lumot yo'q")}</Text>
         ) : (
           slow!.map((p) => <ProductStatRow key={p.product_id} p={p} />)
         )}
@@ -144,6 +147,7 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
 /** Kassir bo'yicha savdo — FAQAT egaga mount bo'ladi (email'lar owner-gated
  *  list_shop_members RPC'dan; kassirlar bir-birining natijasini ko'rmaydi). */
 function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string }) {
+  const { t } = useTranslation();
   const { data: aggs, isLoading } = useCashierStats(period);
   const { data: staff } = useStaff(shopId);
 
@@ -151,11 +155,11 @@ function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string
   const roleById = new Map((staff ?? []).map((m) => [m.user_id, m.role]));
 
   return (
-    <ListCard title="Kassirlar bo'yicha">
+    <ListCard title={t("statistics.byCashier", "Kassirlar bo'yicha")}>
       {isLoading ? (
         <ActivityIndicator color={colors.primary} />
       ) : (aggs?.length ?? 0) === 0 ? (
-        <Text className="py-3 text-center text-sm text-muted">Bu davrda sotuv yo'q</Text>
+        <Text className="py-3 text-center text-sm text-muted">{t("statistics.noSalesPeriod", "Bu davrda sotuv yo'q")}</Text>
       ) : (
         aggs!.map((a) => {
           const email = a.cashierId ? emailById.get(a.cashierId) : null;
@@ -171,11 +175,11 @@ function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string
               </View>
               <View className="min-w-0 flex-1">
                 <Text className="text-sm font-medium text-ink" numberOfLines={1}>
-                  {email ?? "Noma'lum (eski sotuvlar)"}
+                  {email ?? t("statistics.unknownCashier", "Noma'lum (eski sotuvlar)")}
                 </Text>
                 <Text className="text-xs text-muted">
-                  {isShopOwner ? "Egasi · " : ""}
-                  {a.salesCount} ta sotuv
+                  {isShopOwner ? t("statistics.ownerBadge", "Egasi · ") : ""}
+                  {t("statistics.salesCountStr", "{{count}} ta sotuv", { count: a.salesCount })}
                 </Text>
               </View>
               <Text className="text-sm font-semibold text-ink">{formatCurrency(a.revenue)}</Text>
@@ -188,6 +192,7 @@ function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string
 }
 
 function LockedSalesSection() {
+  const { t } = useTranslation();
   return (
     <View
       className="items-center rounded-2xl bg-surface p-6"
@@ -197,7 +202,7 @@ function LockedSalesSection() {
         <Ionicons name="lock-closed" size={24} color={colors.muted} />
       </View>
       <Text className="text-center text-sm text-muted">
-        Savdo statistikasi faqat egasi yoki "Hisobotlar" ruxsati bor xodimga ko'rinadi.
+        {t("statistics.lockedHint", "Savdo statistikasi faqat egasi yoki \"Hisobotlar\" ruxsati bor xodimga ko'rinadi.")}
       </Text>
     </View>
   );
@@ -205,6 +210,7 @@ function LockedSalesSection() {
 
 export default function StatistikaScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const shopId = useActiveShopId();
   const { canViewReports, canViewCost, isOwner } = useActivePermissions();
@@ -238,10 +244,10 @@ export default function StatistikaScreen() {
         includeProfit: canViewCost,
         periodLabel: p.file,
       });
-      if (res === "empty") toast.info("Eksport", "Bu davrda sotuv yo'q.");
-      else if (res === "unavailable") toast.info("Eksport", "Ulashish bu qurilmada mavjud emas.");
+      if (res === "empty") toast.info("Eksport", t("statistics.exportEmpty", "Bu davrda sotuv yo'q."));
+      else if (res === "unavailable") toast.info("Eksport", t("statistics.exportUnavailable", "Ulashish bu qurilmada mavjud emas."));
     } catch (e) {
-      toast.error("Xatolik", e instanceof Error ? e.message : "Eksport amalga oshmadi");
+      toast.error("Xatolik", e instanceof Error ? e.message : t("statistics.exportFailed", "Eksport amalga oshmadi"));
     } finally {
       setExporting(false);
     }
@@ -251,10 +257,15 @@ export default function StatistikaScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       {/* Header */}
       <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          accessibilityLabel={t("common.close", "Orqaga")}
+          className="h-10 w-10 items-center justify-center"
+        >
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
-        <Text className="text-xl font-semibold text-ink">Statistika</Text>
+        <Text className="text-xl font-semibold text-ink">{t("statistics.title", "Statistika")}</Text>
       </View>
 
       <ScrollView
@@ -273,12 +284,12 @@ export default function StatistikaScreen() {
             <View className="mb-1 flex-row items-center gap-2">
               <Ionicons name="alert-circle" size={18} color="#B42318" />
               <Text className="text-base font-medium" style={{ color: "#B42318" }}>
-                Statistikani yuklab bo'lmadi
+                {t("statistics.loadError", "Statistikani yuklab bo'lmadi")}
               </Text>
             </View>
             <Text className="text-sm" style={{ color: "#8A2A22" }}>
               {migrationMissing
-                ? "Statistika funksiyalari DB'da yo'q. Supabase'da migration 030 (030_statistics_rpcs.sql) ni ishga tushiring."
+                ? t("statistics.migrationMissing", "Statistika funksiyalari DB'da yo'q. Supabase'da migration 030 (030_statistics_rpcs.sql) ni ishga tushiring.")
                 : invErrMsg}
             </Text>
           </View>
@@ -286,17 +297,17 @@ export default function StatistikaScreen() {
 
         {/* 1. Ombor qiymati */}
         <View style={{ gap: 10 }}>
-          <SectionTitle>Ombor qiymati</SectionTitle>
+          <SectionTitle>{t("statistics.secInventory", "Ombor qiymati")}</SectionTitle>
           <Row>
             <StatsCard
-              label="Mahsulot turlari"
+              label={t("statistics.productTypes", "Mahsulot turlari")}
               value={`${inv?.product_count ?? 0} ta`}
               icon="cube-outline"
               tone="brand"
               loading={invLoading}
             />
             <StatsCard
-              label="Jami zaxira"
+              label={t("statistics.totalStock", "Jami zaxira")}
               value={`${inv?.total_unit_qty ?? 0} dona`}
               subtitle={inv && inv.total_weight_kg > 0 ? `+ ${formatWeight(inv.total_weight_kg)}` : undefined}
               icon="layers-outline"
@@ -306,15 +317,15 @@ export default function StatistikaScreen() {
           </Row>
           <Row>
             <StatsCard
-              label="Sotuv narxida"
+              label={t("statistics.atRetail", "Sotuv narxida")}
               value={formatCurrency(inv?.retail_value ?? 0)}
-              subtitle="hammasi sotilsa"
+              subtitle={t("statistics.ifAllSold", "hammasi sotilsa")}
               icon="pricetag-outline"
               tone="green"
               loading={invLoading}
             />
             <StatsCard
-              label="Tan narxida"
+              label={t("statistics.atCost", "Tan narxida")}
               value={formatCurrency(inv?.cost_value ?? 0)}
               icon="wallet-outline"
               tone="amber"
@@ -324,7 +335,7 @@ export default function StatistikaScreen() {
           </Row>
           <Row>
             <StatsCard
-              label="Potensial foyda"
+              label={t("statistics.potentialProfit", "Potensial foyda")}
               value={formatCurrency(inv?.potential_profit ?? 0)}
               icon="trending-up-outline"
               tone="green"
@@ -332,9 +343,9 @@ export default function StatistikaScreen() {
               loading={invLoading}
             />
             <StatsCard
-              label="Kam qoldiq"
+              label={t("statistics.lowStockCount", "Kam qoldiq")}
               value={`${inv?.low_stock_count ?? 0} ta`}
-              subtitle={`Tugagan: ${inv?.out_of_stock_count ?? 0}`}
+              subtitle={t("statistics.outOfStock", "Tugagan: {{count}}", { count: inv?.out_of_stock_count ?? 0 })}
               icon="alert-circle-outline"
               tone="amber"
               loading={invLoading}
@@ -345,7 +356,7 @@ export default function StatistikaScreen() {
         {/* 2. Savdo statistikasi */}
         <View style={{ gap: 10 }}>
           <View className="flex-row items-center justify-between">
-            <SectionTitle>Savdo statistikasi</SectionTitle>
+            <SectionTitle>{t("statistics.secSales", "Savdo statistikasi")}</SectionTitle>
             <View className="flex-row self-start rounded-full p-0.5" style={{ backgroundColor: colors.primaryTint }}>
               {PERIODS.map((p) => {
                 const active = period === p.days;
@@ -353,11 +364,12 @@ export default function StatistikaScreen() {
                   <Pressable
                     key={p.days}
                     onPress={() => setPeriod(p.days)}
+                    accessibilityLabel={t("statistics." + p.key, p.fallback)}
                     className="rounded-full px-3.5 py-1"
                     style={{ backgroundColor: active ? colors.primaryDeep : "transparent" }}
                   >
                     <Text style={{ fontSize: 12, fontWeight: "600", color: active ? "#fff" : colors.muted }}>
-                      {p.label}
+                      {t("statistics." + p.key, p.fallback)}
                     </Text>
                   </Pressable>
                 );
@@ -379,6 +391,7 @@ export default function StatistikaScreen() {
           <Pressable
             onPress={onExport}
             disabled={exporting}
+            accessibilityLabel={t("statistics.exportCsvBtn", "Excel (CSV) eksport — {{period}}", { period: t("statistics." + PERIODS.find((p) => p.days === period)!.key, PERIODS.find((p) => p.days === period)!.fallback) })}
             className="mt-1 flex-row items-center justify-center rounded-2xl bg-primary"
             style={{ height: 52, gap: 8, opacity: exporting ? 0.6 : 1 }}
           >
@@ -388,7 +401,7 @@ export default function StatistikaScreen() {
               <>
                 <Ionicons name="download-outline" size={20} color="#fff" />
                 <Text className="text-base font-semibold text-white">
-                  Excel (CSV) eksport — {PERIODS.find((p) => p.days === period)!.label}
+                  {t("statistics.exportCsvBtn", "Excel (CSV) eksport — {{period}}", { period: t("statistics." + PERIODS.find((p) => p.days === period)!.key, PERIODS.find((p) => p.days === period)!.fallback) })}
                 </Text>
               </>
             )}

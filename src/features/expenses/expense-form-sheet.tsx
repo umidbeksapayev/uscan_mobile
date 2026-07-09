@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { View, Text, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { toast } from "@/lib/toast";
 import { formatNumber } from "@/lib/format";
 import { parseAmount } from "@/features/shift/shift-math";
-import { EXPENSE_CATEGORIES, type Expense } from "./expense-math";
+import { EXPENSE_CATEGORIES, categoryLabel, type Expense } from "./expense-math";
 import { useCreateExpense, useUpdateExpense, useDeleteExpense } from "./use-expenses";
 
 /** Kategoriya ikonlari (UI qatlami — math faylida emas). */
@@ -31,6 +32,7 @@ type Props = {
 };
 
 export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
+  const { t } = useTranslation();
   const createMut = useCreateExpense();
   const updateMut = useUpdateExpense();
   const deleteMut = useDeleteExpense();
@@ -64,42 +66,46 @@ export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
       }
       onClose();
     } catch (e) {
-      toast.error("Xatolik", e instanceof Error ? e.message : "Saqlab bo'lmadi");
+      toast.error(t("expenses.saveErrorTitle", "Xatolik"), e instanceof Error ? e.message : t("expenses.saveErrorBody", "Saqlab bo'lmadi"));
     }
   }
 
   function onDelete() {
     if (!expense) return;
-    Alert.alert("Xarajatni o'chirish", "Rostdan ham o'chirilsinmi?", [
-      { text: "Bekor qilish", style: "cancel" },
-      {
-        text: "O'chirish",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteMut.mutateAsync(expense.id);
-            onClose();
-          } catch (e) {
-            toast.error("Xatolik", e instanceof Error ? e.message : "O'chirib bo'lmadi");
-          }
+    Alert.alert(
+      t("expenses.deleteTitle", "Xarajatni o'chirish"),
+      t("expenses.deleteBody", "Rostdan ham o'chirilsinmi?"),
+      [
+        { text: t("common.cancel", "Bekor qilish"), style: "cancel" },
+        {
+          text: t("expenses.deleteBtn", "O'chirish"),
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteMut.mutateAsync(expense.id);
+              onClose();
+            } catch (e) {
+              toast.error(t("expenses.saveErrorTitle", "Xatolik"), e instanceof Error ? e.message : t("expenses.deleteErrorBody", "O'chirib bo'lmadi"));
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   }
 
   return (
     <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding contentStyle={{ gap: 10 }}>
           <Text className="mb-1 text-lg font-medium text-ink">
-            {expense ? "Xarajatni tahrirlash" : "Yangi xarajat"}
+            {expense ? t("expenses.editTitle", "Xarajatni tahrirlash") : t("expenses.addTitle", "Yangi xarajat")}
           </Text>
 
           <TextInput
             value={amountText}
             onChangeText={setAmountText}
             keyboardType="number-pad"
-            placeholder={`Summa, masalan ${formatNumber(500000)}`}
+            placeholder={t("expenses.amountPlaceholder", "Summa, masalan {{sample}}", { sample: formatNumber(500000) })}
             placeholderTextColor={colors.tabInactive}
-            accessibilityLabel="Xarajat summasi"
+            accessibilityLabel={t("expenses.amountA11y", "Xarajat summasi")}
             className="rounded-2xl border border-line bg-bg px-4 text-xl font-medium text-ink"
             style={{ height: 56 }}
             autoFocus={!expense}
@@ -109,11 +115,12 @@ export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
           <View className="flex-row flex-wrap" style={{ gap: 8 }}>
             {EXPENSE_CATEGORIES.map((c) => {
               const active = category === c.id;
+              const catLabel = categoryLabel(c.id, t);
               return (
                 <Pressable
                   key={c.id}
                   onPress={() => setCategory(c.id)}
-                  accessibilityLabel={`Kategoriya: ${c.label}`}
+                  accessibilityLabel={t("expenses.catA11y", "Kategoriya: {{label}}", { label: catLabel })}
                   className="flex-row items-center rounded-full px-3 py-2"
                   style={{
                     gap: 5,
@@ -124,7 +131,7 @@ export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
                 >
                   <Ionicons name={categoryIcon(c.id)} size={15} color={active ? "#fff" : colors.muted} />
                   <Text style={{ fontSize: 13, fontWeight: "500", color: active ? "#fff" : colors.muted }}>
-                    {c.label}
+                    {catLabel}
                   </Text>
                 </Pressable>
               );
@@ -134,9 +141,9 @@ export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder="Izoh (ixtiyoriy)"
+            placeholder={t("expenses.notePlaceholder", "Izoh (ixtiyoriy)")}
             placeholderTextColor={colors.tabInactive}
-            accessibilityLabel="Xarajat izohi"
+            accessibilityLabel={t("expenses.noteA11y", "Xarajat izohi")}
             className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
             style={{ height: 50 }}
           />
@@ -144,13 +151,14 @@ export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
           <Pressable
             disabled={!canSave}
             onPress={onSave}
+            accessibilityLabel={t("expenses.saveBtn", "Saqlash")}
             className="mt-2 flex-row items-center justify-center rounded-2xl bg-primary"
             style={{ height: 52, opacity: canSave ? 1 : 0.5 }}
           >
             {pending ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-base font-semibold text-white">Saqlash</Text>
+              <Text className="text-base font-semibold text-white">{t("expenses.saveBtn", "Saqlash")}</Text>
             )}
           </Pressable>
 
@@ -158,11 +166,12 @@ export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
             <Pressable
               disabled={pending}
               onPress={onDelete}
+              accessibilityLabel={t("expenses.deleteBtn", "O'chirish")}
               className="flex-row items-center justify-center gap-2 rounded-2xl"
               style={{ height: 48 }}
             >
               <Ionicons name="trash-outline" size={18} color={colors.danger} />
-              <Text className="text-base font-medium text-danger">O'chirish</Text>
+              <Text className="text-base font-medium text-danger">{t("expenses.deleteBtn", "O'chirish")}</Text>
             </Pressable>
           ) : null}
     </BottomSheet>
