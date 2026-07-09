@@ -25,6 +25,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { useActiveShopId } from "@/features/auth/use-memberships";
@@ -57,6 +58,7 @@ function Corner({
 
 export default function ScannerScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { mode } = useLocalSearchParams<{ mode?: string }>();
   const { width } = useWindowDimensions();
 
@@ -108,11 +110,11 @@ export default function ScannerScreen() {
       locked.current = false;
       return;
     }
-    setStatus({ text: "Qidirilmoqda..." });
+    setStatus({ text: t("scanner.searching", "Qidirilmoqda...") });
     try {
       const found = await findProductsByBarcode(raw, shopId);
       if (found.length === 0) {
-        setStatus({ text: `Topilmadi: ${raw}`, error: true });
+        setStatus({ text: t("scanner.notFound", "Topilmadi: {{code}}", { code: raw }), error: true });
         setTimeout(() => {
           locked.current = false;
           setStatus(null);
@@ -129,7 +131,7 @@ export default function ScannerScreen() {
       setActive(false);
       router.back();
     } catch {
-      setStatus({ text: "Xatolik yuz berdi", error: true });
+      setStatus({ text: t("common.loadError", "Xatolik yuz berdi"), error: true });
       setTimeout(() => {
         locked.current = false;
         setStatus(null);
@@ -162,19 +164,20 @@ export default function ScannerScreen() {
         <View className="h-20 w-20 items-center justify-center rounded-full bg-primary-tint">
           <Ionicons name="camera-outline" size={40} color={colors.primary} />
         </View>
-        <Text className="mt-5 text-center text-lg font-medium text-ink">Kameraga ruxsat kerak</Text>
+        <Text className="mt-5 text-center text-lg font-medium text-ink">{t("scanner.camPermTitle", "Kameraga ruxsat kerak")}</Text>
         <Text className="mt-1 text-center text-sm text-muted">
-          Shtrix-kodni skanerlash uchun kamera ruxsatini bering.
+          {t("scanner.camPermSub", "Shtrix-kodni skanerlash uchun kamera ruxsatini bering.")}
         </Text>
         <Pressable
           onPress={requestPermission}
+          accessibilityLabel={t("scanner.permBtn", "Ruxsat berish")}
           className="mt-6 rounded-2xl bg-primary"
           style={{ paddingHorizontal: 28, paddingVertical: 14 }}
         >
-          <Text className="text-base font-medium text-white">Ruxsat berish</Text>
+          <Text className="text-base font-medium text-white">{t("scanner.permBtn", "Ruxsat berish")}</Text>
         </Pressable>
-        <Pressable onPress={() => router.back()} className="mt-3 p-2">
-          <Text className="text-sm text-muted">Orqaga</Text>
+        <Pressable onPress={() => router.back()} accessibilityLabel={t("common.close", "Orqaga")} className="mt-3 p-2">
+          <Text className="text-sm text-muted">{t("common.close", "Orqaga")}</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -187,16 +190,17 @@ export default function ScannerScreen() {
         <View className="h-20 w-20 items-center justify-center rounded-full bg-primary-tint">
           <Ionicons name="videocam-off-outline" size={40} color={colors.muted} />
         </View>
-        <Text className="mt-5 text-center text-lg font-medium text-ink">Kamera topilmadi</Text>
+        <Text className="mt-5 text-center text-lg font-medium text-ink">{t("scanner.noCamTitle", "Kamera topilmadi")}</Text>
         <Text className="mt-1 text-center text-sm text-muted">
-          Qurilmada orqa kamera aniqlanmadi.
+          {t("scanner.noCamSub", "Qurilmada orqa kamera aniqlanmadi.")}
         </Text>
         <Pressable
           onPress={() => router.back()}
+          accessibilityLabel={t("common.close", "Orqaga")}
           className="mt-6 rounded-2xl bg-primary"
           style={{ paddingHorizontal: 28, paddingVertical: 14 }}
         >
-          <Text className="text-base font-medium text-white">Orqaga</Text>
+          <Text className="text-base font-medium text-white">{t("common.close", "Orqaga")}</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -249,7 +253,7 @@ export default function ScannerScreen() {
         </View>
         <View style={{ flex: 1, backgroundColor: MASK, alignItems: "center", paddingTop: 18 }}>
           <Text style={{ color: "rgba(255,255,255,0.92)", fontSize: 15, fontWeight: "500" }}>
-            Shtrix-kodni ramka ichiga tuting
+            {t("scanner.frameHint", "Shtrix-kodni ramka ichiga tuting")}
           </Text>
         </View>
       </View>
@@ -261,13 +265,21 @@ export default function ScannerScreen() {
           pointerEvents="box-none"
         >
           {device.hasTorch ? (
-            <Pressable onPress={() => setTorch((t) => !t)} style={styles.iconBtn}>
+            <Pressable
+              onPress={() => setTorch((t) => !t)}
+              accessibilityLabel={t("scanner.torchBtn", "Chiroqni yoqish/o'chirish")}
+              style={styles.iconBtn}
+            >
               <Ionicons name={torch ? "flash" : "flash-off"} size={22} color="#fff" />
             </Pressable>
           ) : (
             <View style={{ width: 44 }} />
           )}
-          <Pressable onPress={() => router.back()} style={styles.iconBtn}>
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityLabel={t("common.close", "Yopish")}
+            style={styles.iconBtn}
+          >
             <Ionicons name="close" size={26} color="#fff" />
           </Pressable>
         </View>
