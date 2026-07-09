@@ -11,16 +11,23 @@ export const isSupabaseConfigured = Boolean(url && anonKey);
 
 // .env hali bo'sh bo'lsa ham createClient yiqilmasligi uchun placeholder.
 // Haqiqiy so'rovlar faqat isSupabaseConfigured === true bo'lganda yuboriladi.
+// ⚠️ React Native / Expo'da GoTrueClient ichidagi `_acquireLock` navbati
+// bir vaqtning o'zida bir necha useQuery so'rovi ketganda cheksiz osiladi
+// (deadlock). `lock` parametri funksiya kutadi — quyidagi no-op variant
+// lock navbatini butunlay chetlab o'tib, callback'ni darhol chaqiradi.
+const noopLock = async (
+  _name: string,
+  _acquireTimeout: number,
+  fn: () => Promise<unknown>,
+) => fn();
+
 export const supabase = createClient(
   url || "https://placeholder.supabase.co",
   anonKey || "placeholder-anon-key",
   {
     auth: {
       storage: AsyncStorage,
-      // ⚠️ React Native/Expo'da bir vaqtning o'zida bir necha so'rovlar (useQuery)
-      // ketganda GoTrueClient ichidagi lock navbati (`_acquireLock`) cheksiz
-      // osilmasligi (deadlock bo'lmasligi) uchun lock: false ni aniq ko'rsatamiz:
-      lock: false as any,
+      lock: noopLock,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
