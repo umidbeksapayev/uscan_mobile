@@ -7,16 +7,17 @@ import { toast } from "@/lib/toast";
 import { setDailySummaryReminder, getDailySlot } from "./notify";
 import type { ReminderSlot } from "./notify-math";
 
-const OPTIONS: { value: ReminderSlot; label: string; sub: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { value: "morning", label: "Ertalab", sub: "09:00", icon: "sunny-outline" },
-  { value: "evening", label: "Kechqurun", sub: "21:00", icon: "moon-outline" },
-  { value: "off", label: "O'chiq", sub: "—", icon: "notifications-off-outline" },
+const OPTIONS: {
+  value: ReminderSlot;
+  label: string;
+  time: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { value: "morning", label: "Ertalab", time: "09:00", icon: "sunny-outline" },
+  { value: "evening", label: "Kechqurun", time: "21:00", icon: "moon-outline" },
+  { value: "off", label: "O'chiq", time: "—", icon: "notifications-off-outline" },
 ];
 
-/**
- * Telefonda lokal kunlik eslatma (server/Telegram'siz — barcha foydalanuvchiga).
- * Kam-qoldiq eslatmasi ham shu ruxsatga suyanadi (dashboardда jim rejalashadi).
- */
 export function LocalReminderCard() {
   const [slot, setSlot] = useState<ReminderSlot>(getDailySlot());
   const [saving, setSaving] = useState(false);
@@ -30,10 +31,7 @@ export function LocalReminderCard() {
       const ok = await setDailySummaryReminder(value);
       if (!ok) {
         setSlot(prev);
-        toast.error(
-          "Yoqib bo'lmadi",
-          "Bildirishnoma ruxsati berilmadi yoki bu build'da modul yo'q (yangi build kerak).",
-        );
+        toast.error("Yoqib bo'lmadi", "Bildirishnoma ruxsati berilmadi.");
       }
     } finally {
       setSaving(false);
@@ -41,62 +39,108 @@ export function LocalReminderCard() {
   }
 
   return (
-    <View className="rounded-2xl border border-line bg-surface overflow-hidden">
+    <View
+      style={{
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: colors.line,
+        backgroundColor: colors.surface,
+        overflow: "hidden",
+      }}
+    >
       {/* Sarlavha */}
-      <View className="flex-row items-center gap-3 px-4 pt-4 pb-3">
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 12,
+        }}
+      >
         <View
-          className="h-10 w-10 items-center justify-center rounded-xl"
-          style={{ backgroundColor: "rgba(59,130,246,0.12)" }}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            backgroundColor: "rgba(245,158,11,0.12)",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <Ionicons name="alarm-outline" size={20} color="#2563eb" />
+          <Ionicons name="alarm-outline" size={20} color="#d97706" />
         </View>
-        <View className="flex-1">
-          <Text className="text-sm font-semibold text-ink">Kunlik eslatma</Text>
-          <Text className="text-xs text-muted mt-0.5">Telefonda savdo yakunini eslatadi</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
+            Kunlik eslatma
+          </Text>
+          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
+            Savdo yakunini belgilangan vaqtda eslatadi
+          </Text>
         </View>
       </View>
 
-      {/* Vaqt tugmalari */}
-      <View className="flex-row border-t border-line">
-        {OPTIONS.map((o, i) => {
+      {/* Divider */}
+      <View style={{ height: 1, backgroundColor: colors.line }} />
+
+      {/* Chip tugmalar — gorizontal */}
+      <View
+        style={{
+          flexDirection: "row",
+          gap: 8,
+          padding: 12,
+          backgroundColor: colors.bg,
+        }}
+      >
+        {OPTIONS.map((o) => {
           const active = slot === o.value;
           return (
             <Pressable
               key={o.value}
               onPress={() => onChoose(o.value)}
               disabled={saving}
-              className="flex-1 items-center justify-center py-3"
               style={{
-                backgroundColor: active ? colors.primary : "transparent",
-                borderLeftWidth: i > 0 ? 1 : 0,
-                borderLeftColor: colors.line,
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
+                paddingVertical: 10,
+                paddingHorizontal: 8,
+                borderRadius: 12,
+                backgroundColor: active ? colors.primary : colors.surface,
+                borderWidth: 1.5,
+                borderColor: active ? colors.primary : colors.line,
                 opacity: saving ? 0.6 : 1,
               }}
             >
               <Ionicons
                 name={o.icon}
-                size={17}
+                size={14}
                 color={active ? "#fff" : colors.muted}
               />
-              <Text
-                style={{
-                  fontSize: 12,
-                  marginTop: 3,
-                  fontWeight: "600",
-                  color: active ? "#fff" : colors.ink,
-                }}
-              >
-                {o.sub}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 10,
-                  marginTop: 1,
-                  color: active ? "rgba(255,255,255,0.8)" : colors.muted,
-                }}
-              >
-                {o.label}
-              </Text>
+              <View>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: "700",
+                    color: active ? "#fff" : colors.ink,
+                    lineHeight: 16,
+                  }}
+                >
+                  {o.time}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 10,
+                    color: active ? "rgba(255,255,255,0.75)" : colors.muted,
+                    lineHeight: 13,
+                  }}
+                >
+                  {o.label}
+                </Text>
+              </View>
             </Pressable>
           );
         })}

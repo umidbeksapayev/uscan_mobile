@@ -8,15 +8,17 @@ import { toast } from "@/lib/toast";
 import { createOwnerLinkUrl, updateSummaryTime } from "./owner-telegram";
 import type { Shop, SummaryTime } from "@/types/database";
 
-const TIMES: { value: SummaryTime; label: string; sub: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { value: "morning", label: "Ertalab", sub: "07:00", icon: "sunny-outline" },
-  { value: "evening", label: "Kechqurun", sub: "21:00", icon: "moon-outline" },
-  { value: "off", label: "O'chiq", sub: "—", icon: "notifications-off-outline" },
+const TIMES: {
+  value: SummaryTime;
+  label: string;
+  time: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { value: "morning", label: "Ertalab", time: "07:00", icon: "sunny-outline" },
+  { value: "evening", label: "Kechqurun", time: "21:00", icon: "moon-outline" },
+  { value: "off", label: "O'chiq", time: "—", icon: "notifications-off-outline" },
 ];
 
-/**
- * Egaga kunlik Telegram xulosa: botga ulash (deep-link) + vaqt tanlovi.
- */
 export function TelegramSummaryCard({ shop }: { shop: Shop }) {
   const qc = useQueryClient();
   const connected = shop.owner_telegram_chat_id != null;
@@ -58,29 +60,73 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
   }
 
   return (
-    <View className="rounded-2xl border border-line bg-surface overflow-hidden">
+    <View
+      style={{
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: colors.line,
+        backgroundColor: colors.surface,
+        overflow: "hidden",
+      }}
+    >
       {/* Sarlavha */}
-      <View className="flex-row items-center gap-3 px-4 pt-4 pb-3">
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 12,
+        }}
+      >
         <View
-          className="h-10 w-10 items-center justify-center rounded-xl"
-          style={{ backgroundColor: "rgba(3,169,244,0.12)" }}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            backgroundColor: "rgba(3,169,244,0.12)",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           <Ionicons name="paper-plane-outline" size={20} color="#0288d1" />
         </View>
-        <View className="flex-1">
-          <Text className="text-sm font-semibold text-ink">Kunlik xulosa (Telegram)</Text>
-          <Text className="text-xs text-muted mt-0.5">Savdo natijasi Telegram'ga yuboriladi</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
+            Kunlik xulosa (Telegram)
+          </Text>
+          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
+            Savdo natijasi Telegram'ga yuboriladi
+          </Text>
         </View>
-        {/* Holat badge */}
+        {/* Holat badge — yashil nuqta bilan */}
         <View
-          className="rounded-full px-2.5 py-1"
-          style={{ backgroundColor: connected ? "#E7F6EE" : "#f3f4f6" }}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 5,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            borderRadius: 20,
+            backgroundColor: connected ? "rgba(22,163,74,0.1)" : colors.bg,
+            borderWidth: 1,
+            borderColor: connected ? "rgba(22,163,74,0.2)" : colors.line,
+          }}
         >
+          <View
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: 4,
+              backgroundColor: connected ? "#16A34A" : colors.tabInactive,
+            }}
+          />
           <Text
             style={{
               fontSize: 11,
               fontWeight: "600",
-              color: connected ? "#0F6E56" : colors.muted,
+              color: connected ? "#15803d" : colors.muted,
             }}
           >
             {connected ? "Ulangan" : "Ulanmagan"}
@@ -88,69 +134,101 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
         </View>
       </View>
 
-      {/* Qism: ulash tugmasi yoki vaqt tanlovi */}
+      {/* Divider */}
+      <View style={{ height: 1, backgroundColor: colors.line }} />
+
+      {/* Qism: ulash yoki vaqt tanlash */}
       {!connected ? (
-        <View className="border-t border-line px-4 py-3" style={{ gap: 8 }}>
+        <View style={{ padding: 12, gap: 8, backgroundColor: colors.bg }}>
           <Pressable
             onPress={onConnect}
             disabled={connecting}
-            className="flex-row items-center justify-center gap-2 rounded-xl bg-primary"
-            style={{ height: 46, opacity: connecting ? 0.6 : 1 }}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              height: 46,
+              borderRadius: 14,
+              backgroundColor: colors.primary,
+              opacity: connecting ? 0.6 : 1,
+            }}
           >
             {connecting ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <>
                 <Ionicons name="paper-plane" size={17} color="#fff" />
-                <Text style={{ fontSize: 14, fontWeight: "600", color: "#fff" }}>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: "#fff" }}>
                   Telegram'ga ulash
                 </Text>
               </>
             )}
           </Pressable>
-          <Pressable onPress={onRefresh} className="items-center py-1">
-            <Text className="text-xs text-muted">
+          <Pressable onPress={onRefresh} style={{ alignItems: "center", paddingVertical: 4 }}>
+            <Text style={{ fontSize: 12, color: colors.muted }}>
               Botda «Start» bosdingizmi? → Holatni yangilash
             </Text>
           </Pressable>
         </View>
       ) : (
-        <View className="flex-row border-t border-line">
-          {TIMES.map((t, i) => {
+        /* Chip tugmalar — gorizontal */
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 8,
+            padding: 12,
+            backgroundColor: colors.bg,
+          }}
+        >
+          {TIMES.map((t) => {
             const activeOpt = time === t.value;
             return (
               <Pressable
                 key={t.value}
                 onPress={() => onChooseTime(t.value)}
                 disabled={saving}
-                className="flex-1 items-center justify-center py-3"
                 style={{
-                  backgroundColor: activeOpt ? colors.primary : "transparent",
-                  borderLeftWidth: i > 0 ? 1 : 0,
-                  borderLeftColor: colors.line,
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 5,
+                  paddingVertical: 10,
+                  paddingHorizontal: 8,
+                  borderRadius: 12,
+                  backgroundColor: activeOpt ? colors.primary : colors.surface,
+                  borderWidth: 1.5,
+                  borderColor: activeOpt ? colors.primary : colors.line,
                   opacity: saving ? 0.6 : 1,
                 }}
               >
-                <Ionicons name={t.icon} size={17} color={activeOpt ? "#fff" : colors.muted} />
-                <Text
-                  style={{
-                    fontSize: 12,
-                    marginTop: 3,
-                    fontWeight: "600",
-                    color: activeOpt ? "#fff" : colors.ink,
-                  }}
-                >
-                  {t.sub}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 10,
-                    marginTop: 1,
-                    color: activeOpt ? "rgba(255,255,255,0.8)" : colors.muted,
-                  }}
-                >
-                  {t.label}
-                </Text>
+                <Ionicons
+                  name={t.icon}
+                  size={14}
+                  color={activeOpt ? "#fff" : colors.muted}
+                />
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: "700",
+                      color: activeOpt ? "#fff" : colors.ink,
+                      lineHeight: 16,
+                    }}
+                  >
+                    {t.time}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      color: activeOpt ? "rgba(255,255,255,0.75)" : colors.muted,
+                      lineHeight: 13,
+                    }}
+                  >
+                    {t.label}
+                  </Text>
+                </View>
               </Pressable>
             );
           })}
