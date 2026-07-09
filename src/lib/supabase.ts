@@ -17,12 +17,10 @@ export const supabase = createClient(
   {
     auth: {
       storage: AsyncStorage,
-      // ⚠️ `lock: processLock` ATAYLAB YO'Q. auth-js 2.x da u refresh uchun
-      // deprecated no-op, LEKIN berilishi GoTrueClient ichidagi `_acquireLock`/
-      // `pendingInLock` drenaj mashinasini yoqadi → RN'da login (signInWithPassword
-      // → SIGNED_IN → useMemberships getUser) re-entrant deadlock'iga olib keladi
-      // (~30s osilish). Lockless yo'l (this.lock=null) bu sinfni butunlay yo'qotadi.
-      // Refresh poygalari klient+server tomonidan boshqariladi (kutubxona tavsiyasi).
+      // ⚠️ React Native/Expo'da bir vaqtning o'zida bir necha so'rovlar (useQuery)
+      // ketganda GoTrueClient ichidagi lock navbati (`_acquireLock`) cheksiz
+      // osilmasligi (deadlock bo'lmasligi) uchun lock: false ni aniq ko'rsatamiz:
+      lock: false as any,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
