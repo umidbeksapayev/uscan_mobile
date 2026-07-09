@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export default function ProductFormScreen() {
   const router = useRouter();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEdit = !!id;
 
@@ -95,7 +97,7 @@ export default function ProductFormScreen() {
   const profit = sp - cp;
   const unit = saleType === "weight" ? "kg" : "dona";
   const categoryName =
-    (categories ?? []).find((c) => c.id === categoryId)?.name ?? "Kategoriyasiz";
+    (categories ?? []).find((c) => c.id === categoryId)?.name ?? t("product.noCategory");
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -137,14 +139,13 @@ export default function ProductFormScreen() {
             <Ionicons name="arrow-back" size={24} color={colors.ink} />
           </Pressable>
           <Text className="text-xl font-medium text-ink">
-            {isEdit ? "Tahrirlash" : "Mahsulot qo'shish"}
+            {isEdit ? t("product.formTitleEdit") : t("product.formTitleAdd")}
           </Text>
         </View>
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
           <Ionicons name="lock-closed" size={36} color={colors.muted} />
           <Text className="text-center text-sm text-muted">
-            Mahsulotlarni qo'shish/tahrirlash faqat egasi yoki "Mahsulotlar" ruxsati bor xodimga
-            ko'rinadi.
+            {t("product.gatePerm")}
           </Text>
         </View>
       </SafeAreaView>
@@ -158,20 +159,20 @@ export default function ProductFormScreen() {
       const url = await pickAndUpload(source, shopId);
       if (url) setImageUrl(url);
     } catch (e) {
-      toast.error("Xato", e instanceof Error ? e.message : "Rasm yuklanmadi");
+      toast.error(t("common.error"), e instanceof Error ? e.message : t("product.imageUploadFailed"));
     } finally {
       setUploading(false);
     }
   }
 
   function chooseImage() {
-    Alert.alert("Mahsulot rasmi", undefined, [
-      { text: "Kamera", onPress: () => doPick("camera") },
-      { text: "Galereyadan", onPress: () => doPick("library") },
+    Alert.alert(t("product.imageTitle"), undefined, [
+      { text: t("uploader.camera"), onPress: () => doPick("camera") },
+      { text: t("uploader.gallery"), onPress: () => doPick("library") },
       ...(imageUrl
-        ? [{ text: "Rasmni o'chirish", style: "destructive" as const, onPress: () => setImageUrl(null) }]
+        ? [{ text: t("product.removeImage"), style: "destructive" as const, onPress: () => setImageUrl(null) }]
         : []),
-      { text: "Bekor", style: "cancel" as const },
+      { text: t("common.cancel"), style: "cancel" as const },
     ]);
   }
 
@@ -192,7 +193,7 @@ export default function ProductFormScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.ink} />
         </Pressable>
         <Text className="text-xl font-medium text-ink">
-          {isEdit ? "Tahrirlash" : "Mahsulot qo'shish"}
+          {isEdit ? t("product.formTitleEdit") : t("product.formTitleAdd")}
         </Text>
       </View>
 
@@ -228,30 +229,30 @@ export default function ProductFormScreen() {
               style={{ borderWidth: 1, borderColor: colors.line, borderStyle: "dashed" }}
             >
               <Ionicons name="camera-outline" size={28} color={colors.primary} />
-              <Text className="mt-1 text-xs text-muted">Rasm qo'shish</Text>
+              <Text className="mt-1 text-xs text-muted">{t("uploader.add")}</Text>
             </View>
           )}
         </Pressable>
 
-        <Section title="Mahsulot">
+        <Section title={t("product.secProduct")}>
           <View style={{ gap: 6 }}>
-            <Text className="text-sm font-medium text-ink">Nomi</Text>
+            <Text className="text-sm font-medium text-ink">{t("catalog.colName")}</Text>
             <TextInput
               value={name}
               onChangeText={setName}
-              placeholder="Mahsulot nomi"
+              placeholder={t("product.namePlaceholder")}
               placeholderTextColor={colors.tabInactive}
               className={INPUT}
               style={{ height: 52 }}
             />
           </View>
           <View style={{ gap: 6 }}>
-            <Text className="text-sm font-medium text-ink">Shtrix-kod</Text>
+            <Text className="text-sm font-medium text-ink">{t("product.barcodeLabel")}</Text>
             <View className="flex-row gap-2">
               <TextInput
                 value={barcode}
                 onChangeText={setBarcode}
-                placeholder="Kod yoki skanerlang"
+                placeholder={t("product.barcodeScanPlaceholder")}
                 placeholderTextColor={colors.tabInactive}
                 className={`flex-1 ${INPUT}`}
                 style={{ height: 52 }}
@@ -268,12 +269,12 @@ export default function ProductFormScreen() {
           </View>
         </Section>
 
-        <Section title="Narx">
+        <Section title={t("product.secPrice")}>
           <View className="flex-row" style={{ gap: 12 }}>
             {isOwner ? (
               <View className="flex-1" style={{ gap: 6 }}>
                 <View className="flex-row items-center gap-1">
-                  <Text className="text-sm font-medium text-ink">Tan narxi</Text>
+                  <Text className="text-sm font-medium text-ink">{t("product.costPrice")}</Text>
                   <Ionicons name="lock-closed" size={11} color={colors.muted} />
                 </View>
                 <TextInput
@@ -288,7 +289,7 @@ export default function ProductFormScreen() {
               </View>
             ) : null}
             <View className="flex-1" style={{ gap: 6 }}>
-              <Text className="text-sm font-medium text-ink">Sotuv narxi</Text>
+              <Text className="text-sm font-medium text-ink">{t("product.sellingPrice")}</Text>
               <TextInput
                 value={sellingPrice}
                 onChangeText={setSellingPrice}
@@ -308,26 +309,26 @@ export default function ProductFormScreen() {
                 color={profit >= 0 ? colors.success : colors.danger}
               />
               <Text className="text-sm" style={{ color: profit >= 0 ? colors.success : colors.danger }}>
-                Foyda: {formatCurrency(profit)} ({Math.round((profit / cp) * 100)}%)
+                {t("reports.profit")}: {formatCurrency(profit)} ({Math.round((profit / cp) * 100)}%)
               </Text>
             </View>
           ) : null}
         </Section>
 
-        <Section title="Qoldiq">
+        <Section title={t("product.secStock")}>
           {/* Sotuv turi — miqdor ustida */}
           <View className="flex-row rounded-xl bg-bg p-1">
-            {(["unit", "weight"] as SaleType[]).map((t) => {
-              const active = saleType === t;
+            {(["unit", "weight"] as SaleType[]).map((tSale) => {
+              const active = saleType === tSale;
               return (
                 <Pressable
-                  key={t}
-                  onPress={() => setSaleType(t)}
+                  key={tSale}
+                  onPress={() => setSaleType(tSale)}
                   className="flex-1 items-center justify-center rounded-lg"
                   style={{ height: 42, backgroundColor: active ? colors.primary : "transparent" }}
                 >
                   <Text style={{ fontWeight: "500", color: active ? "#fff" : colors.muted }}>
-                    {t === "unit" ? "DONALI (dona)" : "VAZN (kg)"}
+                    {tSale === "unit" ? t("product.unitBtn") : t("product.weightBtn")}
                   </Text>
                 </Pressable>
               );
@@ -335,7 +336,7 @@ export default function ProductFormScreen() {
           </View>
 
           <View style={{ gap: 6 }}>
-            <Text className="text-sm font-medium text-ink">Miqdor ({unit})</Text>
+            <Text className="text-sm font-medium text-ink">{t("product.quantity")} ({unit})</Text>
             <TextInput
               value={quantity}
               onChangeText={setQuantity}
@@ -351,8 +352,8 @@ export default function ProductFormScreen() {
             <Ionicons name="notifications-outline" size={15} color={colors.muted} />
             <Text className="text-xs text-muted">
               {q > 0
-                ? `${lowStockThreshold(q, saleType)} ${unit} (20%) qolganda avtomatik ogohlantiriladi`
-                : "Qoldiq 20% ga yetganda avtomatik ogohlantiriladi"}
+                ? t("product.lowStockAutoQty", { qty: lowStockThreshold(q, saleType), unit })
+                : t("product.lowStockAuto")}
             </Text>
           </View>
         </Section>
@@ -363,7 +364,7 @@ export default function ProductFormScreen() {
           className="mb-2 flex-row items-center justify-between rounded-2xl border border-line bg-surface p-4"
           style={{ height: 56 }}
         >
-          <Text className="text-base font-medium text-ink">Kategoriya</Text>
+          <Text className="text-base font-medium text-ink">{t("product.category")}</Text>
           <View className="flex-row items-center gap-1">
             <Text className="text-base text-muted">{categoryName}</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.muted} />
@@ -372,7 +373,7 @@ export default function ProductFormScreen() {
 
         {mutation.isError ? (
           <Text className="mt-2 text-center text-sm text-danger">
-            {(mutation.error as Error)?.message ?? "Saqlashda xatolik"}
+            {(mutation.error as Error)?.message ?? t("product.saveError")}
           </Text>
         ) : null}
       </KeyboardAwareScrollView>
@@ -382,14 +383,14 @@ export default function ProductFormScreen() {
           <View className="mb-2">
             <Button
               variant="ghost"
-              label="Yorliq chop etish"
+              label={t("product.printLabel")}
               onPress={() => printLabel([existing])}
               loading={labelPrinting}
             />
           </View>
         ) : null}
         <Button
-          label={isEdit ? "Saqlash" : "Qo'shish"}
+          label={isEdit ? t("common.save") : t("common.add")}
           onPress={onSave}
           loading={mutation.isPending}
         />

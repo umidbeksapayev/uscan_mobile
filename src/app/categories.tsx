@@ -12,6 +12,7 @@ import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -36,6 +37,7 @@ function RenameSheet({
   onSave: (name: string) => void;
   saving: boolean;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   // category o'zgarganda inputni boshlang'ich qiymatga to'ldiramiz
   const [seen, setSeen] = useState<string | null>(null);
@@ -49,11 +51,11 @@ function RenameSheet({
 
   return (
     <BottomSheet visible={!!category} onClose={onClose} keyboardAvoiding>
-            <Text className="mb-3 text-lg font-medium text-ink">Kategoriya nomi</Text>
+            <Text className="mb-3 text-lg font-medium text-ink">{t("category.namePlaceholder")}</Text>
             <TextInput
               value={name}
               onChangeText={setName}
-              placeholder="Kategoriya nomi"
+              placeholder={t("category.namePlaceholder")}
               placeholderTextColor={colors.tabInactive}
               className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
               style={{ height: 52 }}
@@ -68,7 +70,7 @@ function RenameSheet({
               {saving ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text className="text-base font-medium text-white">Saqlash</Text>
+                <Text className="text-base font-medium text-white">{t("common.save")}</Text>
               )}
             </Pressable>
     </BottomSheet>
@@ -77,6 +79,7 @@ function RenameSheet({
 
 export default function CategoriesScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { canManageProducts } = useActivePermissions();
   const { data: categories, isLoading, isError, error, refetch, isRefetching } =
     useCategoriesWithCount();
@@ -93,7 +96,7 @@ export default function CategoriesScreen() {
     if (!name) return;
     createMut.mutate(name, {
       onSuccess: () => setNewName(""),
-      onError: (e) => toast.error("Qo'shilmadi", (e as Error)?.message ?? "Xatolik"),
+      onError: (e) => toast.error(t("category.addFailed"), (e as Error)?.message ?? t("common.error")),
     });
   }
 
@@ -103,24 +106,22 @@ export default function CategoriesScreen() {
       { id: editing.id, name },
       {
         onSuccess: () => setEditing(null),
-        onError: (e) => toast.error("O'zgarmadi", (e as Error)?.message ?? "Xatolik"),
+        onError: (e) => toast.error(t("category.renameFailed"), (e as Error)?.message ?? t("common.error")),
       },
     );
   }
 
   function onDelete(c: CategoryWithCount) {
     const note =
-      c.product_count > 0
-        ? `\n\n${c.product_count} ta mahsulot kategoriyasiz qoladi (o'chmaydi).`
-        : "";
-    Alert.alert("Kategoriyani o'chirish", `"${c.name}" o'chirilsinmi?${note}`, [
-      { text: "Bekor", style: "cancel" },
+      c.product_count > 0 ? `\n\n${t("category.deleteNote", { count: c.product_count })}` : "";
+    Alert.alert(t("category.deleteTitle"), `${t("category.deleteMsg", { name: c.name })}${note}`, [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "O'chirish",
+        text: t("common.delete"),
         style: "destructive",
         onPress: () =>
           deleteMut.mutate(c.id, {
-            onError: (e) => toast.error("O'chmadi", (e as Error)?.message ?? "Xatolik"),
+            onError: (e) => toast.error(t("category.deleteFailed"), (e as Error)?.message ?? t("common.error")),
           }),
       },
     ]);
@@ -133,15 +134,13 @@ export default function CategoriesScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
-        <Text className="text-xl font-semibold text-ink">Kategoriyalar</Text>
+        <Text className="text-xl font-semibold text-ink">{t("category.manageTitle")}</Text>
       </View>
 
       {!canManageProducts ? (
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
           <Ionicons name="lock-closed" size={36} color={colors.muted} />
-          <Text className="text-center text-sm text-muted">
-            Kategoriyalar faqat egasi yoki "Mahsulotlar" ruxsati bor xodimga ko'rinadi.
-          </Text>
+          <Text className="text-center text-sm text-muted">{t("category.gatePerm")}</Text>
         </View>
       ) : (
         <>
@@ -151,7 +150,7 @@ export default function CategoriesScreen() {
               <TextInput
                 value={newName}
                 onChangeText={setNewName}
-                placeholder="Yangi kategoriya..."
+                placeholder={t("category.newPlaceholder")}
                 placeholderTextColor={colors.tabInactive}
                 className="flex-1 rounded-2xl border border-line bg-surface px-4 text-base text-ink"
                 style={{ height: 50 }}
@@ -181,15 +180,13 @@ export default function CategoriesScreen() {
             <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
               <Ionicons name="cloud-offline-outline" size={36} color={colors.muted} />
               <Text className="text-center text-sm text-muted">
-                {(error as Error)?.message ?? "Yuklab bo'lmadi"}
+                {(error as Error)?.message ?? t("common.loadError")}
               </Text>
             </View>
           ) : (categories ?? []).length === 0 ? (
             <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
               <Ionicons name="pricetags-outline" size={36} color={colors.muted} />
-              <Text className="text-center text-sm text-muted">
-                Hali kategoriya yo'q. Yuqorida qo'shing.
-              </Text>
+              <Text className="text-center text-sm text-muted">{t("category.emptyHint")}</Text>
             </View>
           ) : (
             <FlatList
@@ -211,7 +208,9 @@ export default function CategoriesScreen() {
                     <Text className="text-base font-medium text-ink" numberOfLines={1}>
                       {item.name}
                     </Text>
-                    <Text className="text-xs text-muted">{item.product_count} mahsulot</Text>
+                    <Text className="text-xs text-muted">
+                      {t("category.productCount", { count: item.product_count })}
+                    </Text>
                   </View>
                   <Pressable onPress={() => setEditing(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
                     <Ionicons name="pencil" size={18} color={colors.muted} />

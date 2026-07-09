@@ -1,5 +1,6 @@
 import { Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -18,13 +19,14 @@ export function CategorySheet({
   onSelect: (id: string | null) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const options: { id: string | null; name: string }[] = [
-    { id: null, name: "Kategoriyasiz" },
+    { id: null, name: t("product.noCategory") },
     ...categories.map((c) => ({ id: c.id, name: c.name })),
   ];
   return (
     <BottomSheet visible={visible} onClose={onClose}>
-          <Text className="mb-2 text-lg font-medium text-ink">Kategoriya</Text>
+          <Text className="mb-2 text-lg font-medium text-ink">{t("product.category")}</Text>
           <ScrollView style={{ maxHeight: 380 }}>
             {options.map((o) => {
               const active = selectedId === o.id;

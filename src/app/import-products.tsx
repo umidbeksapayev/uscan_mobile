@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { File } from "expo-file-system";
+import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { toast } from "@/lib/toast";
@@ -38,25 +39,20 @@ const ERROR_LABELS: Record<string, string> = {
 };
 
 function RequiredHeaderHint() {
+  const { t } = useTranslation();
   return (
     <View className="rounded-2xl border border-line bg-surface p-4" style={{ gap: 6 }}>
-      <Text className="text-sm font-medium text-ink">Kerakli ustunlar (CSV, 1-qator sarlavha)</Text>
-      <Text className="text-xs text-muted">
-        <Text style={{ fontWeight: "500" }}>Nomi*</Text>, Tur (dona/kg),{" "}
-        <Text style={{ fontWeight: "500" }}>Tan narxi*</Text>,{" "}
-        <Text style={{ fontWeight: "500" }}>Sotuv narxi*</Text>,{" "}
-        <Text style={{ fontWeight: "500" }}>Miqdor*</Text>, Barcode, Kategoriya
-      </Text>
-      <Text className="text-xs text-muted">
-        * — majburiy. Tur bo'sh bo'lsa DONALI deb olinadi. Sarlavha o'zbek, rus yoki
-        inglizcha bo'lishi mumkin.
-      </Text>
+      <Text className="text-sm font-medium text-ink">{t("import.requiredCols")}</Text>
+      <Text className="text-xs text-muted">{t("import.columnsHint")}</Text>
+      <Text className="text-xs text-muted">{t("import.colsNote")}</Text>
     </View>
   );
 }
 
 function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
+  const { t } = useTranslation();
   const badge = STATUS_BADGE[row.status];
+  const badgeLabel = t(`import.status_${row.status}`, badge.label);
   return (
     <View
       className="mb-2 rounded-2xl border border-line bg-surface p-3"
@@ -64,20 +60,20 @@ function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
     >
       <View className="flex-row items-center justify-between">
         <Text className="flex-1 text-sm font-medium text-ink" numberOfLines={1}>
-          {row.name || `#${row.rowNumber}-qator`}
+          {row.name || `#${row.rowNumber}`}
         </Text>
         <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: badge.bg }}>
-          <Text style={{ fontSize: 11, fontWeight: "500", color: badge.text }}>{badge.label}</Text>
+          <Text style={{ fontSize: 11, fontWeight: "500", color: badge.text }}>{badgeLabel}</Text>
         </View>
       </View>
       {row.status === "error" ? (
         <Text className="text-xs" style={{ color: colors.danger }}>
-          {row.errors.map((e) => ERROR_LABELS[e] ?? e).join(", ")}
+          {row.errors.map((e) => t(`import.err.${e}`, ERROR_LABELS[e] ?? e)).join(", ")}
         </Text>
       ) : (
         <Text className="text-xs text-muted">
-          {row.saleType === "weight" ? "VAZN" : "DONALI"} · {row.quantity} ·{" "}
-          {row.sellingPrice.toLocaleString("ru-RU")} so'm
+          {row.saleType === "weight" ? t("catalog.weight") : t("catalog.unit")} · {row.quantity} ·{" "}
+          {row.sellingPrice.toLocaleString("ru-RU")} {t("common.som")}
           {row.category ? ` · ${row.category}` : ""}
         </Text>
       )}
@@ -88,6 +84,7 @@ function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
 export default function ImportProductsScreen() {
   const router = useRouter();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const shopId = useActiveShopId();
   const { canManageProducts } = useActivePermissions();
 
@@ -104,12 +101,12 @@ export default function ImportProductsScreen() {
           <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
             <Ionicons name="chevron-back" size={26} color={colors.ink} />
           </Pressable>
-          <Text className="text-xl font-semibold text-ink">Import</Text>
+          <Text className="text-xl font-semibold text-ink">{t("import.title")}</Text>
         </View>
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
           <Ionicons name="lock-closed" size={36} color={colors.muted} />
           <Text className="text-center text-sm text-muted">
-            Mahsulot import qilish faqat egasi yoki "Mahsulotlar" ruxsati bor xodimga ko'rinadi.
+            {t("import.gatePerm")}
           </Text>
         </View>
       </SafeAreaView>
@@ -133,14 +130,14 @@ export default function ImportProductsScreen() {
     try {
       DocumentPicker = await import("expo-document-picker");
     } catch {
-      setErrorMsg("Bu build'da fayl tanlash moduli yo'q — Expo Go yoki yangi dev build kerak.");
+      setErrorMsg(t("import.noPickerModule"));
       return;
     }
     const picked = await DocumentPicker.getDocumentAsync({ type: "*/*", copyToCacheDirectory: true });
     if (picked.canceled || !picked.assets?.[0]) return;
     const asset = picked.assets[0];
     if (!/\.csv$/i.test(asset.name)) {
-      setErrorMsg("Faqat .csv fayl qo'llab-quvvatlanadi.");
+      setErrorMsg(t("import.csvOnly"));
       return;
     }
     if (!shopId) return;
@@ -155,7 +152,7 @@ export default function ImportProductsScreen() {
       setPreview(built);
       setStatus("preview");
     } catch (e) {
-      setErrorMsg(e instanceof Error ? e.message : "Faylni o'qib bo'lmadi");
+      setErrorMsg(e instanceof Error ? e.message : t("import.parseError"));
       setStatus("idle");
     }
   }
@@ -172,7 +169,7 @@ export default function ImportProductsScreen() {
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["categories"] });
     } catch (e) {
-      toast.error("Import xatosi", e instanceof Error ? e.message : "Import qilib bo'lmadi");
+      toast.error(t("import.importError"), e instanceof Error ? e.message : t("import.importFailed"));
       setStatus("preview");
     }
   }
@@ -183,7 +180,7 @@ export default function ImportProductsScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
-        <Text className="text-xl font-semibold text-ink">Mahsulot import qilish</Text>
+        <Text className="text-xl font-semibold text-ink">{t("import.title")}</Text>
       </View>
 
       {status === "idle" ? (
@@ -198,48 +195,47 @@ export default function ImportProductsScreen() {
             style={{ height: 56 }}
           >
             <Ionicons name="document-attach-outline" size={22} color="#fff" />
-            <Text className="text-base font-medium text-white">CSV fayl tanlash</Text>
+            <Text className="text-base font-medium text-white">{t("import.pickCsv")}</Text>
           </Pressable>
         </ScrollView>
       ) : status === "loading" ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.primary} />
-          <Text className="mt-3 text-sm text-muted">Fayl o'qilmoqda...</Text>
+          <Text className="mt-3 text-sm text-muted">{t("import.parsing")}</Text>
         </View>
       ) : status === "preview" && preview ? (
         preview.headerError ? (
           <View className="flex-1 items-center justify-center px-10" style={{ gap: 12 }}>
             <Ionicons name="alert-circle-outline" size={36} color={colors.danger} />
             <Text className="text-center text-sm text-muted">
-              "{fileName}" faylida majburiy ustunlar (Nomi, Tan narxi, Sotuv narxi, Miqdor)
-              topilmadi. Sarlavha qatorini tekshiring.
+              {t("import.headerError")}
             </Text>
             <Pressable onPress={reset} className="p-2">
-              <Text className="text-sm font-medium text-primary">Boshqa fayl tanlash</Text>
+              <Text className="text-sm font-medium text-primary">{t("import.chooseAnother")}</Text>
             </Pressable>
           </View>
         ) : (
           <>
             <View className="px-4 pb-2">
               <Text className="text-sm text-muted" numberOfLines={1}>
-                {fileName} · {preview.rows.length} qator
+                {fileName} · {t("import.fileRows", { count: preview.rows.length })}
               </Text>
               <View className="mt-2 flex-row gap-2">
                 <View className="flex-1 items-center rounded-xl bg-bg py-2">
                   <Text className="text-base font-medium" style={{ color: "#0F6E56" }}>
                     {preview.validCount}
                   </Text>
-                  <Text className="text-xs text-muted">Yaroqli</Text>
+                  <Text className="text-xs text-muted">{t("import.status_valid")}</Text>
                 </View>
                 <View className="flex-1 items-center rounded-xl bg-bg py-2">
                   <Text className="text-base font-medium" style={{ color: "#92600A" }}>
                     {preview.duplicateCount}
                   </Text>
-                  <Text className="text-xs text-muted">Dublikat</Text>
+                  <Text className="text-xs text-muted">{t("import.status_duplicate")}</Text>
                 </View>
                 <View className="flex-1 items-center rounded-xl bg-bg py-2">
                   <Text className="text-base font-medium text-danger">{preview.errorCount}</Text>
-                  <Text className="text-xs text-muted">Xato</Text>
+                  <Text className="text-xs text-muted">{t("import.status_error")}</Text>
                 </View>
               </View>
             </View>
@@ -251,12 +247,12 @@ export default function ImportProductsScreen() {
             />
             <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 14, gap: 8 }}>
               <Button
-                label={`${preview.validCount} ta mahsulotni import qilish`}
+                label={t("import.confirmBtn", { count: preview.validCount })}
                 onPress={onImport}
                 disabled={preview.validCount === 0}
               />
               <Pressable onPress={reset} className="items-center p-2">
-                <Text className="text-sm text-muted">Boshqa fayl tanlash</Text>
+                <Text className="text-sm text-muted">{t("import.chooseAnother")}</Text>
               </Pressable>
             </View>
           </>
@@ -264,7 +260,7 @@ export default function ImportProductsScreen() {
       ) : status === "importing" ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.primary} />
-          <Text className="mt-3 text-sm text-muted">Import qilinmoqda...</Text>
+          <Text className="mt-3 text-sm text-muted">{t("import.importing")}</Text>
         </View>
       ) : status === "done" && result ? (
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
@@ -274,16 +270,16 @@ export default function ImportProductsScreen() {
           >
             <Ionicons name="checkmark" size={40} color={colors.success} />
           </View>
-          <Text className="text-center text-xl font-medium text-ink">Import yakunlandi</Text>
+          <Text className="text-center text-xl font-medium text-ink">{t("import.done")}</Text>
           <Text className="text-center text-sm text-muted">
-            {result.inserted} ta mahsulot qo'shildi
-            {result.categories_created > 0 ? `, ${result.categories_created} ta yangi kategoriya` : ""}
-            {result.skipped > 0 ? `, ${result.skipped} ta qator o'tkazib yuborildi` : ""}.
+            {t("import.resultInserted", { count: result.inserted })}
+            {result.categories_created > 0 ? `, ${t("import.resultCategories", { count: result.categories_created })}` : ""}
+            {result.skipped > 0 ? `, ${t("import.resultSkipped", { count: result.skipped })}` : ""}.
           </Text>
           <View className="mt-4 w-full" style={{ gap: 8 }}>
-            <Button label="Katalogga o'tish" onPress={() => router.back()} />
+            <Button label={t("import.goCatalog")} onPress={() => router.back()} />
             <Pressable onPress={reset} className="items-center p-2">
-              <Text className="text-sm text-muted">Yana fayl import qilish</Text>
+              <Text className="text-sm text-muted">{t("import.importMore")}</Text>
             </Pressable>
           </View>
         </View>
