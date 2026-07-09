@@ -25,6 +25,18 @@ import { TelegramSummaryCard } from "@/features/telegram/telegram-summary-card";
 import { LocalReminderCard } from "@/features/notifications/local-reminder-card";
 import type { MemberPermissions, ShopMemberRow } from "@/types/database";
 
+/** Section sarlavha komponenti — bir xil uslub uchun */
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <Text
+      className="mb-2 ml-1 text-xs font-bold text-muted"
+      style={{ letterSpacing: 0.8, textTransform: "uppercase" }}
+    >
+      {children}
+    </Text>
+  );
+}
+
 /** Kassir ruxsatlari oynasi (6 toggle) + o'chirish. */
 function PermissionsSheet({
   member,
@@ -51,21 +63,35 @@ function PermissionsSheet({
   return (
     <BottomSheet visible={!!member} onClose={onClose} keyboardAvoiding>
       <View className="pb-2">
-        <Text className="text-xl font-bold text-ink" numberOfLines={1}>
-          {member?.email}
-        </Text>
-        <Text className="mt-0.5 text-sm font-medium text-muted">Kassir ruxsatnomalarini boshqarish</Text>
+        {/* Sheet sarlavhasi */}
+        <View className="mb-4 flex-row items-center gap-3">
+          <View
+            className="h-11 w-11 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: "rgba(59,130,246,0.12)" }}
+          >
+            <Text className="text-lg font-bold" style={{ color: "#2563eb" }}>
+              {(member?.email ?? "?").slice(0, 1).toUpperCase()}
+            </Text>
+          </View>
+          <View className="flex-1">
+            <Text className="text-base font-bold text-ink" numberOfLines={1}>
+              {member?.email}
+            </Text>
+            <Text className="text-xs text-muted mt-0.5">Kassir ruxsatnomalari</Text>
+          </View>
+        </View>
 
-        <View className="mt-4 rounded-[20px] border border-line bg-surface overflow-hidden">
+        {/* Ruxsatlar ro'yxati */}
+        <View className="rounded-2xl border border-line bg-surface overflow-hidden">
           {PERMISSION_LABELS.map((p, i) => (
             <View
               key={p.key}
-              className={`flex-row items-center justify-between gap-4 p-4 ${
-                i > 0 ? "border-t border-line/60" : ""
+              className={`flex-row items-center gap-3 px-4 py-3.5 ${
+                i > 0 ? "border-t border-line" : ""
               }`}
             >
               <View className="min-w-0 flex-1">
-                <Text className="text-base font-semibold text-ink">{p.label}</Text>
+                <Text className="text-sm font-semibold text-ink">{p.label}</Text>
                 <Text className="text-xs text-muted mt-0.5">{p.hint}</Text>
               </View>
               <Switch
@@ -81,22 +107,25 @@ function PermissionsSheet({
         <Pressable
           disabled={saving}
           onPress={() => onSave(perms)}
-          className="mt-6 flex-row items-center justify-center rounded-[20px] bg-primary shadow-sm"
-          style={{ height: 54, opacity: saving ? 0.6 : 1 }}
+          className="mt-5 flex-row items-center justify-center rounded-2xl bg-primary"
+          style={{ height: 52, opacity: saving ? 0.6 : 1 }}
         >
           {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text className="text-base font-bold text-white">Saqlash</Text>
+            <Text style={{ fontSize: 15, fontWeight: "700", color: "#fff" }}>Saqlash</Text>
           )}
         </Pressable>
 
         <Pressable
           onPress={onRemove}
-          className="mt-3 flex-row items-center justify-center gap-2 rounded-[20px] bg-danger/10 py-4"
+          className="mt-3 flex-row items-center justify-center gap-2 rounded-2xl border border-line bg-surface"
+          style={{ height: 48 }}
         >
-          <Ionicons name="person-remove-outline" size={19} color={colors.danger} />
-          <Text className="text-base font-semibold text-danger">Xodimni do'kondan chiqarish</Text>
+          <Ionicons name="person-remove-outline" size={18} color={colors.danger} />
+          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.danger }}>
+            Xodimni chiqarish
+          </Text>
         </Pressable>
       </View>
     </BottomSheet>
@@ -159,60 +188,72 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center gap-3 px-4 py-3">
+      {/* ── Header ── */}
+      <View className="flex-row items-center gap-2 px-4 py-3 border-b border-line bg-bg">
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          className="h-10 w-10 items-center justify-center rounded-2xl bg-surface border border-line"
+          className="h-9 w-9 items-center justify-center rounded-xl bg-surface border border-line"
         >
-          <Ionicons name="chevron-back" size={24} color={colors.ink} />
+          <Ionicons name="chevron-back" size={22} color={colors.ink} />
         </Pressable>
-        <Text className="text-xl font-bold text-ink">{t("settings.title")}</Text>
+        <Text className="text-lg font-bold text-ink">{t("settings.title")}</Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        {/* Do'kon Profili */}
-        <Text className="mb-2 ml-1 text-xs font-semibold text-muted" style={{ letterSpacing: 0.6 }}>
-          DO'KON PROFILI
-        </Text>
-        <View className="mb-6 flex-row items-center gap-3.5 rounded-[24px] border border-line bg-surface p-4 shadow-2xs">
-          <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-primary-deep shadow-xs">
-            <Text className="text-xl font-bold text-white">
-              {(active?.shop.name ?? "u").slice(0, 2).toUpperCase()}
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ══════════════════════════════════════
+            DO'KON PROFILI
+        ══════════════════════════════════════ */}
+        <SectionLabel>Do'kon</SectionLabel>
+        <View className="mb-5 flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4">
+          <View
+            className="h-12 w-12 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: colors.primaryDeep }}
+          >
+            <Text className="text-base font-bold text-white">
+              {(active?.shop.name ?? "U").slice(0, 2).toUpperCase()}
             </Text>
           </View>
-          <View className="flex-1 justify-center">
-            <Text className="text-lg font-bold text-ink" numberOfLines={1}>{active?.shop.name ?? "Do'kon"}</Text>
-            <Text className="text-xs font-medium text-muted mt-0.5">{isOwner ? t("staff.owner") : t("staff.cashier")}</Text>
+          <View className="flex-1">
+            <Text className="text-base font-semibold text-ink" numberOfLines={1}>
+              {active?.shop.name ?? "Do'kon"}
+            </Text>
+            <Text className="text-xs text-muted mt-0.5">
+              {isOwner ? t("staff.owner") : t("staff.cashier")}
+            </Text>
           </View>
-          <View className="rounded-xl bg-primary-tint px-3 py-1.5">
-            <Text className="text-xs font-bold text-primary">Faol</Text>
+          <View
+            className="rounded-full px-3 py-1"
+            style={{ backgroundColor: "rgba(16,185,129,0.12)" }}
+          >
+            <Text style={{ fontSize: 11, fontWeight: "700", color: "#059669" }}>● Faol</Text>
           </View>
         </View>
 
-        {/* Til Tanlash (Segmented card) */}
-        <Text className="mb-2 ml-1 text-xs font-semibold text-muted" style={{ letterSpacing: 0.6 }}>
-          {t("language.label").toUpperCase()}
-        </Text>
-        <View className="mb-6 rounded-[22px] border border-line bg-surface p-1.5 shadow-2xs flex-row">
+        {/* ══════════════════════════════════════
+            TIL TANLASH
+        ══════════════════════════════════════ */}
+        <SectionLabel>{t("language.label")}</SectionLabel>
+        <View className="mb-5 rounded-2xl border border-line bg-surface p-1.5 flex-row">
           {LANGUAGES.map((l) => {
-            const activeLang = i18n.language === l.code;
+            const isActive = i18n.language === l.code;
             return (
               <Pressable
                 key={l.code}
                 onPress={() => setLanguage(l.code as LangCode)}
                 accessibilityLabel={l.label}
-                className="flex-1 items-center justify-center rounded-2xl py-3"
-                style={{
-                  backgroundColor: activeLang ? colors.primary : "transparent",
-                }}
+                className="flex-1 items-center justify-center rounded-xl py-2.5"
+                style={{ backgroundColor: isActive ? colors.primary : "transparent" }}
               >
                 <Text
                   style={{
                     fontSize: 13,
-                    fontWeight: activeLang ? "700" : "500",
-                    color: activeLang ? "#fff" : colors.ink,
+                    fontWeight: isActive ? "700" : "500",
+                    color: isActive ? "#fff" : colors.muted,
                   }}
                 >
                   {l.label}
@@ -222,59 +263,61 @@ export default function SettingsScreen() {
           })}
         </View>
 
-        {/* Printer va Qurilmalar */}
-        <Text className="mb-2 ml-1 text-xs font-semibold text-muted" style={{ letterSpacing: 0.6 }}>
-          QURILMALAR
-        </Text>
+        {/* ══════════════════════════════════════
+            QURILMALAR
+        ══════════════════════════════════════ */}
+        <SectionLabel>Qurilmalar</SectionLabel>
         <Pressable
           onPress={() => router.push("/printer-settings")}
           android_ripple={{ color: colors.line }}
-          className="mb-6 flex-row items-center gap-3.5 rounded-[22px] border border-line bg-surface p-4 shadow-2xs"
+          className="mb-5 flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4"
         >
-          <View className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: "rgba(168, 85, 247, 0.12)" }}>
-            <Ionicons name="print" size={21} color="#9333ea" />
+          <View
+            className="h-10 w-10 items-center justify-center rounded-xl"
+            style={{ backgroundColor: "rgba(168,85,247,0.12)" }}
+          >
+            <Ionicons name="print-outline" size={20} color="#9333ea" />
           </View>
           <View className="flex-1">
-            <Text className="text-base font-semibold text-ink">Printer va Cheklar</Text>
+            <Text className="text-sm font-semibold text-ink">Printer va Cheklar</Text>
             <Text className="text-xs text-muted mt-0.5">Bluetooth, termal printer, test chek</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
         </Pressable>
 
-        {/* Bildirishnomalar */}
-        <Text className="mb-2 ml-1 text-xs font-semibold text-muted" style={{ letterSpacing: 0.6 }}>
-          BILDIRISHNOMALAR VA ESLLATMALAR
-        </Text>
-        <View className="mb-6" style={{ gap: 12 }}>
+        {/* ══════════════════════════════════════
+            BILDIRISHNOMALAR
+        ══════════════════════════════════════ */}
+        <SectionLabel>Bildirishnomalar</SectionLabel>
+        <View className="mb-5" style={{ gap: 10 }}>
           <LocalReminderCard />
           {isOwner && active?.shop ? <TelegramSummaryCard shop={active.shop} /> : null}
         </View>
 
-        {/* Xodimlar */}
+        {/* ══════════════════════════════════════
+            KASSIRLAR
+        ══════════════════════════════════════ */}
         {!isOwner ? (
-          <View className="flex-row items-center gap-3 rounded-[22px] border border-line bg-surface p-4 shadow-2xs">
-            <View className="h-10 w-10 items-center justify-center rounded-2xl bg-bg border border-line">
-              <Ionicons name="lock-closed" size={19} color={colors.muted} />
-            </View>
-            <Text className="flex-1 text-sm font-medium text-muted">
-              Xodimlar va ularning ruxsatnomalarini faqat do'kon egasi boshqarishi mumkin.
+          <View className="flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4">
+            <Ionicons name="lock-closed-outline" size={18} color={colors.muted} />
+            <Text className="flex-1 text-xs font-medium text-muted">
+              Xodimlarni faqat do'kon egasi boshqaradi.
             </Text>
           </View>
         ) : (
           <>
-            <Text className="mb-2 ml-1 text-xs font-semibold text-muted" style={{ letterSpacing: 0.6 }}>
-              KASSIRLAR VA XODIMLAR
-            </Text>
+            <SectionLabel>Kassirlar</SectionLabel>
 
-            {/* Email bilan qo'shish */}
-            <View className="mb-3 flex-row items-center gap-2.5 rounded-[22px] border border-line bg-surface p-2 shadow-2xs">
+            {/* Email qo'shish maydoni */}
+            <View className="mb-2 flex-row items-center gap-2 rounded-2xl border border-line bg-surface p-2">
+              <Ionicons name="mail-outline" size={18} color={colors.muted} style={{ marginLeft: 6 }} />
               <TextInput
                 value={email}
                 onChangeText={setEmail}
                 placeholder="kassir@email.com"
                 placeholderTextColor={colors.tabInactive}
-                className="flex-1 px-3 text-base text-ink"
-                style={{ height: 44 }}
+                className="flex-1 text-sm text-ink"
+                style={{ height: 40, paddingHorizontal: 4 }}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 onSubmitEditing={onAdd}
@@ -283,59 +326,68 @@ export default function SettingsScreen() {
               <Pressable
                 onPress={onAdd}
                 disabled={!email.trim() || addMut.isPending}
-                className="items-center justify-center rounded-[18px] bg-primary px-5"
-                style={{ height: 44, opacity: email.trim() && !addMut.isPending ? 1 : 0.5 }}
+                className="items-center justify-center rounded-xl bg-primary px-4"
+                style={{ height: 40, opacity: email.trim() && !addMut.isPending ? 1 : 0.45 }}
               >
                 {addMut.isPending ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Ionicons name="person-add" size={20} color="#fff" />
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: "#fff" }}>Qo'shish</Text>
                 )}
               </Pressable>
             </View>
-            <Text className="mb-5 ml-1 text-xs text-muted">
-              Yangi kassir qo'shish uchun u avval ilovadan shu email orqali ro'yxatdan o'tgan bo'lishi kerak.
+            <Text className="mb-4 ml-1 text-xs text-muted">
+              Kassir ilovadan shu email bilan ro'yxatdan o'tgan bo'lishi kerak.
             </Text>
 
+            {/* Kassirlar ro'yxati */}
             {isLoading ? (
-              <ActivityIndicator color={colors.primary} style={{ marginVertical: 28 }} />
+              <ActivityIndicator color={colors.primary} style={{ marginVertical: 24 }} />
             ) : isError ? (
-              <View className="rounded-[22px] border border-line bg-surface p-6 items-center">
-                <Text className="text-center text-sm font-medium text-danger">
-                  {(error as Error)?.message ?? "Kassirlar ro'yxatini yuklab bo'lmadi"}
+              <View className="rounded-2xl border border-line bg-surface p-5 items-center">
+                <Text className="text-center text-xs font-medium text-danger">
+                  {(error as Error)?.message ?? "Yuklab bo'lmadi"}
                 </Text>
               </View>
             ) : cashiers.length === 0 ? (
-              <View className="rounded-[22px] border border-line bg-surface p-8 items-center justify-center shadow-2xs" style={{ gap: 10 }}>
-                <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-bg border border-line">
-                  <Ionicons name="people" size={26} color={colors.muted} />
-                </View>
-                <Text className="text-center text-base font-semibold text-ink">Hali kassirlar yo'q</Text>
-                <Text className="text-center text-xs text-muted">
-                  Yuqoridagi maydonga kassir emailini yozib "Qo'shish" tugmasini bosing.
+              <View
+                className="rounded-2xl border border-line bg-surface items-center justify-center py-8"
+                style={{ gap: 8 }}
+              >
+                <Ionicons name="people-outline" size={28} color={colors.muted} />
+                <Text className="text-sm font-semibold text-ink">Hali kassirlar yo'q</Text>
+                <Text className="text-xs text-muted text-center px-6">
+                  Yuqoriga email kiritib «Qo'shish» tugmasini bosing
                 </Text>
               </View>
             ) : (
-              <View className="rounded-[22px] border border-line bg-surface overflow-hidden shadow-2xs">
+              <View className="rounded-2xl border border-line bg-surface overflow-hidden">
                 {cashiers.map((m, i) => (
                   <Pressable
                     key={m.user_id}
                     onPress={() => setEditing(m)}
                     android_ripple={{ color: colors.line }}
-                    className={`flex-row items-center gap-3.5 p-4 ${i > 0 ? "border-t border-line/60" : ""}`}
+                    className={`flex-row items-center gap-3 p-4 ${i > 0 ? "border-t border-line" : ""}`}
                   >
-                    <View className="h-11 w-11 items-center justify-center rounded-2xl bg-primary-tint">
-                      <Text className="text-base font-bold text-primary">
+                    <View
+                      className="h-10 w-10 items-center justify-center rounded-full"
+                      style={{ backgroundColor: colors.primaryTint }}
+                    >
+                      <Text
+                        style={{ fontSize: 14, fontWeight: "700", color: colors.primary }}
+                      >
                         {m.email.slice(0, 1).toUpperCase()}
                       </Text>
                     </View>
                     <View className="min-w-0 flex-1">
-                      <Text className="text-base font-semibold text-ink" numberOfLines={1}>{m.email}</Text>
-                      <Text className="text-xs font-medium text-muted mt-0.5">
-                        {Object.values(m.permissions ?? {}).filter(Boolean).length} ta ruxsat berilgan
+                      <Text className="text-sm font-semibold text-ink" numberOfLines={1}>
+                        {m.email}
+                      </Text>
+                      <Text className="text-xs text-muted mt-0.5">
+                        {Object.values(m.permissions ?? {}).filter(Boolean).length} ta ruxsat
                       </Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
+                    <Ionicons name="chevron-forward" size={16} color={colors.tabInactive} />
                   </Pressable>
                 ))}
               </View>

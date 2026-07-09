@@ -8,16 +8,14 @@ import { toast } from "@/lib/toast";
 import { createOwnerLinkUrl, updateSummaryTime } from "./owner-telegram";
 import type { Shop, SummaryTime } from "@/types/database";
 
-const TIMES: { value: SummaryTime; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { value: "morning", label: "Ertalab", icon: "sunny-outline" },
-  { value: "evening", label: "Kechqurun", icon: "moon-outline" },
-  { value: "off", label: "O'chiq", icon: "notifications-off-outline" },
+const TIMES: { value: SummaryTime; label: string; sub: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { value: "morning", label: "Ertalab", sub: "07:00", icon: "sunny-outline" },
+  { value: "evening", label: "Kechqurun", sub: "21:00", icon: "moon-outline" },
+  { value: "off", label: "O'chiq", sub: "—", icon: "notifications-off-outline" },
 ];
 
 /**
  * Egaga kunlik Telegram xulosa: botga ulash (deep-link) + vaqt tanlovi.
- * Web settings/owner-telegram-card.tsx ga mos — xabarni web backend cron
- * yuboradi (migration 027), mobile faqat ulash/sozlash UI.
  */
 export function TelegramSummaryCard({ shop }: { shop: Shop }) {
   const qc = useQueryClient();
@@ -39,7 +37,6 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
     }
   }
 
-  /** Botda /start bosilgach DB yangilanadi — holatni qayta o'qish. */
   function onRefresh() {
     qc.invalidateQueries({ queryKey: ["memberships"] });
   }
@@ -61,73 +58,95 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
   }
 
   return (
-    <View className="rounded-2xl border border-line bg-surface p-4" style={{ gap: 12 }}>
-      <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
-          <Ionicons name="paper-plane-outline" size={20} color={colors.primary} />
+    <View className="rounded-2xl border border-line bg-surface overflow-hidden">
+      {/* Sarlavha */}
+      <View className="flex-row items-center gap-3 px-4 pt-4 pb-3">
+        <View
+          className="h-10 w-10 items-center justify-center rounded-xl"
+          style={{ backgroundColor: "rgba(3,169,244,0.12)" }}
+        >
+          <Ionicons name="paper-plane-outline" size={20} color="#0288d1" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-medium text-ink">Kunlik xulosa (Telegram)</Text>
-          <Text className="text-xs text-muted">
-            Har kuni savdo natijasi Telegram'ga yuboriladi
-          </Text>
+          <Text className="text-sm font-semibold text-ink">Kunlik xulosa (Telegram)</Text>
+          <Text className="text-xs text-muted mt-0.5">Savdo natijasi Telegram'ga yuboriladi</Text>
         </View>
+        {/* Holat badge */}
         <View
           className="rounded-full px-2.5 py-1"
-          style={{ backgroundColor: connected ? "#E7F6EE" : colors.bg }}
+          style={{ backgroundColor: connected ? "#E7F6EE" : "#f3f4f6" }}
         >
           <Text
-            style={{ fontSize: 11, fontWeight: "500", color: connected ? "#0F6E56" : colors.muted }}
+            style={{
+              fontSize: 11,
+              fontWeight: "600",
+              color: connected ? "#0F6E56" : colors.muted,
+            }}
           >
             {connected ? "Ulangan" : "Ulanmagan"}
           </Text>
         </View>
       </View>
 
+      {/* Qism: ulash tugmasi yoki vaqt tanlovi */}
       {!connected ? (
-        <View style={{ gap: 8 }}>
+        <View className="border-t border-line px-4 py-3" style={{ gap: 8 }}>
           <Pressable
             onPress={onConnect}
             disabled={connecting}
-            className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
-            style={{ height: 48, opacity: connecting ? 0.6 : 1 }}
+            className="flex-row items-center justify-center gap-2 rounded-xl bg-primary"
+            style={{ height: 46, opacity: connecting ? 0.6 : 1 }}
           >
             {connecting ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <>
-                <Ionicons name="paper-plane" size={18} color="#fff" />
-                <Text className="text-base font-medium text-white">Telegram'ga ulash</Text>
+                <Ionicons name="paper-plane" size={17} color="#fff" />
+                <Text style={{ fontSize: 14, fontWeight: "600", color: "#fff" }}>
+                  Telegram'ga ulash
+                </Text>
               </>
             )}
           </Pressable>
-          <Pressable onPress={onRefresh} className="items-center p-1">
-            <Text className="text-xs text-muted">Botda «Start» bosdingizmi? Holatni yangilash</Text>
+          <Pressable onPress={onRefresh} className="items-center py-1">
+            <Text className="text-xs text-muted">
+              Botda «Start» bosdingizmi? → Holatni yangilash
+            </Text>
           </Pressable>
         </View>
       ) : (
-        <View className="flex-row gap-2">
-          {TIMES.map((t) => {
+        <View className="flex-row border-t border-line">
+          {TIMES.map((t, i) => {
             const activeOpt = time === t.value;
             return (
               <Pressable
                 key={t.value}
                 onPress={() => onChooseTime(t.value)}
                 disabled={saving}
-                className="flex-1 items-center justify-center rounded-xl"
+                className="flex-1 items-center justify-center py-3"
                 style={{
-                  height: 52,
-                  backgroundColor: activeOpt ? colors.primary : colors.bg,
-                  opacity: saving ? 0.7 : 1,
+                  backgroundColor: activeOpt ? colors.primary : "transparent",
+                  borderLeftWidth: i > 0 ? 1 : 0,
+                  borderLeftColor: colors.line,
+                  opacity: saving ? 0.6 : 1,
                 }}
               >
-                <Ionicons name={t.icon} size={16} color={activeOpt ? "#fff" : colors.muted} />
+                <Ionicons name={t.icon} size={17} color={activeOpt ? "#fff" : colors.muted} />
                 <Text
                   style={{
-                    fontSize: 11,
-                    marginTop: 2,
-                    fontWeight: "500",
-                    color: activeOpt ? "#fff" : colors.muted,
+                    fontSize: 12,
+                    marginTop: 3,
+                    fontWeight: "600",
+                    color: activeOpt ? "#fff" : colors.ink,
+                  }}
+                >
+                  {t.sub}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 10,
+                    marginTop: 1,
+                    color: activeOpt ? "rgba(255,255,255,0.8)" : colors.muted,
                   }}
                 >
                   {t.label}
