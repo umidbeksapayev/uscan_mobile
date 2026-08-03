@@ -55,7 +55,7 @@ export function StatsCard({
       style={{
         borderWidth: 0.5,
         borderColor: colors.line,
-        shadowColor: "#0F172A",
+        shadowColor: colors.shadow,
         shadowOpacity: 0.05,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },

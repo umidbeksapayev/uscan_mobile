@@ -169,7 +169,7 @@ export default function NasiyaScreen() {
               backgroundColor: colors.primary,
               alignItems: "center",
               justifyContent: "center",
-              shadowColor: "#0F172A",
+              shadowColor: colors.shadow,
               shadowOpacity: 0.18,
               shadowRadius: 10,
               shadowOffset: { width: 0, height: 4 },

@@ -84,7 +84,7 @@ function ProductRow({
       style={{
         borderWidth: selected ? 1.5 : 0.5,
         borderColor: selected ? colors.primary : colors.line,
-        shadowColor: "#0F172A",
+        shadowColor: colors.shadow,
         shadowOpacity: 0.05,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
@@ -440,7 +440,7 @@ export default function KatalogScreen() {
             backgroundColor: colors.primary,
             alignItems: "center",
             justifyContent: "center",
-            shadowColor: "#0F172A",
+            shadowColor: colors.shadow,
             shadowOpacity: 0.18,
             shadowRadius: 10,
             shadowOffset: { width: 0, height: 4 },

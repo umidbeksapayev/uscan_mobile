@@ -44,6 +44,13 @@ export const colors = {
   muted: "#64748B",
   line: "#E6EAF0",
   tabInactive: "#94A3B8",
+  /**
+   * Karta soyasi. Tungi rejimda sof qora — chunki `surface` (#1E293B) `bg`
+   * (#0F172A) dan OCHIQROQ, ya'ni chuqurlik asosan shu farq va `line` chegarasi
+   * orqali beriladi (Material dark theme yondashuvi), soya esa faqat nozik
+   * qo'shimcha.
+   */
+  shadow: "#0F172A",
 } as const;
 
 /** Ilova rang palitrasining tipi — light/dark ikkalasi ham shu shaklga ega. */
@@ -73,4 +80,5 @@ export const darkColors: AppColors = {
   muted: "#94A3B8",
   line: "#334155",
   tabInactive: "#64748B",
+  shadow: "#000000",
 };

@@ -18,6 +18,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useThemeStore, useColors, type ThemeMode } from "@/theme/theme-store";
+import type { AppColors } from "@/theme/colors";
 import { LANGUAGES, setLanguage, type LangCode } from "@/i18n";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useActiveMembership } from "@/features/auth/use-memberships";
@@ -31,16 +32,20 @@ import type { MemberPermissions, ShopMemberRow } from "@/types/database";
    Uslub konstantalari
 ───────────────────────────────────────────────────────────────────────── */
 const RADIUS = 18;
-const CARD_SHADOW = Platform.select({
-  ios: {
-    shadowColor: "#94A3B8",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  android: { elevation: 2 },
-  default: {},
-});
+
+/** Karta soyasi — rang palitradan olinadi (tungi rejimda sof qora). */
+function cardShadow(colors: AppColors) {
+  return Platform.select({
+    ios: {
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+    },
+    android: { elevation: 2 },
+    default: {},
+  });
+}
 
 /* ─────────────────────────────────────────────────────────────────────────
    SectionLabel — bo'lim sarlavhasi
@@ -533,7 +538,7 @@ export default function SettingsScreen() {
             gap: 14,
             padding: 16,
             marginBottom: 20,
-            ...CARD_SHADOW,
+            ...cardShadow(colors),
           }}
         >
           {/* Avatar — gradient simulyatsiya: to'q fon + kichik ring */}
@@ -593,7 +598,7 @@ export default function SettingsScreen() {
             backgroundColor: colors.surface,
             overflow: "hidden",
             marginBottom: 20,
-            ...CARD_SHADOW,
+            ...cardShadow(colors),
           }}
         >
           <SettingRow
@@ -671,7 +676,7 @@ export default function SettingsScreen() {
                 paddingRight: 6,
                 paddingVertical: 6,
                 marginBottom: 6,
-                ...CARD_SHADOW,
+                ...cardShadow(colors),
               }}
             >
               <Ionicons name="mail-outline" size={17} color={colors.muted} />
@@ -792,7 +797,7 @@ export default function SettingsScreen() {
                   borderColor: colors.line,
                   backgroundColor: colors.surface,
                   overflow: "hidden",
-                  ...CARD_SHADOW,
+                  ...cardShadow(colors),
                 }}
               >
                 {cashiers.map((m, i) => {

@@ -32,7 +32,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         className="flex-row items-center rounded-3xl border border-line bg-surface"
         style={{
           height: 62,
-          shadowColor: "#0F172A",
+          shadowColor: colors.shadow,
           shadowOpacity: 0.06,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: 4 },

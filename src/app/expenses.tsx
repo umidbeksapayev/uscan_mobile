@@ -134,7 +134,7 @@ export default function ExpensesScreen() {
       <Pressable
         onPress={openNew}
         accessibilityLabel={t("expenses.addBtnA11y", "Xarajat qo'shish")}
-        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", shadowColor: "#0F172A", shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
+        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", shadowColor: colors.shadow, shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
       >
         <Ionicons name="add" size={30} color="#fff" />
       </Pressable>
