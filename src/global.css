@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/**
+ * Rang tokenlari — `tailwind.config.js` shu o'zgaruvchilarga bog'langan.
+ * Qiymatlar `src/theme/colors.ts` bilan BIR XIL bo'lishi shart (RGB kanallar,
+ * `<alpha-value>` ishlashi uchun `rgb()` siz yoziladi).
+ *
+ * `.dark:root` — NativeWind `darkMode: "class"` rejimidagi tungi qiymatlar.
+ */
+@layer base {
+  :root {
+    /* Brend */
+    --color-primary: 47 128 237; /* #2F80ED */
+    --color-primary-deep: 15 61 110; /* #0F3D6E */
+    --color-primary-light: 125 180 245; /* #7DB4F5 */
+    --color-primary-tint: 234 242 254; /* #EAF2FE */
+    /* Funksional */
+    --color-success: 22 163 74; /* #16A34A */
+    --color-danger: 220 38 38; /* #DC2626 */
+    --color-warning: 245 158 11; /* #F59E0B */
+    --color-kirim: 14 159 110; /* #0E9F6E */
+    --color-kirim-tint: 230 247 240; /* #E6F7F0 */
+    /* Neytral */
+    --color-bg: 245 248 255; /* #F5F8FF */
+    --color-surface: 255 255 255; /* #FFFFFF */
+    --color-ink: 15 23 42; /* #0F172A */
+    --color-muted: 100 116 139; /* #64748B */
+    --color-line: 230 234 240; /* #E6EAF0 */
+    --color-tab-inactive: 148 163 184; /* #94A3B8 */
+  }
+
+  .dark:root {
+    /* Brend va semantik ranglar o'zgarmaydi — faqat tint/neytral tokenlar */
+    --color-primary-tint: 23 37 84; /* #172554 */
+    --color-kirim-tint: 13 46 35; /* #0D2E23 */
+    --color-bg: 15 23 42; /* #0F172A */
+    --color-surface: 30 41 59; /* #1E293B */
+    --color-ink: 248 250 252; /* #F8FAFC */
+    --color-muted: 148 163 184; /* #94A3B8 */
+    --color-line: 51 65 85; /* #334155 */
+    --color-tab-inactive: 100 116 139; /* #64748B */
+  }
+}
