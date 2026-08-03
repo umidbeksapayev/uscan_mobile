@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { useExpenses } from "@/features/expenses/use-expenses";
 import { expensesTotal, categoryLabel, type Expense } from "@/features/expenses/expense-math";
@@ -17,6 +17,8 @@ const PERIODS = [
 ] as const;
 
 export default function ExpensesScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const [days, setDays] = useState<7 | 30>(30);

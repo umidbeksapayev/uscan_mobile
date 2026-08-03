@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Text, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { useTranslation } from "react-i18next";
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useRecordPayment } from "./use-customers";
@@ -17,6 +17,8 @@ type Props = {
 
 /** Qarz to'lovini qabul qilish (record_customer_payment, optimistik). */
 export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalance, onClose }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const mutation = useRecordPayment(customerId);

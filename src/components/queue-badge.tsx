@@ -1,10 +1,12 @@
 import { View, Text } from "react-native";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { useOfflineStore } from "@/lib/offline/offline-store";
 
 /** Yuborilmagan sotuvlar soni — mini badge (0 bo'lsa ko'rinmaydi). */
 export function QueueBadge({ size = 18 }: { size?: number }) {
+  const colors = useColors();
+
   const count = useOfflineStore((s) => s.pendingCount);
   if (count <= 0) return null;
   return (

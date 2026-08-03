@@ -5,7 +5,7 @@ import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useSuppliers, useCreateSupplier } from "./use-suppliers";
 
@@ -19,6 +19,8 @@ type Props = {
 };
 
 export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const { data: suppliers, isLoading } = useSuppliers();
   const createMut = useCreateSupplier();

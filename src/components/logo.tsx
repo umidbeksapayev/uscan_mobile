@@ -1,12 +1,14 @@
 import { View, Text } from "react-native";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 
 /**
  * uscan brend logosi: "u" (to'q ko'k) + skaner-ramka ichida "scan" (yorqin ko'k)
  * + ochiq ko'k gorizontal chiziq. Brend listidagi belgi asosida.
  */
 export function Logo({ size = 24 }: { size?: number }) {
+  const colors = useColors();
+
   const frameH = Math.round(size * 1.5);
   const corner = Math.round(size * 0.36);
   const cb = 2.5;

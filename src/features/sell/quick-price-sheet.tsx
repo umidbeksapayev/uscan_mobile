@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency } from "@/lib/format";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 
@@ -22,6 +22,8 @@ type Props = {
  * `features/sell/misc-product.ts`da.
  */
 export function QuickPriceSheet({ visible, loading, onClose, onConfirm }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const [text, setText] = useState("");
 

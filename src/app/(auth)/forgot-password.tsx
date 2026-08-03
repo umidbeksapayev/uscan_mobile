@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { Field } from "@/components/ui/field";
 const REDIRECT_TO = "uscan://reset-password";
 
 export default function ForgotPasswordScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);

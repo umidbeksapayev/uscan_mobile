@@ -6,7 +6,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import {
@@ -20,6 +20,8 @@ import type { CustomerPayment } from "@/types/database";
 import type { CustomerSaleRow } from "@/features/customers/customers-api";
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
+  const colors = useColors();
+
   return (
     <View className="rounded-2xl bg-surface p-4" style={{ borderWidth: 0.5, borderColor: colors.line }}>
       <Text className="mb-2 text-sm font-semibold text-ink">{title}</Text>
@@ -29,6 +31,8 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 function SaleRow({ s }: { s: CustomerSaleRow }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const debt = Math.max(0, s.total_revenue - s.paid_amount);
   return (
@@ -52,6 +56,8 @@ function SaleRow({ s }: { s: CustomerSaleRow }) {
 }
 
 function PaymentRow({ p }: { p: CustomerPayment }) {
+  const colors = useColors();
+
   return (
     <View className="flex-row items-center justify-between py-2" style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}>
       <View className="flex-row items-center gap-2">
@@ -64,6 +70,8 @@ function PaymentRow({ p }: { p: CustomerPayment }) {
 }
 
 export default function CustomerDetailScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const qc = useQueryClient();

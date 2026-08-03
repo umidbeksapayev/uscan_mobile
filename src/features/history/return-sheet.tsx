@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import type { Sale, SaleItem } from "@/types/database";
@@ -31,6 +31,8 @@ function ReturnRow({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const isWeight = item.sale_type === "weight";
   const disabled = max <= 0;
@@ -85,6 +87,8 @@ function ReturnRow({
  * Faqat egasi ko'radi (returns RLS = egasi) — tugma tarix ekranida gate qilingan.
  */
 export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const { data: returnedMap } = useReturnedQuantities(visible ? sale?.id : undefined);
   const mutation = useProcessReturn();

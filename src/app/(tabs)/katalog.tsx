@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useProducts, type CategoryFilter } from "@/features/catalog/use-products";
@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/database";
 
 function StockBadge({ item }: { item: Product }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const isWeight = item.sale_type === "weight";
   const q = item.quantity;
@@ -74,6 +76,8 @@ function ProductRow({
   selectionMode?: boolean;
   selected?: boolean;
 }) {
+  const colors = useColors();
+
   return (
     <View
       className="mb-3 flex-row items-center gap-3 rounded-2xl bg-surface p-3"
@@ -134,6 +138,8 @@ function EmptyState({
   icon: keyof typeof Ionicons.glyphMap;
   text: string;
 }) {
+  const colors = useColors();
+
   return (
     <View className="flex-1 items-center justify-center px-10">
       <View className="mb-4 h-20 w-20 items-center justify-center rounded-3xl bg-primary-tint">
@@ -145,6 +151,8 @@ function EmptyState({
 }
 
 export default function KatalogScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const [search, setSearch] = useState("");

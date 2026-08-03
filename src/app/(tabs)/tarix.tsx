@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
 import { useMemberships, useActiveMembership } from "@/features/auth/use-memberships";
@@ -28,6 +28,8 @@ function refundedTotal(sale: Sale): number {
 }
 
 function ItemLine({ it }: { it: SaleItem }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const qtyLabel =
     it.sale_type === "weight"
@@ -72,6 +74,8 @@ function SaleCard({
   onReturn?: () => void;
   shopName: string;
 }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const meta = METHOD[sale.search_method] ?? METHOD.manual;
   const refunded = refundedTotal(sale);
@@ -198,6 +202,8 @@ function EmptyState({
   icon: keyof typeof Ionicons.glyphMap;
   text: string;
 }) {
+  const colors = useColors();
+
   return (
     <View className="flex-1 items-center justify-center px-10" style={{ paddingTop: 80 }}>
       <View className="mb-4 h-20 w-20 items-center justify-center rounded-3xl bg-primary-tint">
@@ -209,6 +215,8 @@ function EmptyState({
 }
 
 export default function TarixScreen() {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const [openId, setOpenId] = useState<string | null>(null);
   const [returnSale, setReturnSale] = useState<Sale | null>(null);

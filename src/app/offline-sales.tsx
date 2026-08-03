@@ -5,7 +5,10 @@ import { useRouter } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+// `STATUS` modul darajasida — u faqat semantik ranglarni ishlatadi, ular
+// tungi rejimda o'zgarmaydi. Mavzuga bog'liq ranglar uchun `useColors()`.
+import { colors as brand } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency } from "@/lib/format";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import { loadQueue, removeSale, unsyncedCount } from "@/lib/offline/sale-queue-db";
@@ -14,13 +17,14 @@ import { useOfflineStore } from "@/lib/offline/offline-store";
 import type { QueuedSale, SaleStatus } from "@/lib/offline/sale-queue";
 
 const STATUS: Record<SaleStatus, { label: string; color: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  pending: { label: "Kutilmoqda", color: colors.warning, icon: "time-outline" },
-  syncing: { label: "Yuborilmoqda", color: colors.primary, icon: "sync-outline" },
-  failed: { label: "Muvaffaqiyatsiz", color: colors.danger, icon: "alert-circle-outline" },
-  done: { label: "Yuborildi", color: colors.kirim, icon: "checkmark-circle-outline" },
+  pending: { label: "Kutilmoqda", color: brand.warning, icon: "time-outline" },
+  syncing: { label: "Yuborilmoqda", color: brand.primary, icon: "sync-outline" },
+  failed: { label: "Muvaffaqiyatsiz", color: brand.danger, icon: "alert-circle-outline" },
+  done: { label: "Yuborildi", color: brand.kirim, icon: "checkmark-circle-outline" },
 };
 
 export default function OfflineSalesScreen() {
+  const colors = useColors();
   const router = useRouter();
   const { t } = useTranslation();
   const shopId = useActiveShopId();

@@ -4,13 +4,15 @@ import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { useOfflineStore } from "@/lib/offline/offline-store";
 
 type Kind = "info" | "success" | "warn";
 
 /** Sync holati toast'i (pastda, avtomatik yo'qoladi). */
 export function SyncToast() {
+  const colors = useColors();
+
   const syncing = useOfflineStore((s) => s.syncing);
   const pendingCount = useOfflineStore((s) => s.pendingCount);
   const lastResult = useOfflineStore((s) => s.lastResult);

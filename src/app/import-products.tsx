@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { File } from "expo-file-system";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
@@ -50,6 +50,8 @@ function RequiredHeaderHint() {
 }
 
 function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const badge = STATUS_BADGE[row.status];
   const badgeLabel = t(`import.status_${row.status}`, badge.label);
@@ -82,6 +84,8 @@ function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
 }
 
 export default function ImportProductsScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const qc = useQueryClient();
   const { t } = useTranslation();

@@ -3,7 +3,7 @@ import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import type { Category } from "@/types/database";
 
@@ -20,6 +20,8 @@ export function CategorySheet({
   onSelect: (id: string | null) => void;
   onClose: () => void;
 }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const options: { id: string | null; name: string }[] = [
     { id: null, name: t("product.noCategory") },

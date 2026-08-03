@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Text } from "react-native";
 import Svg, { Rect, Line, Polyline, Circle, Text as SvgText } from "react-native-svg";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import type { SalesTrendPoint } from "@/types/database";
 import { niceMax, compactSom, dayLabel } from "./dashboard-math";
 
@@ -14,6 +14,8 @@ const PAD_B = 22;
 
 /** Tushum (ustun) + foyda (chiziq) trend grafigi — react-native-svg. */
 export function TrendChart({ data }: { data: SalesTrendPoint[] }) {
+  const colors = useColors();
+
   const [w, setW] = useState(320);
 
   const n = data.length;

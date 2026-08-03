@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { uuidv4 } from "@/lib/uuid";
 import { changeAmount } from "./payment-math";
@@ -40,6 +40,8 @@ type Props = {
 };
 
 export function PaymentSheet({ visible, total, shopId: propShopId, items, onClose, onPaid }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const qc = useQueryClient();
   const activeShopId = useActiveShopId();

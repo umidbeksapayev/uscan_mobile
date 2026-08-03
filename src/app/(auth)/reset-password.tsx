@@ -5,7 +5,7 @@ import * as Linking from "expo-linking";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { supabase } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { parseRecoveryParams } from "@/features/auth/parse-recovery-url";
@@ -22,6 +22,8 @@ type Status = "checking" | "ready" | "invalid" | "done";
  * o'rnatamiz, foydalanuvchi yangi parol kiritgach `updateUser` bilan saqlaymiz.
  */
 export default function ResetPasswordScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const url = Linking.useURL();
   const setRecoveryActive = useRecoveryStore((s) => s.setActive);

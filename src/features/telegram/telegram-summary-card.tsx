@@ -3,7 +3,7 @@ import { View, Text, Pressable, ActivityIndicator, Linking } from "react-native"
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { toast } from "@/lib/toast";
 import { createOwnerLinkUrl, updateSummaryTime } from "./owner-telegram";
 import type { Shop, SummaryTime } from "@/types/database";
@@ -20,6 +20,8 @@ const TIMES: {
 ];
 
 export function TelegramSummaryCard({ shop }: { shop: Shop }) {
+  const colors = useColors();
+
   const qc = useQueryClient();
   const connected = shop.owner_telegram_chat_id != null;
   const [time, setTime] = useState<SummaryTime>(shop.summary_time ?? "off");

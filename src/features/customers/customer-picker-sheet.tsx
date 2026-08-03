@@ -5,7 +5,7 @@ import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency } from "@/lib/format";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { useCustomersWithBalance, useCreateCustomer } from "./use-customers";
@@ -21,6 +21,8 @@ type Props = {
 
 /** Checkout uchun mijoz tanlash: qidiriladigan ro'yxat + tezkor "Yangi mijoz". */
 export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const { data: customers, isLoading } = useCustomersWithBalance();
   const createMut = useCreateCustomer();

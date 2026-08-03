@@ -8,7 +8,7 @@ import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import { pctChange } from "@/features/dashboard/dashboard-math";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
@@ -39,6 +39,8 @@ function Row({ children }: { children: React.ReactNode }) {
 }
 
 function ProductStatRow({ p, rank }: { p: TopProduct; rank?: number }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const sold = p.sale_type === "weight" ? formatWeight(p.units_sold) : `${p.units_sold} dona`;
   return (
@@ -63,6 +65,8 @@ function ProductStatRow({ p, rank }: { p: TopProduct; rank?: number }) {
 }
 
 function ListCard({ title, children }: { title: string; children: React.ReactNode }) {
+  const colors = useColors();
+
   return (
     <View
       className="rounded-2xl bg-surface p-4"
@@ -77,6 +81,8 @@ function ListCard({ title, children }: { title: string; children: React.ReactNod
 /** Savdo statistikasi — faqat view_reports'li foydalanuvchida MOUNT bo'ladi
  *  (shu sababli himoyalangan RPC'lar ruxsatsiz chaqirilmaydi). */
 function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost: boolean }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const { data: s, isLoading } = useSalesStats(period);
   const { data: top, isLoading: topLoading } = useTopProducts(period, 5);
@@ -147,6 +153,8 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
 /** Kassir bo'yicha savdo — FAQAT egaga mount bo'ladi (email'lar owner-gated
  *  list_shop_members RPC'dan; kassirlar bir-birining natijasini ko'rmaydi). */
 function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const { data: aggs, isLoading } = useCashierStats(period);
   const { data: staff } = useStaff(shopId);
@@ -192,6 +200,8 @@ function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string
 }
 
 function LockedSalesSection() {
+  const colors = useColors();
+
   const { t } = useTranslation();
   return (
     <View
@@ -209,6 +219,8 @@ function LockedSalesSection() {
 }
 
 export default function StatistikaScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const qc = useQueryClient();

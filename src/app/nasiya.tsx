@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency } from "@/lib/format";
 import { useActivePermissions } from "@/features/auth/use-memberships";
 import { useCustomersWithBalance } from "@/features/customers/use-customers";
@@ -13,6 +13,8 @@ import { debtTotal } from "@/features/customers/debt-math";
 import type { CustomerWithBalance } from "@/types/database";
 
 function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => void }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const owes = c.balance > 0;
   const prepaid = c.balance < 0;
@@ -47,6 +49,8 @@ function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => vo
 }
 
 export default function NasiyaScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const { canManageDebt } = useActivePermissions();

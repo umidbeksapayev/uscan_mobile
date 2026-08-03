@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import type { Product, TopProduct } from "@/types/database";
 
@@ -97,6 +97,8 @@ export function Section({ title, action }: { title: string; action?: React.React
 }
 
 export function Card({ children }: { children: React.ReactNode }) {
+  const colors = useColors();
+
   return (
     <View
       className="rounded-2xl bg-surface p-4"
@@ -116,6 +118,8 @@ export function Card({ children }: { children: React.ReactNode }) {
 }
 
 function Thumb({ uri }: { uri: string | null }) {
+  const colors = useColors();
+
   return uri ? (
     <Image source={{ uri }} style={{ width: 40, height: 40, borderRadius: 12 }} contentFit="cover" />
   ) : (
@@ -134,6 +138,8 @@ function EmptyRow({ text }: { text: string }) {
 }
 
 export function TopList({ items, loading }: { items: TopProduct[]; loading?: boolean }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   if (loading) return <EmptyRow text={t("common.loading")} />;
   if (items.length === 0) return <EmptyRow text={t("reports.noSales")} />;
@@ -210,6 +216,8 @@ export function SlowList({ items }: { items: TopProduct[] }) {
 }
 
 export function LowStockList({ items, onTap }: { items: Product[]; onTap: () => void }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   if (items.length === 0)
     return (

@@ -1,6 +1,6 @@
 import { Pressable, Text, ActivityIndicator } from "react-native";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 
 type Props = {
   label: string;
@@ -13,6 +13,8 @@ type Props = {
 };
 
 export function Button({ label, onPress, loading, disabled, variant = "primary", testID }: Props) {
+  const colors = useColors();
+
   const isPrimary = variant === "primary";
   const blocked = disabled || loading;
 

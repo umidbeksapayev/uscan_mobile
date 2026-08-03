@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { formatCurrency, formatWeight, formatNumber } from "@/lib/format";
 import { kgFromAmount, amountFromKg } from "./weight-math";
@@ -25,6 +25,8 @@ type Props = {
  * ikkinchisi avtomatik ko'rsatiladi. Mijoz "20 000 so'mlik" desa → Summa rejimi.
  */
 export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const price = product?.selling_price ?? 0;
   const [mode, setMode] = useState<Mode>("som");

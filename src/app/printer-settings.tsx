@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { useActiveMembership } from "@/features/auth/use-memberships";
 import { usePrinterStore, type PrinterType } from "@/features/print/printer-settings";
 import { listBluetoothDevices } from "@/features/print/bt-print";
@@ -20,6 +20,8 @@ function TypeCard({
 }: {
   active: boolean; icon: keyof typeof Ionicons.glyphMap; title: string; subtitle: string; onPress: () => void; accessibilityLabel?: string;
 }) {
+  const colors = useColors();
+
   return (
     <Pressable
       onPress={onPress}
@@ -40,6 +42,8 @@ function TypeCard({
 }
 
 export default function PrinterSettingsScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const shopName = useActiveMembership()?.shop.name ?? "uscan";

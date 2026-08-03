@@ -3,7 +3,7 @@ import { Text, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { toast } from "@/lib/toast";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import type { Supplier } from "@/types/database";
 import { useCreateSupplier, useUpdateSupplier } from "./use-suppliers";
@@ -17,6 +17,8 @@ type Props = {
 };
 
 export function SupplierFormSheet({ visible, shopId, supplier, onClose }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const createMut = useCreateSupplier();
   const updateMut = useUpdateSupplier();

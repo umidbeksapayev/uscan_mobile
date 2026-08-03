@@ -16,7 +16,7 @@ import {
 import { useActiveShopStore } from "@/features/auth/active-shop-store";
 import { ShopSwitcherSheet } from "@/features/auth/shop-switcher-sheet";
 import { useOfflineStore } from "@/lib/offline/offline-store";
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 
 type MenuItem = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -48,6 +48,8 @@ const MENU: MenuItem[] = [
 ];
 
 export default function KoproqScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const { session } = useAuth();

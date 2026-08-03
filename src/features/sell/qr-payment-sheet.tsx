@@ -2,7 +2,7 @@ import { View, Text, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { formatCurrency } from "@/lib/format";
 import { useQrPayment } from "./acquiring/use-qr-payment";
@@ -21,6 +21,8 @@ type Props = {
 
 /** QR/ekvayring to'lov oynasi — intent QR ko'rsatadi, holatni polling qiladi. */
 export function QrPaymentSheet({ visible, shopId, items, amount, clientId, onPaid, onClose }: Props) {
+  const colors = useColors();
+
   const { status, payUrl } = useQrPayment({ shopId, items, amount, clientId, enabled: visible, onPaid });
   const ui = acquiringStatusUI(status);
 

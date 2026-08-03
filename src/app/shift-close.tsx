@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatDateTime, formatDateTimeFull, formatNumber } from "@/lib/format";
 import { useOnline } from "@/lib/use-online";
 import { useAuth } from "@/features/auth/auth-context";
@@ -31,6 +31,8 @@ const DIFF_UI = {
 } as const;
 
 export default function ShiftCloseScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const online = useOnline();
@@ -277,6 +279,8 @@ export default function ShiftCloseScreen() {
 }
 
 function ResultRow({ label, value, color }: { label: string; value: string; color?: string }) {
+  const colors = useColors();
+
   return (
     <View className="mt-2 w-full flex-row items-center justify-between">
       <Text className="text-sm text-muted">{label}</Text>
@@ -288,6 +292,8 @@ function ResultRow({ label, value, color }: { label: string; value: string; colo
 }
 
 function BreakdownRow({ label, value, negative }: { label: string; value: number; negative?: boolean }) {
+  const colors = useColors();
+
   return (
     <View className="flex-row items-center justify-between py-1">
       <Text className="text-sm text-muted">{label}</Text>
