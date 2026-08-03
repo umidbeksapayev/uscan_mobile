@@ -1,9 +1,9 @@
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 
 import { colors } from "@/theme/colors";
-import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { formatCurrency } from "@/lib/format";
 import { useQrPayment } from "./acquiring/use-qr-payment";
 import { acquiringStatusUI } from "./acquiring/acquiring-status";
@@ -47,7 +47,7 @@ export function QrPaymentSheet({ visible, shopId, items, amount, clientId, onPai
             <Text style={{ color: ui.color, fontWeight: "500", fontSize: 16 }}>{ui.label}</Text>
           </View>
 
-          <Pressable
+          <SheetPressable
             onPress={onClose}
             className="mt-6 w-full items-center justify-center rounded-2xl bg-bg"
             style={{ height: 52, borderWidth: 1, borderColor: colors.line }}
@@ -55,7 +55,7 @@ export function QrPaymentSheet({ visible, shopId, items, amount, clientId, onPai
             <Text className="text-base font-medium text-muted">
               {status === "paid" ? "Yopish" : "Bekor qilish"}
             </Text>
-          </Pressable>
+          </SheetPressable>
     </BottomSheet>
   );
 }

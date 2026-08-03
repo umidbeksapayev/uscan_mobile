@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { BottomSheetTextInput, BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -52,8 +53,8 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
 
           {adding ? (
             <View style={{ gap: 10 }}>
-              <TextInput value={newName} onChangeText={setNewName} placeholder={`${t("suppliers.name")} *`} placeholderTextColor={colors.tabInactive} className="rounded-2xl border border-line bg-bg px-4 text-base text-ink" style={{ height: 50 }} autoFocus />
-              <TextInput value={newPhone} onChangeText={setNewPhone} placeholder={`${t("suppliers.phone")} (${t("common.optional").toLowerCase()})`} placeholderTextColor={colors.tabInactive} keyboardType="phone-pad" className="rounded-2xl border border-line bg-bg px-4 text-base text-ink" style={{ height: 50 }} />
+              <BottomSheetTextInput value={newName} onChangeText={setNewName} placeholder={`${t("suppliers.name")} *`} placeholderTextColor={colors.tabInactive} className="rounded-2xl border border-line bg-bg px-4 text-base text-ink" style={{ height: 50 }} autoFocus />
+              <BottomSheetTextInput value={newPhone} onChangeText={setNewPhone} placeholder={`${t("suppliers.phone")} (${t("common.optional").toLowerCase()})`} placeholderTextColor={colors.tabInactive} keyboardType="phone-pad" className="rounded-2xl border border-line bg-bg px-4 text-base text-ink" style={{ height: 50 }} />
               <View className="flex-row gap-3">
                 <Pressable onPress={() => setAdding(false)} className="flex-1 items-center justify-center rounded-2xl bg-bg" style={{ height: 50, borderWidth: 1, borderColor: colors.line }}>
                   <Text className="text-base font-medium text-muted">{t("common.cancel")}</Text>
@@ -67,7 +68,7 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
             <>
               <View className="mb-2 flex-row items-center gap-2 rounded-2xl border border-line bg-bg px-4" style={{ height: 46 }}>
                 <Ionicons name="search" size={18} color={colors.tabInactive} />
-                <TextInput value={search} onChangeText={setSearch} placeholder={t("suppliers.searchPlaceholder")} placeholderTextColor={colors.tabInactive} className="flex-1 text-base text-ink" style={{ height: 46 }} autoCapitalize="none" />
+                <BottomSheetTextInput value={search} onChangeText={setSearch} placeholder={t("suppliers.searchPlaceholder")} placeholderTextColor={colors.tabInactive} className="flex-1 text-base text-ink" style={{ height: 46 }} autoCapitalize="none" />
               </View>
 
               <Pressable onPress={() => setAdding(true)} className="mb-2 flex-row items-center gap-2 rounded-2xl px-4 py-3" style={{ backgroundColor: colors.kirimTint }}>
@@ -84,7 +85,7 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
               {isLoading ? (
                 <ActivityIndicator color={colors.kirim} style={{ marginVertical: 20 }} />
               ) : (
-                <FlatList
+                <BottomSheetFlatList
                   data={filtered}
                   keyExtractor={(s) => s.id}
                   keyboardShouldPersistTaps="handled"

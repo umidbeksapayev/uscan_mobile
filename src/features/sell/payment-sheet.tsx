@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator, Alert } from "react-native";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -12,14 +13,14 @@ import { submitSale, type PaymentMethod, type SaleResult } from "./checkout";
 import type { CartItem } from "./cart-store";
 import { unsyncedCount } from "@/lib/offline/sale-queue-db";
 import { useOfflineStore } from "@/lib/offline/offline-store";
-import { useActivePermissions, useActiveMembership } from "@/features/auth/use-memberships";
+import { useActivePermissions, useActiveMembership, useActiveShopId } from "@/features/auth/use-memberships";
 import { CustomerPickerSheet, type PickedCustomer } from "@/features/customers/customer-picker-sheet";
 import { debtFromSale } from "@/features/customers/debt-math";
 import { printReceipt } from "@/features/print/print-receipt";
 import type { ReceiptData, ReceiptLine } from "@/features/print/types";
 import { QrPaymentSheet } from "./qr-payment-sheet";
 import { acquiringHasCredentials } from "./acquiring/acquiring-api";
-import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 
 const METHODS: { id: PaymentMethod; labelKey: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { id: "cash", labelKey: "sell.payCash", icon: "cash-outline" },
@@ -38,9 +39,11 @@ type Props = {
   onPaid: () => void;
 };
 
-export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }: Props) {
+export function PaymentSheet({ visible, total, shopId: propShopId, items, onClose, onPaid }: Props) {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const activeShopId = useActiveShopId();
+  const currentShopId = propShopId ?? activeShopId;
   const { canManageDebt } = useActivePermissions();
   const shop = useActiveMembership()?.shop;
   const setQueueCount = useOfflineStore((s) => s.setCount);
@@ -58,9 +61,9 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
   const [soldItems, setSoldItems] = useState<CartItem[]>([]);
 
   const { data: hasAcquiring } = useQuery({
-    queryKey: ["acquiring-creds", shopId],
-    queryFn: () => acquiringHasCredentials(shopId as string),
-    enabled: !!shopId,
+    queryKey: ["acquiring-creds", currentShopId],
+    queryFn: () => acquiringHasCredentials(currentShopId as string),
+    enabled: !!currentShopId,
     staleTime: 5 * 60_000,
   });
 
@@ -70,7 +73,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
   const mutation = useMutation({
     mutationFn: () =>
       submitSale({
-        shopId: shopId as string,
+        shopId: currentShopId as string,
         items,
         clientId,
         method,
@@ -83,9 +86,13 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["sell-search"] });
       // Offline'da navbatga yozildi → badge sanog'ini yangilaymiz
-      if (data.offline && shopId) unsyncedCount(shopId).then(setQueueCount).catch(() => {});
+      if (data.offline && currentShopId) unsyncedCount(currentShopId).then(setQueueCount).catch(() => {});
       onPaid(); // savatni tozalaydi (qayta sotuv oldini oladi)
       setPhase("success");
+    },
+    onError: (error) => {
+      const msg = (error as Error)?.message ?? "Noma'lum sotuv xatoligi";
+      Alert.alert("Sotuv Xatosi", msg);
     },
   });
 
@@ -102,6 +109,14 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
 
   /** To'lov tugmasi — QR + ekvayring bo'lsa QR oynasi, aks holda oddiy sotuv. */
   function onPayPress() {
+    if (!currentShopId) {
+      Alert.alert("Do'kon Xatosi", "Do'kon identifikatori (shopId) yetib kelmadi!");
+      return;
+    }
+    if (method === "debt" && !customer) {
+      Alert.alert("Mijoz Tanlanmagan", "Nasiya uchun mijozni tanlang!");
+      return;
+    }
     if (method === "qr" && hasAcquiring) {
       setQrOpen(true);
     } else {
@@ -133,7 +148,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
   const cashShort = method === "cash" && given > 0 && given < total;
   // Nasiya uchun mijoz tanlangan bo'lishi shart; Naqd/Karta/QR uchun avvalgidek
   const debtReady = method === "debt" ? !!customer : true;
-  const canPay = !!shopId && items.length > 0 && debtReady && !mutation.isPending;
+  const canPay = !!currentShopId && items.length > 0 && debtReady && !mutation.isPending;
 
   function handlePrint() {
     const lines: ReceiptLine[] = soldItems.map((i) => ({
@@ -201,7 +216,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                 </Text>
               ) : null}
               <View className="mt-6 w-full flex-row gap-3">
-                <Pressable
+                <SheetPressable
                   onPress={handlePrint}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-bg"
                   style={{ height: 54, borderWidth: 1, borderColor: colors.primary }}
@@ -210,14 +225,14 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                   <Text className="text-base font-medium" style={{ color: colors.primary }}>
                     {t("receipt.label")}
                   </Text>
-                </Pressable>
-                <Pressable
+                </SheetPressable>
+                <SheetPressable
                   onPress={onClose}
                   className="flex-1 flex-row items-center justify-center rounded-2xl bg-primary"
                   style={{ height: 54 }}
                 >
                   <Text className="text-base font-medium text-white">{t("sell.newSale")}</Text>
-                </Pressable>
+                </SheetPressable>
               </View>
             </View>
           ) : (
@@ -234,7 +249,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                 {methods.map((m) => {
                   const active = method === m.id;
                   return (
-                    <Pressable
+                    <SheetPressable
                       key={m.id}
                       onPress={() => setMethod(m.id)}
                       className="flex-1 items-center justify-center rounded-2xl"
@@ -256,7 +271,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                       >
                         {t(m.labelKey)}
                       </Text>
-                    </Pressable>
+                    </SheetPressable>
                   );
                 })}
               </View>
@@ -264,7 +279,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
               {method === "cash" ? (
                 <View className="mb-4">
                   <Text className="mb-1 text-sm font-medium text-ink">{t("sell.givenMoney")}</Text>
-                  <TextInput
+                  <BottomSheetTextInput
                     value={givenText}
                     onChangeText={setGivenText}
                     keyboardType="number-pad"
@@ -274,22 +289,22 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                     style={{ height: 56 }}
                   />
                   <View className="mt-2 flex-row gap-2">
-                    <Pressable
+                    <SheetPressable
                       onPress={() => setGivenText(String(total))}
                       className="flex-1 items-center justify-center rounded-xl bg-bg"
                       style={{ height: 40 }}
                     >
                       <Text className="text-sm font-medium text-ink">{t("sell.exact")}</Text>
-                    </Pressable>
+                    </SheetPressable>
                     {QUICK.map((q) => (
-                      <Pressable
+                      <SheetPressable
                         key={q}
                         onPress={() => setGivenText(String(q))}
                         className="flex-1 items-center justify-center rounded-xl bg-bg"
                         style={{ height: 40 }}
                       >
                         <Text className="text-sm font-medium text-ink">{formatNumber(q)}</Text>
-                      </Pressable>
+                      </SheetPressable>
                     ))}
                   </View>
                   {given > 0 ? (
@@ -312,7 +327,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
               ) : method === "debt" ? (
                 <View className="mb-4" style={{ gap: 10 }}>
                   {/* Mijoz tanlash */}
-                  <Pressable
+                  <SheetPressable
                     onPress={() => setPickerOpen(true)}
                     className="flex-row items-center justify-between rounded-2xl border border-line bg-bg px-4"
                     style={{ height: 56 }}
@@ -324,12 +339,12 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                       </Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
-                  </Pressable>
+                  </SheetPressable>
 
                   {/* To'langan summa (qisman to'lov; bo'sh = to'liq nasiya) */}
                   <View>
                     <Text className="mb-1 text-sm font-medium text-ink">{t("sell.paidOptional")}</Text>
-                    <TextInput
+                    <BottomSheetTextInput
                       value={debtPaidText}
                       onChangeText={setDebtPaidText}
                       keyboardType="number-pad"
@@ -359,7 +374,7 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                 </Text>
               ) : null}
 
-              <Pressable
+              <SheetPressable
                 disabled={!canPay}
                 onPress={onPayPress}
                 className="flex-row items-center justify-center rounded-2xl bg-primary"
@@ -372,15 +387,15 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
                     {method === "qr" && hasAcquiring ? t("sell.showQr") : t("sell.finishPayment")}
                   </Text>
                 )}
-              </Pressable>
+              </SheetPressable>
             </>
           )}
     </BottomSheet>
 
-    {shopId ? (
+    {currentShopId ? (
       <CustomerPickerSheet
         visible={pickerOpen}
-        shopId={shopId}
+        shopId={currentShopId}
         onSelect={(c) => {
           setCustomer(c);
           setPickerOpen(false);
@@ -389,10 +404,10 @@ export function PaymentSheet({ visible, total, shopId, items, onClose, onPaid }:
       />
     ) : null}
 
-    {shopId ? (
+    {currentShopId ? (
       <QrPaymentSheet
         visible={qrOpen}
-        shopId={shopId}
+        shopId={currentShopId}
         items={items.map((i) => ({ product_id: i.product.id, quantity: i.quantity }))}
         amount={total}
         clientId={clientId}

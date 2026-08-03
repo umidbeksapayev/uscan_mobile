@@ -1,3 +1,4 @@
+import "react-native-gesture-handler";
 import "@/global.css";
 import "@/i18n"; // i18next init (til MMKV'dan yuklanadi) — birinchi renderdan oldin
 
@@ -5,6 +6,8 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import Toast from "react-native-toast-message";
 
 import { queryClient } from "@/lib/query-client";
@@ -15,9 +18,11 @@ import { AuthGate } from "@/features/auth/auth-gate";
 
 export default function RootLayout() {
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-      <SafeAreaProvider>
-        <ErrorBoundary onReset={() => queryClient.resetQueries()}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+        <SafeAreaProvider>
+          <BottomSheetModalProvider>
+            <ErrorBoundary onReset={() => queryClient.resetQueries()}>
           <AuthProvider>
             <StatusBar style="dark" />
             <AuthGate>
@@ -44,7 +49,9 @@ export default function RootLayout() {
           </AuthProvider>
         </ErrorBoundary>
         <Toast />
-      </SafeAreaProvider>
-    </PersistQueryClientProvider>
+          </BottomSheetModalProvider>
+        </SafeAreaProvider>
+      </PersistQueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

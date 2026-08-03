@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
+import { BottomSheetTextInput, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
-import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import type { Sale, SaleItem } from "@/types/database";
 import { useReturnedQuantities, useProcessReturn } from "./use-history";
@@ -61,7 +62,7 @@ function ReturnRow({
       </View>
 
       <View className="items-end" style={{ gap: 4 }}>
-        <TextInput
+        <BottomSheetTextInput
           value={value}
           onChangeText={onChange}
           editable={!disabled}
@@ -71,9 +72,9 @@ function ReturnRow({
           className="rounded-xl border border-line bg-surface text-center text-base font-medium text-ink"
           style={{ width: 72, height: 40 }}
         />
-        <Pressable onPress={() => onChange(String(max))} disabled={disabled} hitSlop={6}>
+        <SheetPressable onPress={() => onChange(String(max))} disabled={disabled} hitSlop={6}>
           <Text className="text-xs font-medium text-primary">{t("common.all")}</Text>
-        </Pressable>
+        </SheetPressable>
       </View>
     </View>
   );
@@ -132,7 +133,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
     <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding>
           <Text className="mb-3 text-lg font-medium text-ink">{t("returns.title")}</Text>
 
-          <ScrollView style={{ maxHeight: 280 }} keyboardShouldPersistTaps="handled">
+          <BottomSheetScrollView style={{ maxHeight: 280 }} keyboardShouldPersistTaps="handled">
             {items.map((it) => {
               const max = returnableQty(it.quantity_sold, returnedMap?.[it.id] ?? 0);
               return (
@@ -145,12 +146,12 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
                 />
               );
             })}
-          </ScrollView>
+          </BottomSheetScrollView>
 
           <Text className="mb-1 mt-3 text-sm font-medium text-ink">
             {t("returns.reasonPlaceholder")}
           </Text>
-          <TextInput
+          <BottomSheetTextInput
             value={reason}
             onChangeText={setReason}
             placeholder={t("returns.reasonExample")}
@@ -176,14 +177,14 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
           ) : null}
 
           <View className="mt-4 flex-row gap-3">
-            <Pressable
+            <SheetPressable
               onPress={onClose}
               className="flex-1 items-center justify-center rounded-2xl bg-bg"
               style={{ height: 54, borderWidth: 1, borderColor: colors.line }}
             >
               <Text className="text-base font-medium text-muted">{t("common.cancel")}</Text>
-            </Pressable>
-            <Pressable
+            </SheetPressable>
+            <SheetPressable
               disabled={!canSubmit}
               onPress={handleSubmit}
               className="flex-1 flex-row items-center justify-center rounded-2xl"
@@ -194,7 +195,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
               ) : (
                 <Text className="text-base font-medium text-white">{t("returns.confirm")}</Text>
               )}
-            </Pressable>
+            </SheetPressable>
           </View>
     </BottomSheet>
   );

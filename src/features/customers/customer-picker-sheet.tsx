@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
-import { View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
+import { BottomSheetTextInput, BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import { colors } from "@/theme/colors";
 import { formatCurrency } from "@/lib/format";
-import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { useCustomersWithBalance, useCreateCustomer } from "./use-customers";
 
 export type PickedCustomer = { id: string; name: string };
@@ -54,7 +55,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
 
           {adding ? (
             <View style={{ gap: 10 }}>
-              <TextInput
+              <BottomSheetTextInput
                 value={newName}
                 onChangeText={setNewName}
                 placeholder={`${t("customers.name")} *`}
@@ -63,7 +64,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                 style={{ height: 50 }}
                 autoFocus
               />
-              <TextInput
+              <BottomSheetTextInput
                 value={newPhone}
                 onChangeText={setNewPhone}
                 placeholder={`${t("customers.phone")} (${t("common.optional").toLowerCase()})`}
@@ -73,14 +74,14 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                 style={{ height: 50 }}
               />
               <View className="flex-row gap-3">
-                <Pressable
+                <SheetPressable
                   onPress={() => setAdding(false)}
                   className="flex-1 items-center justify-center rounded-2xl bg-bg"
                   style={{ height: 50, borderWidth: 1, borderColor: colors.line }}
                 >
                   <Text className="text-base font-medium text-muted">{t("common.cancel")}</Text>
-                </Pressable>
-                <Pressable
+                </SheetPressable>
+                <SheetPressable
                   disabled={!newName.trim() || createMut.isPending}
                   onPress={onQuickAdd}
                   className="flex-1 flex-row items-center justify-center rounded-2xl bg-primary"
@@ -91,7 +92,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                   ) : (
                     <Text className="text-base font-semibold text-white">{t("common.add")}</Text>
                   )}
-                </Pressable>
+                </SheetPressable>
               </View>
             </View>
           ) : (
@@ -101,7 +102,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                 style={{ height: 46 }}
               >
                 <Ionicons name="search" size={18} color={colors.tabInactive} />
-                <TextInput
+                <BottomSheetTextInput
                   value={search}
                   onChangeText={setSearch}
                   placeholder={t("customers.searchPlaceholder")}
@@ -112,19 +113,19 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                 />
               </View>
 
-              <Pressable
+              <SheetPressable
                 onPress={() => setAdding(true)}
                 className="mb-2 flex-row items-center gap-2 rounded-2xl px-4 py-3"
                 style={{ backgroundColor: colors.primaryTint }}
               >
                 <Ionicons name="person-add" size={18} color={colors.primary} />
                 <Text className="text-base font-medium text-primary">{t("customers.addNew")}</Text>
-              </Pressable>
+              </SheetPressable>
 
               {isLoading ? (
                 <ActivityIndicator color={colors.primary} style={{ marginVertical: 20 }} />
               ) : (
-                <FlatList
+                <BottomSheetFlatList
                   data={filtered}
                   keyExtractor={(c) => c.id}
                   keyboardShouldPersistTaps="handled"
@@ -135,7 +136,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                     </Text>
                   }
                   renderItem={({ item }) => (
-                    <Pressable
+                    <SheetPressable
                       onPress={() => onSelect({ id: item.id, name: item.name })}
                       className="flex-row items-center gap-3 py-2.5"
                       style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}
@@ -154,7 +155,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                           {formatCurrency(item.balance)}
                         </Text>
                       ) : null}
-                    </Pressable>
+                    </SheetPressable>
                   )}
                 />
               )}
