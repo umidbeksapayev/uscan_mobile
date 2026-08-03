@@ -15,6 +15,8 @@ function DeltaPill({ delta, suffix }: { delta: number; suffix: string }) {
       className="flex-row items-center self-start rounded-full px-2 py-1"
       style={{ gap: 3, backgroundColor: "rgba(255,255,255,0.18)" }}
     >
+      {/* Brend rangli karta ustida turadi — foni ikkala rejimda bir xil,
+          shuning uchun ikonka rangi ham mavzuga bog'lanmaydi. */}
       <Ionicons name={up ? "arrow-up" : "arrow-down"} size={11} color={up ? "#BBF7D0" : "#FECACA"} />
       <Text style={{ fontSize: 11, fontWeight: "600", color: "#fff" }}>
         {`${up ? "+" : ""}${delta.toFixed(0)}% ${suffix}`}
@@ -179,6 +181,8 @@ export function TopList({ items, loading }: { items: TopProduct[]; loading?: boo
 }
 
 export function SlowList({ items }: { items: TopProduct[] }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   if (items.length === 0) return <EmptyRow text={t("common.noData")} />;
   return (
@@ -197,8 +201,8 @@ export function SlowList({ items }: { items: TopProduct[] }) {
               </Text>
             </View>
             {unsold ? (
-              <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: "#FCF1DD" }}>
-                <Text style={{ fontSize: 11, fontWeight: "500", color: "#92600A" }}>
+              <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: colors.warningTint }}>
+                <Text style={{ fontSize: 11, fontWeight: "500", color: colors.warningInk }}>
                   {t("dashboard.notSold")}
                 </Text>
               </View>
@@ -250,10 +254,10 @@ export function LowStockList({ items, onTap }: { items: Product[]; onTap: () => 
             </View>
             <View
               className="flex-row items-center rounded-full px-2 py-0.5"
-              style={{ gap: 3, backgroundColor: "#FDECEC" }}
+              style={{ gap: 3, backgroundColor: colors.dangerTint }}
             >
-              <Ionicons name="alert-circle-outline" size={12} color="#B42318" />
-              <Text style={{ fontSize: 11, fontWeight: "500", color: "#B42318" }}>
+              <Ionicons name="alert-circle-outline" size={12} color={colors.dangerInk} />
+              <Text style={{ fontSize: 11, fontWeight: "500", color: colors.dangerInk }}>
                 {out ? t("dashboard.out") : t("dashboard.low")}
               </Text>
             </View>
@@ -265,27 +269,29 @@ export function LowStockList({ items, onTap }: { items: Product[]; onTap: () => 
 }
 
 export function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   // Ruxsat xatosini foydalanuvchiga tushunarli qilamiz
   const friendly = /ruxsat|permission|denied/i.test(message) ? t("dashboard.permHint") : message;
   return (
     <View
       className="rounded-2xl p-4"
-      style={{ backgroundColor: "#FDECEC", borderWidth: 1, borderColor: "#F7C6C6" }}
+      style={{ backgroundColor: colors.dangerTint, borderWidth: 1, borderColor: colors.dangerBorder }}
     >
       <View className="mb-1 flex-row items-center gap-2">
-        <Ionicons name="alert-circle" size={18} color="#B42318" />
-        <Text className="text-base font-medium" style={{ color: "#B42318" }}>
+        <Ionicons name="alert-circle" size={18} color={colors.dangerInk} />
+        <Text className="text-base font-medium" style={{ color: colors.dangerInk }}>
           {t("dashboard.loadFailed")}
         </Text>
       </View>
-      <Text className="mb-3 text-sm" style={{ color: "#8A2A22" }}>
+      <Text className="mb-3 text-sm" style={{ color: colors.dangerInk }}>
         {friendly}
       </Text>
       <Pressable
         onPress={onRetry}
         className="flex-row items-center self-start rounded-xl px-4 py-2"
-        style={{ gap: 6, backgroundColor: "#B42318" }}
+        style={{ gap: 6, backgroundColor: colors.dangerInk }}
       >
         <Ionicons name="refresh" size={15} color="#fff" />
         <Text className="text-sm font-medium text-white">{t("sync.retry")}</Text>

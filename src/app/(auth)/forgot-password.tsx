@@ -65,7 +65,7 @@ export default function ForgotPasswordScreen() {
           <View className="items-center">
             <View
               className="mb-4 h-20 w-20 items-center justify-center rounded-full"
-              style={{ backgroundColor: "#E7F6EE" }}
+              style={{ backgroundColor: colors.successTint }}
             >
               <Ionicons name="mail-outline" size={36} color={colors.success} />
             </View>

@@ -121,10 +121,10 @@ function SaleCard({
             {hasReturns ? (
               <View
                 className="flex-row items-center rounded-full px-2 py-0.5"
-                style={{ gap: 3, backgroundColor: "#FDECEC" }}
+                style={{ gap: 3, backgroundColor: colors.dangerTint }}
               >
-                <Ionicons name="arrow-undo-outline" size={11} color="#B42318" />
-                <Text style={{ fontSize: 10, fontWeight: "500", color: "#B42318" }}>
+                <Ionicons name="arrow-undo-outline" size={11} color={colors.dangerInk} />
+                <Text style={{ fontSize: 10, fontWeight: "500", color: colors.dangerInk }}>
                   {t("returns.badge")}
                 </Text>
               </View>
@@ -133,7 +133,7 @@ function SaleCard({
         </View>
 
         <View className="items-end" style={{ gap: 4 }}>
-          <Text className="text-base font-medium text-primary-deep">
+          <Text className="text-base font-medium text-heading">
             {formatCurrency(sale.total_revenue)}
           </Text>
           <Ionicons
@@ -159,7 +159,7 @@ function SaleCard({
             {hasReturns ? (
               <Text className="text-xs text-muted">
                 {t("returns.refunded")}:{" "}
-                <Text style={{ fontWeight: "500", color: "#B42318" }}>
+                <Text style={{ fontWeight: "500", color: colors.dangerInk }}>
                   {formatCurrency(refunded)}
                 </Text>
               </Text>
@@ -245,7 +245,7 @@ export default function TarixScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
         <View className="flex-row items-end justify-between pb-3">
-          <Text className="text-2xl font-medium text-primary-deep">{t("nav.history")}</Text>
+          <Text className="text-2xl font-medium text-heading">{t("nav.history")}</Text>
           {list.length > 0 ? (
             <Text className="text-sm text-muted">
               {t("history.countSales", {

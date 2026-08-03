@@ -51,7 +51,7 @@ const FrequentTile = memo(function FrequentTile({
       <Text className="mt-1.5 text-center text-xs text-ink" numberOfLines={1}>
         {product.name}
       </Text>
-      <Text className="text-center text-xs font-medium text-primary-deep">
+      <Text className="text-center text-xs font-medium text-heading">
         {formatCurrency(product.selling_price)}
       </Text>
     </Pressable>
@@ -69,7 +69,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
   const remove = useCart((s) => s.remove);
 
   const isWeight = item.product.sale_type === "weight";
-  const accent = isWeight ? "#0F6E56" : colors.primary;
+  const accent = isWeight ? colors.successInk : colors.primary;
   const lineTotal = cartTotal([item]);
 
   return (
@@ -79,7 +79,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
           <View
             style={{
               alignSelf: "flex-start",
-              backgroundColor: isWeight ? "#E1F5EE" : colors.primaryTint,
+              backgroundColor: isWeight ? colors.successTint : colors.primaryTint,
               paddingHorizontal: 9,
               paddingVertical: 3,
               borderRadius: 6,
@@ -258,7 +258,7 @@ export default function SotuvScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
         <View className="flex-row items-center justify-between pb-3">
-          <Text className="text-2xl font-medium text-primary-deep">{t("sell.title")}</Text>
+          <Text className="text-2xl font-medium text-heading">{t("sell.title")}</Text>
           {items.length > 0 ? (
             <Pressable onPress={clear} hitSlop={10}>
               <Text className="text-sm text-danger">{t("common.clear")}</Text>
@@ -358,7 +358,7 @@ export default function SotuvScreen() {
                   {item.sale_type === "weight" ? t("common.kg") : t("common.pcs")}
                 </Text>
               </View>
-              <Text className="text-base font-medium text-primary-deep">
+              <Text className="text-base font-medium text-heading">
                 {formatCurrency(item.selling_price)}
               </Text>
               <Ionicons name="add-circle" size={28} color={colors.primary} />

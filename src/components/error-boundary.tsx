@@ -2,7 +2,7 @@ import * as React from "react";
 import { View, Text, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { useColors, useIsDark } from "@/theme/theme-store";
+import { useColors } from "@/theme/theme-store";
 import { Button } from "@/components/ui/button";
 
 type Props = { children: React.ReactNode; onReset?: () => void };
@@ -14,13 +14,12 @@ type State = { error: Error | null };
  */
 function ErrorFallback({ message, onRetry }: { message: string; onRetry: () => void }) {
   const colors = useColors();
-  const isDark = useIsDark();
 
   return (
     <View className="flex-1 items-center justify-center bg-bg px-6">
       <View
         className="h-16 w-16 items-center justify-center rounded-full"
-        style={{ backgroundColor: isDark ? "#3B1214" : "#FEE2E2" }}
+        style={{ backgroundColor: colors.dangerTint }}
       >
         <Ionicons name="alert-circle-outline" size={36} color={colors.danger} />
       </View>

@@ -40,10 +40,10 @@ function StockBadge({ item }: { item: Product }) {
   else tone = "ok";
 
   const palette = {
-    ok: { dot: colors.success, bg: "#E7F6EE", text: "#0F6E56" },
-    low: { dot: colors.warning, bg: "#FCF1DD", text: "#92600A" },
-    crit: { dot: colors.danger, bg: "#FDECEC", text: "#B42318" },
-    out: { dot: colors.danger, bg: "#FDECEC", text: "#B42318" },
+    ok: { dot: colors.success, bg: colors.successTint, text: colors.successInk },
+    low: { dot: colors.warning, bg: colors.warningTint, text: colors.warningInk },
+    crit: { dot: colors.danger, bg: colors.dangerTint, text: colors.dangerInk },
+    out: { dot: colors.danger, bg: colors.dangerTint, text: colors.dangerInk },
   }[tone];
 
   const label =
@@ -122,7 +122,7 @@ function ProductRow({
       </View>
 
       <View className="items-end" style={{ gap: 6 }}>
-        <Text className="text-base font-medium text-primary-deep">
+        <Text className="text-base font-medium text-heading">
           {formatCurrency(item.selling_price)}
         </Text>
         <StockBadge item={item} />
@@ -236,7 +236,7 @@ export default function KatalogScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
         <View className="flex-row items-center justify-between pb-3">
-          <Text className="text-2xl font-medium text-primary-deep">
+          <Text className="text-2xl font-medium text-heading">
             {labelMode ? t("labels.selectedCount", { count: selected.size }) : t("catalog.title")}
           </Text>
           <View className="flex-row items-center gap-5">

@@ -153,7 +153,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                         {item.phone ? <Text className="text-xs text-muted">{item.phone}</Text> : null}
                       </View>
                       {item.balance > 0 ? (
-                        <Text className="text-sm font-medium" style={{ color: "#B42318" }}>
+                        <Text className="text-sm font-medium" style={{ color: colors.dangerInk }}>
                           {formatCurrency(item.balance)}
                         </Text>
                       ) : null}

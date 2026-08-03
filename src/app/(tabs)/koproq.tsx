@@ -96,7 +96,7 @@ export default function KoproqScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <ScrollView className="flex-1">
         <View className="px-4 pb-10">
-          <Text className="pb-4 pt-2 text-2xl font-medium text-primary-deep">{t("nav.more")}</Text>
+          <Text className="pb-4 pt-2 text-2xl font-medium text-heading">{t("nav.more")}</Text>
 
           {/* Profil — bosilganda ko'p do'konda almashtirish oynasi, bitta
               do'konda tushuntiruvchi xabar chiqadi (har doim bosiladigan) */}
@@ -131,7 +131,7 @@ export default function KoproqScreen() {
             <Pressable
               onPress={() => router.navigate("/offline-sales" as Href)}
               className="mb-3 flex-row items-center gap-3 rounded-2xl border p-4"
-              style={{ borderColor: colors.warning, backgroundColor: "#FEF6E7" }}
+              style={{ borderColor: colors.warning, backgroundColor: colors.warningTint }}
             >
               <Ionicons name="cloud-upload-outline" size={20} color={colors.warning} />
               <Text className="flex-1 text-base font-medium text-ink">{t("menu.unsyncedSales")}</Text>

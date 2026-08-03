@@ -1,29 +1,22 @@
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { useColors, useIsDark } from "@/theme/theme-store";
+import { useColors } from "@/theme/theme-store";
 import type { AppColors } from "@/theme/colors";
 
 export type StatTone = "brand" | "green" | "amber" | "muted";
 
-/** Ohang (tone) ranglari — tungi rejimda fon to'qlashadi, matn yorishadi. */
-function toneColors(
-  colors: AppColors,
-  isDark: boolean
-): Record<StatTone, { bg: string; fg: string }> {
-  return isDark
-    ? {
-        brand: { bg: colors.primaryTint, fg: colors.primary },
-        green: { bg: "#0D2E23", fg: "#34D399" },
-        amber: { bg: "#3B2A08", fg: "#FBBF24" },
-        muted: { bg: "#334155", fg: colors.muted },
-      }
-    : {
-        brand: { bg: colors.primaryTint, fg: colors.primary },
-        green: { bg: "#E7F6EE", fg: "#0F6E56" },
-        amber: { bg: "#FCF1DD", fg: "#92600A" },
-        muted: { bg: "#EEF2F7", fg: colors.muted },
-      };
+/**
+ * Ohang (tone) ranglari — palitradan olinadi, shuning uchun tungi rejimda
+ * fon to'qlashib, matn yorishishi avtomatik (qarang: `theme/colors.ts`).
+ */
+function toneColors(colors: AppColors): Record<StatTone, { bg: string; fg: string }> {
+  return {
+    brand: { bg: colors.primaryTint, fg: colors.primary },
+    green: { bg: colors.successTint, fg: colors.successInk },
+    amber: { bg: colors.warningTint, fg: colors.warningInk },
+    muted: { bg: colors.neutralTint, fg: colors.muted },
+  };
 }
 
 export interface StatsCardProps {
@@ -51,12 +44,10 @@ export function StatsCard({
   loading,
 }: StatsCardProps) {
   const colors = useColors();
-  const isDark = useIsDark();
-  const c = toneColors(colors, isDark)[tone];
+  const c = toneColors(colors)[tone];
   const up = (delta ?? 0) >= 0;
-  // Delta belgisi (↑/↓) — tungi rejimda to'q fon + yorqin matn.
-  const deltaBg = up ? (isDark ? "#0D2E23" : "#E7F6EE") : isDark ? "#3B1214" : "#FDECEC";
-  const deltaFg = up ? (isDark ? "#34D399" : "#0F6E56") : isDark ? "#FCA5A5" : "#B42318";
+  const deltaBg = up ? colors.successTint : colors.dangerTint;
+  const deltaFg = up ? colors.successInk : colors.dangerInk;
 
   return (
     <View

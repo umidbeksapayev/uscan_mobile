@@ -44,7 +44,7 @@ function SaleRow({ s }: { s: CustomerSaleRow }) {
       <View className="items-end">
         <Text className="text-sm font-medium text-ink">{formatCurrency(s.total_revenue)}</Text>
         {debt > 0 ? (
-          <Text className="text-xs" style={{ color: "#B42318" }}>
+          <Text className="text-xs" style={{ color: colors.dangerInk }}>
             {t("customers.debt").toLowerCase()}: {formatCurrency(debt)}
           </Text>
         ) : (
@@ -120,8 +120,8 @@ export default function CustomerDetailScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
         {/* Balans */}
-        <View className="rounded-2xl p-4" style={{ backgroundColor: owes ? "#FDECEC" : colors.primaryTint }}>
-          <Text className="text-xs" style={{ color: owes ? "#B42318" : colors.primary, letterSpacing: 0.5 }}>
+        <View className="rounded-2xl p-4" style={{ backgroundColor: owes ? colors.dangerTint : colors.primaryTint }}>
+          <Text className="text-xs" style={{ color: owes ? colors.dangerInk : colors.primary, letterSpacing: 0.5 }}>
             {(owes
               ? t("customers.debt")
               : balance < 0
@@ -131,7 +131,7 @@ export default function CustomerDetailScreen() {
           </Text>
           <Text
             className="mt-1 text-3xl font-bold"
-            style={{ color: owes ? "#B42318" : colors.primaryDeep }}
+            style={{ color: owes ? colors.dangerInk : colors.heading }}
             numberOfLines={1}
             adjustsFontSizeToFit
           >

@@ -105,7 +105,7 @@ export default function ResetPasswordScreen() {
           <View className="items-center">
             <View
               className="mb-4 h-20 w-20 items-center justify-center rounded-full"
-              style={{ backgroundColor: "#FDECEC" }}
+              style={{ backgroundColor: colors.dangerTint }}
             >
               <Ionicons name="alert-circle-outline" size={36} color={colors.danger} />
             </View>

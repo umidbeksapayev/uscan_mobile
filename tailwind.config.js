@@ -18,6 +18,8 @@ module.exports = {
           light: "rgb(var(--color-primary-light) / <alpha-value>)", // ochiq ko'k
           tint: "rgb(var(--color-primary-tint) / <alpha-value>)", // juda ochiq fon
         },
+        // Ekran sarlavhalari (tungi rejimda yorishadi — `colors.ts`ga qarang)
+        heading: "rgb(var(--color-heading) / <alpha-value>)",
         // Funksional
         success: "rgb(var(--color-success) / <alpha-value>)",
         danger: "rgb(var(--color-danger) / <alpha-value>)",

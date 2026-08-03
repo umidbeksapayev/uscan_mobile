@@ -169,7 +169,7 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
             style={{ backgroundColor: colors.primaryTint }}
           >
             <Text className="text-sm text-muted">{t("returns.refundTotal")}</Text>
-            <Text className="text-lg font-medium" style={{ color: colors.primaryDeep }}>
+            <Text className="text-lg font-medium" style={{ color: colors.heading }}>
               {formatCurrency(preview)}
             </Text>
           </View>

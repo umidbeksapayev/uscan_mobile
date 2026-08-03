@@ -191,7 +191,7 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
             <View className="items-center" style={{ paddingVertical: 8 }}>
               <View
                 className="mb-4 h-20 w-20 items-center justify-center rounded-full"
-                style={{ backgroundColor: "#E7F6EE" }}
+                style={{ backgroundColor: colors.successTint }}
               >
                 <Ionicons name="checkmark" size={44} color={colors.success} />
               </View>
@@ -213,7 +213,7 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
                 </Text>
               ) : null}
               {method === "debt" ? (
-                <Text className="mt-1 text-base font-medium" style={{ color: "#B42318" }}>
+                <Text className="mt-1 text-base font-medium" style={{ color: colors.dangerInk }}>
                   {t("sell.debtRecorded")}: {formatCurrency(debtFromSale(effectiveTotal, debtPaid))}
                 </Text>
               ) : null}
@@ -312,14 +312,14 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
                   {given > 0 ? (
                     <View
                       className="mt-3 flex-row items-center justify-between rounded-2xl px-4 py-3"
-                      style={{ backgroundColor: cashShort ? "#FDECEC" : "#E7F6EE" }}
+                      style={{ backgroundColor: cashShort ? colors.dangerTint : colors.successTint }}
                     >
-                      <Text className="text-sm" style={{ color: cashShort ? "#B42318" : "#0F6E56" }}>
+                      <Text className="text-sm" style={{ color: cashShort ? colors.dangerInk : colors.successInk }}>
                         {cashShort ? t("sell.notEnough") : t("sell.change")}
                       </Text>
                       <Text
                         className="text-base font-medium"
-                        style={{ color: cashShort ? "#B42318" : "#0F6E56" }}
+                        style={{ color: cashShort ? colors.dangerInk : colors.successInk }}
                       >
                         {formatCurrency(Math.abs(change))}
                       </Text>
@@ -360,10 +360,10 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
                   {/* Qarz preview */}
                   <View
                     className="flex-row items-center justify-between rounded-2xl px-4 py-3"
-                    style={{ backgroundColor: "#FDECEC" }}
+                    style={{ backgroundColor: colors.dangerTint }}
                   >
-                    <Text className="text-sm" style={{ color: "#B42318" }}>{t("sell.willOwe")}</Text>
-                    <Text className="text-base font-medium" style={{ color: "#B42318" }}>
+                    <Text className="text-sm" style={{ color: colors.dangerInk }}>{t("sell.willOwe")}</Text>
+                    <Text className="text-base font-medium" style={{ color: colors.dangerInk }}>
                       {formatCurrency(debtFromSale(total, debtPaid))}
                     </Text>
                   </View>

@@ -36,11 +36,11 @@ function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => vo
       <View className="items-end">
         <Text
           className="text-base font-semibold"
-          style={{ color: owes ? "#B42318" : prepaid ? "#0F6E56" : colors.muted }}
+          style={{ color: owes ? colors.dangerInk : prepaid ? colors.successInk : colors.muted }}
         >
           {formatCurrency(Math.abs(c.balance))}
         </Text>
-        <Text className="text-xs" style={{ color: owes ? "#B42318" : prepaid ? "#0F6E56" : colors.muted }}>
+        <Text className="text-xs" style={{ color: owes ? colors.dangerInk : prepaid ? colors.successInk : colors.muted }}>
           {owes ? t("customers.debtor") : prepaid ? t("customers.creditor") : t("customers.settled")}
         </Text>
       </View>

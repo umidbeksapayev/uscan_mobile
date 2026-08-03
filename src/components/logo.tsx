@@ -16,7 +16,7 @@ export function Logo({ size = 24 }: { size?: number }) {
     position: "absolute" as const,
     width: corner,
     height: corner,
-    borderColor: colors.primaryDeep,
+    borderColor: colors.heading,
   };
 
   return (
@@ -25,7 +25,7 @@ export function Logo({ size = 24 }: { size?: number }) {
         style={{
           fontSize: Math.round(size * 1.1),
           fontWeight: "800",
-          color: colors.primaryDeep,
+          color: colors.heading,
           marginRight: 3,
         }}
       >

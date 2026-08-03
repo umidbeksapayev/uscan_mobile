@@ -16,6 +16,7 @@
     --color-primary-deep: 15 61 110; /* #0F3D6E */
     --color-primary-light: 125 180 245; /* #7DB4F5 */
     --color-primary-tint: 234 242 254; /* #EAF2FE */
+    --color-heading: 15 61 110; /* #0F3D6E — ekran sarlavhalari */
     /* Funksional */
     --color-success: 22 163 74; /* #16A34A */
     --color-danger: 220 38 38; /* #DC2626 */
@@ -34,6 +35,7 @@
   .dark:root {
     /* Brend va semantik ranglar o'zgarmaydi — faqat tint/neytral tokenlar */
     --color-primary-tint: 23 37 84; /* #172554 */
+    --color-heading: 125 180 245; /* #7DB4F5 — to'q fonda o'qiladi */
     --color-kirim-tint: 13 46 35; /* #0D2E23 */
     --color-bg: 15 23 42; /* #0F172A */
     --color-surface: 30 41 59; /* #1E293B */

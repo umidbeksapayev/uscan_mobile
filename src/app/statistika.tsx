@@ -208,7 +208,7 @@ function LockedSalesSection() {
       className="items-center rounded-2xl bg-surface p-6"
       style={{ borderWidth: 0.5, borderColor: colors.line, gap: 8 }}
     >
-      <View className="h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: "#EEF2F7" }}>
+      <View className="h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.neutralTint }}>
         <Ionicons name="lock-closed" size={24} color={colors.muted} />
       </View>
       <Text className="text-center text-sm text-muted">
@@ -291,15 +291,15 @@ export default function StatistikaScreen() {
         {invError ? (
           <View
             className="rounded-2xl p-4"
-            style={{ backgroundColor: "#FDECEC", borderWidth: 1, borderColor: "#F7C6C6" }}
+            style={{ backgroundColor: colors.dangerTint, borderWidth: 1, borderColor: colors.dangerBorder }}
           >
             <View className="mb-1 flex-row items-center gap-2">
-              <Ionicons name="alert-circle" size={18} color="#B42318" />
-              <Text className="text-base font-medium" style={{ color: "#B42318" }}>
+              <Ionicons name="alert-circle" size={18} color={colors.dangerInk} />
+              <Text className="text-base font-medium" style={{ color: colors.dangerInk }}>
                 {t("statistics.loadError", "Statistikani yuklab bo'lmadi")}
               </Text>
             </View>
-            <Text className="text-sm" style={{ color: "#8A2A22" }}>
+            <Text className="text-sm" style={{ color: colors.dangerInk }}>
               {migrationMissing
                 ? t("statistics.migrationMissing", "Statistika funksiyalari DB'da yo'q. Supabase'da migration 030 (030_statistics_rpcs.sql) ni ishga tushiring.")
                 : invErrMsg}
