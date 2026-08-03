@@ -1,5 +1,7 @@
-import { useColorScheme } from "react-native";
-import { colorScheme as nativewindColorScheme } from "nativewind";
+import {
+  colorScheme as nativewindColorScheme,
+  useColorScheme as useNativewindColorScheme,
+} from "nativewind";
 import { create } from "zustand";
 
 import { colors, darkColors, type AppColors } from "@/theme/colors";
@@ -43,14 +45,17 @@ export const useThemeStore = create<ThemeState>((set) => ({
 }));
 
 /**
- * Hozir tungi rejim faolmi — tanlangan rejim + OS sozlamasini hisobga oladi.
- * `StatusBar` uslubi kabi mavzuga bog'liq qarorlar uchun.
+ * Hozir tungi rejim faolmi.
+ *
+ * ⚠️ Manba ATAYLAB `useThemeStore` EMAS, balki NativeWind'ning o'z holati —
+ * chunki `global.css`dagi `.dark:root` rang o'zgaruvchilari aynan shu holat
+ * bilan boshqariladi. Agar bu yerda store'dan o'qisak, NativeWind negadir
+ * tungi rejimga o'tmagan holatda JS ranglari to'q, `className` ranglari esa
+ * yorqin bo'lib qolardi (fon oq, badge'lar to'q). Bitta manba — bo'linish yo'q.
  */
 export function useIsDark(): boolean {
-  const themeMode = useThemeStore((s) => s.themeMode);
-  const systemScheme = useColorScheme();
-
-  return themeMode === "dark" || (themeMode === "system" && systemScheme === "dark");
+  const { colorScheme } = useNativewindColorScheme();
+  return colorScheme === "dark";
 }
 
 /**

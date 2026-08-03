@@ -17,10 +17,12 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { AuthGate } from "@/features/auth/auth-gate";
 import { useColors, useIsDark } from "@/theme/theme-store";
+import { useToastConfig } from "@/components/ui/toast-config";
 
 export default function RootLayout() {
   const colors = useColors();
   const isDark = useIsDark();
+  const toastConfig = useToastConfig();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -60,7 +62,7 @@ export default function RootLayout() {
                 </AuthGate>
               </AuthProvider>
             </ErrorBoundary>
-            <Toast />
+            <Toast config={toastConfig} />
           </BottomSheetModalProvider>
         </SafeAreaProvider>
       </PersistQueryClientProvider>

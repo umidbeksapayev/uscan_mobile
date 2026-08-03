@@ -12,7 +12,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "uscan",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "uz.uscan.app",
       "supportsTablet": false,

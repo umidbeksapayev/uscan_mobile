@@ -813,8 +813,10 @@ export default function SettingsScreen() {
                           gap: 14,
                           paddingHorizontal: 16,
                           paddingVertical: 13,
+                          // iOS bosilish holati — palitradan, aks holda tungi
+                          // rejimda oq chaqnash bo'lardi
                           backgroundColor:
-                            pressed && Platform.OS === "ios" ? "#f4f4f5" : colors.surface,
+                            pressed && Platform.OS === "ios" ? colors.bg : colors.surface,
                         })}
                       >
                         <View

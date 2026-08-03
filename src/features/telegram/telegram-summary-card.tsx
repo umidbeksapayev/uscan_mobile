@@ -121,14 +121,14 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
               width: 7,
               height: 7,
               borderRadius: 4,
-              backgroundColor: connected ? "#16A34A" : colors.tabInactive,
+              backgroundColor: connected ? colors.success : colors.tabInactive,
             }}
           />
           <Text
             style={{
               fontSize: 11,
               fontWeight: "600",
-              color: connected ? "#15803d" : colors.muted,
+              color: connected ? colors.successInk : colors.muted,
             }}
           >
             {connected ? "Ulangan" : "Ulanmagan"}
