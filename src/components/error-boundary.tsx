@@ -2,11 +2,44 @@ import * as React from "react";
 import { View, Text, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { colors } from "@/theme/colors";
+import { useColors, useIsDark } from "@/theme/theme-store";
 import { Button } from "@/components/ui/button";
 
 type Props = { children: React.ReactNode; onReset?: () => void };
 type State = { error: Error | null };
+
+/**
+ * Fallback UI alohida funksiya komponent — `ErrorBoundary` class bo'lgani uchun
+ * mavzu hook'lari (`useColors`) faqat shu yerda ishlatilishi mumkin.
+ */
+function ErrorFallback({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const colors = useColors();
+  const isDark = useIsDark();
+
+  return (
+    <View className="flex-1 items-center justify-center bg-bg px-6">
+      <View
+        className="h-16 w-16 items-center justify-center rounded-full"
+        style={{ backgroundColor: isDark ? "#3B1214" : "#FEE2E2" }}
+      >
+        <Ionicons name="alert-circle-outline" size={36} color={colors.danger} />
+      </View>
+      <Text className="mt-4 text-lg font-semibold text-ink">Xatolik yuz berdi</Text>
+      <Text className="mt-1 text-center text-sm text-muted">
+        Ilovada kutilmagan xato. Qayta urinib ko'ring.
+      </Text>
+      <ScrollView
+        className="mt-4 max-h-32 w-full rounded-xl"
+        style={{ backgroundColor: colors.surface, borderWidth: 0.5, borderColor: colors.line }}
+      >
+        <Text className="p-3 text-xs text-muted">{message}</Text>
+      </ScrollView>
+      <View className="mt-5 w-full">
+        <Button label="Qayta urinish" onPress={onRetry} />
+      </View>
+    </View>
+  );
+}
 
 /**
  * Render paytidagi xatoni ushlaydi — aks holda bitta komponent throw qilsa butun
@@ -36,28 +69,6 @@ export class ErrorBoundary extends React.Component<Props, State> {
     const { error } = this.state;
     if (!error) return this.props.children;
 
-    return (
-      <View className="flex-1 items-center justify-center bg-bg px-6">
-        <View
-          className="h-16 w-16 items-center justify-center rounded-full"
-          style={{ backgroundColor: "#FEE2E2" }}
-        >
-          <Ionicons name="alert-circle-outline" size={36} color={colors.danger} />
-        </View>
-        <Text className="mt-4 text-lg font-semibold text-ink">Xatolik yuz berdi</Text>
-        <Text className="mt-1 text-center text-sm text-muted">
-          Ilovada kutilmagan xato. Qayta urinib ko'ring.
-        </Text>
-        <ScrollView
-          className="mt-4 max-h-32 w-full rounded-xl"
-          style={{ backgroundColor: colors.surface, borderWidth: 0.5, borderColor: colors.line }}
-        >
-          <Text className="p-3 text-xs text-muted">{error.message}</Text>
-        </ScrollView>
-        <View className="mt-5 w-full">
-          <Button label="Qayta urinish" onPress={this.reset} />
-        </View>
-      </View>
-    );
+    return <ErrorFallback message={error.message} onRetry={this.reset} />;
   }
 }

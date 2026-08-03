@@ -1,16 +1,30 @@
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { colors } from "@/theme/colors";
+import { useColors, useIsDark } from "@/theme/theme-store";
+import type { AppColors } from "@/theme/colors";
 
 export type StatTone = "brand" | "green" | "amber" | "muted";
 
-const TONE: Record<StatTone, { bg: string; fg: string }> = {
-  brand: { bg: colors.primaryTint, fg: colors.primary },
-  green: { bg: "#E7F6EE", fg: "#0F6E56" },
-  amber: { bg: "#FCF1DD", fg: "#92600A" },
-  muted: { bg: "#EEF2F7", fg: colors.muted },
-};
+/** Ohang (tone) ranglari — tungi rejimda fon to'qlashadi, matn yorishadi. */
+function toneColors(
+  colors: AppColors,
+  isDark: boolean
+): Record<StatTone, { bg: string; fg: string }> {
+  return isDark
+    ? {
+        brand: { bg: colors.primaryTint, fg: colors.primary },
+        green: { bg: "#0D2E23", fg: "#34D399" },
+        amber: { bg: "#3B2A08", fg: "#FBBF24" },
+        muted: { bg: "#334155", fg: colors.muted },
+      }
+    : {
+        brand: { bg: colors.primaryTint, fg: colors.primary },
+        green: { bg: "#E7F6EE", fg: "#0F6E56" },
+        amber: { bg: "#FCF1DD", fg: "#92600A" },
+        muted: { bg: "#EEF2F7", fg: colors.muted },
+      };
+}
 
 export interface StatsCardProps {
   label: string;
@@ -36,8 +50,13 @@ export function StatsCard({
   delta,
   loading,
 }: StatsCardProps) {
-  const c = TONE[tone];
+  const colors = useColors();
+  const isDark = useIsDark();
+  const c = toneColors(colors, isDark)[tone];
   const up = (delta ?? 0) >= 0;
+  // Delta belgisi (↑/↓) — tungi rejimda to'q fon + yorqin matn.
+  const deltaBg = up ? (isDark ? "#0D2E23" : "#E7F6EE") : isDark ? "#3B1214" : "#FDECEC";
+  const deltaFg = up ? (isDark ? "#34D399" : "#0F6E56") : isDark ? "#FCA5A5" : "#B42318";
 
   return (
     <View
@@ -59,10 +78,10 @@ export function StatsCard({
         {!locked && delta !== null && delta !== undefined ? (
           <View
             className="flex-row items-center rounded-full px-1.5 py-0.5"
-            style={{ gap: 2, backgroundColor: up ? "#E7F6EE" : "#FDECEC" }}
+            style={{ gap: 2, backgroundColor: deltaBg }}
           >
-            <Ionicons name={up ? "arrow-up" : "arrow-down"} size={10} color={up ? "#0F6E56" : "#B42318"} />
-            <Text style={{ fontSize: 10, fontWeight: "600", color: up ? "#0F6E56" : "#B42318" }}>
+            <Ionicons name={up ? "arrow-up" : "arrow-down"} size={10} color={deltaFg} />
+            <Text style={{ fontSize: 10, fontWeight: "600", color: deltaFg }}>
               {`${Math.abs(delta).toFixed(0)}%`}
             </Text>
           </View>

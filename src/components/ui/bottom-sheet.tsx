@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { StyleSheet, Pressable, type StyleProp, type ViewStyle } from "react-native";
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 
 /* ─────────────────────────────────────────────────────────────────────────
    SheetPressable — BottomSheet ichidagi tugmalar uchun maxsus komponent.
@@ -75,6 +75,7 @@ export function BottomSheet({
 }: Props) {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const insets = useSafeAreaInsets();
+  const colors = useColors();
 
   useEffect(() => {
     if (visible) {
