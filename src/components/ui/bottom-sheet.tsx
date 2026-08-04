@@ -18,6 +18,8 @@ type SheetPressableProps = {
   activeOpacity?: number;
   style?: StyleProp<ViewStyle>;
   className?: string;
+  accessibilityLabel?: string;
+  accessibilityRole?: "button" | "link" | "checkbox" | "radio";
   children?: React.ReactNode;
 };
 
@@ -28,6 +30,8 @@ export function SheetPressable({
   activeOpacity = 0.7,
   style,
   className,
+  accessibilityLabel,
+  accessibilityRole = "button",
   children,
 }: SheetPressableProps) {
   return (
@@ -35,6 +39,8 @@ export function SheetPressable({
       onPress={disabled ? undefined : onPress}
       disabled={disabled}
       hitSlop={hitSlop}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={onPress ? accessibilityRole : undefined}
       style={({ pressed }) => [
         style as ViewStyle,
         pressed && !disabled ? { opacity: activeOpacity } : null,

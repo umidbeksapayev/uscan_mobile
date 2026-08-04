@@ -6,6 +6,8 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { ListItemCard } from "@/components/ui/list-item-card";
+import { Avatar } from "@/components/ui/avatar";
 import { shadowMd } from "@/theme/shadows";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import { useSuppliers } from "@/features/suppliers/use-suppliers";
@@ -59,21 +61,24 @@ export default function SuppliersScreen() {
           refreshing={isRefetching}
           onRefresh={() => void refetch()}
           renderItem={({ item }) => (
-            <Pressable
+            <ListItemCard
               onPress={() => openEdit(item)}
-              className="mb-2.5 flex-row items-center gap-3 rounded-2xl bg-surface p-3.5"
-              style={{ borderWidth: 0.5, borderColor: colors.line }}
-            >
-              <View className="h-11 w-11 items-center justify-center rounded-full" style={{ backgroundColor: colors.kirimTint }}>
-                <Text className="text-base font-semibold" style={{ color: colors.kirim }}>{item.name.slice(0, 1).toUpperCase()}</Text>
-              </View>
-              <View className="min-w-0 flex-1">
-                <Text className="text-base font-medium text-ink" numberOfLines={1}>{item.name}</Text>
-                {item.phone ? <Text className="text-xs text-muted">{item.phone}</Text> : null}
-                {item.note ? <Text className="text-xs text-muted" numberOfLines={1}>{item.note}</Text> : null}
-              </View>
-              <Ionicons name="create-outline" size={20} color={colors.tabInactive} />
-            </Pressable>
+              leading={
+                <Avatar name={item.name} tone={{ bg: colors.kirimTint, text: colors.kirim }} />
+              }
+              title={item.name}
+              subtitle={
+                <>
+                  {item.phone ? <Text className="text-xs text-muted">{item.phone}</Text> : null}
+                  {item.note ? (
+                    <Text className="text-xs text-muted" numberOfLines={1}>
+                      {item.note}
+                    </Text>
+                  ) : null}
+                </>
+              }
+              trailing={<Ionicons name="create-outline" size={20} color={colors.tabInactive} />}
+            />
           )}
         />
       )}

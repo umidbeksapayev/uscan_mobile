@@ -6,6 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { ListRow } from "@/components/ui/list-row";
+import { Avatar } from "@/components/ui/avatar";
 import { formatCurrency } from "@/lib/format";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { useCustomersWithBalance, useCreateCustomer } from "./use-customers";
@@ -138,26 +140,19 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                     </Text>
                   }
                   renderItem={({ item }) => (
-                    <SheetPressable
+                    <ListRow
                       onPress={() => onSelect({ id: item.id, name: item.name })}
-                      className="flex-row items-center gap-3 py-2.5"
-                      style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}
-                    >
-                      <View className="h-9 w-9 items-center justify-center rounded-full bg-primary-tint">
-                        <Text className="font-semibold text-primary">{item.name.slice(0, 1).toUpperCase()}</Text>
-                      </View>
-                      <View className="min-w-0 flex-1">
-                        <Text className="text-base text-ink" numberOfLines={1}>
-                          {item.name}
-                        </Text>
-                        {item.phone ? <Text className="text-xs text-muted">{item.phone}</Text> : null}
-                      </View>
-                      {item.balance > 0 ? (
-                        <Text className="text-sm font-medium" style={{ color: colors.dangerInk }}>
-                          {formatCurrency(item.balance)}
-                        </Text>
-                      ) : null}
-                    </SheetPressable>
+                      leading={<Avatar name={item.name} size={36} />}
+                      title={item.name}
+                      subtitle={item.phone ?? undefined}
+                      trailing={
+                        item.balance > 0 ? (
+                          <Text className="text-sm font-medium" style={{ color: colors.dangerInk }}>
+                            {formatCurrency(item.balance)}
+                          </Text>
+                        ) : null
+                      }
+                    />
                   )}
                 />
               )}

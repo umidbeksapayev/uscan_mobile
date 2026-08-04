@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { shadowSm, shadowMd } from "@/theme/shadows";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useProducts, type CategoryFilter } from "@/features/catalog/use-products";
@@ -124,25 +125,6 @@ function ProductRow({
         </Text>
         <StockBadge item={item} />
       </View>
-    </View>
-  );
-}
-
-function EmptyState({
-  icon,
-  text,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  text: string;
-}) {
-  const colors = useColors();
-
-  return (
-    <View className="flex-1 items-center justify-center px-10">
-      <View className="mb-4 h-20 w-20 items-center justify-center rounded-3xl bg-primary-tint">
-        <Ionicons name={icon} size={36} color={colors.primary} />
-      </View>
-      <Text className="text-center text-base text-muted">{text}</Text>
     </View>
   );
 }

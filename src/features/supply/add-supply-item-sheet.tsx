@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { ListRow } from "@/components/ui/list-row";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
@@ -122,24 +123,24 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
                     )
                   }
                   renderItem={({ item }) => (
-                    <Pressable onPress={() => choose(item)} className="flex-row items-center gap-3 py-2.5" style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}>
-                      {item.image_url ? (
-                        <Image source={{ uri: item.image_url }} style={{ width: 40, height: 40, borderRadius: 10 }} contentFit="cover" />
-                      ) : (
-                        <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
-                          <Ionicons name="cube-outline" size={18} color={colors.primary} />
-                        </View>
-                      )}
-                      <View className="min-w-0 flex-1">
-                        <Text className="text-base text-ink" numberOfLines={1}>{item.name}</Text>
-                        <Text className="text-xs text-muted">
-                          {t("dashboard.remaining")}:{" "}
-                          {item.sale_type === "weight"
-                            ? `${item.quantity} ${t("common.kg")}`
-                            : `${item.quantity} ${t("common.pcs")}`}
-                        </Text>
-                      </View>
-                    </Pressable>
+                    <ListRow
+                      onPress={() => choose(item)}
+                      leading={
+                        item.image_url ? (
+                          <Image source={{ uri: item.image_url }} style={{ width: 40, height: 40, borderRadius: 10 }} contentFit="cover" />
+                        ) : (
+                          <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
+                            <Ionicons name="cube-outline" size={18} color={colors.primary} />
+                          </View>
+                        )
+                      }
+                      title={item.name}
+                      subtitle={`${t("dashboard.remaining")}: ${
+                        item.sale_type === "weight"
+                          ? `${item.quantity} ${t("common.kg")}`
+                          : `${item.quantity} ${t("common.pcs")}`
+                      }`}
+                    />
                   )}
                 />
               )}

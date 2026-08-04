@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { shadowSm } from "@/theme/shadows";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
 import { useMemberships, useActiveMembership } from "@/features/auth/use-memberships";
@@ -192,25 +193,6 @@ function SaleCard({
   );
 }
 
-function EmptyState({
-  icon,
-  text,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  text: string;
-}) {
-  const colors = useColors();
-
-  return (
-    <View className="flex-1 items-center justify-center px-10" style={{ paddingTop: 80 }}>
-      <View className="mb-4 h-20 w-20 items-center justify-center rounded-3xl bg-primary-tint">
-        <Ionicons name={icon} size={36} color={colors.primary} />
-      </View>
-      <Text className="text-center text-base text-muted">{text}</Text>
-    </View>
-  );
-}
-
 export default function TarixScreen() {
   const colors = useColors();
 
@@ -259,9 +241,9 @@ export default function TarixScreen() {
           <ActivityIndicator color={colors.primary} />
         </View>
       ) : isError ? (
-        <EmptyState icon="cloud-offline-outline" text={t("common.loadError")} />
+        <EmptyState icon="cloud-offline-outline" text={t("common.loadError")} paddingTop={80} />
       ) : list.length === 0 ? (
-        <EmptyState icon="receipt-outline" text={t("history.noSales")} />
+        <EmptyState icon="receipt-outline" text={t("history.noSales")} paddingTop={80} />
       ) : (
         <FlatList
           data={list}
