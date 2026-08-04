@@ -42,3 +42,10 @@ example
 # generated native folders
 /ios
 /android
+
+# Claude Code — shaxsiy sozlamalar (mashinaga bog'liq yo'llar bo'lishi mumkin)
+.claude/settings.local.json
+.claude/*.graphify-bak
+
+# graphify — kod grafi har safar `graphify update .` bilan qayta yaratiladi
+graphify-out/
