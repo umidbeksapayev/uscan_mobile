@@ -14,6 +14,7 @@ import {
   useActivePermissions,
 } from "@/features/auth/use-memberships";
 import { useActiveShopStore } from "@/features/auth/active-shop-store";
+import { unregisterPushToken } from "@/features/notifications/notify";
 import { ShopSwitcherSheet } from "@/features/auth/shop-switcher-sheet";
 import { useOfflineStore } from "@/lib/offline/offline-store";
 import { useColors } from "@/theme/theme-store";
@@ -88,7 +89,17 @@ export default function KoproqScreen() {
   function logout() {
     Alert.alert(t("nav.logout"), t("menu.logoutConfirm"), [
       { text: t("common.cancel"), style: "cancel" },
-      { text: t("nav.logout"), style: "destructive", onPress: () => supabase.auth.signOut() },
+      {
+        text: t("nav.logout"),
+        style: "destructive",
+        // Tokenni AVVAL o'chiramiz — signOut'dan keyin RLS `auth.uid()` yo'q
+        // bo'ladi va o'chirish qatorga tegmay qolardi (telefonni boshqa
+        // foydalanuvchiga bergan ega begona do'kon xulosasini olishda davom etardi).
+        onPress: async () => {
+          await unregisterPushToken();
+          await supabase.auth.signOut();
+        },
+      },
     ]);
   }
 

@@ -1012,6 +1012,14 @@
     "permDeniedTitle": "Ёқиб бўлмади",
     "permDeniedBody": "Билдиришнома рухсати берилмади.",
     "dailyTitle": "Кунлик эслатма",
-    "dailyHint": "Савдо якунини белгиланган вақтда эслатади"
+    "dailyHint": "Савдо якунини белгиланган вақтда эслатади",
+    "pushTitle": "Push билдиришнома",
+    "pushHint": "Кунлик хулоса сервердан келади — илова ёпиқ бўлса ҳам",
+    "pushOn": "Ёқилган",
+    "pushOff": "Ўчиқ",
+    "pushEnable": "Ёқиш",
+    "pushDenied": "Рухсат берилмади",
+    "pushUnavailable": "Бу build да мавжуд эмас (dev build керак)",
+    "pushEnabled": "Push ёқилди"
   }
 }
