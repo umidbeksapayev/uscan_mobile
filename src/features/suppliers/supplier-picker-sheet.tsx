@@ -6,6 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { ListRow } from "@/components/ui/list-row";
+import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useSuppliers, useCreateSupplier } from "./use-suppliers";
 
@@ -94,15 +96,18 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                   style={{ maxHeight: 300 }}
                   ListEmptyComponent={<Text className="py-6 text-center text-sm text-muted">{search ? t("suppliers.notFound") : t("suppliers.empty")}</Text>}
                   renderItem={({ item }) => (
-                    <Pressable onPress={() => onSelect({ id: item.id, name: item.name })} className="flex-row items-center gap-3 py-2.5" style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}>
-                      <View className="h-9 w-9 items-center justify-center rounded-full" style={{ backgroundColor: colors.kirimTint }}>
-                        <Text className="font-semibold" style={{ color: colors.kirim }}>{item.name.slice(0, 1).toUpperCase()}</Text>
-                      </View>
-                      <View className="min-w-0 flex-1">
-                        <Text className="text-base text-ink" numberOfLines={1}>{item.name}</Text>
-                        {item.phone ? <Text className="text-xs text-muted">{item.phone}</Text> : null}
-                      </View>
-                    </Pressable>
+                    <ListRow
+                      onPress={() => onSelect({ id: item.id, name: item.name })}
+                      leading={
+                        <Avatar
+                          name={item.name}
+                          size={36}
+                          tone={{ bg: colors.kirimTint, text: colors.kirim }}
+                        />
+                      }
+                      title={item.name}
+                      subtitle={item.phone ?? undefined}
+                    />
                   )}
                 />
               )}

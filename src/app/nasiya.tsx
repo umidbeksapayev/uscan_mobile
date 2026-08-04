@@ -6,6 +6,8 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { ListItemCard } from "@/components/ui/list-item-card";
+import { Avatar } from "@/components/ui/avatar";
 import { shadowMd } from "@/theme/shadows";
 import { formatCurrency } from "@/lib/format";
 import { useActivePermissions } from "@/features/auth/use-memberships";
@@ -19,33 +21,31 @@ function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => vo
   const { t } = useTranslation();
   const owes = c.balance > 0;
   const prepaid = c.balance < 0;
+  const stateColor = owes ? colors.dangerInk : prepaid ? colors.successInk : colors.muted;
+  const stateLabel = owes
+    ? t("customers.debtor")
+    : prepaid
+      ? t("customers.creditor")
+      : t("customers.settled");
+
   return (
-    <Pressable
+    <ListItemCard
       onPress={onPress}
-      className="mb-2.5 flex-row items-center gap-3 rounded-2xl bg-surface p-3"
-      style={{ borderWidth: 0.5, borderColor: colors.line }}
-    >
-      <View className="h-11 w-11 items-center justify-center rounded-full bg-primary-tint">
-        <Text className="text-base font-semibold text-primary">{c.name.slice(0, 1).toUpperCase()}</Text>
-      </View>
-      <View className="min-w-0 flex-1">
-        <Text className="text-base font-medium text-ink" numberOfLines={1}>
-          {c.name}
-        </Text>
-        {c.phone ? <Text className="text-xs text-muted">{c.phone}</Text> : null}
-      </View>
-      <View className="items-end">
-        <Text
-          className="text-base font-semibold"
-          style={{ color: owes ? colors.dangerInk : prepaid ? colors.successInk : colors.muted }}
-        >
-          {formatCurrency(Math.abs(c.balance))}
-        </Text>
-        <Text className="text-xs" style={{ color: owes ? colors.dangerInk : prepaid ? colors.successInk : colors.muted }}>
-          {owes ? t("customers.debtor") : prepaid ? t("customers.creditor") : t("customers.settled")}
-        </Text>
-      </View>
-    </Pressable>
+      leading={<Avatar name={c.name} />}
+      title={c.name}
+      subtitle={c.phone ?? undefined}
+      accessibilityLabel={`${c.name}, ${stateLabel} ${formatCurrency(Math.abs(c.balance))}`}
+      trailing={
+        <View className="items-end">
+          <Text className="text-base font-semibold" style={{ color: stateColor }}>
+            {formatCurrency(Math.abs(c.balance))}
+          </Text>
+          <Text className="text-xs" style={{ color: stateColor }}>
+            {stateLabel}
+          </Text>
+        </View>
+      }
+    />
   );
 }
 

@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { ListItemCard } from "@/components/ui/list-item-card";
 import { shadowMd } from "@/theme/shadows";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { useExpenses } from "@/features/expenses/use-expenses";
@@ -106,28 +107,22 @@ export default function ExpensesScreen() {
           refreshing={isRefetching}
           onRefresh={() => void refetch()}
           renderItem={({ item }) => (
-            <Pressable
+            <ListItemCard
               onPress={() => openEdit(item)}
               accessibilityLabel={`${categoryLabel(item.category, t)}: −${formatCurrency(item.amount)}`}
-              className="mb-2.5 flex-row items-center gap-3 rounded-2xl bg-surface p-3.5"
-              style={{ borderWidth: 0.5, borderColor: colors.line }}
-            >
-              <View className="h-11 w-11 items-center justify-center rounded-full bg-primary-tint">
-                <Ionicons name={categoryIcon(item.category)} size={20} color={colors.primary} />
-              </View>
-              <View className="min-w-0 flex-1">
-                <Text className="text-base font-medium text-ink" numberOfLines={1}>
-                  {categoryLabel(item.category, t)}
+              leading={
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-primary-tint">
+                  <Ionicons name={categoryIcon(item.category)} size={20} color={colors.primary} />
+                </View>
+              }
+              title={categoryLabel(item.category, t)}
+              subtitle={`${formatDateTime(item.spent_at)}${item.note ? ` · ${item.note}` : ""}`}
+              trailing={
+                <Text className="text-base font-semibold" style={{ color: colors.danger }}>
+                  −{formatCurrency(item.amount)}
                 </Text>
-                <Text className="text-xs text-muted" numberOfLines={1}>
-                  {formatDateTime(item.spent_at)}
-                  {item.note ? ` · ${item.note}` : ""}
-                </Text>
-              </View>
-              <Text className="text-base font-semibold" style={{ color: colors.danger }}>
-                −{formatCurrency(item.amount)}
-              </Text>
-            </Pressable>
+              }
+            />
           )}
         />
       )}

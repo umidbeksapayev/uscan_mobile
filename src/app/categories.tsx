@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { ListItemCard } from "@/components/ui/list-item-card";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useActivePermissions } from "@/features/auth/use-memberships";
 import {
@@ -201,28 +202,25 @@ export default function CategoriesScreen() {
               onRefresh={() => void refetch()}
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
-                <View
-                  className="mb-2.5 flex-row items-center gap-3 rounded-2xl bg-surface p-3"
-                  style={{ borderWidth: 0.5, borderColor: colors.line }}
-                >
-                  <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
-                    <Ionicons name="pricetag" size={18} color={colors.primary} />
-                  </View>
-                  <View className="min-w-0 flex-1">
-                    <Text className="text-base font-medium text-ink" numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                    <Text className="text-xs text-muted">
-                      {t("category.productCount", { count: item.product_count })}
-                    </Text>
-                  </View>
-                  <Pressable onPress={() => setEditing(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
-                    <Ionicons name="pencil" size={18} color={colors.muted} />
-                  </Pressable>
-                  <Pressable onPress={() => onDelete(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
-                    <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                  </Pressable>
-                </View>
+                <ListItemCard
+                  leading={
+                    <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
+                      <Ionicons name="pricetag" size={18} color={colors.primary} />
+                    </View>
+                  }
+                  title={item.name}
+                  subtitle={t("category.productCount", { count: item.product_count })}
+                  trailing={
+                    <>
+                      <Pressable onPress={() => setEditing(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
+                        <Ionicons name="pencil" size={18} color={colors.muted} />
+                      </Pressable>
+                      <Pressable onPress={() => onDelete(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
+                        <Ionicons name="trash-outline" size={18} color={colors.danger} />
+                      </Pressable>
+                    </>
+                  }
+                />
               )}
             />
           )}
