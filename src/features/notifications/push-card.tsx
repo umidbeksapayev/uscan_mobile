@@ -6,7 +6,17 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { toast } from "@/lib/toast";
 import { useActiveShopId } from "@/features/auth/use-memberships";
-import { enablePush, isPushRegistered } from "./notify";
+import { enablePush, isPushRegistered, type PushFailure } from "./notify";
+
+/** Sabab kodi → tarjima kaliti. */
+const FAILURE_KEYS: Record<PushFailure, string> = {
+  noModule: "notif.errNoModule",
+  noProjectId: "notif.errNoProjectId",
+  denied: "notif.errDenied",
+  noSession: "notif.errNoSession",
+  tokenFailed: "notif.errTokenFailed",
+  saveFailed: "notif.errSaveFailed",
+};
 
 /**
  * Push bildirishnomani yoqish (P1, migration 032).
@@ -31,15 +41,15 @@ export function PushCard() {
     if (busy || enabled) return;
     setBusy(true);
     try {
-      const ok = await enablePush(shopId ?? null);
-      if (ok) {
+      const res = await enablePush(shopId ?? null);
+      if (res.ok) {
         setEnabled(true);
         toast.success(t("notif.pushEnabled"));
       } else {
-        // Ikki sabab bo'lishi mumkin: ruxsat berilmadi yoki native modul yo'q
-        // (Expo Go). Ikkalasini ham ajratib bo'lmaydi, shuning uchun umumiy
-        // xabar + dev build eslatmasi.
-        toast.error(t("notif.pushDenied"), t("notif.pushUnavailable"));
+        // Aniq sababni ko'rsatamiz — ilgari hamma holat "dev build kerak"
+        // deb chiqib, haqiqiy sababni (masalan FCM sozlanmagani) yashirardi.
+        // To'liq xato matni Diagnostika jurnalida.
+        toast.error(t("notif.pushFailedTitle"), t(FAILURE_KEYS[res.reason]));
       }
     } finally {
       setBusy(false);

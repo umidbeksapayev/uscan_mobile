@@ -67,6 +67,21 @@ function easProjectId(): string | null {
 }
 
 /**
+ * Nega ro'yxatdan o'tmadi. Ilgari hammasi `false` qaytarardi va UI barchasini
+ * "bu build'da mavjud emas" deb ko'rsatardi — FCM sozlanmagani yoki tarmoq
+ * xatosi ham shunday chiqib, sababni topish imkonsiz edi.
+ */
+export type PushFailure =
+  | "noModule" // native modul yo'q (Expo Go)
+  | "noProjectId" // app.json extra.eas.projectId yo'q
+  | "denied" // foydalanuvchi ruxsat bermadi
+  | "noSession" // sessiya yo'q
+  | "tokenFailed" // getExpoPushTokenAsync yiqildi (ko'pincha FCM sozlanmagan)
+  | "saveFailed"; // DB'ga yozib bo'lmadi
+
+export type PushResult = { ok: true } | { ok: false; reason: PushFailure; detail?: string };
+
+/**
  * Qurilma push tokenini olib `push_tokens` jadvaliga yozadi (upsert).
  *
  * Login va do'kon almashtirilganda chaqiriladi. Xatolar jimgina jurnalga
@@ -75,47 +90,57 @@ function easProjectId(): string | null {
  * ⚠️ Faqat dev-build yoki production build'da ishlaydi (Expo Go emas) —
  * F3 kamerasi bilan bir xil cheklov.
  */
-export async function registerPushToken(shopId: string | null): Promise<boolean> {
+export async function registerPushToken(shopId: string | null): Promise<PushResult> {
   const N = await loadNotifications();
-  if (!N) return false;
+  if (!N) return { ok: false, reason: "noModule" };
 
   const projectId = easProjectId();
   if (!projectId) {
     logError("push.noProjectId", "app.json extra.eas.projectId topilmadi");
-    return false;
+    return { ok: false, reason: "noProjectId" };
   }
 
+  // Ruxsat allaqachon berilgan bo'lsagina davom etamiz — bu yerda dialog
+  // ko'rsatmaymiz (login paytida kutilmagan so'rov chiqmasin). Ruxsat
+  // Sozlamalardagi tugma orqali so'raladi.
+  const perm = await N.getPermissionsAsync();
+  if (!perm.granted) return { ok: false, reason: "denied" };
+
+  let token: string;
   try {
-    // Ruxsat allaqachon berilgan bo'lsagina davom etamiz — bu yerda dialog
-    // ko'rsatmaymiz (login paytida kutilmagan so'rov chiqmasin). Ruxsat
-    // Sozlamalardagi tugma orqali so'raladi.
-    const perm = await N.getPermissionsAsync();
-    if (!perm.granted) return false;
-
-    const { data: token } = await N.getExpoPushTokenAsync({ projectId });
-    if (!token) return false;
-
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) return false;
-
-    const { error } = await supabase.from("push_tokens").upsert(
-      {
-        user_id: auth.user.id,
-        shop_id: shopId,
-        token,
-        platform: Platform.OS === "ios" || Platform.OS === "android" ? Platform.OS : "unknown",
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "token" },
-    );
-    if (error) throw new Error(error.message);
-
-    meta.setString(NotifKeys.pushToken, token);
-    return true;
+    const res = await N.getExpoPushTokenAsync({ projectId });
+    token = res.data;
   } catch (e) {
-    logError("push.register", e);
-    return false;
+    // Android'da eng ko'p uchraydigan sabab — EAS loyihasida FCM (Firebase)
+    // sozlanmagan. Xato matnini saqlaymiz, aks holda sabab yo'qoladi.
+    logError("push.tokenFailed", e);
+    return {
+      ok: false,
+      reason: "tokenFailed",
+      detail: e instanceof Error ? e.message : String(e),
+    };
   }
+
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return { ok: false, reason: "noSession" };
+
+  const { error } = await supabase.from("push_tokens").upsert(
+    {
+      user_id: auth.user.id,
+      shop_id: shopId,
+      token,
+      platform: Platform.OS === "ios" || Platform.OS === "android" ? Platform.OS : "unknown",
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "token" },
+  );
+  if (error) {
+    logError("push.saveFailed", error.message);
+    return { ok: false, reason: "saveFailed", detail: error.message };
+  }
+
+  meta.setString(NotifKeys.pushToken, token);
+  return { ok: true };
 }
 
 /**
@@ -140,9 +165,9 @@ export async function unregisterPushToken(): Promise<void> {
  * Push uchun ruxsat so'raydi (dialog chiqadi) va tokenni yozadi.
  * Sozlamalardagi tugma shuni chaqiradi.
  */
-export async function enablePush(shopId: string | null): Promise<boolean> {
+export async function enablePush(shopId: string | null): Promise<PushResult> {
   const granted = await ensureNotificationPermission();
-  if (!granted) return false;
+  if (!granted) return { ok: false, reason: "denied" };
   return registerPushToken(shopId);
 }
 

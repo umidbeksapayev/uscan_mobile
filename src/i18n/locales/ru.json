@@ -1023,6 +1023,13 @@
     "pushDenied": "Разрешение не выдано",
     "pushUnavailable": "Недоступно в этой сборке (нужен dev build)",
     "pushEnabled": "Push включён",
-    "pushScheduleHint": "Время отправки берётся из «Время ежедневной сводки» ниже"
+    "pushScheduleHint": "Время отправки берётся из «Время ежедневной сводки» ниже",
+    "errNoModule": "В этой сборке нет модуля push (нужен dev build)",
+    "errNoProjectId": "Не найден ID проекта EAS",
+    "errDenied": "Разрешение на уведомления не выдано",
+    "errNoSession": "Сессия не найдена — войдите заново",
+    "errTokenFailed": "Токен не получен — для Android нужно настроить FCM (Firebase) в EAS",
+    "errSaveFailed": "Токен не сохранён",
+    "pushFailedTitle": "Push не включён"
   }
 }

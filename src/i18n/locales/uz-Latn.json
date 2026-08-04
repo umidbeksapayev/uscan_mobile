@@ -1023,6 +1023,13 @@
     "pushDenied": "Ruxsat berilmadi",
     "pushUnavailable": "Bu build'da mavjud emas (dev build kerak)",
     "pushEnabled": "Push yoqildi",
-    "pushScheduleHint": "Yuborish vaqti quyidagi «Kunlik xulosa vaqti» dan olinadi"
+    "pushScheduleHint": "Yuborish vaqti quyidagi «Kunlik xulosa vaqti» dan olinadi",
+    "errNoModule": "Bu build'da push moduli yo'q (dev build kerak)",
+    "errNoProjectId": "EAS loyiha ID topilmadi",
+    "errDenied": "Bildirishnoma ruxsati berilmadi",
+    "errNoSession": "Sessiya topilmadi — qayta kiring",
+    "errTokenFailed": "Token olinmadi — Android uchun EAS'da FCM (Firebase) sozlanishi kerak",
+    "errSaveFailed": "Token saqlanmadi",
+    "pushFailedTitle": "Push yoqilmadi"
   }
 }

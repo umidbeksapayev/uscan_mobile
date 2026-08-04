@@ -21,6 +21,8 @@ export function usePushRegistration(): void {
 
   useEffect(() => {
     if (!session) return;
+    // Natija bu yerda e'tiborsiz qoldiriladi — sabab jurnalga yozilgan bo'ladi,
+    // fon registratsiyasi foydalanuvchiga xabar ko'rsatmaydi.
     void registerPushToken(shopId ?? null);
   }, [session, shopId]);
 }
