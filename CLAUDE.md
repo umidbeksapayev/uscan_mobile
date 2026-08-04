@@ -58,10 +58,14 @@ npm start              # Expo dev server (Expo Go yoki dev build)
 ekvayring; F11: eas.json AAB/IPA + expo-updates OTA; Play+App Store qo'lda yuklash).
 
 F11'dan keyin audit sprintlari (`docs/AUDIT_AND_ROADMAP_2026-07.md`):
-**Sprint 1–5 ✅** (xavfsizlik, switcher/reprint/parol, tezkor sotuv, CSV import,
-bildirishnomalar). **Joriy reja:** `docs/SPRINT_PLAN_2026-07.md` —
-Sprint 6 (kassa yopish/Z-hisobot + xarajatlar, migration 030/031) ·
-Sprint 7 (i18n kirill/rus, BottomSheet, a11y, katalog export) · Sprint 8 backlog.
+**Sprint 1–8 ✅** — xavfsizlik, switcher/reprint/parol, tezkor sotuv, CSV
+import/eksport, bildirishnomalar, kassa yopish + xarajatlar (migration 030/031),
+i18n 3 til + BottomSheet + tungi rejim, hamda **Sprint 8**: feedback forma,
+xatolik jurnali (Diagnostika), soya tokenlari, umumiy ro'yxat komponentlari,
+`React.memo`, a11y yorliqlari, i18n parity testi va **remote push**
+(migration 032 + web `lib/push/`). Batafsil: `docs/SPRINT_PLAN_2026-07.md`.
+
+Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · ESLint sozlanmagan.
 
 ## AI Agent (Antigravity) Rules & Skills
 
