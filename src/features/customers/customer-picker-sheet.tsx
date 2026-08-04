@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import { BottomSheetTextInput, BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { toast } from "@/lib/toast";
@@ -11,6 +11,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { formatCurrency } from "@/lib/format";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { useCustomersWithBalance, useCreateCustomer } from "./use-customers";
+import type { CustomerWithBalance } from "@/types/database";
 
 export type PickedCustomer = { id: string; name: string };
 
@@ -39,6 +40,26 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
     if (!q) return list;
     return list.filter((c) => c.name.toLowerCase().includes(q) || (c.phone ?? "").includes(q));
   }, [customers, search]);
+
+  /** Barqaror `renderItem` (audit A10) — `ListRow` memo bilan juftlashadi. */
+  const renderCustomer = useCallback(
+    ({ item }: { item: CustomerWithBalance }) => (
+      <ListRow
+        onPress={() => onSelect({ id: item.id, name: item.name })}
+        leading={<Avatar name={item.name} size={36} />}
+        title={item.name}
+        subtitle={item.phone ?? undefined}
+        trailing={
+          item.balance > 0 ? (
+            <Text className="text-sm font-medium" style={{ color: colors.dangerInk }}>
+              {formatCurrency(item.balance)}
+            </Text>
+          ) : null
+        }
+      />
+    ),
+    [onSelect, colors.dangerInk],
+  );
 
   async function onQuickAdd() {
     if (!newName.trim()) return;
@@ -139,21 +160,7 @@ export function CustomerPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                       {search ? t("customers.notFound") : t("customers.empty")}
                     </Text>
                   }
-                  renderItem={({ item }) => (
-                    <ListRow
-                      onPress={() => onSelect({ id: item.id, name: item.name })}
-                      leading={<Avatar name={item.name} size={36} />}
-                      title={item.name}
-                      subtitle={item.phone ?? undefined}
-                      trailing={
-                        item.balance > 0 ? (
-                          <Text className="text-sm font-medium" style={{ color: colors.dangerInk }}>
-                            {formatCurrency(item.balance)}
-                          </Text>
-                        ) : null
-                      }
-                    />
-                  )}
+                  renderItem={renderCustomer}
                 />
               )}
             </>

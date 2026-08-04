@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { View, Text, Pressable, ScrollView, ActivityIndicator, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -55,7 +55,11 @@ function RequiredHeaderHint() {
   );
 }
 
-function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
+/**
+ * CSV oldindan ko'rish qatori. `memo` (audit A10): import faylida yuzlab
+ * qator bo'lishi mumkin.
+ */
+const PreviewRowItem = memo(function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
   const colors = useColors();
 
   const { t } = useTranslation();
@@ -87,7 +91,7 @@ function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
       )}
     </View>
   );
-}
+});
 
 export default function ImportProductsScreen() {
   const colors = useColors();
@@ -97,6 +101,12 @@ export default function ImportProductsScreen() {
   const { t } = useTranslation();
   const shopId = useActiveShopId();
   const { canManageProducts } = useActivePermissions();
+
+  /** Barqaror `renderItem` (audit A10) — `PreviewRowItem` memo bilan juftlashadi. */
+  const renderPreviewRow = useCallback(
+    ({ item }: { item: ImportPreviewRow }) => <PreviewRowItem row={item} />,
+    [],
+  );
 
   const [status, setStatus] = useState<Status>("idle");
   const [fileName, setFileName] = useState<string | null>(null);
@@ -252,7 +262,7 @@ export default function ImportProductsScreen() {
             <FlatList
               data={preview.rows}
               keyExtractor={(r) => String(r.rowNumber)}
-              renderItem={({ item }) => <PreviewRowItem row={item} />}
+              renderItem={renderPreviewRow}
               contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
             />
             <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 14, gap: 8 }}>

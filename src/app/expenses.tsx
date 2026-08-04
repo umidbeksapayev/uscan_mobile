@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -34,10 +34,33 @@ export default function ExpensesScreen() {
     setEditing(null);
     setFormOpen(true);
   }
-  function openEdit(e: Expense) {
+  const openEdit = useCallback((e: Expense) => {
     setEditing(e);
     setFormOpen(true);
-  }
+  }, []);
+
+  /** Barqaror `renderItem` (audit A10) — `ListItemCard` memo bilan juftlashadi. */
+  const renderExpense = useCallback(
+    ({ item }: { item: Expense }) => (
+      <ListItemCard
+        onPress={() => openEdit(item)}
+        accessibilityLabel={`${categoryLabel(item.category, t)}: −${formatCurrency(item.amount)}`}
+        leading={
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-primary-tint">
+            <Ionicons name={categoryIcon(item.category)} size={20} color={colors.primary} />
+          </View>
+        }
+        title={categoryLabel(item.category, t)}
+        subtitle={`${formatDateTime(item.spent_at)}${item.note ? ` · ${item.note}` : ""}`}
+        trailing={
+          <Text className="text-base font-semibold" style={{ color: colors.danger }}>
+            −{formatCurrency(item.amount)}
+          </Text>
+        }
+      />
+    ),
+    [openEdit, t, colors.primary, colors.danger],
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
@@ -106,24 +129,7 @@ export default function ExpensesScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 90 }}
           refreshing={isRefetching}
           onRefresh={() => void refetch()}
-          renderItem={({ item }) => (
-            <ListItemCard
-              onPress={() => openEdit(item)}
-              accessibilityLabel={`${categoryLabel(item.category, t)}: −${formatCurrency(item.amount)}`}
-              leading={
-                <View className="h-11 w-11 items-center justify-center rounded-full bg-primary-tint">
-                  <Ionicons name={categoryIcon(item.category)} size={20} color={colors.primary} />
-                </View>
-              }
-              title={categoryLabel(item.category, t)}
-              subtitle={`${formatDateTime(item.spent_at)}${item.note ? ` · ${item.note}` : ""}`}
-              trailing={
-                <Text className="text-base font-semibold" style={{ color: colors.danger }}>
-                  −{formatCurrency(item.amount)}
-                </Text>
-              }
-            />
-          )}
+          renderItem={renderExpense}
         />
       )}
 

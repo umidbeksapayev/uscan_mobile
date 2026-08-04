@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -116,21 +116,50 @@ export default function CategoriesScreen() {
     );
   }
 
-  function onDelete(c: CategoryWithCount) {
-    const note =
-      c.product_count > 0 ? `\n\n${t("category.deleteNote", { count: c.product_count })}` : "";
-    Alert.alert(t("category.deleteTitle"), `${t("category.deleteMsg", { name: c.name })}${note}`, [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("common.delete"),
-        style: "destructive",
-        onPress: () =>
-          deleteMut.mutate(c.id, {
-            onError: (e) => toast.error(t("category.deleteFailed"), (e as Error)?.message ?? t("common.error")),
-          }),
-      },
-    ]);
-  }
+  const onDelete = useCallback(
+    (c: CategoryWithCount) => {
+      const note =
+        c.product_count > 0 ? `\n\n${t("category.deleteNote", { count: c.product_count })}` : "";
+      Alert.alert(t("category.deleteTitle"), `${t("category.deleteMsg", { name: c.name })}${note}`, [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("common.delete"),
+          style: "destructive",
+          onPress: () =>
+            deleteMut.mutate(c.id, {
+              onError: (e) => toast.error(t("category.deleteFailed"), (e as Error)?.message ?? t("common.error")),
+            }),
+        },
+      ]);
+    },
+    [t, deleteMut],
+  );
+
+  /** Barqaror `renderItem` (audit A10) — `ListItemCard` memo bilan juftlashadi. */
+  const renderCategory = useCallback(
+    ({ item }: { item: CategoryWithCount }) => (
+      <ListItemCard
+        leading={
+          <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
+            <Ionicons name="pricetag" size={18} color={colors.primary} />
+          </View>
+        }
+        title={item.name}
+        subtitle={t("category.productCount", { count: item.product_count })}
+        trailing={
+          <>
+            <Pressable onPress={() => setEditing(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
+              <Ionicons name="pencil" size={18} color={colors.muted} />
+            </Pressable>
+            <Pressable onPress={() => onDelete(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
+              <Ionicons name="trash-outline" size={18} color={colors.danger} />
+            </Pressable>
+          </>
+        }
+      />
+    ),
+    [t, onDelete, colors.primary, colors.muted, colors.danger],
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
@@ -201,27 +230,7 @@ export default function CategoriesScreen() {
               refreshing={isRefetching}
               onRefresh={() => void refetch()}
               keyboardShouldPersistTaps="handled"
-              renderItem={({ item }) => (
-                <ListItemCard
-                  leading={
-                    <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
-                      <Ionicons name="pricetag" size={18} color={colors.primary} />
-                    </View>
-                  }
-                  title={item.name}
-                  subtitle={t("category.productCount", { count: item.product_count })}
-                  trailing={
-                    <>
-                      <Pressable onPress={() => setEditing(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
-                        <Ionicons name="pencil" size={18} color={colors.muted} />
-                      </Pressable>
-                      <Pressable onPress={() => onDelete(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
-                        <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                      </Pressable>
-                    </>
-                  }
-                />
-              )}
+              renderItem={renderCategory}
             />
           )}
         </>

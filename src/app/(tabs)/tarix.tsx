@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -63,7 +63,11 @@ function ItemLine({ it }: { it: SaleItem }) {
   );
 }
 
-function SaleCard({
+/**
+ * Sotuv kartasi. `memo` (audit A10): tarix cheksiz varaqlanadi va bitta
+ * kartani ochish/yopish ilgari butun ro'yxatni qayta chizardi.
+ */
+const SaleCard = memo(function SaleCard({
   sale,
   open,
   onToggle,
@@ -191,7 +195,7 @@ function SaleCard({
       ) : null}
     </View>
   );
-}
+});
 
 export default function TarixScreen() {
   const colors = useColors();
@@ -219,6 +223,20 @@ export default function TarixScreen() {
 
   const list = useMemo(() => data?.pages.flat() ?? [], [data]);
   const total = list.reduce((sum, s) => sum + s.total_revenue, 0);
+
+  /** Barqaror `renderItem` (audit A10) — `SaleCard` memo bilan juftlashadi. */
+  const renderSale = useCallback(
+    ({ item }: { item: Sale }) => (
+      <SaleCard
+        sale={item}
+        open={openId === item.id}
+        onToggle={() => setOpenId(openId === item.id ? null : item.id)}
+        onReturn={isOwner && shopId ? () => setReturnSale(item) : undefined}
+        shopName={shopName}
+      />
+    ),
+    [openId, isOwner, shopId, shopName],
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
@@ -248,15 +266,7 @@ export default function TarixScreen() {
         <FlatList
           data={list}
           keyExtractor={(s) => s.id}
-          renderItem={({ item }) => (
-            <SaleCard
-              sale={item}
-              open={openId === item.id}
-              onToggle={() => setOpenId(openId === item.id ? null : item.id)}
-              onReturn={isOwner && shopId ? () => setReturnSale(item) : undefined}
-              shopName={shopName}
-            />
-          )}
+          renderItem={renderSale}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 90 }}
           refreshing={isRefetching}
           onRefresh={() => {

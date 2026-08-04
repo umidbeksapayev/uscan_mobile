@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,7 +15,13 @@ import { useCustomersWithBalance } from "@/features/customers/use-customers";
 import { debtTotal } from "@/features/customers/debt-math";
 import type { CustomerWithBalance } from "@/types/database";
 
-function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => void }) {
+const CustomerRow = memo(function CustomerRow({
+  c,
+  onPress,
+}: {
+  c: CustomerWithBalance;
+  onPress: () => void;
+}) {
   const colors = useColors();
 
   const { t } = useTranslation();
@@ -47,7 +53,7 @@ function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => vo
       }
     />
   );
-}
+});
 
 export default function NasiyaScreen() {
   const colors = useColors();
@@ -67,6 +73,17 @@ export default function NasiyaScreen() {
       (c) => c.name.toLowerCase().includes(q) || (c.phone ?? "").includes(q),
     );
   }, [customers, search]);
+
+  /** Barqaror `renderItem` (audit A10) — `CustomerRow` memo bilan juftlashadi. */
+  const renderCustomer = useCallback(
+    ({ item }: { item: CustomerWithBalance }) => (
+      <CustomerRow
+        c={item}
+        onPress={() => router.push({ pathname: "/customer-detail", params: { id: item.id } })}
+      />
+    ),
+    [router],
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
@@ -144,12 +161,7 @@ export default function NasiyaScreen() {
             <FlatList
               data={filtered}
               keyExtractor={(c) => c.id}
-              renderItem={({ item }) => (
-                <CustomerRow
-                  c={item}
-                  onPress={() => router.push({ pathname: "/customer-detail", params: { id: item.id } })}
-                />
-              )}
+              renderItem={renderCustomer}
               contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 90 }}
               refreshing={isRefetching}
               onRefresh={() => void refetch()}
