@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,10 +28,33 @@ export default function SuppliersScreen() {
     setEditing(null);
     setFormOpen(true);
   }
-  function openEdit(s: Supplier) {
+  const openEdit = useCallback((s: Supplier) => {
     setEditing(s);
     setFormOpen(true);
-  }
+  }, []);
+
+  /** Barqaror `renderItem` (audit A10) — `ListItemCard` memo bilan juftlashadi. */
+  const renderSupplier = useCallback(
+    ({ item }: { item: Supplier }) => (
+      <ListItemCard
+        onPress={() => openEdit(item)}
+        leading={<Avatar name={item.name} tone={{ bg: colors.kirimTint, text: colors.kirim }} />}
+        title={item.name}
+        subtitle={
+          <>
+            {item.phone ? <Text className="text-xs text-muted">{item.phone}</Text> : null}
+            {item.note ? (
+              <Text className="text-xs text-muted" numberOfLines={1}>
+                {item.note}
+              </Text>
+            ) : null}
+          </>
+        }
+        trailing={<Ionicons name="create-outline" size={20} color={colors.tabInactive} />}
+      />
+    ),
+    [openEdit, colors.kirimTint, colors.kirim, colors.tabInactive],
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
@@ -60,26 +83,7 @@ export default function SuppliersScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 90 }}
           refreshing={isRefetching}
           onRefresh={() => void refetch()}
-          renderItem={({ item }) => (
-            <ListItemCard
-              onPress={() => openEdit(item)}
-              leading={
-                <Avatar name={item.name} tone={{ bg: colors.kirimTint, text: colors.kirim }} />
-              }
-              title={item.name}
-              subtitle={
-                <>
-                  {item.phone ? <Text className="text-xs text-muted">{item.phone}</Text> : null}
-                  {item.note ? (
-                    <Text className="text-xs text-muted" numberOfLines={1}>
-                      {item.note}
-                    </Text>
-                  ) : null}
-                </>
-              }
-              trailing={<Ionicons name="create-outline" size={20} color={colors.tabInactive} />}
-            />
-          )}
+          renderItem={renderSupplier}
         />
       )}
 

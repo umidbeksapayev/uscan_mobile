@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { BottomSheetTextInput, BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { toast } from "@/lib/toast";
@@ -10,6 +10,7 @@ import { ListRow } from "@/components/ui/list-row";
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useSuppliers, useCreateSupplier } from "./use-suppliers";
+import type { Supplier } from "@/types/database";
 
 export type PickedSupplier = { id: string; name: string } | null;
 
@@ -37,6 +38,21 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
     if (!q) return list;
     return list.filter((s) => s.name.toLowerCase().includes(q) || (s.phone ?? "").includes(q));
   }, [suppliers, search]);
+
+  /** Barqaror `renderItem` (audit A10) — `ListRow` memo bilan juftlashadi. */
+  const renderSupplier = useCallback(
+    ({ item }: { item: Supplier }) => (
+      <ListRow
+        onPress={() => onSelect({ id: item.id, name: item.name })}
+        leading={
+          <Avatar name={item.name} size={36} tone={{ bg: colors.kirimTint, text: colors.kirim }} />
+        }
+        title={item.name}
+        subtitle={item.phone ?? undefined}
+      />
+    ),
+    [onSelect, colors.kirimTint, colors.kirim],
+  );
 
   async function onQuickAdd() {
     if (!newName.trim()) return;
@@ -95,20 +111,7 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
                   keyboardShouldPersistTaps="handled"
                   style={{ maxHeight: 300 }}
                   ListEmptyComponent={<Text className="py-6 text-center text-sm text-muted">{search ? t("suppliers.notFound") : t("suppliers.empty")}</Text>}
-                  renderItem={({ item }) => (
-                    <ListRow
-                      onPress={() => onSelect({ id: item.id, name: item.name })}
-                      leading={
-                        <Avatar
-                          name={item.name}
-                          size={36}
-                          tone={{ bg: colors.kirimTint, text: colors.kirim }}
-                        />
-                      }
-                      title={item.name}
-                      subtitle={item.phone ?? undefined}
-                    />
-                  )}
+                  renderItem={renderSupplier}
                 />
               )}
             </>

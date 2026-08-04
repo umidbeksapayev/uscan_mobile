@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -69,7 +69,12 @@ function StockBadge({ item }: { item: Product }) {
   );
 }
 
-function ProductRow({
+/**
+ * Katalog qatori. `memo` (audit A10): katalogda yuzlab mahsulot bo'lishi
+ * mumkin va qidiruv har bosilganda ekranni qayta render qiladi — memo'siz
+ * har harfda butun ro'yxat qayta chiziladi.
+ */
+const ProductRow = memo(function ProductRow({
   item,
   selectionMode,
   selected,
@@ -127,7 +132,7 @@ function ProductRow({
       </View>
     </View>
   );
-}
+});
 
 export default function KatalogScreen() {
   const colors = useColors();
@@ -169,27 +174,46 @@ export default function KatalogScreen() {
   function onAdd() {
     router.push("/product-form");
   }
-  function onRowPress(item: Product) {
-    if (!canManageProducts) {
-      toast.info(t("common.noPermission"), t("catalog.editPermHint"));
-      return;
-    }
-    router.push({ pathname: "/product-form", params: { id: item.id } });
-  }
+  const onRowPress = useCallback(
+    (item: Product) => {
+      if (!canManageProducts) {
+        toast.info(t("common.noPermission"), t("catalog.editPermHint"));
+        return;
+      }
+      router.push({ pathname: "/product-form", params: { id: item.id } });
+    },
+    [canManageProducts, router, t],
+  );
 
   function toggleLabelMode() {
     setLabelMode((v) => !v);
     setSelected(new Set());
     setCopies(1);
   }
-  function toggleSelect(id: string) {
+  const toggleSelect = useCallback((id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  }
+  }, []);
+
+  /**
+   * Barqaror `renderItem` (audit A10) — inline arrow har renderda yangi
+   * funksiya yaratib, `FlatList`ni butun ro'yxatni qayta chizishga majburlardi.
+   * `selected` — Set, ya'ni tanlov o'zgarganda bu funksiya ham yangilanadi;
+   * lekin `ProductRow` memo bo'lgani uchun faqat holati o'zgargan qatorlar
+   * qayta chiziladi.
+   */
+  const renderProduct = useCallback(
+    ({ item }: { item: Product }) => (
+      <Pressable onPress={() => (labelMode ? toggleSelect(item.id) : onRowPress(item))}>
+        <ProductRow item={item} selectionMode={labelMode} selected={selected.has(item.id)} />
+      </Pressable>
+    ),
+    [labelMode, selected, toggleSelect, onRowPress],
+  );
   async function onPrintSelected() {
     const chosen = (products ?? []).filter((p) => selected.has(p.id));
     const ok = await printLabels(chosen, copies);
@@ -347,13 +371,7 @@ export default function KatalogScreen() {
         <FlatList
           data={products}
           keyExtractor={(p) => p.id}
-          renderItem={({ item }) => (
-            <Pressable
-              onPress={() => (labelMode ? toggleSelect(item.id) : onRowPress(item))}
-            >
-              <ProductRow item={item} selectionMode={labelMode} selected={selected.has(item.id)} />
-            </Pressable>
-          )}
+          renderItem={renderProduct}
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingTop: 4,

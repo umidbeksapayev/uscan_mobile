@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -62,16 +63,80 @@ export default function OfflineSalesScreen() {
     onSuccess: () => void refresh(),
   });
 
-  function onDelete(s: QueuedSale) {
-    Alert.alert(
-      t("offlineSales.deleteAlertTitle", "Sotuvni o'chirish"),
-      t("offlineSales.deleteAlertBody", "Navbatdagi bu sotuv o'chiriladi (yuborilmaydi)."),
-      [
-        { text: t("common.cancel", "Bekor"), style: "cancel" },
-        { text: t("offlineSales.deleteBtn", "O'chirish"), style: "destructive", onPress: () => deleteMut.mutate(s.client_id) },
-      ],
-    );
-  }
+  const onDelete = useCallback(
+    (s: QueuedSale) => {
+      Alert.alert(
+        t("offlineSales.deleteAlertTitle", "Sotuvni o'chirish"),
+        t("offlineSales.deleteAlertBody", "Navbatdagi bu sotuv o'chiriladi (yuborilmaydi)."),
+        [
+          { text: t("common.cancel", "Bekor"), style: "cancel" },
+          { text: t("offlineSales.deleteBtn", "O'chirish"), style: "destructive", onPress: () => deleteMut.mutate(s.client_id) },
+        ],
+      );
+    },
+    [t, deleteMut],
+  );
+
+  /** Barqaror `renderItem` (audit A10). */
+  const renderQueuedSale = useCallback(
+    ({ item }: { item: QueuedSale }) => {
+      const meta = STATUS[item.status];
+      const failed = item.status === "failed";
+      const statusLabel = t(`offlineSales.status_${item.status}`, meta.label);
+      return (
+        <View
+          className="mb-2.5 rounded-2xl bg-surface p-3"
+          style={{ borderWidth: 0.5, borderColor: colors.line }}
+        >
+          <View className="flex-row items-center gap-3">
+            <View
+              className="h-10 w-10 items-center justify-center rounded-xl"
+              style={{ backgroundColor: meta.color + "1A" }}
+            >
+              <Ionicons name={meta.icon} size={20} color={meta.color} />
+            </View>
+            <View className="min-w-0 flex-1">
+              <Text className="text-base font-medium text-ink">
+                {t("offlineSales.itemSummary", "{{count}} mahsulot · {{amount}}", {
+                  count: item.items.length,
+                  amount: formatCurrency(item.paid_amount ?? 0),
+                })}
+              </Text>
+              <Text className="text-xs" style={{ color: meta.color }}>{statusLabel}</Text>
+            </View>
+          </View>
+
+          {failed && item.error ? (
+            <Text className="mt-2 text-xs text-danger" numberOfLines={2}>{item.error}</Text>
+          ) : null}
+
+          {failed ? (
+            <View className="mt-3 flex-row gap-2">
+              <Pressable
+                onPress={() => retryMut.mutate(item.client_id)}
+                disabled={retryMut.isPending}
+                accessibilityLabel={t("offlineSales.retryBtn", "Qayta urinish")}
+                className="flex-1 flex-row items-center justify-center gap-1.5 rounded-xl bg-primary"
+                style={{ height: 42 }}
+              >
+                <Ionicons name="refresh" size={16} color="#fff" />
+                <Text className="text-sm font-medium text-white">{t("offlineSales.retryBtn", "Qayta urinish")}</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => onDelete(item)}
+                accessibilityLabel={t("offlineSales.deleteBtn", "O'chirish")}
+                className="items-center justify-center rounded-xl bg-bg px-4"
+                style={{ height: 42, borderWidth: 1, borderColor: colors.line }}
+              >
+                <Ionicons name="trash-outline" size={18} color={colors.danger} />
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+      );
+    },
+    [t, onDelete, retryMut, colors.line, colors.danger],
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
@@ -105,62 +170,7 @@ export default function OfflineSalesScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 32 }}
           refreshing={isRefetching}
           onRefresh={() => void refetch()}
-          renderItem={({ item }) => {
-            const meta = STATUS[item.status];
-            const failed = item.status === "failed";
-            const statusLabel = t(`offlineSales.status_${item.status}`, meta.label);
-            return (
-              <View
-                className="mb-2.5 rounded-2xl bg-surface p-3"
-                style={{ borderWidth: 0.5, borderColor: colors.line }}
-              >
-                <View className="flex-row items-center gap-3">
-                  <View
-                    className="h-10 w-10 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: meta.color + "1A" }}
-                  >
-                    <Ionicons name={meta.icon} size={20} color={meta.color} />
-                  </View>
-                  <View className="min-w-0 flex-1">
-                    <Text className="text-base font-medium text-ink">
-                      {t("offlineSales.itemSummary", "{{count}} mahsulot · {{amount}}", {
-                        count: item.items.length,
-                        amount: formatCurrency(item.paid_amount ?? 0),
-                      })}
-                    </Text>
-                    <Text className="text-xs" style={{ color: meta.color }}>{statusLabel}</Text>
-                  </View>
-                </View>
-
-                {failed && item.error ? (
-                  <Text className="mt-2 text-xs text-danger" numberOfLines={2}>{item.error}</Text>
-                ) : null}
-
-                {failed ? (
-                  <View className="mt-3 flex-row gap-2">
-                    <Pressable
-                      onPress={() => retryMut.mutate(item.client_id)}
-                      disabled={retryMut.isPending}
-                      accessibilityLabel={t("offlineSales.retryBtn", "Qayta urinish")}
-                      className="flex-1 flex-row items-center justify-center gap-1.5 rounded-xl bg-primary"
-                      style={{ height: 42 }}
-                    >
-                      <Ionicons name="refresh" size={16} color="#fff" />
-                      <Text className="text-sm font-medium text-white">{t("offlineSales.retryBtn", "Qayta urinish")}</Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => onDelete(item)}
-                      accessibilityLabel={t("offlineSales.deleteBtn", "O'chirish")}
-                      className="items-center justify-center rounded-xl bg-bg px-4"
-                      style={{ height: 42, borderWidth: 1, borderColor: colors.line }}
-                    >
-                      <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                    </Pressable>
-                  </View>
-                ) : null}
-              </View>
-            );
-          }}
+          renderItem={renderQueuedSale}
         />
       )}
     </SafeAreaView>

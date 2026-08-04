@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { View, Text, TextInput, Pressable, FlatList, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -58,11 +58,36 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
     }
   }, [visible, scanCode, setScanCode]);
 
-  function choose(p: Product) {
+  const choose = useCallback((p: Product) => {
     setPicked(p);
     setCostText(String(p.cost_price || "")); // eski tan narxni boshlang'ich qilib qo'yamiz
     setQtyText("");
-  }
+  }, []);
+
+  /** Barqaror `renderItem` (audit A10) — `ListRow` memo bilan juftlashadi. */
+  const renderProduct = useCallback(
+    ({ item }: { item: Product }) => (
+      <ListRow
+        onPress={() => choose(item)}
+        leading={
+          item.image_url ? (
+            <Image source={{ uri: item.image_url }} style={{ width: 40, height: 40, borderRadius: 10 }} contentFit="cover" />
+          ) : (
+            <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
+              <Ionicons name="cube-outline" size={18} color={colors.primary} />
+            </View>
+          )
+        }
+        title={item.name}
+        subtitle={`${t("dashboard.remaining")}: ${
+          item.sale_type === "weight"
+            ? `${item.quantity} ${t("common.kg")}`
+            : `${item.quantity} ${t("common.pcs")}`
+        }`}
+      />
+    ),
+    [choose, t, colors.primary],
+  );
 
   const isWeight = picked?.sale_type === "weight";
   const qty = parseFloat(qtyText.replace(/\s/g, "").replace(",", ".")) || 0;
@@ -122,26 +147,7 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
                       <Text className="py-6 text-center text-sm text-muted">{t("purchases.typeProductName")}</Text>
                     )
                   }
-                  renderItem={({ item }) => (
-                    <ListRow
-                      onPress={() => choose(item)}
-                      leading={
-                        item.image_url ? (
-                          <Image source={{ uri: item.image_url }} style={{ width: 40, height: 40, borderRadius: 10 }} contentFit="cover" />
-                        ) : (
-                          <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
-                            <Ionicons name="cube-outline" size={18} color={colors.primary} />
-                          </View>
-                        )
-                      }
-                      title={item.name}
-                      subtitle={`${t("dashboard.remaining")}: ${
-                        item.sale_type === "weight"
-                          ? `${item.quantity} ${t("common.kg")}`
-                          : `${item.quantity} ${t("common.pcs")}`
-                      }`}
-                    />
-                  )}
+                  renderItem={renderProduct}
                 />
               )}
             </>
