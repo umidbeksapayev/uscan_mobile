@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { shadowSm, shadowGlow } from "@/theme/shadows";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import type { Product, TopProduct } from "@/types/database";
 
@@ -52,11 +53,7 @@ export function GradientStat({
       style={{
         borderRadius: 22,
         padding: 18,
-        shadowColor: tone[1],
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 5,
+        ...shadowGlow(tone[1]),
       }}
     >
       <View className="flex-row items-start justify-between">
@@ -107,11 +104,7 @@ export function Card({ children }: { children: React.ReactNode }) {
       style={{
         borderWidth: 0.5,
         borderColor: colors.line,
-        shadowColor: colors.shadow,
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 2,
+        ...shadowSm(colors.shadow),
       }}
     >
       {children}

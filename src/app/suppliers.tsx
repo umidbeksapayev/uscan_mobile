@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { shadowMd } from "@/theme/shadows";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import { useSuppliers } from "@/features/suppliers/use-suppliers";
 import { SupplierFormSheet } from "@/features/suppliers/supplier-form-sheet";
@@ -79,7 +80,7 @@ export default function SuppliersScreen() {
 
       <Pressable
         onPress={openNew}
-        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.kirim, alignItems: "center", justifyContent: "center", shadowColor: colors.shadow, shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
+        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.kirim, alignItems: "center", justifyContent: "center", ...shadowMd(colors.shadow) }}
       >
         <Ionicons name="add" size={30} color="#fff" />
       </Pressable>

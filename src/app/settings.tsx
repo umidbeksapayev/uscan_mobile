@@ -18,6 +18,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useThemeStore, useColors, type ThemeMode } from "@/theme/theme-store";
+import { shadowPanel } from "@/theme/shadows";
 import type { AppColors } from "@/theme/colors";
 import { LANGUAGES, setLanguage, type LangCode } from "@/i18n";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -36,16 +37,7 @@ const RADIUS = 18;
 
 /** Karta soyasi — rang palitradan olinadi (tungi rejimda sof qora). */
 function cardShadow(colors: AppColors) {
-  return Platform.select({
-    ios: {
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-    },
-    android: { elevation: 2 },
-    default: {},
-  });
+  return shadowPanel(colors.shadow);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────

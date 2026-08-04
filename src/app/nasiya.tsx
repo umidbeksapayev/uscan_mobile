@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { shadowMd } from "@/theme/shadows";
 import { formatCurrency } from "@/lib/format";
 import { useActivePermissions } from "@/features/auth/use-memberships";
 import { useCustomersWithBalance } from "@/features/customers/use-customers";
@@ -169,11 +170,7 @@ export default function NasiyaScreen() {
               backgroundColor: colors.primary,
               alignItems: "center",
               justifyContent: "center",
-              shadowColor: colors.shadow,
-              shadowOpacity: 0.18,
-              shadowRadius: 10,
-              shadowOffset: { width: 0, height: 4 },
-              elevation: 6,
+              ...shadowMd(colors.shadow),
             }}
           >
             <Ionicons name="person-add" size={24} color="#fff" />

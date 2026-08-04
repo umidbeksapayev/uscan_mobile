@@ -241,6 +241,9 @@ export default function ScannerScreen() {
                     height: 3,
                     borderRadius: 2,
                     backgroundColor: colors.primary,
+                    // Ataylab `theme/shadows.ts` presetlaridan foydalanmaydi:
+                    // bu karta soyasi emas, skaner nurining porlashi (elevation
+                    // yo'q, offset nol, opacity 0.9).
                     shadowColor: colors.primary,
                     shadowOpacity: 0.9,
                     shadowRadius: 8,
