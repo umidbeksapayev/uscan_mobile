@@ -77,7 +77,8 @@ export function PushCard() {
           {t("notif.pushTitle")}
         </Text>
         <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
-          {t("notif.pushHint")}
+          {/* Yoqilgandan keyin muhimi — QACHON kelishi, ya'ni jadval qayerda. */}
+          {enabled ? t("notif.pushScheduleHint") : t("notif.pushHint")}
         </Text>
       </View>
 
