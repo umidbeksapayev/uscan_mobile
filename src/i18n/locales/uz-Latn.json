@@ -35,7 +35,10 @@
     "clear": "Tozalash",
     "delete": "O'chirish",
     "edit": "Tahrirlash",
-    "back": "Orqaga"
+    "back": "Orqaga",
+    "retry": "Qayta urinish",
+    "errorOccurred": "Xatolik yuz berdi",
+    "unexpectedError": "Ilovada kutilmagan xato. Qayta urinib ko'ring."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -132,7 +135,26 @@
     "errInvalidEmail": "Email manzili noto'g'ri formatda.",
     "errNetwork": "Internet aloqasi yo'q. Ulanishni tekshirib qayta urining.",
     "errGeneric": "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring.",
-    "forgotPassword": "Parolni unutdingizmi?"
+    "forgotPassword": "Parolni unutdingizmi?",
+    "emailPlaceholder": "email@misol.uz",
+    "emailRequired": "Emailni kiriting.",
+    "notConfigured": "Supabase sozlanmagan (.env).",
+    "forgotTitle": "Parolni tiklash",
+    "forgotSubtitle": "Ro'yxatdan o'tgan emailingizni kiriting — tiklash havolasini yuboramiz",
+    "forgotSend": "Havola yuborish",
+    "linkSentTitle": "Havola yuborildi",
+    "linkSentBody": "{{email}} manziliga parolni tiklash havolasi yuborildi. Emailingizni tekshiring va havolani bosib yangi parol o'rnating.",
+    "backToLogin": "Kirish ekraniga qaytish",
+    "checkingLink": "Havola tekshirilmoqda...",
+    "linkInvalidTitle": "Havola yaroqsiz",
+    "linkInvalidBody": "Havola muddati o'tgan yoki noto'g'ri. Qaytadan so'rang.",
+    "requestAgain": "Qaytadan so'rash",
+    "newPasswordTitle": "Yangi parol",
+    "newPasswordSubtitle": "Hisobingiz uchun yangi parol o'rnating",
+    "newPasswordLabel": "Yangi parol",
+    "confirmPasswordLabel": "Parolni tasdiqlang",
+    "passwordsMismatch": "Parollar mos kelmadi.",
+    "pickShop": "Do'konni tanlang"
   },
   "catalog": {
     "export": "Eksport",
@@ -290,7 +312,10 @@
     "payCard": "Plastik",
     "payQr": "QR to'lov",
     "payCredit": "Nasiya",
-    "selectCustomerForCredit": "Nasiya uchun mijozni tanlang"
+    "selectCustomerForCredit": "Nasiya uchun mijozni tanlang",
+    "saleErrorTitle": "Sotuv xatosi",
+    "noCustomerTitle": "Mijoz tanlanmagan",
+    "cartErrorTitle": "Savat xatosi"
   },
   "qr": {
     "title": "QR orqali to'lov",
@@ -406,7 +431,8 @@
     "month": "Oy",
     "sold": "Sotildi",
     "notSold": "Sotilmagan",
-    "noProducts": "Mahsulot yo'q"
+    "noProducts": "Mahsulot yo'q",
+    "noSalesPeriod": "Bu davrda sotuv yo'q"
   },
   "reports": {
     "title": "Hisobotlar",
@@ -417,7 +443,8 @@
     "sales": "Sotuvlar",
     "revenueDynamics": "Tushum va Foyda dinamikasi",
     "topProducts": "Eng ko'p tushum keltirgan mahsulotlar",
-    "noSales": "Bu davrda sotuvlar yo'q"
+    "noSales": "Bu davrda sotuvlar yo'q",
+    "ownerOnly": "Faqat egasi ko'radi"
   },
   "history": {
     "countSales": "{{count}} sotuv",
@@ -512,7 +539,23 @@
     "exporting": "Tayyorlanmoqda...",
     "exportEmpty": "Eksport uchun mahsulot yo'q",
     "exportDone": "Fayl yuklab olindi",
-    "exportError": "Eksport xatosi"
+    "exportError": "Eksport xatosi",
+    "sectionGeneral": "Umumiy",
+    "sectionNotifications": "Bildirishnomalar",
+    "sectionCashiers": "Kassirlar",
+    "rowLanguage": "Interfeys tili",
+    "rowTheme": "Mavzu (Dizayn)",
+    "rowPrinter": "Printer va Cheklar",
+    "rowPrinterSub": "Bluetooth, termal printer, test chek",
+    "staffEmailPlaceholder": "kassir@email.com",
+    "removeStaffTitle": "Xodimni chiqarish",
+    "tgOpenedTitle": "Telegram ochildi",
+    "tgOpenedBody": "Botda «Start» bosing, so'ng bu yerga qayting.",
+    "tgConnectFailed": "Ulanmadi",
+    "tgLinkFailed": "Havola olinmadi",
+    "tgSaveFailed": "Saqlanmadi",
+    "tgConnectedShort": "Ulangan",
+    "tgNotConnectedShort": "Ulanmagan"
   },
   "admin": {
     "title": "Super-admin paneli",
@@ -808,7 +851,8 @@
     "discard": "Bekor qilish",
     "synced": "{{count}} ta offline sotuv sinxronlandi",
     "failedToast": "{{count}} ta sotuv sinxronlanmadi",
-    "queuedToast": "Sotuv navbatga qo'shildi (internetsiz)"
+    "queuedToast": "Sotuv navbatga qo'shildi (internetsiz)",
+    "sending": "Sotuvlar yuborilmoqda…"
   },
   "shift": {
     "title": "Kassani yopish",
@@ -960,5 +1004,14 @@
     "addCategory": "Kategoriya qo'shish",
     "removeItem": "Ro'yxatdan olib tashlash",
     "chooseImage": "Rasm tanlash"
+  },
+  "notif": {
+    "morning": "Ertalab",
+    "evening": "Kechqurun",
+    "off": "O'chiq",
+    "permDeniedTitle": "Yoqib bo'lmadi",
+    "permDeniedBody": "Bildirishnoma ruxsati berilmadi.",
+    "dailyTitle": "Kunlik eslatma",
+    "dailyHint": "Savdo yakunini belgilangan vaqtda eslatadi"
   }
 }

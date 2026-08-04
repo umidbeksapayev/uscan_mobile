@@ -35,7 +35,10 @@
     "clear": "Тозалаш",
     "delete": "Ўчириш",
     "edit": "Таҳрирлаш",
-    "back": "Орқага"
+    "back": "Орқага",
+    "retry": "Қайта уриниш",
+    "errorOccurred": "Хатолик юз берди",
+    "unexpectedError": "Иловада кутилмаган хато. Қайта уриниб кўринг."
   },
   "nav": {
     "dashboard": "Дашборд",
@@ -132,7 +135,26 @@
     "errInvalidEmail": "Email манзили нотўғри форматда.",
     "errNetwork": "Интернет алоқаси йўқ. Уланишни текшириб қайта уриниб кўринг.",
     "errGeneric": "Хатолик юз берди. Бироздан сўнг қайта уриниб кўринг.",
-    "forgotPassword": "Паролни унутдингизми?"
+    "forgotPassword": "Паролни унутдингизми?",
+    "emailPlaceholder": "email@misol.uz",
+    "emailRequired": "Емайлни киритинг.",
+    "notConfigured": "Supabase созланмаган (.env).",
+    "forgotTitle": "Паролни тиклаш",
+    "forgotSubtitle": "Рўйхатдан ўтган емайлингизни киритинг — тиклаш ҳаволасини юборамиз",
+    "forgotSend": "Ҳавола юбориш",
+    "linkSentTitle": "Ҳавола юборилди",
+    "linkSentBody": "{{email}} манзилига паролни тиклаш ҳаволаси юборилди. Емайлингизни текширинг ва ҳаволани босиб янги парол ўрнатинг.",
+    "backToLogin": "Кириш экранига қайтиш",
+    "checkingLink": "Ҳавола текширилмоқда...",
+    "linkInvalidTitle": "Ҳавола яроқсиз",
+    "linkInvalidBody": "Ҳавола муддати ўтган ёки нотўғри. Қайтадан сўранг.",
+    "requestAgain": "Қайтадан сўраш",
+    "newPasswordTitle": "Янги парол",
+    "newPasswordSubtitle": "Ҳисобингиз учун янги парол ўрнатинг",
+    "newPasswordLabel": "Янги парол",
+    "confirmPasswordLabel": "Паролни тасдиқланг",
+    "passwordsMismatch": "Пароллар мос келмади.",
+    "pickShop": "Дўконни танланг"
   },
   "catalog": {
     "export": "Экспорт",
@@ -290,7 +312,10 @@
     "payCard": "Пластик",
     "payQr": "QR тўлов",
     "payCredit": "Насия",
-    "selectCustomerForCredit": "Насия учун мижозни танланг"
+    "selectCustomerForCredit": "Насия учун мижозни танланг",
+    "saleErrorTitle": "Сотув хатоси",
+    "noCustomerTitle": "Мижоз танланмаган",
+    "cartErrorTitle": "Сават хатоси"
   },
   "qr": {
     "title": "QR орқали тўлов",
@@ -406,7 +431,8 @@
     "month": "Ой",
     "sold": "Сотилди",
     "notSold": "Сотилмаган",
-    "noProducts": "Маҳсулот йўқ"
+    "noProducts": "Маҳсулот йўқ",
+    "noSalesPeriod": "Бу даврда сотув йўқ"
   },
   "reports": {
     "title": "Ҳисоботлар",
@@ -417,7 +443,8 @@
     "sales": "Сотувлар",
     "revenueDynamics": "Тушум ва Фойда динамикаси",
     "topProducts": "Энг кўп тушум келтирган маҳсулотлар",
-    "noSales": "Бу даврда сотувлар йўқ"
+    "noSales": "Бу даврда сотувлар йўқ",
+    "ownerOnly": "Фақат эгаси кўради"
   },
   "history": {
     "countSales": "{{count}} сотув",
@@ -512,7 +539,23 @@
     "exporting": "Тайёрланмоқда...",
     "exportEmpty": "Экспорт учун маҳсулот йўқ",
     "exportDone": "Файл юклаб олинди",
-    "exportError": "Экспорт хатоси"
+    "exportError": "Экспорт хатоси",
+    "sectionGeneral": "Умумий",
+    "sectionNotifications": "Билдиришномалар",
+    "sectionCashiers": "Кассирлар",
+    "rowLanguage": "Интерфейс тили",
+    "rowTheme": "Мавзу (Дизайн)",
+    "rowPrinter": "Принтер ва Чеклар",
+    "rowPrinterSub": "Bluetooth, термал принтер, тест чек",
+    "staffEmailPlaceholder": "kassir@email.com",
+    "removeStaffTitle": "Ходимни чиқариш",
+    "tgOpenedTitle": "Телеграм очилди",
+    "tgOpenedBody": "Ботда «Start» босинг, сўнг бу ерга қайтинг.",
+    "tgConnectFailed": "Уланмади",
+    "tgLinkFailed": "Ҳавола олинмади",
+    "tgSaveFailed": "Сақланмади",
+    "tgConnectedShort": "Уланган",
+    "tgNotConnectedShort": "Уланмаган"
   },
   "admin": {
     "title": "Супер-админ панели",
@@ -808,7 +851,8 @@
     "discard": "Бекор қилиш",
     "synced": "{{count}} та офлайн сотув синхронланди",
     "failedToast": "{{count}} та сотув синхронланмади",
-    "queuedToast": "Сотув навбатга қўшилди (интернетсиз)"
+    "queuedToast": "Сотув навбатга қўшилди (интернетсиз)",
+    "sending": "Сотувлар юборилмоқда…"
   },
   "shift": {
     "title": "Кассани ёпиш",
@@ -960,5 +1004,14 @@
     "addCategory": "Категория қўшиш",
     "removeItem": "Рўйхатдан олиб ташлаш",
     "chooseImage": "Расм танлаш"
+  },
+  "notif": {
+    "morning": "Эрталаб",
+    "evening": "Кечқурун",
+    "off": "Ўчиқ",
+    "permDeniedTitle": "Ёқиб бўлмади",
+    "permDeniedBody": "Билдиришнома рухсати берилмади.",
+    "dailyTitle": "Кунлик эслатма",
+    "dailyHint": "Савдо якунини белгиланган вақтда эслатади"
   }
 }

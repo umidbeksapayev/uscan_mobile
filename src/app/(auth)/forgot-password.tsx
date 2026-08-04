@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -18,6 +19,7 @@ export default function ForgotPasswordScreen() {
   const colors = useColors();
 
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -26,11 +28,11 @@ export default function ForgotPasswordScreen() {
   async function onSubmit() {
     setErrorMsg(null);
     if (!email.trim()) {
-      setErrorMsg("Emailni kiriting.");
+      setErrorMsg(t("auth.emailRequired"));
       return;
     }
     if (!isSupabaseConfigured) {
-      setErrorMsg("Supabase sozlanmagan (.env).");
+      setErrorMsg(t("auth.notConfigured"));
       return;
     }
 
@@ -57,11 +59,10 @@ export default function ForgotPasswordScreen() {
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Bu ekran hali tarjima qilinmagan (Bosqich 4) — yorliq vaqtincha o'zbekcha. */}
         <Pressable
           onPress={() => router.back()}
           accessibilityRole="button"
-          accessibilityLabel="Orqaga"
+          accessibilityLabel={t("common.back")}
           className="absolute left-4 top-4 p-2"
           hitSlop={10}
         >
@@ -76,37 +77,36 @@ export default function ForgotPasswordScreen() {
             >
               <Ionicons name="mail-outline" size={36} color={colors.success} />
             </View>
-            <Text className="text-center text-xl font-medium text-ink">Havola yuborildi</Text>
+            <Text className="text-center text-xl font-medium text-ink">{t("auth.linkSentTitle")}</Text>
             <Text className="mt-2 text-center text-sm text-muted">
-              {email.trim()} manziliga parolni tiklash havolasi yuborildi. Emailingizni tekshiring
-              va havolani bosib yangi parol o'rnating.
+              {t("auth.linkSentBody", { email: email.trim() })}
             </Text>
             <Pressable onPress={() => router.replace("/(auth)/login")} className="mt-6 p-2">
-              <Text className="text-sm font-medium text-primary">Kirish ekraniga qaytish</Text>
+              <Text className="text-sm font-medium text-primary">{t("auth.backToLogin")}</Text>
             </Pressable>
           </View>
         ) : (
           <>
-            <Text className="text-center text-2xl font-medium text-ink">Parolni tiklash</Text>
+            <Text className="text-center text-2xl font-medium text-ink">{t("auth.forgotTitle")}</Text>
             <Text className="mb-6 mt-1 text-center text-sm text-muted">
-              Ro'yxatdan o'tgan emailingizni kiriting — tiklash havolasini yuboramiz
+              {t("auth.forgotSubtitle")}
             </Text>
 
             <View style={{ gap: 16 }}>
               <Field
-                label="Email"
+                label={t("auth.email")}
                 value={email}
                 onChangeText={(t) => {
                   setEmail(t);
                   if (errorMsg) setErrorMsg(null);
                 }}
-                placeholder="email@misol.uz"
+                placeholder={t("auth.emailPlaceholder")}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 autoComplete="email"
               />
 
-              <Button label="Havola yuborish" onPress={onSubmit} loading={loading} />
+              <Button label={t("auth.forgotSend")} onPress={onSubmit} loading={loading} />
               {errorMsg ? (
                 <Text className="text-center text-sm text-danger">{errorMsg}</Text>
               ) : null}

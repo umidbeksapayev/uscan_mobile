@@ -2,6 +2,7 @@ import { View, Text, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { formatCurrency } from "@/lib/format";
@@ -22,13 +23,14 @@ type Props = {
 /** QR/ekvayring to'lov oynasi — intent QR ko'rsatadi, holatni polling qiladi. */
 export function QrPaymentSheet({ visible, shopId, items, amount, clientId, onPaid, onClose }: Props) {
   const colors = useColors();
+  const { t } = useTranslation();
 
   const { status, payUrl } = useQrPayment({ shopId, items, amount, clientId, enabled: visible, onPaid });
   const ui = acquiringStatusUI(status);
 
   return (
     <BottomSheet visible={visible} onClose={onClose} contentStyle={{ alignItems: "center" }}>
-          <Text className="mb-1 text-lg font-medium text-ink">QR orqali to'lov</Text>
+          <Text className="mb-1 text-lg font-medium text-ink">{t("qr.title")}</Text>
           <Text className="mb-4 text-2xl font-bold" style={{ color: colors.primary }}>{formatCurrency(amount)}</Text>
 
           <View

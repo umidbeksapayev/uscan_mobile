@@ -4,6 +4,7 @@ import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { useOfflineStore } from "@/lib/offline/offline-store";
 
@@ -12,6 +13,7 @@ type Kind = "info" | "success" | "warn";
 /** Sync holati toast'i (pastda, avtomatik yo'qoladi). */
 export function SyncToast() {
   const colors = useColors();
+  const { t } = useTranslation();
 
   const syncing = useOfflineStore((s) => s.syncing);
   const pendingCount = useOfflineStore((s) => s.pendingCount);
@@ -22,7 +24,7 @@ export function SyncToast() {
   // Yuborilmoqda — faqat haqiqatan navbat bor bo'lsa
   useEffect(() => {
     if (syncing && pendingCount > 0) {
-      setMsg({ text: "Sotuvlar yuborilmoqda…", kind: "info" });
+      setMsg({ text: t("sync.sending"), kind: "info" });
     }
   }, [syncing, pendingCount]);
 

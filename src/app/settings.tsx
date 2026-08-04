@@ -146,6 +146,7 @@ function PermissionsSheet({
   saving: boolean;
 }) {
   const colors = useColors();
+  const { t } = useTranslation();
 
   const [perms, setPerms] = useState<MemberPermissions>({});
   const [seen, setSeen] = useState<string | null>(null);
@@ -244,7 +245,9 @@ function PermissionsSheet({
           {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={{ fontSize: 16, fontWeight: "700", color: "#fff" }}>Saqlash</Text>
+            <Text style={{ fontSize: 16, fontWeight: "700", color: "#fff" }}>
+              {t("common.save")}
+            </Text>
           )}
         </Pressable>
 
@@ -456,7 +459,7 @@ export default function SettingsScreen() {
   function onRemove() {
     if (!editing) return;
     const m = editing;
-    Alert.alert("Xodimni chiqarish", `"${m.email}" do'kondan chiqarilsinmi?`, [
+    Alert.alert(t("settings.removeStaffTitle"), `"${m.email}" do'kondan chiqarilsinmi?`, [
       { text: "Bekor", style: "cancel" },
       {
         text: "Chiqarish",
@@ -522,7 +525,7 @@ export default function SettingsScreen() {
         {/* ══════════════════════════════════════════════
             DO'KON PROFILI
         ══════════════════════════════════════════════ */}
-        <SectionLabel label="Profil" />
+        <SectionLabel label={t("settings.profileSection")} />
         <View
           style={{
             borderRadius: RADIUS,
@@ -585,7 +588,7 @@ export default function SettingsScreen() {
         {/* ══════════════════════════════════════════════
             UMUMIY SOZLAMALAR
         ══════════════════════════════════════════════ */}
-        <SectionLabel label="Umumiy" />
+        <SectionLabel label={t("settings.sectionGeneral")} />
         <View
           style={{
             borderRadius: RADIUS,
@@ -601,7 +604,7 @@ export default function SettingsScreen() {
             icon="language-outline"
             iconBg="rgba(47,128,237,0.12)"
             iconColor={colors.primary}
-            title="Interfeys tili"
+            title={t("settings.rowLanguage")}
             subtitle={currentLangLabel}
             onPress={() => setLangOpen(true)}
           />
@@ -609,7 +612,7 @@ export default function SettingsScreen() {
             icon="color-palette-outline"
             iconBg="rgba(245,158,11,0.12)"
             iconColor="#f59e0b"
-            title="Mavzu (Dizayn)"
+            title={t("settings.rowTheme")}
             subtitle={themeModeLabel}
             onPress={() => setThemeOpen(true)}
           />
@@ -617,8 +620,8 @@ export default function SettingsScreen() {
             icon="print-outline"
             iconBg="rgba(168,85,247,0.12)"
             iconColor="#9333ea"
-            title="Printer va Cheklar"
-            subtitle="Bluetooth, termal printer, test chek"
+            title={t("settings.rowPrinter")}
+            subtitle={t("settings.rowPrinterSub")}
             onPress={() => router.push("/printer-settings")}
           />
           <SettingRow
@@ -643,7 +646,7 @@ export default function SettingsScreen() {
         {/* ══════════════════════════════════════════════
             BILDIRISHNOMALAR
         ══════════════════════════════════════════════ */}
-        <SectionLabel label="Bildirishnomalar" />
+        <SectionLabel label={t("settings.sectionNotifications")} />
         <View style={{ gap: 10, marginBottom: 20 }}>
           <LocalReminderCard />
           {isOwner && active?.shop ? <TelegramSummaryCard shop={active.shop} /> : null}
@@ -672,7 +675,7 @@ export default function SettingsScreen() {
           </View>
         ) : (
           <>
-            <SectionLabel label="Kassirlar" />
+            <SectionLabel label={t("settings.sectionCashiers")} />
 
             {/* Email qo'shish — kompakt inline karta */}
             <View
@@ -695,7 +698,7 @@ export default function SettingsScreen() {
               <TextInput
                 value={email}
                 onChangeText={setEmail}
-                placeholder="kassir@email.com"
+                placeholder={t("settings.staffEmailPlaceholder")}
                 placeholderTextColor={colors.tabInactive}
                 style={{
                   flex: 1,

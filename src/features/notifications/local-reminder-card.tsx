@@ -1,25 +1,28 @@
 import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { toast } from "@/lib/toast";
 import { setDailySummaryReminder, getDailySlot } from "./notify";
 import type { ReminderSlot } from "./notify-math";
 
+/** Yorliq matni tarjima kaliti sifatida saqlanadi — til almashganda yangilanadi. */
 const OPTIONS: {
   value: ReminderSlot;
-  label: string;
+  labelKey: string;
   time: string;
   icon: keyof typeof Ionicons.glyphMap;
 }[] = [
-  { value: "morning", label: "Ertalab", time: "09:00", icon: "sunny-outline" },
-  { value: "evening", label: "Kechqurun", time: "21:00", icon: "moon-outline" },
-  { value: "off", label: "O'chiq", time: "—", icon: "notifications-off-outline" },
+  { value: "morning", labelKey: "notif.morning", time: "09:00", icon: "sunny-outline" },
+  { value: "evening", labelKey: "notif.evening", time: "21:00", icon: "moon-outline" },
+  { value: "off", labelKey: "notif.off", time: "—", icon: "notifications-off-outline" },
 ];
 
 export function LocalReminderCard() {
   const colors = useColors();
+  const { t } = useTranslation();
 
   const [slot, setSlot] = useState<ReminderSlot>(getDailySlot());
   const [saving, setSaving] = useState(false);
@@ -33,7 +36,7 @@ export function LocalReminderCard() {
       const ok = await setDailySummaryReminder(value);
       if (!ok) {
         setSlot(prev);
-        toast.error("Yoqib bo'lmadi", "Bildirishnoma ruxsati berilmadi.");
+        toast.error(t("notif.permDeniedTitle"), t("notif.permDeniedBody"));
       }
     } finally {
       setSaving(false);
@@ -75,10 +78,10 @@ export function LocalReminderCard() {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
-            Kunlik eslatma
+            {t("notif.dailyTitle")}
           </Text>
           <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
-            Savdo yakunini belgilangan vaqtda eslatadi
+            {t("notif.dailyHint")}
           </Text>
         </View>
       </View>
@@ -142,7 +145,7 @@ export function LocalReminderCard() {
                     lineHeight: 13,
                   }}
                 >
-                  {o.label}
+                  {t(o.labelKey)}
                 </Text>
               </View>
             </Pressable>

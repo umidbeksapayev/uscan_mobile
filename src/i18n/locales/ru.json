@@ -35,7 +35,10 @@
     "clear": "Очистить",
     "delete": "Удалить",
     "edit": "Редактировать",
-    "back": "Назад"
+    "back": "Назад",
+    "retry": "Повторить",
+    "errorOccurred": "Произошла ошибка",
+    "unexpectedError": "Непредвиденная ошибка в приложении. Попробуйте снова."
   },
   "nav": {
     "dashboard": "Дашборд",
@@ -132,7 +135,26 @@
     "errInvalidEmail": "Неверный формат email.",
     "errNetwork": "Нет соединения с интернетом. Проверьте подключение и повторите.",
     "errGeneric": "Произошла ошибка. Повторите попытку позже.",
-    "forgotPassword": "Забыли пароль?"
+    "forgotPassword": "Забыли пароль?",
+    "emailPlaceholder": "email@primer.uz",
+    "emailRequired": "Введите email.",
+    "notConfigured": "Supabase не настроен (.env).",
+    "forgotTitle": "Восстановление пароля",
+    "forgotSubtitle": "Введите email, указанный при регистрации — отправим ссылку для сброса",
+    "forgotSend": "Отправить ссылку",
+    "linkSentTitle": "Ссылка отправлена",
+    "linkSentBody": "Ссылка для сброса пароля отправлена на {{email}}. Проверьте почту и перейдите по ссылке, чтобы задать новый пароль.",
+    "backToLogin": "Вернуться ко входу",
+    "checkingLink": "Проверка ссылки...",
+    "linkInvalidTitle": "Ссылка недействительна",
+    "linkInvalidBody": "Срок действия ссылки истёк или она неверна. Запросите заново.",
+    "requestAgain": "Запросить заново",
+    "newPasswordTitle": "Новый пароль",
+    "newPasswordSubtitle": "Задайте новый пароль для вашего аккаунта",
+    "newPasswordLabel": "Новый пароль",
+    "confirmPasswordLabel": "Подтвердите пароль",
+    "passwordsMismatch": "Пароли не совпадают.",
+    "pickShop": "Выберите магазин"
   },
   "catalog": {
     "export": "Экспорт",
@@ -290,7 +312,10 @@
     "payCard": "Карта",
     "payQr": "QR оплата",
     "payCredit": "Долг",
-    "selectCustomerForCredit": "Выберите клиента для долга"
+    "selectCustomerForCredit": "Выберите клиента для долга",
+    "saleErrorTitle": "Ошибка продажи",
+    "noCustomerTitle": "Клиент не выбран",
+    "cartErrorTitle": "Ошибка корзины"
   },
   "qr": {
     "title": "Оплата по QR",
@@ -406,7 +431,8 @@
     "month": "Месяц",
     "sold": "Продано",
     "notSold": "Не продавался",
-    "noProducts": "Нет товаров"
+    "noProducts": "Нет товаров",
+    "noSalesPeriod": "За этот период продаж нет"
   },
   "reports": {
     "title": "Отчёты",
@@ -417,7 +443,8 @@
     "sales": "Продажи",
     "revenueDynamics": "Динамика выручки и прибыли",
     "topProducts": "Товары с наибольшей выручкой",
-    "noSales": "За этот период продаж нет"
+    "noSales": "За этот период продаж нет",
+    "ownerOnly": "Видит только владелец"
   },
   "history": {
     "countSales": "{{count}} продаж",
@@ -512,7 +539,23 @@
     "exporting": "Подготовка...",
     "exportEmpty": "Нет товаров для экспорта",
     "exportDone": "Файл скачан",
-    "exportError": "Ошибка экспорта"
+    "exportError": "Ошибка экспорта",
+    "sectionGeneral": "Общее",
+    "sectionNotifications": "Уведомления",
+    "sectionCashiers": "Кассиры",
+    "rowLanguage": "Язык интерфейса",
+    "rowTheme": "Тема (Дизайн)",
+    "rowPrinter": "Принтер и чеки",
+    "rowPrinterSub": "Bluetooth, термопринтер, тестовый чек",
+    "staffEmailPlaceholder": "kassir@email.com",
+    "removeStaffTitle": "Исключить сотрудника",
+    "tgOpenedTitle": "Telegram открыт",
+    "tgOpenedBody": "Нажмите «Start» в боте, затем вернитесь сюда.",
+    "tgConnectFailed": "Не подключено",
+    "tgLinkFailed": "Не удалось получить ссылку",
+    "tgSaveFailed": "Не сохранено",
+    "tgConnectedShort": "Подключено",
+    "tgNotConnectedShort": "Не подключено"
   },
   "admin": {
     "title": "Панель супер-админа",
@@ -808,7 +851,8 @@
     "discard": "Отменить",
     "synced": "Синхронизировано продаж: {{count}}",
     "failedToast": "Не синхронизировано продаж: {{count}}",
-    "queuedToast": "Продажа добавлена в очередь (офлайн)"
+    "queuedToast": "Продажа добавлена в очередь (офлайн)",
+    "sending": "Отправка продаж…"
   },
   "shift": {
     "title": "Закрытие кассы",
@@ -960,5 +1004,14 @@
     "addCategory": "Добавить категорию",
     "removeItem": "Убрать из списка",
     "chooseImage": "Выбрать изображение"
+  },
+  "notif": {
+    "morning": "Утром",
+    "evening": "Вечером",
+    "off": "Выкл",
+    "permDeniedTitle": "Не удалось включить",
+    "permDeniedBody": "Разрешение на уведомления не выдано.",
+    "dailyTitle": "Ежедневное напоминание",
+    "dailyHint": "Напомнит об итогах продаж в заданное время"
   }
 }
