@@ -1023,6 +1023,13 @@
     "pushDenied": "Рухсат берилмади",
     "pushUnavailable": "Бу build да мавжуд эмас (dev build керак)",
     "pushEnabled": "Push ёқилди",
-    "pushScheduleHint": "Юбориш вақти қуйидаги «Кунлик хулоса вақти» дан олинади"
+    "pushScheduleHint": "Юбориш вақти қуйидаги «Кунлик хулоса вақти» дан олинади",
+    "errNoModule": "Бу build да push модули йўқ (dev build керак)",
+    "errNoProjectId": "EAS лойиҳа ID топилмади",
+    "errDenied": "Билдиришнома рухсати берилмади",
+    "errNoSession": "Сессия топилмади — қайта киринг",
+    "errTokenFailed": "Токен олинмади — Android учун EAS да FCM (Firebase) созланиши керак",
+    "errSaveFailed": "Токен сақланмади",
+    "pushFailedTitle": "Push ёқилмади"
   }
 }
