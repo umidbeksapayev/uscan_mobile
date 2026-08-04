@@ -288,11 +288,21 @@ export default function KatalogScreen() {
               autoCapitalize="none"
             />
             {search ? (
-              <Pressable onPress={() => setSearch("")} hitSlop={8}>
+              <Pressable
+                onPress={() => setSearch("")}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t("a11y.clearSearch", "Qidiruvni tozalash")}
+              >
                 <Ionicons name="close-circle" size={18} color={colors.tabInactive} />
               </Pressable>
             ) : (
-              <Pressable onPress={onScan} hitSlop={8}>
+              <Pressable
+                onPress={onScan}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t("a11y.scan", "Shtrix-kodni skanerlash")}
+              >
                 <Ionicons name="barcode-outline" size={22} color={colors.primary} />
               </Pressable>
             )}
@@ -300,6 +310,9 @@ export default function KatalogScreen() {
 
           <Pressable
             onPress={() => setShowFilters((v) => !v)}
+            accessibilityRole="button"
+            accessibilityLabel={t("a11y.filters", "Filtrlar")}
+            accessibilityState={{ expanded: showFilters }}
             style={{
               height: 48,
               width: 48,
@@ -396,6 +409,8 @@ export default function KatalogScreen() {
             <View className="flex-row items-center gap-3">
               <Pressable
                 onPress={() => setCopies((c) => Math.max(1, c - 1))}
+                accessibilityRole="button"
+                accessibilityLabel={t("a11y.decrease", "Kamaytirish")}
                 className="h-9 w-9 items-center justify-center rounded-xl bg-bg"
               >
                 <Ionicons name="remove" size={18} color={colors.ink} />
@@ -408,6 +423,8 @@ export default function KatalogScreen() {
               </Text>
               <Pressable
                 onPress={() => setCopies((c) => Math.min(50, c + 1))}
+                accessibilityRole="button"
+                accessibilityLabel={t("a11y.increase", "Ko'paytirish")}
                 className="h-9 w-9 items-center justify-center rounded-xl bg-primary-tint"
               >
                 <Ionicons name="add" size={18} color={colors.primary} />

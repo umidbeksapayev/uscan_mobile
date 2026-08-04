@@ -52,7 +52,12 @@ function SupplyCartRow({ item }: { item: SupplyItem }) {
           </View>
         )}
         <Text className="flex-1 text-base font-medium text-ink" numberOfLines={1}>{item.product.name}</Text>
-        <Pressable onPress={() => remove(item.product.id)} hitSlop={8}>
+        <Pressable
+          onPress={() => remove(item.product.id)}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={`${t("a11y.removeItem", "Ro'yxatdan olib tashlash")}: ${item.product.name}`}
+        >
           <Ionicons name="trash-outline" size={20} color={colors.danger} />
         </Pressable>
       </View>
@@ -137,7 +142,13 @@ export default function SupplyScreen() {
     return (
       <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
         <View className="flex-row items-center gap-2 px-3 py-2">
-          <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
+          <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.back", "Orqaga")}
+          className="h-10 w-10 items-center justify-center"
+        >
             <Ionicons name="chevron-back" size={26} color={colors.ink} />
           </Pressable>
           <Text className="text-xl font-semibold text-ink">{t("purchases.title")}</Text>
@@ -154,11 +165,23 @@ export default function SupplyScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       {/* Header */}
       <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.back", "Orqaga")}
+          className="h-10 w-10 items-center justify-center"
+        >
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
         <Text className="flex-1 text-xl font-semibold text-ink">{t("purchases.title")}</Text>
-        <Pressable onPress={() => router.push("/suppliers")} hitSlop={8} className="h-10 w-10 items-center justify-center">
+        <Pressable
+          onPress={() => router.push("/suppliers")}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t("a11y.suppliersList", "Ta'minotchilar ro'yxati")}
+          className="h-10 w-10 items-center justify-center"
+        >
           <Ionicons name="people-outline" size={22} color={colors.kirim} />
         </Pressable>
       </View>

@@ -59,7 +59,13 @@ export default function SuppliersScreen() {
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.back", "Orqaga")}
+          className="h-10 w-10 items-center justify-center"
+        >
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
         <Text className="text-xl font-semibold text-ink">{t("suppliers.title")}</Text>
@@ -89,6 +95,8 @@ export default function SuppliersScreen() {
 
       <Pressable
         onPress={openNew}
+        accessibilityRole="button"
+        accessibilityLabel={t("a11y.addSupplier", "Yangi ta'minotchi qo'shish")}
         style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.kirim, alignItems: "center", justifyContent: "center", ...shadowMd(colors.shadow) }}
       >
         <Ionicons name="add" size={30} color="#fff" />

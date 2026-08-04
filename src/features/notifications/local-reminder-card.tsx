@@ -102,6 +102,8 @@ export function LocalReminderCard() {
               key={o.value}
               onPress={() => onChoose(o.value)}
               disabled={saving}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: active, disabled: saving }}
               style={{
                 flex: 1,
                 flexDirection: "row",

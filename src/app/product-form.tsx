@@ -137,7 +137,12 @@ export default function ProductFormScreen() {
     return (
       <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
         <View className="flex-row items-center gap-3 px-4 py-2">
-          <Pressable onPress={() => router.back()} hitSlop={10}>
+          <Pressable
+          onPress={() => router.back()}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.back", "Orqaga")}
+        >
             <Ionicons name="arrow-back" size={24} color={colors.ink} />
           </Pressable>
           <Text className="text-xl font-medium text-ink">
@@ -191,7 +196,12 @@ export default function ProductFormScreen() {
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top", "bottom"]}>
       <View className="flex-row items-center gap-3 px-4 py-2">
-        <Pressable onPress={() => router.back()} hitSlop={10}>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.back", "Orqaga")}
+        >
           <Ionicons name="arrow-back" size={24} color={colors.ink} />
         </Pressable>
         <Text className="text-xl font-medium text-ink">
@@ -206,7 +216,13 @@ export default function ProductFormScreen() {
         extraScrollHeight={24}
       >
         {/* Rasm */}
-        <Pressable onPress={chooseImage} className="mb-4 self-center" style={{ width: 120, height: 120 }}>
+        <Pressable
+          onPress={chooseImage}
+          accessibilityRole="button"
+          accessibilityLabel={t("a11y.chooseImage", "Rasm tanlash")}
+          className="mb-4 self-center"
+          style={{ width: 120, height: 120 }}
+        >
           {uploading ? (
             <View className="h-full w-full items-center justify-center rounded-2xl border border-line bg-surface">
               <ActivityIndicator color={colors.primary} />
@@ -262,6 +278,8 @@ export default function ProductFormScreen() {
               />
               <Pressable
                 onPress={() => router.push("/scanner?mode=form")}
+                accessibilityRole="button"
+                accessibilityLabel={t("a11y.scan", "Shtrix-kodni skanerlash")}
                 className="items-center justify-center rounded-xl bg-primary-tint"
                 style={{ width: 52, height: 52 }}
               >

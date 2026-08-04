@@ -133,6 +133,8 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
           <View className="flex-row items-center gap-3">
             <Pressable
               onPress={() => decrement(item.product.id)}
+              accessibilityRole="button"
+              accessibilityLabel={`${t("a11y.decrease", "Kamaytirish")}: ${item.product.name}`}
               className="items-center justify-center rounded-xl bg-bg"
               style={{ height: 44, width: 44 }}
             >
@@ -143,6 +145,8 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
             </Text>
             <Pressable
               onPress={() => increment(item.product.id)}
+              accessibilityRole="button"
+              accessibilityLabel={`${t("a11y.increase", "Ko'paytirish")}: ${item.product.name}`}
               className="items-center justify-center rounded-xl bg-primary-tint"
               style={{ height: 44, width: 44 }}
             >
@@ -307,7 +311,12 @@ export default function SotuvScreen() {
             autoCapitalize="none"
           />
           {search ? (
-            <Pressable onPress={() => setSearch("")} hitSlop={8}>
+            <Pressable
+              onPress={() => setSearch("")}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={t("a11y.clearSearch", "Qidiruvni tozalash")}
+            >
               <Ionicons name="close-circle" size={18} color={colors.tabInactive} />
             </Pressable>
           ) : null}

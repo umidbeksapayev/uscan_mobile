@@ -89,7 +89,13 @@ export default function NasiyaScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       {/* Header */}
       <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.back", "Orqaga")}
+          className="h-10 w-10 items-center justify-center"
+        >
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
         <Text className="text-xl font-semibold text-ink">{t("menu.debtBook")}</Text>
@@ -132,7 +138,12 @@ export default function NasiyaScreen() {
                 autoCapitalize="none"
               />
               {search ? (
-                <Pressable onPress={() => setSearch("")} hitSlop={8}>
+                <Pressable
+                  onPress={() => setSearch("")}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("a11y.clearSearch", "Qidiruvni tozalash")}
+                >
                   <Ionicons name="close-circle" size={18} color={colors.tabInactive} />
                 </Pressable>
               ) : null}
@@ -172,6 +183,8 @@ export default function NasiyaScreen() {
           {/* FAB — yangi mijoz */}
           <Pressable
             onPress={() => router.push("/customer-form")}
+            accessibilityRole="button"
+            accessibilityLabel={t("a11y.addCustomer", "Yangi mijoz qo'shish")}
             style={{
               position: "absolute",
               right: 20,

@@ -57,7 +57,14 @@ export default function ForgotPasswordScreen() {
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
         keyboardShouldPersistTaps="handled"
       >
-        <Pressable onPress={() => router.back()} className="absolute left-4 top-4 p-2" hitSlop={10}>
+        {/* Bu ekran hali tarjima qilinmagan (Bosqich 4) — yorliq vaqtincha o'zbekcha. */}
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Orqaga"
+          className="absolute left-4 top-4 p-2"
+          hitSlop={10}
+        >
           <Ionicons name="arrow-back" size={24} color={colors.ink} />
         </Pressable>
 
