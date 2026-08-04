@@ -1,56 +1,115 @@
-# Welcome to your Expo app 👋
+# uscan mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Kichik va o'rta do'konlar uchun **mobil savdo nuqtasi (POS)** — React Native + Expo.
+Telefon kamerasi skanerga aylanadi, internet uzilsa ham savdo davom etadi.
 
-## Get started
+**Savdo · Qoldiq · Nasiya · Kirim · Xarajat · Foyda · Hisobot** — bitta ilovada.
 
-1. Install dependencies
+> `ShopScan_1v` (Next.js) veb ilovasi bilan **bir xil Supabase backend**dan
+> foydalanadi. Backend qayta qurilmaydi — bu yangi client.
 
-   ```bash
-   npm install
-   ```
+📖 **To'liq ma'lumot:** [`docs/UMUMIY_MALUMOT.md`](docs/UMUMIY_MALUMOT.md)
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Tez boshlash
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+```bash
+cp .env.example .env
+```
 
-### Other setup steps
+`.env` ichida:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| O'zgaruvchi | Vazifasi |
+|---|---|
+| `EXPO_PUBLIC_SUPABASE_URL` | Supabase loyiha manzili (web bilan bir xil) |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Anon key — public, RLS himoyalaydi |
+| `EXPO_PUBLIC_WEB_URL` | Web deploy manzili. Bo'sh bo'lsa QR ekvayring o'chadi |
 
-## Learn more
+```bash
+npm start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+> ⚠️ **Expo Go yetmaydi.** Kamera (skaner) va Bluetooth chek chop etish native
+> modul talab qiladi — **custom dev build** (`expo-dev-client`) kerak.
+> Build EAS bulutida qilinadi.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## Skriptlar
 
-Join our community of developers creating universal apps.
+| Buyruq | Vazifasi |
+|---|---|
+| `npm start` | Expo dev server |
+| `npm run android` / `npm run ios` | To'g'ridan-to'g'ri platformada ochish |
+| `npm test` | Jest — 33 fayl / 213 test |
+| `npm run test:watch` | Test watch rejimi |
+| `npm run lint` | `expo lint` |
+| `npx tsc --noEmit` | Tip tekshiruvi |
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Commit'dan oldin **`tsc` va `jest` yashil** bo'lishi shart.
+
+---
+
+## Struktura
+
+```
+src/
+├── app/            Expo Router yo'llari — (auth) · (tabs) · qolgan ekranlar
+├── components/     Umumiy UI (tab-bar, bottom-sheet, button, field, ...)
+├── features/       Biznes modullar — har birida api + hook + math + UI
+│                   auth · sell · products · catalog · customers · suppliers
+│                   supply · history · shift · expenses · dashboard · stats
+│                   print · labels · notifications · telegram · offline
+├── lib/            supabase · format · offline/ · uuid · toast
+├── i18n/           Tarjimalar: uz-Latn · uz-Cyrl · ru
+├── theme/          colors.ts (palitra) · theme-store.ts (tungi rejim)
+└── types/          database.ts
+```
+
+**Nomlash:** `use-*.ts` (hook) · `*-api.ts` (server) · `*-math.ts` (sof
+funksiya, test qilinadi) · `*-sheet.tsx` (pastdan chiqadigan oyna).
+
+Sof matematika API'dan ajratilgan — pul, vazn, qarz va farq hisoblari
+qurilmasiz test qilinadi.
+
+---
+
+## Muhim qoidalar
+
+- **Pul DB'da `DECIMAL` so'm** (tiyin EMAS), vazn — `DECIMAL` kg.
+  `formatCurrency(som)` / `formatWeight(kg)`. Savat summasi client'da tiyinda
+  yaxlitlanadi (float drift uchun).
+- **`cost_price` (tan narxi) kassir ekranida HECH QACHON ko'rsatilmaydi** —
+  UI'da yashirish yetarli emas, so'rovlar ham bu ustunni tanlamaydi.
+- **RLS** avtomatik `shop_id` bo'yicha filtrlaydi + faol-do'kon almashtirish.
+- Offline sotuvda **`client_id` idempotency** (migration 019).
+- Raqam formati: **bo'sh joy** (`2 450 000`), valyuta — **so'm**.
+- Brend: `#2F80ED` (urg'u) · `#0F3D6E` (asosiy) · `#7DB4F5` (ochiq).
+- Pastki navigatsiya — **qat'iy 5 tugma**: Bosh · Sotuv · Katalog · Tarix · Ko'proq.
+
+---
+
+## Hujjatlar
+
+| Fayl | Mazmun |
+|---|---|
+| [`docs/UMUMIY_MALUMOT.md`](docs/UMUMIY_MALUMOT.md) | **To'liq ma'lumot** — maqsad, foydalar, imkoniyatlar, ekranlar, arxitektura |
+| [`docs/AUDIT_AND_ROADMAP_2026-07.md`](docs/AUDIT_AND_ROADMAP_2026-07.md) | Muhandislik auditi va gap-analiz |
+| [`docs/SPRINT_PLAN_2026-07.md`](docs/SPRINT_PLAN_2026-07.md) | Sprint rejasi va holati |
+| [`CLAUDE.md`](CLAUDE.md) | AI yordamchisi uchun loyiha qoidalari |
+
+---
+
+## Ish tartibi
+
+```
+branch → kichik Conventional Commits (o'zbekcha) → tsc + jest yashil → PR → merge
+```
+
+Backend migratsiyalar web repo'da (`ShopScan_1v/supabase/`) raqam tartibida
+**qo'lda** ishga tushiriladi.
