@@ -27,6 +27,7 @@ import { PERMISSION_LABELS } from "@/features/auth/permissions";
 import { useStaff, useAddMember, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
 import { TelegramSummaryCard } from "@/features/telegram/telegram-summary-card";
 import { LocalReminderCard } from "@/features/notifications/local-reminder-card";
+import { PushCard } from "@/features/notifications/push-card";
 import { FeedbackSheet } from "@/features/feedback/feedback-sheet";
 import type { MemberPermissions, ShopMemberRow } from "@/types/database";
 
@@ -648,6 +649,7 @@ export default function SettingsScreen() {
         ══════════════════════════════════════════════ */}
         <SectionLabel label={t("settings.sectionNotifications")} />
         <View style={{ gap: 10, marginBottom: 20 }}>
+          <PushCard />
           <LocalReminderCard />
           {isOwner && active?.shop ? <TelegramSummaryCard shop={active.shop} /> : null}
         </View>

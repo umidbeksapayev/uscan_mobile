@@ -1012,6 +1012,14 @@
     "permDeniedTitle": "Yoqib bo'lmadi",
     "permDeniedBody": "Bildirishnoma ruxsati berilmadi.",
     "dailyTitle": "Kunlik eslatma",
-    "dailyHint": "Savdo yakunini belgilangan vaqtda eslatadi"
+    "dailyHint": "Savdo yakunini belgilangan vaqtda eslatadi",
+    "pushTitle": "Push bildirishnoma",
+    "pushHint": "Kunlik xulosa serverdan keladi — ilova yopiq bo'lsa ham",
+    "pushOn": "Yoqilgan",
+    "pushOff": "O'chiq",
+    "pushEnable": "Yoqish",
+    "pushDenied": "Ruxsat berilmadi",
+    "pushUnavailable": "Bu build'da mavjud emas (dev build kerak)",
+    "pushEnabled": "Push yoqildi"
   }
 }

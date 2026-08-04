@@ -367,7 +367,8 @@ ma'lumotlar bazasi. Mobil ilova backendni qayta qurmaydi, faqat yangi client.
 
 - **Migratsiyalar web repo'da** (`ShopScan_1v/supabase/`) raqam tartibida
   qo'lda ishga tushiriladi. Mobil uchun qo'shilganlari: `030_shift_close.sql`
-  (kassa yopish), `031_expenses.sql` (xarajatlar).
+  (kassa yopish), `031_expenses.sql` (xarajatlar), `032_push_tokens.sql`
+  (push bildirishnoma).
 - Asosiy POS oqimlarida (sotuv, katalog, kirim, qaytarish, nasiya, dashboard)
   **to'liq parity** mavjud.
 - Ataylab faqat webda qolganlar: super-admin panel, QR/ekvayring kalitlarini
@@ -377,18 +378,28 @@ ma'lumotlar bazasi. Mobil ilova backendni qayta qurmaydi, faqat yangi client.
 
 ## 13. Holat va keyingi qadamlar
 
-**Bajarilgan:** F0–F11 bosqichlari va audit sprintlari 1–7 — xavfsizlik
+**Bajarilgan:** F0–F11 bosqichlari va audit sprintlari 1–**8** — xavfsizlik
 tuzatishlari, do'kon almashtirish, qayta chek, parol tiklash, tezkor sotuv,
 CSV import/eksport, bildirishnomalar, kassa yopish, xarajatlar, i18n (3 til),
 umumiy BottomSheet, accessibility yorliqlari, tungi rejim.
 
-**Backlogda (Sprint 8):**
+**Sprint 8 (2026-08-04) qo'shganlari:**
 
-- Haqiqiy server-trigger push (EAS remote) — hozir faqat lokal eslatma.
-- Feedback forma (backend `028_feedback.sql` tayyor, faqat UI kerak).
-- Silent `.catch(() => {})` larga log/telemetriya qo'shish.
-- `ListItemCard` unifikatsiyasi, `theme/shadows.ts`, ro'yxatlarda `React.memo`.
+- Fikr-mulohaza formasi (Sozlamalar > Umumiy).
+- Xatolik jurnali + **Diagnostika** ekrani — ilgari jim yutilgan xatolar
+  endi qurilmada saqlanadi va ulashiladi (telemetriya yuborilmaydi).
+- `theme/shadows.ts` soya tokenlari, `ListItemCard`/`ListRow`/`Avatar`/
+  `EmptyState` umumiy komponentlari, ro'yxatlarda `React.memo`.
+- 34 ta ikonka-tugmaga accessibility yorlig'i va roli.
+- i18n to'liq yopildi + `locale-parity` testi (kalitlar drift'ini ushlaydi).
+- **Push bildirishnoma** — kunlik xulosa serverdan (migration `032`,
+  web `lib/push/`, mavjud ikkala cron route'ga ulangan). Lokal eslatma
+  zaxira kanal sifatida saqlanib qoldi.
+
+**Ochiq qolgan:**
+
 - Fiskal/OFD — Payme sandbox ochilganda.
+- ESLint sozlanmagan (`npm run lint` ishlamaydi) — alohida ish.
 
 Batafsil: `docs/AUDIT_AND_ROADMAP_2026-07.md` · `docs/SPRINT_PLAN_2026-07.md`
 

@@ -85,15 +85,35 @@ naqd, farqni qayd etish. Vaqt yetsa — xarajat kundaligi.
 
 **Branch:** `feat/i18n`, `refactor/bottom-sheet`, `feat/catalog-export` (alohida PR'lar).
 
-## 5. Sprint 8 — Backlog (ixtiyoriy, prioritetlash keyin)
+## 5. Sprint 8 — BAJARILDI (2026-08-04)
 
-- **EAS remote push** — haqiqiy server-trigger push (kam qoldiq/kunlik yakun
-  serverdan). Backend trigger/Edge Function talab qiladi — webteam bilan.
-- **Feedback forma** — backend (`028_feedback.sql`) allaqachon bor, faqat UI.
-- A5 — silent `.catch(() => {})`larga log/telemetriya.
-- A6 — `ListItemCard` unifikatsiya; A7 — `theme/shadows.ts`; A10 — ro'yxat
-  qatorlarida `React.memo`.
-- Fiskal/OFD — Payme sandbox ochilganda.
+> Boshlashda aniqlangan holat: `main`da **CI qizil** edi — Sprint 7
+> kommitlaridan keyin `tsc --noEmit` 4 ta xato berardi. Sprint 8 shuni
+> tuzatishdan boshlandi.
+
+| # | Ish | Branch | Natija |
+|---|---|---|---|
+| 0 | CI'ni yashil qilish | `fix/typecheck-green` | `categoryLabel` imzosi + `noopLock` generic; `typecheck` skripti ✅ |
+| 1 | Feedback forma | `feat/feedback` | `028_feedback.sql` va tarjimalar tayyor edi — faqat UI ✅ |
+| 2a | A5 — xatolik jurnali | `refactor/logger` | `log-buffer.ts` + `logger.ts`, 18 jim `catch` ulandi, Diagnostika ekrani ✅ |
+| 2b | A7 — soya tokenlari | `refactor/theme-shadows` | `theme/shadows.ts` — 5 preset, 12 inline blok ✅ |
+| 2c | A6 — ro'yxat komponentlari | `refactor/list-item-card` | `ListItemCard`/`ListRow`/`Avatar`/`EmptyState` ✅ |
+| 2d | A10 — ro'yxat renderi | `perf/list-render` | 11 `renderItem` → `useCallback`, 4 qator `memo` ✅ |
+| 3 | A8 — accessibility | `feat/a11y-labels` | 34 ta ikonka-tugma; label 54→88, role 0→45 ✅ |
+| 4 | P4 — i18n yakuni | `feat/i18n-final` | Auth ekranlari + 12 komponent; `locale-parity` testi ✅ |
+| 5 | P1 — remote push | `feat/push-remote` + web `feat/push-notifications` | migration **032**, `lib/push/`, 2 cron route ✅ |
+
+**Test holati:** 213 → **245** test / 36 fayl. `tsc` 0 xato.
+
+**Ataylab bajarilmaganlar (sabab bilan):**
+- `getItemLayout` — `ListItemCard` balandligi o'zgaruvchan (subtitle bor/yo'q),
+  noto'g'ri qiymat varaqlashni buzardi.
+- ESLint — umuman o'rnatilmagan; o'rnatishga urinish `unrs-resolver` native
+  binding xatosiga taqaldi. Alohida ish sifatida ajratildi.
+- `uuid.ts` / `use-online.ts` fallback'lari jurnalga ulanmadi — juda tez-tez
+  ishlaydi va 50 qatorli buferni foydali yozuvlardan tozalab yuborardi.
+
+**Ochiq qolgan:** Fiskal/OFD — Payme sandbox ochilganda.
 
 ## 6. Ish tartibi (avvalgi sprintlar uslubida)
 
