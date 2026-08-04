@@ -142,7 +142,7 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
       {/* Divider */}
       <View style={{ height: 1, backgroundColor: colors.line }} />
 
-      {/* Qism: ulash yoki vaqt tanlash */}
+      {/* Ulash — faqat ulanmagan bo'lsa */}
       {!connected ? (
         <View style={{ padding: 12, gap: 8, backgroundColor: colors.bg }}>
           <Pressable
@@ -165,27 +165,42 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
               <>
                 <Ionicons name="paper-plane" size={17} color="#fff" />
                 <Text style={{ fontSize: 14, fontWeight: "700", color: "#fff" }}>
-                  Telegram'ga ulash
+                  {t("settings.tgConnectBtn")}
                 </Text>
               </>
             )}
           </Pressable>
           <Pressable onPress={onRefresh} style={{ alignItems: "center", paddingVertical: 4 }}>
             <Text style={{ fontSize: 12, color: colors.muted }}>
-              Botda «Start» bosdingizmi? → Holatni yangilash
+              {t("settings.tgRefreshHint")}
             </Text>
           </Pressable>
         </View>
-      ) : (
-        /* Chip tugmalar — gorizontal */
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 8,
-            padding: 12,
-            backgroundColor: colors.bg,
-          }}
-        >
+      ) : null}
+
+      {/* Divider — ulash bloki bilan jadval orasida */}
+      {!connected ? <View style={{ height: 1, backgroundColor: colors.line }} /> : null}
+
+      {/*
+        Kunlik xulosa vaqti — Telegram ulanishidan MUSTAQIL.
+        ⚠️ Bu `shops.summary_time` maydonini yozadi va uni HAM Telegram, HAM
+        push kanali o'qiydi (migration 032 `get_push_summaries`). Ilgari bu
+        tanlagich `connected` sharti ichida edi — natijada Telegramni ulamagan
+        ega jadval belgilay olmasdi va push hech qachon yuborilmasdi.
+      */}
+      <View style={{ paddingHorizontal: 12, paddingTop: 10 }}>
+        <Text style={{ fontSize: 11, fontWeight: "600", color: colors.muted }}>
+          {t("settings.summaryTimeLabel")}
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          gap: 8,
+          padding: 12,
+          backgroundColor: colors.bg,
+        }}
+      >
           {TIMES.map((opt) => {
             const activeOpt = time === opt.value;
             return (
@@ -239,8 +254,7 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
               </Pressable>
             );
           })}
-        </View>
-      )}
+      </View>
     </View>
   );
 }
