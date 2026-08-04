@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { shadowGlow } from "@/theme/shadows";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { Logo } from "@/components/logo";
 import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
@@ -224,11 +225,7 @@ export default function HomeScreen() {
           style={{
             height: 56,
             gap: 8,
-            shadowColor: colors.primary,
-            shadowOpacity: 0.3,
-            shadowRadius: 10,
-            shadowOffset: { width: 0, height: 5 },
-            elevation: 6,
+            ...shadowGlow(colors.primary),
           }}
         >
           <Ionicons name="cart" size={20} color="#fff" />

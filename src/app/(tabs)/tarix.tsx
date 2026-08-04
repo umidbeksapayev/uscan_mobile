@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { shadowSm } from "@/theme/shadows";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
 import { useMemberships, useActiveMembership } from "@/features/auth/use-memberships";
@@ -91,11 +92,7 @@ function SaleCard({
       style={{
         borderWidth: 0.5,
         borderColor: colors.line,
-        shadowColor: colors.shadow,
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 2,
+        ...shadowSm(colors.shadow),
       }}
     >
       <Pressable onPress={onToggle} className="flex-row items-center gap-3 p-3">

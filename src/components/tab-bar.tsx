@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 import { useColors } from "@/theme/theme-store";
+import { shadowNav } from "@/theme/shadows";
 import { QueueBadge } from "./queue-badge";
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -32,11 +33,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         className="flex-row items-center rounded-3xl border border-line bg-surface"
         style={{
           height: 62,
-          shadowColor: colors.shadow,
-          shadowOpacity: 0.06,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 4 },
-          elevation: 6,
+          ...shadowNav(colors.shadow),
         }}
       >
         {state.routes.map((route, index) => {

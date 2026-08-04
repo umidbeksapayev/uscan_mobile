@@ -2,6 +2,7 @@ import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useColors } from "@/theme/theme-store";
+import { shadowSm } from "@/theme/shadows";
 import type { AppColors } from "@/theme/colors";
 
 export type StatTone = "brand" | "green" | "amber" | "muted";
@@ -55,11 +56,7 @@ export function StatsCard({
       style={{
         borderWidth: 0.5,
         borderColor: colors.line,
-        shadowColor: colors.shadow,
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 2,
+        ...shadowSm(colors.shadow),
       }}
     >
       <View className="flex-row items-center justify-between">

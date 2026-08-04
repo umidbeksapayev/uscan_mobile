@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { shadowMd } from "@/theme/shadows";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { useExpenses } from "@/features/expenses/use-expenses";
 import { expensesTotal, categoryLabel, type Expense } from "@/features/expenses/expense-math";
@@ -134,7 +135,7 @@ export default function ExpensesScreen() {
       <Pressable
         onPress={openNew}
         accessibilityLabel={t("expenses.addBtnA11y", "Xarajat qo'shish")}
-        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", shadowColor: colors.shadow, shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
+        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", ...shadowMd(colors.shadow) }}
       >
         <Ionicons name="add" size={30} color="#fff" />
       </Pressable>

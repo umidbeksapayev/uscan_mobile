@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
+import { shadowSm, shadowMd } from "@/theme/shadows";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useProducts, type CategoryFilter } from "@/features/catalog/use-products";
@@ -84,11 +85,7 @@ function ProductRow({
       style={{
         borderWidth: selected ? 1.5 : 0.5,
         borderColor: selected ? colors.primary : colors.line,
-        shadowColor: colors.shadow,
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 2,
+        ...shadowSm(colors.shadow),
       }}
     >
       {selectionMode ? (
@@ -440,11 +437,7 @@ export default function KatalogScreen() {
             backgroundColor: colors.primary,
             alignItems: "center",
             justifyContent: "center",
-            shadowColor: colors.shadow,
-            shadowOpacity: 0.18,
-            shadowRadius: 10,
-            shadowOffset: { width: 0, height: 4 },
-            elevation: 6,
+            ...shadowMd(colors.shadow),
           }}
         >
           <Ionicons name="add" size={30} color="#fff" />
