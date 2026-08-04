@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import { storage } from "@/lib/offline/mmkv";
+import { logError } from "@/lib/logger";
 
 export type PrinterType = "system" | "bluetooth";
 
@@ -18,8 +19,10 @@ function load(): PrinterConfig {
   if (raw) {
     try {
       return { ...DEFAULT, ...(JSON.parse(raw) as Partial<PrinterConfig>) };
-    } catch {
-      /* ignore */
+    } catch (e) {
+      // Buzilgan JSON → default sozlama. Foydalanuvchi printer sozlamasini
+      // "o'zi qaytib ketdi" deb ko'radi — sababini jurnalda qoldiramiz.
+      logError("printerSettings.parse", e);
     }
   }
   return DEFAULT;

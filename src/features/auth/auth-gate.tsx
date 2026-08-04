@@ -6,8 +6,9 @@ import { useAuth } from "./auth-context";
 import { useRecoveryStore } from "./recovery-store";
 import { OfflineBanner } from "@/components/offline-banner";
 import { SyncManager } from "@/components/sync-manager";
+import { logError } from "@/lib/logger";
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.preventAutoHideAsync().catch((e) => logError("splash.prevent", e));
 
 /**
  * Sessiyaga qarab yo'naltirish:
@@ -26,7 +27,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (initializing) return;
 
-    SplashScreen.hideAsync().catch(() => {});
+    SplashScreen.hideAsync().catch((e) => logError("splash.hide", e));
 
     const inAuthGroup = segments[0] === "(auth)";
     if (!session && !inAuthGroup) {

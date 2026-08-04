@@ -14,6 +14,7 @@ export const MetaKeys = {
   activeShopId: "activeShopId",
   language: "language", // i18n (P4): uz-Latn | uz-Cyrl | ru
   themeMode: "themeMode", // A9: system | light | dark
+  errorLog: "errorLog", // A5: xatolik halqa-buferi (LogEntry[])
 } as const;
 
 export const meta = {

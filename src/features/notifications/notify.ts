@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 
 import { meta } from "@/lib/offline/mmkv";
+import { logError } from "@/lib/logger";
 import {
   SLOT_TIME,
   nextOccurrence,
@@ -26,7 +27,8 @@ const LOW_STOCK_ID = "low-stock";
 async function loadNotifications() {
   try {
     return await import("expo-notifications");
-  } catch {
+  } catch (e) {
+    logError("notify.moduleMissing", e);
     return null;
   }
 }
@@ -39,7 +41,7 @@ export async function ensureNotificationPermission(): Promise<boolean> {
     await N.setNotificationChannelAsync("default", {
       name: "Eslatmalar",
       importance: N.AndroidImportance.DEFAULT,
-    }).catch(() => {});
+    }).catch((e) => logError("notify.channel", e));
   }
   const cur = await N.getPermissionsAsync();
   if (cur.granted) return true;
@@ -61,7 +63,7 @@ export async function setDailySummaryReminder(slot: ReminderSlot): Promise<boole
   const N = await loadNotifications();
   if (!N) return false;
 
-  await N.cancelScheduledNotificationAsync(DAILY_ID).catch(() => {});
+  await N.cancelScheduledNotificationAsync(DAILY_ID).catch((e) => logError("notify.cancelDaily", e));
   if (slot === "off") {
     meta.setString(NotifKeys.dailySlot, slot);
     return true;
@@ -100,7 +102,9 @@ export async function maybeScheduleLowStockReminder(count: number): Promise<void
   const perm = await N.getPermissionsAsync();
   if (!perm.granted) return; // jim — ruxsatni faqat sozlamalarda so'raymiz
 
-  await N.cancelScheduledNotificationAsync(LOW_STOCK_ID).catch(() => {});
+  await N.cancelScheduledNotificationAsync(LOW_STOCK_ID).catch((e) =>
+    logError("notify.cancelLowStock", e),
+  );
   await N.scheduleNotificationAsync({
     identifier: LOW_STOCK_ID,
     content: {

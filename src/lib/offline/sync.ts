@@ -1,4 +1,5 @@
 import { processSaleRpc } from "@/lib/sale-rpc";
+import { logError } from "@/lib/logger";
 import { incrementLocalQty } from "./product-cache";
 import { classifySaleError } from "./sync-math";
 import { MAX_ATTEMPTS } from "./sale-queue";
@@ -67,7 +68,9 @@ export async function syncQueue(shopId: string): Promise<SyncResult> {
           await setStatus(sale.client_id, "failed", msg);
           // Sotuv amalga oshmadi → optimistik qoldiqni ROLLBACK
           for (const it of sale.items) {
-            await incrementLocalQty(shopId, it.product_id, it.quantity).catch(() => {});
+            await incrementLocalQty(shopId, it.product_id, it.quantity).catch((err) =>
+              logError("sync.rollbackQty", err),
+            );
           }
           conflicts++;
           continue;
@@ -83,7 +86,10 @@ export async function syncQueue(shopId: string): Promise<SyncResult> {
     }
   } finally {
     meta.setBool(MetaKeys.syncRunning, false);
-    const remaining = await unsyncedCount(shopId).catch(() => 0);
+    const remaining = await unsyncedCount(shopId).catch((e) => {
+      logError("sync.remainingCount", e);
+      return 0;
+    });
     meta.setNumber(MetaKeys.queueCount, remaining);
   }
 
