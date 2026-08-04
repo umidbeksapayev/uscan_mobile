@@ -23,8 +23,12 @@ export const EXPENSE_CATEGORIES = [
 
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number]["id"];
 
-/** Kategoriya id → o'zbekcha label (noma'lum id → "Boshqa"). */
-export function categoryLabel(id: string, t?: (key: string, fallback?: string) => string): string {
+/**
+ * Kategoriya id → tarjima qilingan label (noma'lum id → "Boshqa").
+ * `t` imzosida `fallback` **majburiy** — aks holda i18next `TFunction`
+ * noto'g'ri overload'ga (`(key, options?)`) tushib, tip mos kelmaydi.
+ */
+export function categoryLabel(id: string, t?: (key: string, fallback: string) => string): string {
   if (t) {
     if (id === "rent") return t("expenses.cat_rent", "Ijara");
     if (id === "utility") return t("expenses.cat_utility", "Kommunal");
