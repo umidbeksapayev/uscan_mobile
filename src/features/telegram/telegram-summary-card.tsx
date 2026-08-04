@@ -16,8 +16,13 @@ const TIMES: {
   time: string;
   icon: keyof typeof Ionicons.glyphMap;
 }[] = [
+  // ⚠️ Vaqtlar SERVER cron'idan kelib chiqadi (`ShopScan_1v/vercel.json`), lokal
+  // eslatma jadvalidan EMAS:
+  //   morning → "0 2 * * *"  UTC = 07:00 Toshkent
+  //   evening → "0 19 * * *" UTC = 00:00 Toshkent (kun boshi)
+  // Cron jadvali o'zgarsa shu yorliqlar ham yangilanishi kerak.
   { value: "morning", labelKey: "notif.morning", time: "07:00", icon: "sunny-outline" },
-  { value: "evening", labelKey: "notif.evening", time: "21:00", icon: "moon-outline" },
+  { value: "evening", labelKey: "notif.evening", time: "00:00", icon: "moon-outline" },
   { value: "off", labelKey: "notif.off", time: "—", icon: "notifications-off-outline" },
 ];
 
