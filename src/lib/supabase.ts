@@ -15,11 +15,11 @@ export const isSupabaseConfigured = Boolean(url && anonKey);
 // bir vaqtning o'zida bir necha useQuery so'rovi ketganda cheksiz osiladi
 // (deadlock). `lock` parametri funksiya kutadi — quyidagi no-op variant
 // lock navbatini butunlay chetlab o'tib, callback'ni darhol chaqiradi.
-const noopLock = async (
+const noopLock = async <R>(
   _name: string,
   _acquireTimeout: number,
-  fn: () => Promise<unknown>,
-) => fn();
+  fn: () => Promise<R>,
+): Promise<R> => fn();
 
 export const supabase = createClient(
   url || "https://placeholder.supabase.co",
