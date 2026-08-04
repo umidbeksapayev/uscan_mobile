@@ -85,7 +85,7 @@ export default function LoginScreen() {
               setEmail(t);
               if (errorMsg) setErrorMsg(null);
             }}
-            placeholder="email@misol.uz"
+            placeholder={t("auth.emailPlaceholder")}
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"

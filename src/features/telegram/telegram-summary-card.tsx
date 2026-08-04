@@ -2,25 +2,28 @@ import { useState } from "react";
 import { View, Text, Pressable, ActivityIndicator, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { toast } from "@/lib/toast";
 import { createOwnerLinkUrl, updateSummaryTime } from "./owner-telegram";
 import type { Shop, SummaryTime } from "@/types/database";
 
+/** Yorliq matni tarjima kaliti sifatida saqlanadi — til almashganda yangilanadi. */
 const TIMES: {
   value: SummaryTime;
-  label: string;
+  labelKey: string;
   time: string;
   icon: keyof typeof Ionicons.glyphMap;
 }[] = [
-  { value: "morning", label: "Ertalab", time: "07:00", icon: "sunny-outline" },
-  { value: "evening", label: "Kechqurun", time: "21:00", icon: "moon-outline" },
-  { value: "off", label: "O'chiq", time: "—", icon: "notifications-off-outline" },
+  { value: "morning", labelKey: "notif.morning", time: "07:00", icon: "sunny-outline" },
+  { value: "evening", labelKey: "notif.evening", time: "21:00", icon: "moon-outline" },
+  { value: "off", labelKey: "notif.off", time: "—", icon: "notifications-off-outline" },
 ];
 
 export function TelegramSummaryCard({ shop }: { shop: Shop }) {
   const colors = useColors();
+  const { t } = useTranslation();
 
   const qc = useQueryClient();
   const connected = shop.owner_telegram_chat_id != null;
@@ -33,9 +36,9 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
     try {
       const url = await createOwnerLinkUrl(shop.id);
       await Linking.openURL(url);
-      toast.info("Telegram ochildi", "Botda «Start» bosing, so'ng bu yerga qayting.");
+      toast.info(t("settings.tgOpenedTitle"), t("settings.tgOpenedBody"));
     } catch (e) {
-      toast.error("Ulanmadi", e instanceof Error ? e.message : "Havola olinmadi");
+      toast.error(t("settings.tgConnectFailed"), e instanceof Error ? e.message : t("settings.tgLinkFailed"));
     } finally {
       setConnecting(false);
     }
@@ -55,7 +58,7 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
       qc.invalidateQueries({ queryKey: ["memberships"] });
     } catch (e) {
       setTime(prev);
-      toast.error("Saqlanmadi", e instanceof Error ? e.message : "Xatolik");
+      toast.error(t("settings.tgSaveFailed"), e instanceof Error ? e.message : t("common.error"));
     } finally {
       setSaving(false);
     }
@@ -131,7 +134,7 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
               color: connected ? colors.successInk : colors.muted,
             }}
           >
-            {connected ? "Ulangan" : "Ulanmagan"}
+            {connected ? t("settings.tgConnectedShort") : t("settings.tgNotConnectedShort")}
           </Text>
         </View>
       </View>
@@ -183,12 +186,12 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
             backgroundColor: colors.bg,
           }}
         >
-          {TIMES.map((t) => {
-            const activeOpt = time === t.value;
+          {TIMES.map((opt) => {
+            const activeOpt = time === opt.value;
             return (
               <Pressable
-                key={t.value}
-                onPress={() => onChooseTime(t.value)}
+                key={opt.value}
+                onPress={() => onChooseTime(opt.value)}
                 disabled={saving}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: activeOpt, disabled: saving }}
@@ -208,7 +211,7 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
                 }}
               >
                 <Ionicons
-                  name={t.icon}
+                  name={opt.icon}
                   size={14}
                   color={activeOpt ? "#fff" : colors.muted}
                 />
@@ -221,7 +224,7 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
                       lineHeight: 16,
                     }}
                   >
-                    {t.time}
+                    {opt.time}
                   </Text>
                   <Text
                     style={{
@@ -230,7 +233,7 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
                       lineHeight: 13,
                     }}
                   >
-                    {t.label}
+                    {t(opt.labelKey)}
                   </Text>
                 </View>
               </Pressable>

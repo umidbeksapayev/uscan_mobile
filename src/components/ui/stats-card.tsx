@@ -1,5 +1,6 @@
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { shadowSm } from "@/theme/shadows";
@@ -45,6 +46,7 @@ export function StatsCard({
   loading,
 }: StatsCardProps) {
   const colors = useColors();
+  const { t } = useTranslation();
   const c = toneColors(colors)[tone];
   const up = (delta ?? 0) >= 0;
   const deltaBg = up ? colors.successTint : colors.dangerTint;
@@ -85,7 +87,7 @@ export function StatsCard({
       ) : locked ? (
         <View className="mt-1 flex-row items-center" style={{ gap: 4 }}>
           <Ionicons name="lock-closed" size={13} color={colors.tabInactive} />
-          <Text className="text-sm font-medium text-muted">Faqat egasi ko'radi</Text>
+          <Text className="text-sm font-medium text-muted">{t("reports.ownerOnly")}</Text>
         </View>
       ) : (
         <>

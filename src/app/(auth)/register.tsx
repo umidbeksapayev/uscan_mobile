@@ -92,7 +92,7 @@ export default function RegisterScreen() {
             label={t("auth.email")}
             value={email}
             onChangeText={setEmail}
-            placeholder="email@misol.uz"
+            placeholder={t("auth.emailPlaceholder")}
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"

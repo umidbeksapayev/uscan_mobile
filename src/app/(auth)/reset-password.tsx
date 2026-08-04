@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import * as Linking from "expo-linking";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { supabase } from "@/lib/supabase";
@@ -25,6 +26,7 @@ export default function ResetPasswordScreen() {
   const colors = useColors();
 
   const router = useRouter();
+  const { t } = useTranslation();
   const url = Linking.useURL();
   const setRecoveryActive = useRecoveryStore((s) => s.setActive);
 
@@ -66,11 +68,11 @@ export default function ResetPasswordScreen() {
   async function onSave() {
     setErrorMsg(null);
     if (password.length < 6) {
-      setErrorMsg("Parol kamida 6 belgidan iborat bo'lishi kerak.");
+      setErrorMsg(t("auth.passwordTooShort"));
       return;
     }
     if (password !== confirm) {
-      setErrorMsg("Parollar mos kelmadi.");
+      setErrorMsg(t("auth.passwordsMismatch"));
       return;
     }
     setSaving(true);
@@ -99,7 +101,7 @@ export default function ResetPasswordScreen() {
         {status === "checking" ? (
           <View className="items-center">
             <ActivityIndicator color={colors.primary} />
-            <Text className="mt-3 text-sm text-muted">Havola tekshirilmoqda...</Text>
+            <Text className="mt-3 text-sm text-muted">{t("auth.checkingLink")}</Text>
           </View>
         ) : status === "invalid" ? (
           <View className="items-center">
@@ -109,27 +111,27 @@ export default function ResetPasswordScreen() {
             >
               <Ionicons name="alert-circle-outline" size={36} color={colors.danger} />
             </View>
-            <Text className="text-center text-xl font-medium text-ink">Havola yaroqsiz</Text>
+            <Text className="text-center text-xl font-medium text-ink">{t("auth.linkInvalidTitle")}</Text>
             <Text className="mt-2 text-center text-sm text-muted">
-              {errorMsg ?? "Havola muddati o'tgan yoki noto'g'ri. Qaytadan so'rang."}
+              {errorMsg ?? t("auth.linkInvalidBody")}
             </Text>
             <Pressable
               onPress={() => router.replace("/(auth)/forgot-password")}
               className="mt-6 p-2"
             >
-              <Text className="text-sm font-medium text-primary">Qaytadan so'rash</Text>
+              <Text className="text-sm font-medium text-primary">{t("auth.requestAgain")}</Text>
             </Pressable>
           </View>
         ) : (
           <>
-            <Text className="text-center text-2xl font-medium text-ink">Yangi parol</Text>
+            <Text className="text-center text-2xl font-medium text-ink">{t("auth.newPasswordTitle")}</Text>
             <Text className="mb-6 mt-1 text-center text-sm text-muted">
-              Hisobingiz uchun yangi parol o'rnating
+              {t("auth.newPasswordSubtitle")}
             </Text>
 
             <View style={{ gap: 16 }}>
               <Field
-                label="Yangi parol"
+                label={t("auth.newPasswordLabel")}
                 value={password}
                 onChangeText={(t) => {
                   setPassword(t);
@@ -142,7 +144,7 @@ export default function ResetPasswordScreen() {
                 textContentType="none"
               />
               <Field
-                label="Parolni tasdiqlang"
+                label={t("auth.confirmPasswordLabel")}
                 value={confirm}
                 onChangeText={(t) => {
                   setConfirm(t);
@@ -155,7 +157,7 @@ export default function ResetPasswordScreen() {
                 textContentType="none"
               />
 
-              <Button label="Saqlash" onPress={onSave} loading={saving} />
+              <Button label={t("common.save")} onPress={onSave} loading={saving} />
               {errorMsg ? (
                 <Text className="text-center text-sm text-danger">{errorMsg}</Text>
               ) : null}

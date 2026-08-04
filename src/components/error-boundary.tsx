@@ -1,6 +1,7 @@
 import * as React from "react";
 import { View, Text, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ type State = { error: Error | null };
  */
 function ErrorFallback({ message, onRetry }: { message: string; onRetry: () => void }) {
   const colors = useColors();
+  const { t } = useTranslation();
 
   return (
     <View className="flex-1 items-center justify-center bg-bg px-6">
@@ -24,9 +26,9 @@ function ErrorFallback({ message, onRetry }: { message: string; onRetry: () => v
       >
         <Ionicons name="alert-circle-outline" size={36} color={colors.danger} />
       </View>
-      <Text className="mt-4 text-lg font-semibold text-ink">Xatolik yuz berdi</Text>
+      <Text className="mt-4 text-lg font-semibold text-ink">{t("common.errorOccurred")}</Text>
       <Text className="mt-1 text-center text-sm text-muted">
-        Ilovada kutilmagan xato. Qayta urinib ko'ring.
+        {t("common.unexpectedError")}
       </Text>
       <ScrollView
         className="mt-4 max-h-32 w-full rounded-xl"
@@ -35,7 +37,7 @@ function ErrorFallback({ message, onRetry }: { message: string; onRetry: () => v
         <Text className="p-3 text-xs text-muted">{message}</Text>
       </ScrollView>
       <View className="mt-5 w-full">
-        <Button label="Qayta urinish" onPress={onRetry} />
+        <Button label={t("common.retry")} onPress={onRetry} />
       </View>
     </View>
   );

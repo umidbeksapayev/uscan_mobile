@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import type { Membership } from "@/types/database";
@@ -19,10 +20,11 @@ export function ShopSwitcherSheet({
   onClose: () => void;
 }) {
   const colors = useColors();
+  const { t } = useTranslation();
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
-          <Text className="mb-2 text-lg font-medium text-ink">Do'konni tanlang</Text>
+          <Text className="mb-2 text-lg font-medium text-ink">{t("auth.pickShop")}</Text>
           <ScrollView style={{ maxHeight: 380 }}>
             {memberships.map((m) => {
               const active = activeShopId === m.shop.id;

@@ -252,7 +252,7 @@ export default function SotuvScreen() {
       return;
     }
     if (items.length === 0) {
-      Alert.alert("Savat Xatosi", "Savatda mahsulot mavjud emas!");
+      Alert.alert(t("sell.cartErrorTitle"), "Savatda mahsulot mavjud emas!");
       return;
     }
     setPayOpen(true);

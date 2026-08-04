@@ -98,7 +98,7 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
     },
     onError: (error) => {
       const msg = (error as Error)?.message ?? "Noma'lum sotuv xatoligi";
-      Alert.alert("Sotuv Xatosi", msg);
+      Alert.alert(t("sell.saleErrorTitle"), msg);
     },
   });
 
@@ -120,7 +120,7 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
       return;
     }
     if (method === "debt" && !customer) {
-      Alert.alert("Mijoz Tanlanmagan", "Nasiya uchun mijozni tanlang!");
+      Alert.alert(t("sell.noCustomerTitle"), "Nasiya uchun mijozni tanlang!");
       return;
     }
     if (method === "qr" && hasAcquiring) {
