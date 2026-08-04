@@ -3,6 +3,7 @@ import { decrementLocalQty } from "@/lib/offline/product-cache";
 import { enqueueSale } from "@/lib/offline/sale-queue-db";
 import { classifySaleError } from "@/lib/offline/sync-math";
 import { processSaleRpc, type SaleResult, type SalePayloadItem } from "@/lib/sale-rpc";
+import { logError } from "@/lib/logger";
 import type { CartItem } from "./cart-store";
 import { cartTotal } from "./cart-total";
 
@@ -27,7 +28,9 @@ export async function submitSale(params: {
 
   const decrementLocal = async () => {
     for (const i of items) {
-      await decrementLocalQty(shopId, i.product.id, i.quantity).catch(() => {});
+      await decrementLocalQty(shopId, i.product.id, i.quantity).catch((e) =>
+        logError("checkout.decrementLocal", e),
+      );
     }
   };
 

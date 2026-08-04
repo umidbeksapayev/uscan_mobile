@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { barcodeVariants } from "@/lib/barcode";
 import { isOnlineNow } from "@/lib/use-online";
 import { findByBarcode, searchByName, upsertProducts } from "@/lib/offline/product-cache";
+import { logError } from "@/lib/logger";
 import type { Product } from "@/types/database";
 
 /**
@@ -34,9 +35,11 @@ export async function findProductsByBarcode(
         .limit(3);
       if (error) throw new Error(error.message);
       const rows = (data ?? []) as unknown as Record<string, unknown>[];
-      void upsertProducts(rows).catch(() => {}); // keshni yangilash (fire-and-forget)
+      // keshni yangilash (fire-and-forget)
+      void upsertProducts(rows).catch((e) => logError("lookup.cacheBarcode", e));
       return rows as unknown as Product[];
-    } catch {
+    } catch (e) {
+      logError("lookup.barcode", e);
       return findByBarcode(shopId, variants); // tarmoq xatosi → kesh
     }
   }
@@ -62,9 +65,10 @@ export async function searchSellProducts(
         .limit(10);
       if (error) throw new Error(error.message);
       const rows = (data ?? []) as unknown as Record<string, unknown>[];
-      void upsertProducts(rows).catch(() => {});
+      void upsertProducts(rows).catch((e) => logError("lookup.cacheSearch", e));
       return rows as unknown as Product[];
-    } catch {
+    } catch (e) {
+      logError("lookup.search", e);
       return searchByName(shopId, t);
     }
   }

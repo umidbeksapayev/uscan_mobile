@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { logError } from "@/lib/logger";
 import { useRecordPayment } from "./use-customers";
 
 type Props = {
@@ -40,8 +41,8 @@ export function ReceivePaymentSheet({ visible, shopId, customerId, currentBalanc
     try {
       await mutation.mutateAsync({ shopId, customerId, amount });
       onClose();
-    } catch {
-      // mutation.isError UI'da
+    } catch (e) {
+      logError("customer.receivePayment", e); // mutation.isError UI'da ko'rsatiladi
     }
   }
 

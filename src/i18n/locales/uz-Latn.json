@@ -34,7 +34,8 @@
     "saving": "Saqlanmoqda...",
     "clear": "Tozalash",
     "delete": "O'chirish",
-    "edit": "Tahrirlash"
+    "edit": "Tahrirlash",
+    "back": "Orqaga"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -931,5 +932,16 @@
     "exportUnavailable": "Ulashish bu qurilmada mavjud emas.",
     "exportFailed": "Eksport amalga oshmadi",
     "lockedHint": "Savdo statistikasi faqat egasi yoki \"Hisobotlar\" ruxsati bor xodimga ko'rinadi."
+  },
+  "diagnostics": {
+    "title": "Diagnostika",
+    "hint": "Xatolar faqat shu qurilmada saqlanadi (oxirgi 50 ta). Muammo bo'lsa jurnalni bizga ulashing.",
+    "empty": "Jurnal bo'sh",
+    "share": "Ulashish",
+    "shareUnavailable": "Ulashish mavjud emas",
+    "clearTitle": "Jurnalni tozalash",
+    "clearBody": "Barcha yozuvlar o'chiriladi.",
+    "clearBtn": "Tozalash",
+    "settingsSubtitle": "Xatolik jurnali — muammoni aniqlash uchun"
   }
 }

@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { useColors } from "@/theme/theme-store";
 import { Button } from "@/components/ui/button";
+import { logError } from "@/lib/logger";
 
 type Props = { children: React.ReactNode; onReset?: () => void };
 type State = { error: Error | null };
@@ -53,6 +54,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
+    // Ilgari bu faqat `__DEV__` konsoliga chiqardi — productionda oq ekranning
+    // sababi hech qayerda qolmasdi. Endi jurnalga ham tushadi (Diagnostika).
+    logError("errorBoundary", error);
     if (__DEV__) {
       // eslint-disable-next-line no-console
       console.error("ErrorBoundary:", error, info.componentStack);

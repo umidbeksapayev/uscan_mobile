@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { processSaleRpc, type SaleResult } from "@/lib/sale-rpc";
+import { logError } from "@/lib/logger";
 import {
   createPaymentIntent,
   getIntentStatus,
@@ -72,12 +73,13 @@ export function useQrPayment(args: {
       finalizing.current = true;
       processSaleRpc({ shopId, items, clientId, method: "qr" })
         .then(async (res) => {
-          await markIntentFinalized(intentId).catch(() => {});
+          await markIntentFinalized(intentId).catch((e) => logError("qr.finalize", e));
           setStatus("paid");
           onPaid(res);
         })
-        .catch(() => {
+        .catch((e) => {
           // To'lov o'tdi, lekin sotuv yozilmadi → finalize qilmaymiz (reconciliation).
+          logError("qr.saleAfterPaid", e);
           setStatus("paid");
           onPaid({
             sale_id: `qr-${clientId}`,

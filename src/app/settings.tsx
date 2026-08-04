@@ -634,6 +634,14 @@ export default function SettingsScreen() {
             title={t("settings.feedbackTitle", "Fikr-mulohaza")}
             subtitle={t("settings.feedbackHint", "Taklif, shikoyat yoki xato? Bizga yozing.")}
             onPress={() => setFeedbackOpen(true)}
+          />
+          <SettingRow
+            icon="pulse-outline"
+            iconBg="rgba(100,116,139,0.12)"
+            iconColor={colors.muted}
+            title={t("diagnostics.title", "Diagnostika")}
+            subtitle={t("diagnostics.settingsSubtitle", "Xatolik jurnali")}
+            onPress={() => router.push("/diagnostics")}
             last
           />
         </View>

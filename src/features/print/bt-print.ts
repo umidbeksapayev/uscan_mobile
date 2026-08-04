@@ -2,6 +2,7 @@ import { PermissionsAndroid, Platform } from "react-native";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
 import { encode as encodeBase64 } from "base64-arraybuffer";
 
+import { logError } from "@/lib/logger";
 import { encodeReceipt, encodeLabel } from "./escpos-encoder";
 import type { ReceiptData } from "./types";
 import type { LabelData } from "@/features/labels/barcode-format";
@@ -19,7 +20,8 @@ export async function requestBtPermissions(): Promise<boolean> {
       P.ACCESS_FINE_LOCATION,
     ]);
     return Object.values(res).some((v) => v === PermissionsAndroid.RESULTS.GRANTED);
-  } catch {
+  } catch (e) {
+    logError("bt.permissions", e);
     return false;
   }
 }
@@ -28,7 +30,8 @@ export async function requestBtPermissions(): Promise<boolean> {
 export async function listBluetoothDevices(): Promise<BtDevice[]> {
   await requestBtPermissions();
   const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-  if (!enabled) await RNBluetoothClassic.requestBluetoothEnabled().catch(() => {});
+  if (!enabled)
+    await RNBluetoothClassic.requestBluetoothEnabled().catch((e) => logError("bt.enable", e));
   const devices = await RNBluetoothClassic.getBondedDevices();
   return devices.map((d) => ({ name: d.name, address: d.address }));
 }
@@ -43,7 +46,9 @@ async function ensureConnected(address: string): Promise<void> {
   try {
     const connected = await RNBluetoothClassic.isDeviceConnected(address);
     if (!connected) await RNBluetoothClassic.connectToDevice(address);
-  } catch {
+  } catch (e) {
+    // Holatni aniqlay olmadik — to'g'ridan-to'g'ri ulanishga urinamiz.
+    logError("bt.isConnected", e);
     await RNBluetoothClassic.connectToDevice(address);
   }
 }

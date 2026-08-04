@@ -12,6 +12,7 @@ import { changeAmount } from "./payment-math";
 import { submitSale, type PaymentMethod, type SaleResult } from "./checkout";
 import type { CartItem } from "./cart-store";
 import { unsyncedCount } from "@/lib/offline/sale-queue-db";
+import { logError } from "@/lib/logger";
 import { useOfflineStore } from "@/lib/offline/offline-store";
 import { useActivePermissions, useActiveMembership, useActiveShopId } from "@/features/auth/use-memberships";
 import { CustomerPickerSheet, type PickedCustomer } from "@/features/customers/customer-picker-sheet";
@@ -88,7 +89,10 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["sell-search"] });
       // Offline'da navbatga yozildi → badge sanog'ini yangilaymiz
-      if (data.offline && currentShopId) unsyncedCount(currentShopId).then(setQueueCount).catch(() => {});
+      if (data.offline && currentShopId)
+        unsyncedCount(currentShopId)
+          .then(setQueueCount)
+          .catch((e) => logError("payment.queueCount", e));
       onPaid(); // savatni tozalaydi (qayta sotuv oldini oladi)
       setPhase("success");
     },

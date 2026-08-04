@@ -8,6 +8,7 @@ import { syncQueue } from "@/lib/offline/sync";
 import { syncProductsFromServer } from "@/lib/offline/product-cache";
 import { unsyncedCount } from "@/lib/offline/sale-queue-db";
 import { useOfflineStore } from "@/lib/offline/offline-store";
+import { logError } from "@/lib/logger";
 
 /**
  * Offline orkestratsiya — reconnect / AppState active / focus'da navbatni drenaj
@@ -28,7 +29,10 @@ export function useSync(): void {
   const run = useCallback(async () => {
     if (!shopId) return;
     setSyncing(true);
-    const res = await syncQueue(shopId).catch(() => null);
+    const res = await syncQueue(shopId).catch((e) => {
+      logError("sync.queue", e);
+      return null;
+    });
     setSyncing(false);
     if (!res) return;
     setResult(res);
@@ -40,7 +44,7 @@ export function useSync(): void {
     }
     // Navbat bo'sh → server avtoritativ, katalogni to'liq yangilaymiz
     if (res.remaining === 0) {
-      await syncProductsFromServer(shopId).catch(() => {});
+      await syncProductsFromServer(shopId).catch((e) => logError("sync.products", e));
       qc.invalidateQueries({ queryKey: ["products"] });
     }
   }, [shopId, qc, setCount, setSyncing, setResult]);
@@ -61,7 +65,9 @@ export function useSync(): void {
   // Dastlabki sanoq + online bo'lsa dastlabki sync
   useEffect(() => {
     if (!shopId) return;
-    unsyncedCount(shopId).then(setCount).catch(() => {});
+    unsyncedCount(shopId)
+      .then(setCount)
+      .catch((e) => logError("sync.queueCount", e));
     if (online) scheduleRun();
   }, [shopId, online, scheduleRun, setCount]);
 

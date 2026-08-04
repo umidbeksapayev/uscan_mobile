@@ -1,4 +1,5 @@
 import { getAllAsync, runAsync } from "./db";
+import { logError } from "@/lib/logger";
 import type { QueuedSale, SaleStatus } from "./sale-queue";
 
 /**
@@ -23,7 +24,10 @@ function rowToSale(r: SaleRow): QueuedSale {
   let items: QueuedSale["items"] = [];
   try {
     items = JSON.parse(r.items_json) as QueuedSale["items"];
-  } catch {
+  } catch (e) {
+    // Navbatdagi sotuv qatorlari o'qilmadi — bu ma'lumot yo'qolishi, jim
+    // o'tmaydi.
+    logError("saleQueue.parseItems", e);
     items = [];
   }
   return {

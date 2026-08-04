@@ -14,6 +14,7 @@ import { useActiveShopId } from "@/features/auth/use-memberships";
 import { loadQueue, removeSale, unsyncedCount } from "@/lib/offline/sale-queue-db";
 import { retrySale } from "@/lib/offline/sync";
 import { useOfflineStore } from "@/lib/offline/offline-store";
+import { logError } from "@/lib/logger";
 import type { QueuedSale, SaleStatus } from "@/lib/offline/sale-queue";
 
 const STATUS: Record<SaleStatus, { label: string; color: string; icon: keyof typeof Ionicons.glyphMap }> = {
@@ -39,7 +40,13 @@ export default function OfflineSalesScreen() {
 
   async function refresh() {
     qc.invalidateQueries({ queryKey: ["offline-queue"] });
-    if (shopId) setCount(await unsyncedCount(shopId).catch(() => 0));
+    if (shopId)
+      setCount(
+        await unsyncedCount(shopId).catch((e) => {
+          logError("offlineSales.queueCount", e);
+          return 0;
+        }),
+      );
   }
 
   const retryMut = useMutation({

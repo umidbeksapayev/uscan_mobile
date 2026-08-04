@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { formatCurrency, formatWeight } from "@/lib/format";
+import { logError } from "@/lib/logger";
 import type { Sale, SaleItem } from "@/types/database";
 import { useReturnedQuantities, useProcessReturn } from "./use-history";
 import { returnableQty, refundPreview } from "./returnable";
@@ -128,8 +129,8 @@ export function ReturnSheet({ visible, sale, shopId, onClose }: Props) {
     try {
       await mutation.mutateAsync({ shopId, saleId: sale.id, items: payload, reason: reason || null });
       onClose();
-    } catch {
-      // mutation.isError UI'da ko'rsatiladi
+    } catch (e) {
+      logError("history.return", e); // mutation.isError UI'da ko'rsatiladi
     }
   }
 
