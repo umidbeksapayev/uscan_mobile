@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { QueueBadge } from "./queue-badge";
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -17,6 +17,7 @@ const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
 /** Floating, yumaloq pastki navigatsiya (safe-area inset bilan). */
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
 
   return (
     <View
@@ -31,7 +32,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         className="flex-row items-center rounded-3xl border border-line bg-surface"
         style={{
           height: 62,
-          shadowColor: "#0F172A",
+          shadowColor: colors.shadow,
           shadowOpacity: 0.06,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: 4 },

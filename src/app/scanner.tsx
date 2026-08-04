@@ -27,7 +27,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import { findProductsByBarcode } from "@/features/sell/lookup";
 import { useCart } from "@/features/sell/cart-store";
@@ -57,6 +57,8 @@ function Corner({
 }
 
 export default function ScannerScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const { mode } = useLocalSearchParams<{ mode?: string }>();

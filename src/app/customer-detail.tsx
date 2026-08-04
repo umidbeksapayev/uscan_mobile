@@ -6,7 +6,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import {
@@ -20,6 +20,8 @@ import type { CustomerPayment } from "@/types/database";
 import type { CustomerSaleRow } from "@/features/customers/customers-api";
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
+  const colors = useColors();
+
   return (
     <View className="rounded-2xl bg-surface p-4" style={{ borderWidth: 0.5, borderColor: colors.line }}>
       <Text className="mb-2 text-sm font-semibold text-ink">{title}</Text>
@@ -29,6 +31,8 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 function SaleRow({ s }: { s: CustomerSaleRow }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const debt = Math.max(0, s.total_revenue - s.paid_amount);
   return (
@@ -40,7 +44,7 @@ function SaleRow({ s }: { s: CustomerSaleRow }) {
       <View className="items-end">
         <Text className="text-sm font-medium text-ink">{formatCurrency(s.total_revenue)}</Text>
         {debt > 0 ? (
-          <Text className="text-xs" style={{ color: "#B42318" }}>
+          <Text className="text-xs" style={{ color: colors.dangerInk }}>
             {t("customers.debt").toLowerCase()}: {formatCurrency(debt)}
           </Text>
         ) : (
@@ -52,6 +56,8 @@ function SaleRow({ s }: { s: CustomerSaleRow }) {
 }
 
 function PaymentRow({ p }: { p: CustomerPayment }) {
+  const colors = useColors();
+
   return (
     <View className="flex-row items-center justify-between py-2" style={{ borderTopWidth: 0.5, borderTopColor: colors.line }}>
       <View className="flex-row items-center gap-2">
@@ -64,6 +70,8 @@ function PaymentRow({ p }: { p: CustomerPayment }) {
 }
 
 export default function CustomerDetailScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -112,8 +120,8 @@ export default function CustomerDetailScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
         {/* Balans */}
-        <View className="rounded-2xl p-4" style={{ backgroundColor: owes ? "#FDECEC" : colors.primaryTint }}>
-          <Text className="text-xs" style={{ color: owes ? "#B42318" : colors.primary, letterSpacing: 0.5 }}>
+        <View className="rounded-2xl p-4" style={{ backgroundColor: owes ? colors.dangerTint : colors.primaryTint }}>
+          <Text className="text-xs" style={{ color: owes ? colors.dangerInk : colors.primary, letterSpacing: 0.5 }}>
             {(owes
               ? t("customers.debt")
               : balance < 0
@@ -123,7 +131,7 @@ export default function CustomerDetailScreen() {
           </Text>
           <Text
             className="mt-1 text-3xl font-bold"
-            style={{ color: owes ? "#B42318" : colors.primaryDeep }}
+            style={{ color: owes ? colors.dangerInk : colors.heading }}
             numberOfLines={1}
             adjustsFontSizeToFit
           >

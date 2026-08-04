@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { useOnline } from "@/lib/use-online";
 
 /**
@@ -10,6 +10,8 @@ import { useOnline } from "@/lib/use-online";
  * Faqat offline'da ko'rinadi.
  */
 export function OfflineBanner() {
+  const colors = useColors();
+
   const online = useOnline();
   const insets = useSafeAreaInsets();
   if (online) return null;

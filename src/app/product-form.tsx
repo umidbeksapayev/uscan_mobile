@@ -9,7 +9,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
@@ -39,6 +39,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export default function ProductFormScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const qc = useQueryClient();
   const { t } = useTranslation();

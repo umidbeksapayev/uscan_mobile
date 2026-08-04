@@ -7,7 +7,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import { useCustomer, useCreateCustomer, useUpdateCustomer } from "@/features/customers/use-customers";
 
@@ -24,6 +24,8 @@ function Field({
   placeholder?: string;
   keyboardType?: "default" | "phone-pad";
 }) {
+  const colors = useColors();
+
   return (
     <View className="mb-4">
       <Text className="mb-1.5 text-sm font-medium text-ink">{label}</Text>
@@ -41,6 +43,8 @@ function Field({
 }
 
 export default function CustomerFormScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const shopId = useActiveShopId();

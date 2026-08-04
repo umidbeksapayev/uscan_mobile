@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { Logo } from "@/components/logo";
 import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
@@ -44,6 +44,8 @@ const PERIODS = [
 ] as const;
 
 export default function HomeScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const qc = useQueryClient();
   const { t } = useTranslation();

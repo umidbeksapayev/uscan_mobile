@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
@@ -18,6 +18,8 @@ import { useSupplyCart } from "./supply-store";
 type Props = { visible: boolean; shopId: string; onClose: () => void };
 
 export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const router = useRouter();
   const add = useSupplyCart((s) => s.add);

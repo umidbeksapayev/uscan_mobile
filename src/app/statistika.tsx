@@ -8,7 +8,7 @@ import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import { pctChange } from "@/features/dashboard/dashboard-math";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
@@ -39,6 +39,8 @@ function Row({ children }: { children: React.ReactNode }) {
 }
 
 function ProductStatRow({ p, rank }: { p: TopProduct; rank?: number }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const sold = p.sale_type === "weight" ? formatWeight(p.units_sold) : `${p.units_sold} dona`;
   return (
@@ -63,6 +65,8 @@ function ProductStatRow({ p, rank }: { p: TopProduct; rank?: number }) {
 }
 
 function ListCard({ title, children }: { title: string; children: React.ReactNode }) {
+  const colors = useColors();
+
   return (
     <View
       className="rounded-2xl bg-surface p-4"
@@ -77,6 +81,8 @@ function ListCard({ title, children }: { title: string; children: React.ReactNod
 /** Savdo statistikasi — faqat view_reports'li foydalanuvchida MOUNT bo'ladi
  *  (shu sababli himoyalangan RPC'lar ruxsatsiz chaqirilmaydi). */
 function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost: boolean }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const { data: s, isLoading } = useSalesStats(period);
   const { data: top, isLoading: topLoading } = useTopProducts(period, 5);
@@ -147,6 +153,8 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
 /** Kassir bo'yicha savdo — FAQAT egaga mount bo'ladi (email'lar owner-gated
  *  list_shop_members RPC'dan; kassirlar bir-birining natijasini ko'rmaydi). */
 function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const { data: aggs, isLoading } = useCashierStats(period);
   const { data: staff } = useStaff(shopId);
@@ -192,13 +200,15 @@ function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string
 }
 
 function LockedSalesSection() {
+  const colors = useColors();
+
   const { t } = useTranslation();
   return (
     <View
       className="items-center rounded-2xl bg-surface p-6"
       style={{ borderWidth: 0.5, borderColor: colors.line, gap: 8 }}
     >
-      <View className="h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: "#EEF2F7" }}>
+      <View className="h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.neutralTint }}>
         <Ionicons name="lock-closed" size={24} color={colors.muted} />
       </View>
       <Text className="text-center text-sm text-muted">
@@ -209,6 +219,8 @@ function LockedSalesSection() {
 }
 
 export default function StatistikaScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -279,15 +291,15 @@ export default function StatistikaScreen() {
         {invError ? (
           <View
             className="rounded-2xl p-4"
-            style={{ backgroundColor: "#FDECEC", borderWidth: 1, borderColor: "#F7C6C6" }}
+            style={{ backgroundColor: colors.dangerTint, borderWidth: 1, borderColor: colors.dangerBorder }}
           >
             <View className="mb-1 flex-row items-center gap-2">
-              <Ionicons name="alert-circle" size={18} color="#B42318" />
-              <Text className="text-base font-medium" style={{ color: "#B42318" }}>
+              <Ionicons name="alert-circle" size={18} color={colors.dangerInk} />
+              <Text className="text-base font-medium" style={{ color: colors.dangerInk }}>
                 {t("statistics.loadError", "Statistikani yuklab bo'lmadi")}
               </Text>
             </View>
-            <Text className="text-sm" style={{ color: "#8A2A22" }}>
+            <Text className="text-sm" style={{ color: colors.dangerInk }}>
               {migrationMissing
                 ? t("statistics.migrationMissing", "Statistika funksiyalari DB'da yo'q. Supabase'da migration 030 (030_statistics_rpcs.sql) ni ishga tushiring.")
                 : invErrMsg}

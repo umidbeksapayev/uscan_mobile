@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useProducts, type CategoryFilter } from "@/features/catalog/use-products";
@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/database";
 
 function StockBadge({ item }: { item: Product }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const isWeight = item.sale_type === "weight";
   const q = item.quantity;
@@ -38,10 +40,10 @@ function StockBadge({ item }: { item: Product }) {
   else tone = "ok";
 
   const palette = {
-    ok: { dot: colors.success, bg: "#E7F6EE", text: "#0F6E56" },
-    low: { dot: colors.warning, bg: "#FCF1DD", text: "#92600A" },
-    crit: { dot: colors.danger, bg: "#FDECEC", text: "#B42318" },
-    out: { dot: colors.danger, bg: "#FDECEC", text: "#B42318" },
+    ok: { dot: colors.success, bg: colors.successTint, text: colors.successInk },
+    low: { dot: colors.warning, bg: colors.warningTint, text: colors.warningInk },
+    crit: { dot: colors.danger, bg: colors.dangerTint, text: colors.dangerInk },
+    out: { dot: colors.danger, bg: colors.dangerTint, text: colors.dangerInk },
   }[tone];
 
   const label =
@@ -74,13 +76,15 @@ function ProductRow({
   selectionMode?: boolean;
   selected?: boolean;
 }) {
+  const colors = useColors();
+
   return (
     <View
       className="mb-3 flex-row items-center gap-3 rounded-2xl bg-surface p-3"
       style={{
         borderWidth: selected ? 1.5 : 0.5,
         borderColor: selected ? colors.primary : colors.line,
-        shadowColor: "#0F172A",
+        shadowColor: colors.shadow,
         shadowOpacity: 0.05,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
@@ -118,7 +122,7 @@ function ProductRow({
       </View>
 
       <View className="items-end" style={{ gap: 6 }}>
-        <Text className="text-base font-medium text-primary-deep">
+        <Text className="text-base font-medium text-heading">
           {formatCurrency(item.selling_price)}
         </Text>
         <StockBadge item={item} />
@@ -134,6 +138,8 @@ function EmptyState({
   icon: keyof typeof Ionicons.glyphMap;
   text: string;
 }) {
+  const colors = useColors();
+
   return (
     <View className="flex-1 items-center justify-center px-10">
       <View className="mb-4 h-20 w-20 items-center justify-center rounded-3xl bg-primary-tint">
@@ -145,6 +151,8 @@ function EmptyState({
 }
 
 export default function KatalogScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
@@ -228,7 +236,7 @@ export default function KatalogScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
         <View className="flex-row items-center justify-between pb-3">
-          <Text className="text-2xl font-medium text-primary-deep">
+          <Text className="text-2xl font-medium text-heading">
             {labelMode ? t("labels.selectedCount", { count: selected.size }) : t("catalog.title")}
           </Text>
           <View className="flex-row items-center gap-5">
@@ -432,7 +440,7 @@ export default function KatalogScreen() {
             backgroundColor: colors.primary,
             alignItems: "center",
             justifyContent: "center",
-            shadowColor: "#0F172A",
+            shadowColor: colors.shadow,
             shadowOpacity: 0.18,
             shadowRadius: 10,
             shadowOffset: { width: 0, height: 4 },

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency } from "@/lib/format";
-import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 
 const PRESETS = [5000, 10000, 20000];
 
@@ -21,6 +22,8 @@ type Props = {
  * `features/sell/misc-product.ts`da.
  */
 export function QuickPriceSheet({ visible, loading, onClose, onConfirm }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const [text, setText] = useState("");
 
@@ -36,7 +39,7 @@ export function QuickPriceSheet({ visible, loading, onClose, onConfirm }: Props)
             <Text className="text-lg font-medium text-ink">{t("sell.quickPrice")}</Text>
             <Text className="text-sm text-muted">{t("sell.quickPriceDesc")}</Text>
 
-            <TextInput
+            <BottomSheetTextInput
               value={text}
               onChangeText={setText}
               keyboardType="number-pad"
@@ -49,18 +52,18 @@ export function QuickPriceSheet({ visible, loading, onClose, onConfirm }: Props)
 
             <View className="mt-3 flex-row gap-2">
               {PRESETS.map((p) => (
-                <Pressable
+                <SheetPressable
                   key={p}
                   onPress={() => setText(String(p))}
                   className="flex-1 items-center justify-center rounded-xl bg-bg"
                   style={{ height: 44 }}
                 >
                   <Text className="text-sm font-medium text-ink">{formatCurrency(p)}</Text>
-                </Pressable>
+                </SheetPressable>
               ))}
             </View>
 
-            <Pressable
+            <SheetPressable
               disabled={!valid || loading}
               onPress={() => onConfirm(amount)}
               className="mt-6 flex-row items-center justify-center rounded-2xl bg-primary"
@@ -74,7 +77,7 @@ export function QuickPriceSheet({ visible, loading, onClose, onConfirm }: Props)
                   {valid ? ` · ${formatCurrency(amount)}` : ""}
                 </Text>
               )}
-            </Pressable>
+            </SheetPressable>
     </BottomSheet>
   );
 }

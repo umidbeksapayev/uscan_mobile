@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency } from "@/lib/format";
 import { useActivePermissions } from "@/features/auth/use-memberships";
 import { useCustomersWithBalance } from "@/features/customers/use-customers";
@@ -13,6 +13,8 @@ import { debtTotal } from "@/features/customers/debt-math";
 import type { CustomerWithBalance } from "@/types/database";
 
 function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => void }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const owes = c.balance > 0;
   const prepaid = c.balance < 0;
@@ -34,11 +36,11 @@ function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => vo
       <View className="items-end">
         <Text
           className="text-base font-semibold"
-          style={{ color: owes ? "#B42318" : prepaid ? "#0F6E56" : colors.muted }}
+          style={{ color: owes ? colors.dangerInk : prepaid ? colors.successInk : colors.muted }}
         >
           {formatCurrency(Math.abs(c.balance))}
         </Text>
-        <Text className="text-xs" style={{ color: owes ? "#B42318" : prepaid ? "#0F6E56" : colors.muted }}>
+        <Text className="text-xs" style={{ color: owes ? colors.dangerInk : prepaid ? colors.successInk : colors.muted }}>
           {owes ? t("customers.debtor") : prepaid ? t("customers.creditor") : t("customers.settled")}
         </Text>
       </View>
@@ -47,6 +49,8 @@ function CustomerRow({ c, onPress }: { c: CustomerWithBalance; onPress: () => vo
 }
 
 export default function NasiyaScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const { canManageDebt } = useActivePermissions();
@@ -165,7 +169,7 @@ export default function NasiyaScreen() {
               backgroundColor: colors.primary,
               alignItems: "center",
               justifyContent: "center",
-              shadowColor: "#0F172A",
+              shadowColor: colors.shadow,
               shadowOpacity: 0.18,
               shadowRadius: 10,
               shadowOffset: { width: 0, height: 4 },

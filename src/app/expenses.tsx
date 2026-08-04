@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { useExpenses } from "@/features/expenses/use-expenses";
 import { expensesTotal, categoryLabel, type Expense } from "@/features/expenses/expense-math";
@@ -17,6 +17,8 @@ const PERIODS = [
 ] as const;
 
 export default function ExpensesScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const [days, setDays] = useState<7 | 30>(30);
@@ -132,7 +134,7 @@ export default function ExpensesScreen() {
       <Pressable
         onPress={openNew}
         accessibilityLabel={t("expenses.addBtnA11y", "Xarajat qo'shish")}
-        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", shadowColor: "#0F172A", shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
+        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", shadowColor: colors.shadow, shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
       >
         <Ionicons name="add" size={30} color="#fff" />
       </Pressable>

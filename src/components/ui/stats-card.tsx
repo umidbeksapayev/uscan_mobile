@@ -1,16 +1,23 @@
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
+import type { AppColors } from "@/theme/colors";
 
 export type StatTone = "brand" | "green" | "amber" | "muted";
 
-const TONE: Record<StatTone, { bg: string; fg: string }> = {
-  brand: { bg: colors.primaryTint, fg: colors.primary },
-  green: { bg: "#E7F6EE", fg: "#0F6E56" },
-  amber: { bg: "#FCF1DD", fg: "#92600A" },
-  muted: { bg: "#EEF2F7", fg: colors.muted },
-};
+/**
+ * Ohang (tone) ranglari — palitradan olinadi, shuning uchun tungi rejimda
+ * fon to'qlashib, matn yorishishi avtomatik (qarang: `theme/colors.ts`).
+ */
+function toneColors(colors: AppColors): Record<StatTone, { bg: string; fg: string }> {
+  return {
+    brand: { bg: colors.primaryTint, fg: colors.primary },
+    green: { bg: colors.successTint, fg: colors.successInk },
+    amber: { bg: colors.warningTint, fg: colors.warningInk },
+    muted: { bg: colors.neutralTint, fg: colors.muted },
+  };
+}
 
 export interface StatsCardProps {
   label: string;
@@ -36,8 +43,11 @@ export function StatsCard({
   delta,
   loading,
 }: StatsCardProps) {
-  const c = TONE[tone];
+  const colors = useColors();
+  const c = toneColors(colors)[tone];
   const up = (delta ?? 0) >= 0;
+  const deltaBg = up ? colors.successTint : colors.dangerTint;
+  const deltaFg = up ? colors.successInk : colors.dangerInk;
 
   return (
     <View
@@ -45,7 +55,7 @@ export function StatsCard({
       style={{
         borderWidth: 0.5,
         borderColor: colors.line,
-        shadowColor: "#0F172A",
+        shadowColor: colors.shadow,
         shadowOpacity: 0.05,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
@@ -59,10 +69,10 @@ export function StatsCard({
         {!locked && delta !== null && delta !== undefined ? (
           <View
             className="flex-row items-center rounded-full px-1.5 py-0.5"
-            style={{ gap: 2, backgroundColor: up ? "#E7F6EE" : "#FDECEC" }}
+            style={{ gap: 2, backgroundColor: deltaBg }}
           >
-            <Ionicons name={up ? "arrow-up" : "arrow-down"} size={10} color={up ? "#0F6E56" : "#B42318"} />
-            <Text style={{ fontSize: 10, fontWeight: "600", color: up ? "#0F6E56" : "#B42318" }}>
+            <Ionicons name={up ? "arrow-up" : "arrow-down"} size={10} color={deltaFg} />
+            <Text style={{ fontSize: 10, fontWeight: "600", color: deltaFg }}>
               {`${Math.abs(delta).toFixed(0)}%`}
             </Text>
           </View>

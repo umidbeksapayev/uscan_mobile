@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useActivePermissions } from "@/features/auth/use-memberships";
 import {
@@ -37,6 +37,8 @@ function RenameSheet({
   onSave: (name: string) => void;
   saving: boolean;
 }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const [name, setName] = useState("");
   // category o'zgarganda inputni boshlang'ich qiymatga to'ldiramiz
@@ -78,6 +80,8 @@ function RenameSheet({
 }
 
 export default function CategoriesScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const { canManageProducts } = useActivePermissions();

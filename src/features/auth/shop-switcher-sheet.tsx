@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import type { Membership } from "@/types/database";
 
@@ -18,6 +18,8 @@ export function ShopSwitcherSheet({
   onSelect: (shopId: string) => void;
   onClose: () => void;
 }) {
+  const colors = useColors();
+
   return (
     <BottomSheet visible={visible} onClose={onClose}>
           <Text className="mb-2 text-lg font-medium text-ink">Do'konni tanlang</Text>

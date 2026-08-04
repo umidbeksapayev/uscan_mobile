@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, memo } from "react";
-import { View, Text, TextInput, Pressable, FlatList, ScrollView } from "react-native";
+import { View, Text, TextInput, Pressable, TouchableOpacity, FlatList, ScrollView, Alert } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { toast } from "@/lib/toast";
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import { useDebounce } from "@/lib/use-debounce";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
@@ -29,6 +29,8 @@ const FrequentTile = memo(function FrequentTile({
   product: Product;
   onPress: () => void;
 }) {
+  const colors = useColors();
+
   return (
     <Pressable
       onPress={onPress}
@@ -49,7 +51,7 @@ const FrequentTile = memo(function FrequentTile({
       <Text className="mt-1.5 text-center text-xs text-ink" numberOfLines={1}>
         {product.name}
       </Text>
-      <Text className="text-center text-xs font-medium text-primary-deep">
+      <Text className="text-center text-xs font-medium text-heading">
         {formatCurrency(product.selling_price)}
       </Text>
     </Pressable>
@@ -59,13 +61,15 @@ const FrequentTile = memo(function FrequentTile({
 type CartRowProps = { item: CartItem; onEditWeight: (item: CartItem) => void };
 
 const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const increment = useCart((s) => s.increment);
   const decrement = useCart((s) => s.decrement);
   const remove = useCart((s) => s.remove);
 
   const isWeight = item.product.sale_type === "weight";
-  const accent = isWeight ? "#0F6E56" : colors.primary;
+  const accent = isWeight ? colors.successInk : colors.primary;
   const lineTotal = cartTotal([item]);
 
   return (
@@ -75,7 +79,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
           <View
             style={{
               alignSelf: "flex-start",
-              backgroundColor: isWeight ? "#E1F5EE" : colors.primaryTint,
+              backgroundColor: isWeight ? colors.successTint : colors.primaryTint,
               paddingHorizontal: 9,
               paddingVertical: 3,
               borderRadius: 6,
@@ -152,6 +156,8 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
 });
 
 export default function SotuvScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const shopId = useActiveShopId();
@@ -237,6 +243,14 @@ export default function SotuvScreen() {
   );
 
   function onCheckout() {
+    if (!shopId) {
+      Alert.alert("Do'kon Xatosi", "Do'kon identifikatori (shopId) topilmadi! Iltimos, do'konni qayta tanlang.");
+      return;
+    }
+    if (items.length === 0) {
+      Alert.alert("Savat Xatosi", "Savatda mahsulot mavjud emas!");
+      return;
+    }
     setPayOpen(true);
   }
 
@@ -244,7 +258,7 @@ export default function SotuvScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
         <View className="flex-row items-center justify-between pb-3">
-          <Text className="text-2xl font-medium text-primary-deep">{t("sell.title")}</Text>
+          <Text className="text-2xl font-medium text-heading">{t("sell.title")}</Text>
           {items.length > 0 ? (
             <Pressable onPress={clear} hitSlop={10}>
               <Text className="text-sm text-danger">{t("common.clear")}</Text>
@@ -344,7 +358,7 @@ export default function SotuvScreen() {
                   {item.sale_type === "weight" ? t("common.kg") : t("common.pcs")}
                 </Text>
               </View>
-              <Text className="text-base font-medium text-primary-deep">
+              <Text className="text-base font-medium text-heading">
                 {formatCurrency(item.selling_price)}
               </Text>
               <Ionicons name="add-circle" size={28} color={colors.primary} />
@@ -384,14 +398,23 @@ export default function SotuvScreen() {
             </Text>
             <Text className="text-xl font-medium text-ink">{formatCurrency(total)}</Text>
           </View>
-          <Pressable
+          <TouchableOpacity
+            activeOpacity={0.7}
             onPress={onCheckout}
-            className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
-            style={{ height: 54 }}
+            style={{
+              height: 54,
+              backgroundColor: colors.primary,
+              borderRadius: 16,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              width: "100%",
+            }}
           >
-            <Text className="text-base font-medium text-white">{t("sell.payment")}</Text>
+            <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>{t("sell.payment")}</Text>
             <Ionicons name="arrow-forward" size={18} color="#fff" />
-          </Pressable>
+          </TouchableOpacity>
         </View>
       ) : null}
 

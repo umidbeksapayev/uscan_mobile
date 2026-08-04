@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { toast } from "@/lib/toast";
 import { setDailySummaryReminder, getDailySlot } from "./notify";
 import type { ReminderSlot } from "./notify-math";
@@ -19,6 +19,8 @@ const OPTIONS: {
 ];
 
 export function LocalReminderCard() {
+  const colors = useColors();
+
   const [slot, setSlot] = useState<ReminderSlot>(getDailySlot());
   const [saving, setSaving] = useState(false);
 

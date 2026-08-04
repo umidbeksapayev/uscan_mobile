@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
 import { useMemberships, useActiveMembership } from "@/features/auth/use-memberships";
@@ -28,6 +28,8 @@ function refundedTotal(sale: Sale): number {
 }
 
 function ItemLine({ it }: { it: SaleItem }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const qtyLabel =
     it.sale_type === "weight"
@@ -72,6 +74,8 @@ function SaleCard({
   onReturn?: () => void;
   shopName: string;
 }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const meta = METHOD[sale.search_method] ?? METHOD.manual;
   const refunded = refundedTotal(sale);
@@ -87,7 +91,7 @@ function SaleCard({
       style={{
         borderWidth: 0.5,
         borderColor: colors.line,
-        shadowColor: "#0F172A",
+        shadowColor: colors.shadow,
         shadowOpacity: 0.05,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
@@ -117,10 +121,10 @@ function SaleCard({
             {hasReturns ? (
               <View
                 className="flex-row items-center rounded-full px-2 py-0.5"
-                style={{ gap: 3, backgroundColor: "#FDECEC" }}
+                style={{ gap: 3, backgroundColor: colors.dangerTint }}
               >
-                <Ionicons name="arrow-undo-outline" size={11} color="#B42318" />
-                <Text style={{ fontSize: 10, fontWeight: "500", color: "#B42318" }}>
+                <Ionicons name="arrow-undo-outline" size={11} color={colors.dangerInk} />
+                <Text style={{ fontSize: 10, fontWeight: "500", color: colors.dangerInk }}>
                   {t("returns.badge")}
                 </Text>
               </View>
@@ -129,7 +133,7 @@ function SaleCard({
         </View>
 
         <View className="items-end" style={{ gap: 4 }}>
-          <Text className="text-base font-medium text-primary-deep">
+          <Text className="text-base font-medium text-heading">
             {formatCurrency(sale.total_revenue)}
           </Text>
           <Ionicons
@@ -155,7 +159,7 @@ function SaleCard({
             {hasReturns ? (
               <Text className="text-xs text-muted">
                 {t("returns.refunded")}:{" "}
-                <Text style={{ fontWeight: "500", color: "#B42318" }}>
+                <Text style={{ fontWeight: "500", color: colors.dangerInk }}>
                   {formatCurrency(refunded)}
                 </Text>
               </Text>
@@ -198,6 +202,8 @@ function EmptyState({
   icon: keyof typeof Ionicons.glyphMap;
   text: string;
 }) {
+  const colors = useColors();
+
   return (
     <View className="flex-1 items-center justify-center px-10" style={{ paddingTop: 80 }}>
       <View className="mb-4 h-20 w-20 items-center justify-center rounded-3xl bg-primary-tint">
@@ -209,6 +215,8 @@ function EmptyState({
 }
 
 export default function TarixScreen() {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const [openId, setOpenId] = useState<string | null>(null);
   const [returnSale, setReturnSale] = useState<Sale | null>(null);
@@ -237,7 +245,7 @@ export default function TarixScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pt-2">
         <View className="flex-row items-end justify-between pb-3">
-          <Text className="text-2xl font-medium text-primary-deep">{t("nav.history")}</Text>
+          <Text className="text-2xl font-medium text-heading">{t("nav.history")}</Text>
           {list.length > 0 ? (
             <Text className="text-sm text-muted">
               {t("history.countSales", {

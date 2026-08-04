@@ -1,10 +1,12 @@
 import { View, Text, TextInput, type TextInputProps } from "react-native";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 
 type Props = TextInputProps & { label: string };
 
 export function Field({ label, ...rest }: Props) {
+  const colors = useColors();
+
   return (
     <View style={{ gap: 6 }}>
       <Text className="text-sm font-medium text-ink">{label}</Text>

@@ -3,7 +3,7 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, Alert } from "reac
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { toast } from "@/lib/toast";
 import { formatNumber } from "@/lib/format";
@@ -32,6 +32,8 @@ type Props = {
 };
 
 export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const createMut = useCreateExpense();
   const updateMut = useUpdateExpense();

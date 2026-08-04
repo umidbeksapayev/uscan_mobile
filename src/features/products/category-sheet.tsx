@@ -1,9 +1,10 @@
-import { Text, ScrollView, Pressable } from "react-native";
+import { Text } from "react-native";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
-import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { useColors } from "@/theme/theme-store";
+import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import type { Category } from "@/types/database";
 
 export function CategorySheet({
@@ -19,6 +20,8 @@ export function CategorySheet({
   onSelect: (id: string | null) => void;
   onClose: () => void;
 }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const options: { id: string | null; name: string }[] = [
     { id: null, name: t("product.noCategory") },
@@ -27,11 +30,11 @@ export function CategorySheet({
   return (
     <BottomSheet visible={visible} onClose={onClose}>
           <Text className="mb-2 text-lg font-medium text-ink">{t("product.category")}</Text>
-          <ScrollView style={{ maxHeight: 380 }}>
+          <BottomSheetScrollView style={{ maxHeight: 380 }}>
             {options.map((o) => {
               const active = selectedId === o.id;
               return (
-                <Pressable
+                <SheetPressable
                   key={o.id ?? "none"}
                   onPress={() => {
                     onSelect(o.id);
@@ -47,10 +50,10 @@ export function CategorySheet({
                     {o.name}
                   </Text>
                   {active ? <Ionicons name="checkmark" size={20} color={colors.primary} /> : null}
-                </Pressable>
+                </SheetPressable>
               );
             })}
-          </ScrollView>
+          </BottomSheetScrollView>
     </BottomSheet>
   );
 }

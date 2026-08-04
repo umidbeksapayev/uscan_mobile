@@ -13,7 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
+import type { AppColors } from "@/theme/colors";
 import { formatCurrency, formatDateTime, formatDateTimeFull, formatNumber } from "@/lib/format";
 import { useOnline } from "@/lib/use-online";
 import { useAuth } from "@/features/auth/auth-context";
@@ -23,14 +24,21 @@ import { useExpectedCash, useCloseShift, useCashClosures } from "@/features/shif
 import { parseAmount, closureDifference, diffStatus } from "@/features/shift/shift-math";
 import type { CashClosure } from "@/features/shift/shift-math";
 
-/** Farq holati → rang/fon/label (match=yashil, surplus=sariq, shortage=qizil). */
-const DIFF_UI = {
-  match: { color: "#0F6E56", bg: "#E7F6EE", label: "Mos tushdi" },
-  surplus: { color: "#B45309", bg: "#FEF6E7", label: "Ortiqcha" },
-  shortage: { color: "#B42318", bg: "#FDECEC", label: "Kamomad" },
-} as const;
+/**
+ * Farq holati → rang/fon/label (match=yashil, surplus=sariq, shortage=qizil).
+ * Palitradan olinadi — tungi rejimda fon/matn avtomatik teskarilanadi.
+ */
+function diffUi(colors: AppColors) {
+  return {
+    match: { color: colors.successInk, bg: colors.successTint, label: "Mos tushdi" },
+    surplus: { color: colors.warningInk, bg: colors.warningTint, label: "Ortiqcha" },
+    shortage: { color: colors.dangerInk, bg: colors.dangerTint, label: "Kamomad" },
+  };
+}
 
 export default function ShiftCloseScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const online = useOnline();
@@ -51,7 +59,7 @@ export default function ShiftCloseScreen() {
   const counted = parseAmount(countedText);
   const hasInput = countedText.trim().length > 0;
   const diff = exp ? closureDifference(counted, exp.expectedCash) : 0;
-  const dui = DIFF_UI[diffStatus(diff)];
+  const dui = diffUi(colors)[diffStatus(diff)];
   const statusLabel = t("shift.status_" + diffStatus(diff), dui.label);
 
   const emailByUser = useMemo(() => {
@@ -122,7 +130,7 @@ export default function ShiftCloseScreen() {
         {!online ? (
           <View
             className="mb-3 flex-row items-center gap-2 rounded-2xl border p-3"
-            style={{ borderColor: colors.warning, backgroundColor: "#FEF6E7" }}
+            style={{ borderColor: colors.warning, backgroundColor: colors.warningTint }}
           >
             <Ionicons name="cloud-offline-outline" size={18} color={colors.warning} />
             <Text className="flex-1 text-sm text-ink">
@@ -136,7 +144,7 @@ export default function ShiftCloseScreen() {
           <View className="mb-3 items-center rounded-2xl border border-line bg-surface p-5">
             <View
               className="mb-3 h-14 w-14 items-center justify-center rounded-full"
-              style={{ backgroundColor: "#E7F6EE" }}
+              style={{ backgroundColor: colors.successTint }}
             >
               <Ionicons name="checkmark" size={30} color={colors.success} />
             </View>
@@ -150,7 +158,7 @@ export default function ShiftCloseScreen() {
                   ? `0 ${t("common.som", "so'm")}`
                   : `${result.difference > 0 ? "+" : "−"}${formatCurrency(Math.abs(result.difference))}`
               }
-              color={DIFF_UI[diffStatus(result.difference)].color}
+              color={diffUi(colors)[diffStatus(result.difference)].color}
             />
           </View>
         ) : null}
@@ -277,6 +285,8 @@ export default function ShiftCloseScreen() {
 }
 
 function ResultRow({ label, value, color }: { label: string; value: string; color?: string }) {
+  const colors = useColors();
+
   return (
     <View className="mt-2 w-full flex-row items-center justify-between">
       <Text className="text-sm text-muted">{label}</Text>
@@ -288,6 +298,8 @@ function ResultRow({ label, value, color }: { label: string; value: string; colo
 }
 
 function BreakdownRow({ label, value, negative }: { label: string; value: number; negative?: boolean }) {
+  const colors = useColors();
+
   return (
     <View className="flex-row items-center justify-between py-1">
       <Text className="text-sm text-muted">{label}</Text>
@@ -300,8 +312,9 @@ function BreakdownRow({ label, value, negative }: { label: string; value: number
 }
 
 function ClosureCard({ closure, cashierEmail }: { closure: CashClosure; cashierEmail?: string }) {
+  const colors = useColors();
   const { t } = useTranslation();
-  const ui = DIFF_UI[diffStatus(closure.difference)];
+  const ui = diffUi(colors)[diffStatus(closure.difference)];
   return (
     <View className="mb-2.5 rounded-2xl border border-line bg-surface p-3.5">
       <View className="flex-row items-center justify-between">

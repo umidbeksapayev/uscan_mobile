@@ -10,13 +10,15 @@ import {
   Switch,
   Platform,
 } from "react-native";
+
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useThemeStore, useColors, type ThemeMode } from "@/theme/theme-store";
+import type { AppColors } from "@/theme/colors";
 import { LANGUAGES, setLanguage, type LangCode } from "@/i18n";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useActiveMembership } from "@/features/auth/use-memberships";
@@ -30,21 +32,27 @@ import type { MemberPermissions, ShopMemberRow } from "@/types/database";
    Uslub konstantalari
 ───────────────────────────────────────────────────────────────────────── */
 const RADIUS = 18;
-const CARD_SHADOW = Platform.select({
-  ios: {
-    shadowColor: "#94A3B8",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  android: { elevation: 2 },
-  default: {},
-});
+
+/** Karta soyasi — rang palitradan olinadi (tungi rejimda sof qora). */
+function cardShadow(colors: AppColors) {
+  return Platform.select({
+    ios: {
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+    },
+    android: { elevation: 2 },
+    default: {},
+  });
+}
 
 /* ─────────────────────────────────────────────────────────────────────────
    SectionLabel — bo'lim sarlavhasi
 ───────────────────────────────────────────────────────────────────────── */
 function SectionLabel({ label }: { label: string }) {
+  const colors = useColors();
+
   return (
     <Text
       style={{
@@ -82,19 +90,19 @@ function SettingRow({
   onPress?: () => void;
   last?: boolean;
 }) {
+  const colors = useColors();
+
   return (
     <>
       <Pressable
         onPress={onPress}
-        android_ripple={{ color: colors.line }}
-        style={({ pressed }) => ({
+        style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 14,
           paddingHorizontal: 16,
           paddingVertical: 14,
-          backgroundColor: pressed && Platform.OS === "ios" ? "#f4f4f5" : colors.surface,
-        })}
+          backgroundColor: colors.surface,
+        }}
       >
         <View
           style={{
@@ -104,11 +112,12 @@ function SettingRow({
             backgroundColor: iconBg,
             alignItems: "center",
             justifyContent: "center",
+            marginRight: 14,
           }}
         >
           <Ionicons name={icon} size={19} color={iconColor} />
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, justifyContent: "center" }}>
           <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
             {title}
           </Text>
@@ -118,7 +127,7 @@ function SettingRow({
             </Text>
           ) : null}
         </View>
-        <Ionicons name="chevron-forward" size={16} color={colors.tabInactive} />
+        <Ionicons name="chevron-forward" size={16} color={colors.tabInactive} style={{ marginLeft: 10 }} />
       </Pressable>
       {!last && (
         <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 68 }} />
@@ -143,6 +152,8 @@ function PermissionsSheet({
   onRemove: () => void;
   saving: boolean;
 }) {
+  const colors = useColors();
+
   const [perms, setPerms] = useState<MemberPermissions>({});
   const [seen, setSeen] = useState<string | null>(null);
   if (member && seen !== member.user_id) {
@@ -270,6 +281,135 @@ function PermissionsSheet({
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+   LanguagePickerSheet — til tanlash oynasi
+───────────────────────────────────────────────────────────────────────── */
+function LanguagePickerSheet({
+  visible,
+  onClose,
+}: {
+  visible: boolean;
+  onClose: () => void;
+}) {
+  const colors = useColors();
+
+  const { i18n } = useTranslation();
+
+  return (
+    <BottomSheet visible={visible} onClose={onClose} snapPoints={["35%"]}>
+      <Text style={{ fontSize: 18, fontWeight: "700", color: colors.ink, marginBottom: 16 }}>
+        Interfeys tili
+      </Text>
+      <View style={{ gap: 8 }}>
+        {LANGUAGES.map((l) => {
+          const isActive = i18n.language === l.code;
+          return (
+            <Pressable
+              key={l.code}
+              onPress={() => {
+                setLanguage(l.code as LangCode);
+                onClose();
+              }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                borderRadius: 16,
+                backgroundColor: isActive ? colors.primaryTint : colors.surface,
+                borderWidth: 1,
+                borderColor: isActive ? colors.primary : colors.line,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: isActive ? "600" : "500",
+                  color: isActive ? colors.primary : colors.ink,
+                }}
+              >
+                {l.label}
+              </Text>
+              {isActive && <Ionicons name="checkmark-circle" size={22} color={colors.primary} />}
+            </Pressable>
+          );
+        })}
+      </View>
+    </BottomSheet>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ThemePickerSheet — tungi/yorqin rejim tanlash oynasi
+───────────────────────────────────────────────────────────────────────── */
+const THEME_OPTIONS: { mode: ThemeMode; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { mode: "system", label: "Tizim rejimi (Avto)", icon: "phone-portrait-outline" },
+  { mode: "light", label: "Yorqin rejim (Kun)", icon: "sunny-outline" },
+  { mode: "dark", label: "Tungi rejim (Tun)", icon: "moon-outline" },
+];
+
+function ThemePickerSheet({
+  visible,
+  onClose,
+}: {
+  visible: boolean;
+  onClose: () => void;
+}) {
+  const mode = useThemeStore((s) => s.themeMode);
+  const setThemeMode = useThemeStore((s) => s.setThemeMode);
+  const colors = useColors();
+
+  return (
+    <BottomSheet visible={visible} onClose={onClose} snapPoints={["42%"]}>
+      <Text style={{ fontSize: 18, fontWeight: "700", color: colors.ink, marginBottom: 16 }}>
+        Interfeys mavzusi (Dizayn)
+      </Text>
+      <View style={{ gap: 8 }}>
+        {THEME_OPTIONS.map((opt) => {
+          const isActive = mode === opt.mode;
+          return (
+            <Pressable
+              key={opt.mode}
+              onPress={() => {
+                setThemeMode(opt.mode);
+                onClose();
+              }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                borderRadius: 16,
+                backgroundColor: isActive ? colors.primaryTint : colors.bg,
+                borderWidth: 1.5,
+                borderColor: isActive ? colors.primary : colors.line,
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <Ionicons name={opt.icon} size={20} color={isActive ? colors.primary : colors.muted} />
+                <Text
+                  style={{
+                    fontSize: 15,
+                    fontWeight: isActive ? "700" : "500",
+                    color: isActive ? colors.primary : colors.ink,
+                  }}
+                >
+                  {opt.label}
+                </Text>
+              </View>
+              {isActive ? (
+                <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+              ) : null}
+            </Pressable>
+          );
+        })}
+      </View>
+    </BottomSheet>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
    SettingsScreen — bosh ekran
 ───────────────────────────────────────────────────────────────────────── */
 export default function SettingsScreen() {
@@ -284,8 +424,19 @@ export default function SettingsScreen() {
   const removeMut = useRemoveMember(shopId);
   const permsMut = useSetPermissions(shopId);
 
+  const colors = useColors();
   const [email, setEmail] = useState("");
   const [editing, setEditing] = useState<ShopMemberRow | null>(null);
+  const [langOpen, setLangOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
+
+  const themeMode = useThemeStore((s) => s.themeMode);
+  const themeModeLabel =
+    themeMode === "dark"
+      ? "Tungi rejim (Tun)"
+      : themeMode === "light"
+        ? "Yorqin rejim (Kun)"
+        : "Tizim rejimi (Avto)";
 
   function onAdd() {
     const e = email.trim();
@@ -327,6 +478,7 @@ export default function SettingsScreen() {
 
   const cashiers = (staff ?? []).filter((m) => m.role === "cashier");
   const initials = (active?.shop.name ?? "U").slice(0, 2).toUpperCase();
+  const currentLangLabel = LANGUAGES.find((l) => l.code === i18n.language)?.label ?? "O'zbekcha";
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
@@ -374,7 +526,7 @@ export default function SettingsScreen() {
         {/* ══════════════════════════════════════════════
             DO'KON PROFILI
         ══════════════════════════════════════════════ */}
-        <SectionLabel label="Do'kon" />
+        <SectionLabel label="Profil" />
         <View
           style={{
             borderRadius: RADIUS,
@@ -386,7 +538,7 @@ export default function SettingsScreen() {
             gap: 14,
             padding: 16,
             marginBottom: 20,
-            ...CARD_SHADOW,
+            ...cardShadow(colors),
           }}
         >
           {/* Avatar — gradient simulyatsiya: to'q fon + kichik ring */}
@@ -435,69 +587,9 @@ export default function SettingsScreen() {
         </View>
 
         {/* ══════════════════════════════════════════════
-            TIL TANLASH
+            UMUMIY SOZLAMALAR
         ══════════════════════════════════════════════ */}
-        <SectionLabel label="Interfeys tili" />
-        <View
-          style={{
-            borderRadius: RADIUS,
-            borderWidth: 1,
-            borderColor: colors.line,
-            backgroundColor: colors.surface,
-            padding: 6,
-            flexDirection: "row",
-            gap: 4,
-            marginBottom: 20,
-            ...CARD_SHADOW,
-          }}
-        >
-          {LANGUAGES.map((l) => {
-            const isActive = i18n.language === l.code;
-            return (
-              <Pressable
-                key={l.code}
-                onPress={() => setLanguage(l.code as LangCode)}
-                accessibilityLabel={l.label}
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 10,
-                  borderRadius: 13,
-                  backgroundColor: isActive ? colors.primary : "transparent",
-                  ...(isActive
-                    ? Platform.select({
-                        ios: {
-                          shadowColor: colors.primary,
-                          shadowOffset: { width: 0, height: 2 },
-                          shadowOpacity: 0.3,
-                          shadowRadius: 4,
-                        },
-                        android: { elevation: 3 },
-                        default: {},
-                      })
-                    : {}),
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 13,
-                    fontWeight: isActive ? "700" : "500",
-                    color: isActive ? "#fff" : colors.muted,
-                    lineHeight: 18,
-                  }}
-                >
-                  {l.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* ══════════════════════════════════════════════
-            QURILMALAR
-        ══════════════════════════════════════════════ */}
-        <SectionLabel label="Qurilmalar" />
+        <SectionLabel label="Umumiy" />
         <View
           style={{
             borderRadius: RADIUS,
@@ -506,9 +598,25 @@ export default function SettingsScreen() {
             backgroundColor: colors.surface,
             overflow: "hidden",
             marginBottom: 20,
-            ...CARD_SHADOW,
+            ...cardShadow(colors),
           }}
         >
+          <SettingRow
+            icon="language-outline"
+            iconBg="rgba(47,128,237,0.12)"
+            iconColor={colors.primary}
+            title="Interfeys tili"
+            subtitle={currentLangLabel}
+            onPress={() => setLangOpen(true)}
+          />
+          <SettingRow
+            icon="color-palette-outline"
+            iconBg="rgba(245,158,11,0.12)"
+            iconColor="#f59e0b"
+            title="Mavzu (Dizayn)"
+            subtitle={themeModeLabel}
+            onPress={() => setThemeOpen(true)}
+          />
           <SettingRow
             icon="print-outline"
             iconBg="rgba(168,85,247,0.12)"
@@ -568,7 +676,7 @@ export default function SettingsScreen() {
                 paddingRight: 6,
                 paddingVertical: 6,
                 marginBottom: 6,
-                ...CARD_SHADOW,
+                ...cardShadow(colors),
               }}
             >
               <Ionicons name="mail-outline" size={17} color={colors.muted} />
@@ -689,7 +797,7 @@ export default function SettingsScreen() {
                   borderColor: colors.line,
                   backgroundColor: colors.surface,
                   overflow: "hidden",
-                  ...CARD_SHADOW,
+                  ...cardShadow(colors),
                 }}
               >
                 {cashiers.map((m, i) => {
@@ -710,8 +818,10 @@ export default function SettingsScreen() {
                           gap: 14,
                           paddingHorizontal: 16,
                           paddingVertical: 13,
+                          // iOS bosilish holati — palitradan, aks holda tungi
+                          // rejimda oq chaqnash bo'lardi
                           backgroundColor:
-                            pressed && Platform.OS === "ios" ? "#f4f4f5" : colors.surface,
+                            pressed && Platform.OS === "ios" ? colors.bg : colors.surface,
                         })}
                       >
                         <View
@@ -791,6 +901,14 @@ export default function SettingsScreen() {
         onSave={onSavePerms}
         onRemove={onRemove}
         saving={permsMut.isPending}
+      />
+      <LanguagePickerSheet
+        visible={langOpen}
+        onClose={() => setLangOpen(false)}
+      />
+      <ThemePickerSheet
+        visible={themeOpen}
+        onClose={() => setThemeOpen(false)}
       />
     </SafeAreaView>
   );

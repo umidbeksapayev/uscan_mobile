@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { Logo } from "@/components/logo";
@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 
 export default function LoginScreen() {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

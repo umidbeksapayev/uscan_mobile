@@ -7,7 +7,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { File } from "expo-file-system";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
+import type { AppColors } from "@/theme/colors";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
@@ -23,11 +24,16 @@ import { getExistingBarcodes, importProducts, type ImportResult } from "@/featur
 
 type Status = "idle" | "loading" | "preview" | "importing" | "done";
 
-const STATUS_BADGE: Record<ImportRowStatus, { bg: string; text: string; label: string }> = {
-  valid: { bg: "#E7F6EE", text: "#0F6E56", label: "Yaroqli" },
-  error: { bg: "#FDECEC", text: "#B42318", label: "Xato" },
-  duplicate: { bg: "#FCF1DD", text: "#92600A", label: "Dublikat" },
-};
+/** Palitradan olinadi — tungi rejimda fon/matn avtomatik teskarilanadi. */
+function statusBadge(
+  colors: AppColors
+): Record<ImportRowStatus, { bg: string; text: string; label: string }> {
+  return {
+    valid: { bg: colors.successTint, text: colors.successInk, label: "Yaroqli" },
+    error: { bg: colors.dangerTint, text: colors.dangerInk, label: "Xato" },
+    duplicate: { bg: colors.warningTint, text: colors.warningInk, label: "Dublikat" },
+  };
+}
 
 const ERROR_LABELS: Record<string, string> = {
   name_required: "Nomi yo'q",
@@ -50,8 +56,10 @@ function RequiredHeaderHint() {
 }
 
 function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
-  const badge = STATUS_BADGE[row.status];
+  const badge = statusBadge(colors)[row.status];
   const badgeLabel = t(`import.status_${row.status}`, badge.label);
   return (
     <View
@@ -82,6 +90,8 @@ function PreviewRowItem({ row }: { row: ImportPreviewRow }) {
 }
 
 export default function ImportProductsScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const qc = useQueryClient();
   const { t } = useTranslation();
@@ -222,13 +232,13 @@ export default function ImportProductsScreen() {
               </Text>
               <View className="mt-2 flex-row gap-2">
                 <View className="flex-1 items-center rounded-xl bg-bg py-2">
-                  <Text className="text-base font-medium" style={{ color: "#0F6E56" }}>
+                  <Text className="text-base font-medium" style={{ color: colors.successInk }}>
                     {preview.validCount}
                   </Text>
                   <Text className="text-xs text-muted">{t("import.status_valid")}</Text>
                 </View>
                 <View className="flex-1 items-center rounded-xl bg-bg py-2">
-                  <Text className="text-base font-medium" style={{ color: "#92600A" }}>
+                  <Text className="text-base font-medium" style={{ color: colors.warningInk }}>
                     {preview.duplicateCount}
                   </Text>
                   <Text className="text-xs text-muted">{t("import.status_duplicate")}</Text>
@@ -266,7 +276,7 @@ export default function ImportProductsScreen() {
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
           <View
             className="mb-2 h-20 w-20 items-center justify-center rounded-full"
-            style={{ backgroundColor: "#E7F6EE" }}
+            style={{ backgroundColor: colors.successTint }}
           >
             <Ionicons name="checkmark" size={40} color={colors.success} />
           </View>

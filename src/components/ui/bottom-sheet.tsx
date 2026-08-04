@@ -1,35 +1,67 @@
-import {
-  Modal,
-  View,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import React, { useCallback, useEffect, useRef } from "react";
+import { StyleSheet, Pressable, type StyleProp, type ViewStyle } from "react-native";
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColors } from "@/theme/theme-store";
 
-import { colors } from "@/theme/colors";
+/* ─────────────────────────────────────────────────────────────────────────
+   SheetPressable — BottomSheet ichidagi tugmalar uchun maxsus komponent.
+   
+   NativeWind className (h-14, flex-1, bg-primary, etc.) uslublarini to'liq 
+   qo'llab-quvvatlaydi hamda bosilganda vizual feedback (opacity) beradi.
+   ───────────────────────────────────────────────────────────────────────── */
+
+type SheetPressableProps = {
+  onPress?: () => void;
+  disabled?: boolean;
+  hitSlop?: number | { top?: number; bottom?: number; left?: number; right?: number };
+  activeOpacity?: number;
+  style?: StyleProp<ViewStyle>;
+  className?: string;
+  children?: React.ReactNode;
+};
+
+export function SheetPressable({
+  onPress,
+  disabled,
+  hitSlop,
+  activeOpacity = 0.7,
+  style,
+  className,
+  children,
+}: SheetPressableProps) {
+  return (
+    <Pressable
+      onPress={disabled ? undefined : onPress}
+      disabled={disabled}
+      hitSlop={hitSlop}
+      style={({ pressed }) => [
+        style as ViewStyle,
+        pressed && !disabled ? { opacity: activeOpacity } : null,
+      ]}
+      className={className}
+    >
+      {children}
+    </Pressable>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   BottomSheet — umumiy wrapper komponent
+   ───────────────────────────────────────────────────────────────────────── */
 
 type Props = {
   visible: boolean;
   onClose: () => void;
-  /** Backdrop bosilganda yopish (default true) — masalan, success fazada o'chiriladi. */
   dismissOnBackdrop?: boolean;
-  /** Input bor sheet'lar uchun: klaviatura ochilganda sheet ko'tariladi. */
   keyboardAvoiding?: boolean;
-  /** Tepadagi sudrash chizig'i (default true). */
   handle?: boolean;
-  /** Sheet ichki style qo'shimchasi (gap, alignItems kabi farqlar uchun). */
   contentStyle?: StyleProp<ViewStyle>;
   children: React.ReactNode;
+  snapPoints?: Array<string | number>;
+  enableDynamicSizing?: boolean;
 };
 
-/**
- * Pastdan chiqadigan umumiy oyna (audit A2) — avval 15 faylda takrorlangan
- * Modal boilerplate: qoraytirilgan backdrop (bosilsa yopiladi), pastga
- * yopishgan oq kartochka (tepa burchaklari 24), sudrash chizig'i.
- * Android orqaga tugmasi (`onRequestClose`) har doim yopadi.
- */
 export function BottomSheet({
   visible,
   onClose,
@@ -38,51 +70,71 @@ export function BottomSheet({
   handle = true,
   contentStyle,
   children,
+  snapPoints,
+  enableDynamicSizing = true,
 }: Props) {
-  const body = (
-    <Pressable
-      onPress={dismissOnBackdrop ? onClose : undefined}
-      style={{ flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" }}
-    >
-      <View
-        onStartShouldSetResponder={() => true}
-        style={[
-          {
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            padding: 20,
-            paddingBottom: 28,
-          },
-          contentStyle,
-        ]}
-      >
-        {handle ? (
-          <View
-            style={{
-              alignSelf: "center",
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              backgroundColor: colors.line,
-              marginBottom: 12,
-            }}
-          />
-        ) : null}
-        {children}
-      </View>
-    </Pressable>
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const insets = useSafeAreaInsets();
+  const colors = useColors();
+
+  useEffect(() => {
+    if (visible) {
+      const timer = setTimeout(() => {
+        bottomSheetModalRef.current?.present();
+      }, 10);
+      return () => clearTimeout(timer);
+    }
+  }, [visible]);
+
+  const handleSheetChanges = useCallback(
+    (index: number) => {
+      if (index === -1) {
+        onClose();
+      }
+    },
+    [onClose]
   );
 
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        pressBehavior={dismissOnBackdrop ? "close" : "none"}
+      />
+    ),
+    [dismissOnBackdrop]
+  );
+
+  if (!visible) return null;
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      {keyboardAvoiding ? (
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-          {body}
-        </KeyboardAvoidingView>
-      ) : (
-        body
-      )}
-    </Modal>
+    <BottomSheetModal
+      ref={bottomSheetModalRef}
+      index={0}
+      snapPoints={snapPoints}
+      enableDynamicSizing={enableDynamicSizing}
+      onChange={handleSheetChanges}
+      backdropComponent={renderBackdrop}
+      keyboardBehavior={keyboardAvoiding ? "interactive" : "extend"}
+      keyboardBlurBehavior="restore"
+      stackBehavior="replace"
+      enableContentPanningGesture={false}
+      handleIndicatorStyle={handle ? { backgroundColor: colors.line } : { display: "none" }}
+      backgroundStyle={{ backgroundColor: colors.surface, borderRadius: 24 }}
+      bottomInset={0}
+    >
+      <BottomSheetView style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) }, contentStyle]}>
+        {children}
+      </BottomSheetView>
+    </BottomSheetModal>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+});

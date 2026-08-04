@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, Pressable } from "react-native";
+import { View, Text } from "react-native";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
-import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { useColors } from "@/theme/theme-store";
+import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 import { formatCurrency, formatWeight, formatNumber } from "@/lib/format";
 import { kgFromAmount, amountFromKg } from "./weight-math";
 import type { Product } from "@/types/database";
@@ -24,6 +25,8 @@ type Props = {
  * ikkinchisi avtomatik ko'rsatiladi. Mijoz "20 000 so'mlik" desa → Summa rejimi.
  */
 export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const price = product?.selling_price ?? 0;
   const [mode, setMode] = useState<Mode>("som");
@@ -69,7 +72,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
                 {(["som", "kg"] as Mode[]).map((m) => {
                   const active = mode === m;
                   return (
-                    <Pressable
+                    <SheetPressable
                       key={m}
                       onPress={() => switchMode(m)}
                       className="flex-1 items-center justify-center rounded-xl"
@@ -78,13 +81,13 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
                       <Text style={{ fontWeight: "500", color: active ? "#fff" : colors.muted }}>
                         {m === "som" ? t("sell.somMode") : t("sell.kgMode")}
                       </Text>
-                    </Pressable>
+                    </SheetPressable>
                   );
                 })}
               </View>
 
               {/* Bitta input */}
-              <TextInput
+              <BottomSheetTextInput
                 value={text}
                 onChangeText={setText}
                 keyboardType={mode === "som" ? "number-pad" : "decimal-pad"}
@@ -105,7 +108,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
               {/* Tezkor tugmalar */}
               <View className="mt-3 flex-row gap-2">
                 {presets.map((p) => (
-                  <Pressable
+                  <SheetPressable
                     key={p}
                     onPress={() => setText(String(p))}
                     className="flex-1 items-center justify-center rounded-xl bg-bg"
@@ -114,12 +117,12 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
                     <Text className="text-sm font-medium text-ink">
                       {mode === "som" ? formatNumber(p) : `${p.toFixed(1)} ${t("common.kg")}`}
                     </Text>
-                  </Pressable>
+                  </SheetPressable>
                 ))}
               </View>
 
               {/* Tasdiqlash */}
-              <Pressable
+              <SheetPressable
                 disabled={!valid}
                 onPress={() => onConfirm(finalKg)}
                 className="mt-6 flex-row items-center justify-center rounded-2xl bg-primary"
@@ -129,7 +132,7 @@ export function WeightSheet({ product, initialKg, onClose, onConfirm }: Props) {
                   {t("addToCart.addToCart")}
                   {valid ? ` · ${formatCurrency(amount)}` : ""}
                 </Text>
-              </Pressable>
+              </SheetPressable>
             </>
           ) : null}
     </BottomSheet>

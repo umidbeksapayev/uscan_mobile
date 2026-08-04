@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { Field } from "@/components/ui/field";
 const REDIRECT_TO = "uscan://reset-password";
 
 export default function ForgotPasswordScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,7 +65,7 @@ export default function ForgotPasswordScreen() {
           <View className="items-center">
             <View
               className="mb-4 h-20 w-20 items-center justify-center rounded-full"
-              style={{ backgroundColor: "#E7F6EE" }}
+              style={{ backgroundColor: colors.successTint }}
             >
               <Ionicons name="mail-outline" size={36} color={colors.success} />
             </View>

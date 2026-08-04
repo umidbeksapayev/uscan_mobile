@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 
 type Props = {
   title: string;
@@ -12,10 +12,12 @@ type Props = {
 
 /** F1+ da real ekran bilan almashtiriladigan brendlangan placeholder. */
 export function ScreenPlaceholder({ title, icon, note }: Props) {
+  const colors = useColors();
+
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="px-4 pb-3 pt-2">
-        <Text className="text-2xl font-medium text-primary-deep">{title}</Text>
+        <Text className="text-2xl font-medium text-heading">{title}</Text>
       </View>
       <View className="flex-1 items-center justify-center px-10">
         <View className="mb-4 h-20 w-20 items-center justify-center rounded-3xl bg-primary-tint">

@@ -8,7 +8,7 @@ import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "@/theme/colors";
+import { useColors } from "@/theme/theme-store";
 import { formatCurrency } from "@/lib/format";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
 import { useSupplyCart, type SupplyItem } from "@/features/supply/supply-store";
@@ -18,6 +18,8 @@ import { AddSupplyItemSheet } from "@/features/supply/add-supply-item-sheet";
 import { SupplierPickerSheet, type PickedSupplier } from "@/features/suppliers/supplier-picker-sheet";
 
 function SupplyCartRow({ item }: { item: SupplyItem }) {
+  const colors = useColors();
+
   const { t } = useTranslation();
   const setQty = useSupplyCart((s) => s.setQty);
   const setCost = useSupplyCart((s) => s.setCost);
@@ -97,6 +99,8 @@ function SupplyCartRow({ item }: { item: SupplyItem }) {
 }
 
 export default function SupplyScreen() {
+  const colors = useColors();
+
   const router = useRouter();
   const { t } = useTranslation();
   const qc = useQueryClient();
