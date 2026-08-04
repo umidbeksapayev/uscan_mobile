@@ -148,10 +148,22 @@ export default function CategoriesScreen() {
         subtitle={t("category.productCount", { count: item.product_count })}
         trailing={
           <>
-            <Pressable onPress={() => setEditing(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
+            <Pressable
+              onPress={() => setEditing(item)}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={`${t("a11y.editCategory", "Kategoriyani tahrirlash")}: ${item.name}`}
+              className="h-9 w-9 items-center justify-center"
+            >
               <Ionicons name="pencil" size={18} color={colors.muted} />
             </Pressable>
-            <Pressable onPress={() => onDelete(item)} hitSlop={8} className="h-9 w-9 items-center justify-center">
+            <Pressable
+              onPress={() => onDelete(item)}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={`${t("a11y.deleteCategory", "Kategoriyani o'chirish")}: ${item.name}`}
+              className="h-9 w-9 items-center justify-center"
+            >
               <Ionicons name="trash-outline" size={18} color={colors.danger} />
             </Pressable>
           </>
@@ -165,7 +177,13 @@ export default function CategoriesScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       {/* Header */}
       <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center">
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.back", "Orqaga")}
+          className="h-10 w-10 items-center justify-center"
+        >
           <Ionicons name="chevron-back" size={26} color={colors.ink} />
         </Pressable>
         <Text className="text-xl font-semibold text-ink">{t("category.manageTitle")}</Text>
@@ -194,6 +212,8 @@ export default function CategoriesScreen() {
               <Pressable
                 onPress={onAdd}
                 disabled={!newName.trim() || createMut.isPending}
+                accessibilityRole="button"
+                accessibilityLabel={t("a11y.addCategory", "Kategoriya qo'shish")}
                 className="items-center justify-center rounded-2xl bg-primary px-5"
                 style={{ height: 50, opacity: newName.trim() && !createMut.isPending ? 1 : 0.5 }}
               >

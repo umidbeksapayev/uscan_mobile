@@ -190,6 +190,8 @@ export function TelegramSummaryCard({ shop }: { shop: Shop }) {
                 key={t.value}
                 onPress={() => onChooseTime(t.value)}
                 disabled={saving}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: activeOpt, disabled: saving }}
                 style={{
                   flex: 1,
                   flexDirection: "row",

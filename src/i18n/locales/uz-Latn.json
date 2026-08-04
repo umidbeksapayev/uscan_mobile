@@ -943,5 +943,22 @@
     "clearBody": "Barcha yozuvlar o'chiriladi.",
     "clearBtn": "Tozalash",
     "settingsSubtitle": "Xatolik jurnali — muammoni aniqlash uchun"
+  },
+  "a11y": {
+    "clearSearch": "Qidiruvni tozalash",
+    "scan": "Shtrix-kodni skanerlash",
+    "togglePassword": "Parolni ko'rsatish yoki yashirish",
+    "filters": "Filtrlar",
+    "decrease": "Kamaytirish",
+    "increase": "Ko'paytirish",
+    "addCustomer": "Yangi mijoz qo'shish",
+    "editCustomer": "Mijozni tahrirlash",
+    "addSupplier": "Yangi ta'minotchi qo'shish",
+    "suppliersList": "Ta'minotchilar ro'yxati",
+    "editCategory": "Kategoriyani tahrirlash",
+    "deleteCategory": "Kategoriyani o'chirish",
+    "addCategory": "Kategoriya qo'shish",
+    "removeItem": "Ro'yxatdan olib tashlash",
+    "chooseImage": "Rasm tanlash"
   }
 }

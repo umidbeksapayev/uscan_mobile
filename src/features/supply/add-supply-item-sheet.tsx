@@ -127,7 +127,12 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
                   autoCapitalize="none"
                   autoFocus
                 />
-                <Pressable onPress={() => router.push("/scanner?mode=form")} hitSlop={8}>
+                <Pressable
+                  onPress={() => router.push("/scanner?mode=form")}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("a11y.scan", "Shtrix-kodni skanerlash")}
+                >
                   <Ionicons name="barcode-outline" size={24} color={colors.kirim} />
                 </Pressable>
               </View>

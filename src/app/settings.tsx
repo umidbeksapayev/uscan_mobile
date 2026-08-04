@@ -493,6 +493,8 @@ export default function SettingsScreen() {
         <Pressable
           onPress={() => router.back()}
           hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.back", "Orqaga")}
           style={({ pressed }) => ({
             width: 36,
             height: 36,

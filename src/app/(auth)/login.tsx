@@ -114,7 +114,12 @@ export default function LoginScreen() {
                 className="flex-1 text-base text-ink"
                 style={{ height: 52 }}
               />
-              <Pressable onPress={() => setShowPass((v) => !v)} hitSlop={10}>
+              <Pressable
+                onPress={() => setShowPass((v) => !v)}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel={t("a11y.togglePassword", "Parolni ko'rsatish yoki yashirish")}
+              >
                 <Ionicons
                   name={showPass ? "eye-off-outline" : "eye-outline"}
                   size={20}
