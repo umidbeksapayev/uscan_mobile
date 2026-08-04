@@ -26,6 +26,7 @@ import { PERMISSION_LABELS } from "@/features/auth/permissions";
 import { useStaff, useAddMember, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
 import { TelegramSummaryCard } from "@/features/telegram/telegram-summary-card";
 import { LocalReminderCard } from "@/features/notifications/local-reminder-card";
+import { FeedbackSheet } from "@/features/feedback/feedback-sheet";
 import type { MemberPermissions, ShopMemberRow } from "@/types/database";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -429,6 +430,7 @@ export default function SettingsScreen() {
   const [editing, setEditing] = useState<ShopMemberRow | null>(null);
   const [langOpen, setLangOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const themeMode = useThemeStore((s) => s.themeMode);
   const themeModeLabel =
@@ -624,6 +626,14 @@ export default function SettingsScreen() {
             title="Printer va Cheklar"
             subtitle="Bluetooth, termal printer, test chek"
             onPress={() => router.push("/printer-settings")}
+          />
+          <SettingRow
+            icon="chatbubble-ellipses-outline"
+            iconBg="rgba(16,185,129,0.12)"
+            iconColor="#10b981"
+            title={t("settings.feedbackTitle", "Fikr-mulohaza")}
+            subtitle={t("settings.feedbackHint", "Taklif, shikoyat yoki xato? Bizga yozing.")}
+            onPress={() => setFeedbackOpen(true)}
             last
           />
         </View>
@@ -909,6 +919,10 @@ export default function SettingsScreen() {
       <ThemePickerSheet
         visible={themeOpen}
         onClose={() => setThemeOpen(false)}
+      />
+      <FeedbackSheet
+        visible={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
       />
     </SafeAreaView>
   );
