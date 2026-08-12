@@ -22,6 +22,7 @@
     },
     "android": {
       "package": "uz.uscan.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#0F3D6E",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

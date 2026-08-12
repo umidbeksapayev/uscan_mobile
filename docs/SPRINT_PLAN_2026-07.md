@@ -115,6 +115,52 @@ naqd, farqni qayd etish. Vaqt yetsa — xarajat kundaligi.
 
 **Ochiq qolgan:** Fiskal/OFD — Payme sandbox ochilganda.
 
+## 5.1 Sprint 9 — Push'ni tasdiqlash (2026-08-12)
+
+> Sprint 8'dan keyin (2026-08-04, hujjatlashtirilmagan) 5 ta push tuzatish
+> kirgan edi: kunlik xulosa vaqti Telegram gate'idan ajratildi (aks holda
+> Telegramni ulamagan ega push jadvalini sozlay olmasdi — P1'ni butunlay
+> bloklovchi bug edi), cron yorlig'i (21:00→00:00) va tipланган `PushResult`
+> xato tasnifi. Sprint 9 shu tuzatishlarni kod darajasida tasdiqladi.
+
+**Topilgan va tuzatilgan:**
+- `registerPushToken`/`enablePush`ning 6 xato tarmog'i **hech qanday test
+  bilan qoplanmagan edi**. Test yozishga urinishda **ildiz sabab** topildi:
+  `loadNotifications()` ichidagi `await import("expo-notifications")` —
+  Jest'ning CJS test muhitida native dinamik `import()`
+  `--experimental-vm-modules`siz ishlamaydi (`babel-preset-expo` buni
+  test uchun transformatsiya qilmaydi, faqat sintaksisni tan oladi —
+  Metro/Hermes runtime'da ishlaydi, lekin Jest'da yo'q). Bu sabab bilan
+  **shu naqshdagi barcha kod (`uuid.ts`, `use-online.ts` fallback'lari ham)
+  ilgari sinovdan o'tkazib bo'lmas edi** — Sprint 8'da "juda tez-tez ishlaydi"
+  deb izohlangan, aslida sabab boshqa edi.
+  **Tuzatish:** `babel-plugin-dynamic-import-node` qo'shildi, faqat test
+  muhitida (`api.env("test")`) yoqiladi — ilova bundle'iga (Metro) ta'sir
+  qilmaydi. `babel.config.js`.
+- `src/features/notifications/__tests__/notify-register.test.ts` (8 holat)
+  va `notify-register-nomodule.test.ts` (native modul yo'q holati, alohida
+  fayl — jest.mock bir marta baholanadi) qo'shildi. 245 → **254** test.
+- Server cron jadvali (`ShopScan_1v/vercel.json`: 02:00/19:00 UTC =
+  07:00/00:00 Toshkent) va mobil UI yorlig'i (`telegram-summary-card.tsx`)
+  mos ekanligi tasdiqlandi — nomuvofiqlik yo'q.
+- `ShopScan_1v/src/lib/push/{expo,dispatch}.ts` ko'rib chiqildi — Expo
+  `DeviceNotRegistered` tokenlari to'g'ri tozalanadi, batch yuborish xato
+  tashlamaydi (bitta do'kon yiqilsa qolganlari yuborilishda davom etadi).
+
+**⚠️ Yangi topilgan, tuzatilmagan (foydalanuvchi tomonidan hal qilinishi
+kerak):** `app.json`da Android uchun `googleServicesFile` sozlanmagan va
+`google-services.json` repo tarixida hech qachon bo'lmagan. Expo Push (FCM V1)
+Android'da bu fayl **va** EAS'ga yuklangan Firebase Service Account key talab
+qiladi. Bu — `tokenFailed` xatosining eng ehtimolli sababi bo'lishi mumkin
+(agar productionda kuzatilsa). Tekshirish: Firebase loyihasi bormi →
+`google-services.json`ni yuklab `app.json → expo.android.googleServicesFile`ga
+ulash → `eas credentials -p android` orqali FCM Service Account key
+yuklash → yangi dev build.
+
+**Hali ham qo'lda tekshirish kerak (jismoniy qurilma talab qiladi):** haqiqiy
+Android/iOS qurilmada "Push yoqish" tugmasi va kunlik xulosa cron'ining
+kelishi.
+
 ## 6. Ish tartibi (avvalgi sprintlar uslubida)
 
 branch → kichik Conventional Commits → `tsc` + `jest` yashil → PR (o'zbekcha
