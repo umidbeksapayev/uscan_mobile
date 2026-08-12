@@ -1013,8 +1013,8 @@
     "off": "O'chiq",
     "permDeniedTitle": "Yoqib bo'lmadi",
     "permDeniedBody": "Bildirishnoma ruxsati berilmadi.",
-    "dailyTitle": "Kunlik eslatma",
-    "dailyHint": "Savdo yakunini belgilangan vaqtda eslatadi",
+    "dailyTitle": "Telefondagi eslatma",
+    "dailyHint": "Internet bo'lmasa ham telefon o'zi eslatadi",
     "pushTitle": "Push bildirishnoma",
     "pushHint": "Kunlik xulosa serverdan keladi — ilova yopiq bo'lsa ham",
     "pushOn": "Yoqilgan",
@@ -1030,6 +1030,23 @@
     "errNoSession": "Sessiya topilmadi — qayta kiring",
     "errTokenFailed": "Token olinmadi — Android uchun EAS'da FCM (Firebase) sozlanishi kerak",
     "errSaveFailed": "Token saqlanmadi",
-    "pushFailedTitle": "Push yoqilmadi"
+    "pushFailedTitle": "Push yoqilmadi",
+    "summaryTitle": "Kunlik xulosa",
+    "summaryHint": "Savdo va qarz yakuni belgilangan vaqtda yuboriladi",
+    "summaryOffHint": "Vaqt tanlanmagan — xulosa yuborilmaydi.",
+    "channels": "Yetkazish kanallari",
+    "channelPush": "Telefon bildirishnomasi",
+    "channelTelegram": "Telegram"
+  },
+  "alerts": {
+    "title": "Bildirishnomalar",
+    "empty": "Hammasi joyida",
+    "emptyHint": "E'tibor talab qiladigan narsa bo'lsa shu yerda ko'rinadi",
+    "unsyncedTitle": "Yuborilmagan sotuvlar",
+    "unsyncedBody": "{{count}} ta sotuv hali serverga yuborilmadi",
+    "lowStockTitle": "Kam qoldiq",
+    "lowStockBody": "{{count}} ta mahsulot tugab qolyapti",
+    "debtorsTitle": "Qarzdorlar",
+    "debtorsBody": "{{count}} ta mijozda qarz bor"
   }
 }

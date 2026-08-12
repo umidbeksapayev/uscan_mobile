@@ -21,6 +21,7 @@ import {
 } from "@/features/dashboard/use-dashboard";
 import { trendTotals, periodSplit, pctChange } from "@/features/dashboard/dashboard-math";
 import { maybeScheduleLowStockReminder } from "@/features/notifications/notify";
+import { useAlerts } from "@/features/notifications/use-alerts";
 import { TrendChart } from "@/features/dashboard/trend-chart";
 import {
   GradientStat,
@@ -56,6 +57,7 @@ export default function HomeScreen() {
   const shop = useActiveMembership()?.shop;
   const { isOwner } = useActivePermissions();
   const initials = (shop?.name ?? "uS").slice(0, 2).toUpperCase();
+  const { badge: alertBadge } = useAlerts();
 
   // 2× oyna: joriy + oldingi davr (foiz o'zgarish uchun)
   const {
@@ -112,6 +114,44 @@ export default function HomeScreen() {
               </Text>
             ) : null}
           </View>
+
+          {/*
+            Bildirishnomalar markazi. Sanoq — muammo TURLARI soni (0–3), ularning
+            yig'indisi emas (`alerts-math.ts` ga qarang).
+          */}
+          <Pressable
+            onPress={() => router.push("/notifications")}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={
+              alertBadge > 0
+                ? `${t("alerts.title", "Bildirishnomalar")}: ${alertBadge}`
+                : t("alerts.title", "Bildirishnomalar")
+            }
+            className="items-center justify-center rounded-full border border-line bg-surface"
+            style={{ width: 40, height: 40 }}
+          >
+            <Ionicons name="notifications-outline" size={20} color={colors.ink} />
+            {alertBadge > 0 ? (
+              <View
+                className="absolute items-center justify-center rounded-full"
+                style={{
+                  top: -3,
+                  right: -3,
+                  minWidth: 18,
+                  height: 18,
+                  paddingHorizontal: 4,
+                  backgroundColor: colors.danger,
+                  borderWidth: 2,
+                  borderColor: colors.bg,
+                }}
+              >
+                <Text style={{ fontSize: 10, fontWeight: "700", color: "#fff" }}>
+                  {alertBadge}
+                </Text>
+              </View>
+            ) : null}
+          </Pressable>
         </View>
 
         {/* Davr toggle */}

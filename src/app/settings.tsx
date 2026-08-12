@@ -25,9 +25,8 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useActiveMembership } from "@/features/auth/use-memberships";
 import { PERMISSION_LABELS } from "@/features/auth/permissions";
 import { useStaff, useAddMember, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
-import { TelegramSummaryCard } from "@/features/telegram/telegram-summary-card";
 import { LocalReminderCard } from "@/features/notifications/local-reminder-card";
-import { PushCard } from "@/features/notifications/push-card";
+import { DailySummaryCard } from "@/features/notifications/daily-summary-card";
 import { FeedbackSheet } from "@/features/feedback/feedback-sheet";
 import type { MemberPermissions, ShopMemberRow } from "@/types/database";
 
@@ -648,10 +647,17 @@ export default function SettingsScreen() {
             BILDIRISHNOMALAR
         ══════════════════════════════════════════════ */}
         <SectionLabel label={t("settings.sectionNotifications")} />
+        {/*
+          Ega: xulosa vaqti va yetkazish kanallari (push + Telegram) BITTA
+          kartada. Ilgari uchta karta va ikkita alohida vaqt tanlagich bor edi.
+
+          Kassir: server xulosasi unga umuman yuborilmaydi
+          (`get_push_summaries` faqat `sh.owner_id` tokenlariga yuboradi),
+          shuning uchun unga faqat telefondagi lokal eslatma ko'rsatiladi.
+        */}
         <View style={{ gap: 10, marginBottom: 20 }}>
-          <PushCard />
+          {isOwner && active?.shop ? <DailySummaryCard shop={active.shop} /> : null}
           <LocalReminderCard />
-          {isOwner && active?.shop ? <TelegramSummaryCard shop={active.shop} /> : null}
         </View>
 
         {/* ══════════════════════════════════════════════

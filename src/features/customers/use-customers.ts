@@ -14,12 +14,17 @@ import {
   type RecordPaymentInput,
 } from "./customers-api";
 
-/** Nasiya ro'yxati (balans bilan). */
-export function useCustomersWithBalance() {
+/**
+ * Nasiya ro'yxati (balans bilan).
+ *
+ * `enabled=false` — chaqiruvchida `manage_debt` ruxsati yo'q bo'lsa so'rovni
+ * umuman yubormaslik uchun (bildirishnomalar markazi shundan foydalanadi).
+ */
+export function useCustomersWithBalance(enabled = true) {
   const shopId = useActiveShopId();
   return useQuery({
     queryKey: ["customers", shopId],
-    enabled: !!shopId,
+    enabled: !!shopId && enabled,
     queryFn: () => getCustomersWithBalance(shopId!),
     staleTime: 15_000,
   });

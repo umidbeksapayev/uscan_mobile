@@ -1013,8 +1013,8 @@
     "off": "Ўчиқ",
     "permDeniedTitle": "Ёқиб бўлмади",
     "permDeniedBody": "Билдиришнома рухсати берилмади.",
-    "dailyTitle": "Кунлик эслатма",
-    "dailyHint": "Савдо якунини белгиланган вақтда эслатади",
+    "dailyTitle": "Телефондаги эслатма",
+    "dailyHint": "Интернет бўлмаса ҳам телефон ўзи эслатади",
     "pushTitle": "Push билдиришнома",
     "pushHint": "Кунлик хулоса сервердан келади — илова ёпиқ бўлса ҳам",
     "pushOn": "Ёқилган",
@@ -1030,6 +1030,23 @@
     "errNoSession": "Сессия топилмади — қайта киринг",
     "errTokenFailed": "Токен олинмади — Android учун EAS да FCM (Firebase) созланиши керак",
     "errSaveFailed": "Токен сақланмади",
-    "pushFailedTitle": "Push ёқилмади"
+    "pushFailedTitle": "Push ёқилмади",
+    "summaryTitle": "Кунлик хулоса",
+    "summaryHint": "Савдо ва қарз якуни белгиланган вақтда юборилади",
+    "summaryOffHint": "Вақт танланмаган — хулоса юборилмайди.",
+    "channels": "Етказиш каналлари",
+    "channelPush": "Телефон билдиришномаси",
+    "channelTelegram": "Телеграм"
+  },
+  "alerts": {
+    "title": "Билдиришномалар",
+    "empty": "Ҳаммаси жойида",
+    "emptyHint": "Эътибор талаб қиладиган нарса бўлса шу ерда кўринади",
+    "unsyncedTitle": "Юборилмаган сотувлар",
+    "unsyncedBody": "{{count}} та сотув ҳали серверга юборилмади",
+    "lowStockTitle": "Кам қолдиқ",
+    "lowStockBody": "{{count}} та маҳсулот тугаб қоляпти",
+    "debtorsTitle": "Қарздорлар",
+    "debtorsBody": "{{count}} та мижозда қарз бор"
   }
 }

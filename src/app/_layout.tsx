@@ -59,6 +59,7 @@ export default function RootLayout() {
                     <Stack.Screen name="offline-sales" />
                     <Stack.Screen name="printer-settings" />
                     <Stack.Screen name="diagnostics" />
+                    <Stack.Screen name="notifications" />
                   </Stack>
                 </AuthGate>
               </AuthProvider>

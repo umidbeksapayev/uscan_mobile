@@ -1013,8 +1013,8 @@
     "off": "Выкл",
     "permDeniedTitle": "Не удалось включить",
     "permDeniedBody": "Разрешение на уведомления не выдано.",
-    "dailyTitle": "Ежедневное напоминание",
-    "dailyHint": "Напомнит об итогах продаж в заданное время",
+    "dailyTitle": "Напоминание на телефоне",
+    "dailyHint": "Телефон напомнит даже без интернета",
     "pushTitle": "Push-уведомления",
     "pushHint": "Ежедневная сводка приходит с сервера — даже когда приложение закрыто",
     "pushOn": "Включено",
@@ -1030,6 +1030,23 @@
     "errNoSession": "Сессия не найдена — войдите заново",
     "errTokenFailed": "Токен не получен — для Android нужно настроить FCM (Firebase) в EAS",
     "errSaveFailed": "Токен не сохранён",
-    "pushFailedTitle": "Push не включён"
+    "pushFailedTitle": "Push не включён",
+    "summaryTitle": "Ежедневная сводка",
+    "summaryHint": "Итоги продаж и долгов придут в заданное время",
+    "summaryOffHint": "Время не выбрано — сводка не отправляется.",
+    "channels": "Каналы доставки",
+    "channelPush": "Уведомление на телефон",
+    "channelTelegram": "Telegram"
+  },
+  "alerts": {
+    "title": "Уведомления",
+    "empty": "Всё в порядке",
+    "emptyHint": "Здесь появится то, что требует внимания",
+    "unsyncedTitle": "Неотправленные продажи",
+    "unsyncedBody": "Продаж ещё не отправлено на сервер: {{count}}",
+    "lowStockTitle": "Мало остатка",
+    "lowStockBody": "Заканчивается товаров: {{count}}",
+    "debtorsTitle": "Должники",
+    "debtorsBody": "Клиентов с долгом: {{count}}"
   }
 }
