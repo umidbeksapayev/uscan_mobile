@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "751993060717",
+    "project_id": "uscanmobile",
+    "storage_bucket": "uscanmobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:751993060717:android:f3a0a6f752262cff2bae64",
+        "android_client_info": {
+          "package_name": "uz.uscan.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeSChWFcNz8QqfSaoEsxnzTfVZJauXEJc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
