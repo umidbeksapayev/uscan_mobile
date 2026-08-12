@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Pressable, type StyleProp, type ViewStyle } from "react-native";
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -34,18 +34,34 @@ export function SheetPressable({
   accessibilityRole = "button",
   children,
 }: SheetPressableProps) {
+  /*
+    ⚠️ `style` MASSIV bo'lishi shart, FUNKSIYA emas.
+
+    NativeWind (v4) `className` bo'lgan komponentning `style` propini o'zi
+    hisoblagan uslublar bilan almashtiradi. `style` funksiya ko'rinishida
+    berilsa, u umuman chaqirilmaydi va undagi barcha qiymatlar (height,
+    backgroundColor, borderWidth, ...) jimgina yo'qoladi.
+
+    Amalda bu shunday ko'rinardi: to'lov oynasidagi tugmalar balandliksiz
+    (matn bo'yicha ~25px) va fonsiz chiqardi; tanlangan to'lov usuli esa
+    oq matn + oq fon bo'lib butunlay ko'rinmay qolgandi.
+
+    Shu sabab bosilish holati `useState` orqali kuzatiladi — funksiya
+    o'rniga oddiy massiv beriladi.
+  */
+  const [pressed, setPressed] = useState(false);
+
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
       disabled={disabled}
       hitSlop={hitSlop}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={onPress ? accessibilityRole : undefined}
-      style={({ pressed }) => [
-        style as ViewStyle,
-        pressed && !disabled ? { opacity: activeOpacity } : null,
-      ]}
       className={className}
+      style={[style, pressed && !disabled ? { opacity: activeOpacity } : null]}
     >
       {children}
     </Pressable>

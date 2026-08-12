@@ -35,17 +35,17 @@ const FrequentTile = memo(function FrequentTile({
     <Pressable
       onPress={onPress}
       className="items-center rounded-2xl border border-line bg-surface p-2"
-      style={{ width: 92 }}
+      style={{ width: 80 }}
     >
       {product.image_url ? (
         <Image
           source={{ uri: product.image_url }}
-          style={{ width: 48, height: 48, borderRadius: 12 }}
+          style={{ width: 40, height: 40, borderRadius: 10 }}
           contentFit="cover"
         />
       ) : (
-        <View className="h-12 w-12 items-center justify-center rounded-xl bg-primary-tint">
-          <Ionicons name="cube-outline" size={22} color={colors.primary} />
+        <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
+          <Ionicons name="cube-outline" size={20} color={colors.primary} />
         </View>
       )}
       <Text className="mt-1.5 text-center text-xs text-ink" numberOfLines={1}>
@@ -73,88 +73,98 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
   const lineTotal = cartTotal([item]);
 
   return (
-    <View className="mb-3 rounded-2xl border border-line bg-surface p-4">
-      <View className="flex-row items-start justify-between">
-        <View className="flex-1 pr-3">
-          <View
-            style={{
-              alignSelf: "flex-start",
-              backgroundColor: isWeight ? colors.successTint : colors.primaryTint,
-              paddingHorizontal: 9,
-              paddingVertical: 3,
-              borderRadius: 6,
-            }}
-          >
-            <Text style={{ fontSize: 11, fontWeight: "500", letterSpacing: 0.5, color: accent }}>
-              {(isWeight ? t("catalog.weight") : t("catalog.unit")).toUpperCase()}
-            </Text>
-          </View>
-          <Text className="mt-2 text-base font-medium text-ink" numberOfLines={1}>
-            {item.product.name}
-          </Text>
-          <Text className="text-xs text-muted">
-            {formatCurrency(item.product.selling_price)} /{" "}
-            {isWeight ? t("common.kg") : t("common.pcs")}
-          </Text>
-        </View>
+    /*
+      Ixcham 2-qatorli karta (~82px). Ilgari 4 qatorli edi (~177px) va bitta
+      mahsulot ekranning yarmini egallardi — 2-3 mahsulotni ko'rish uchun ham
+      varaqlash kerak bo'lardi.
 
-        <View className="items-end">
-          <Text className="text-base font-medium" style={{ color: accent }}>
-            {formatCurrency(lineTotal)}
-          </Text>
+      Olib tashlandi: "DONALI/VAZNLI" yorlig'i (birlik narxi qatorida "/ dona"
+      yoki "/ kg" allaqachon yozilgan — takror ma'lumot edi) va ajratuvchi
+      chiziq. Tur farqi summa rangida saqlanib qoldi (ko'k = dona, yashil = kg).
+    */
+    <View className="mb-2 rounded-2xl border border-line bg-surface px-3 py-2.5">
+      {/* Yuqori qator: mahsulot nomi + qator summasi */}
+      <View className="flex-row items-center justify-between gap-2">
+        <Text className="flex-1 text-base font-medium text-ink" numberOfLines={1}>
+          {item.product.name}
+        </Text>
+        <Text className="text-base font-medium" style={{ color: accent }}>
+          {formatCurrency(lineTotal)}
+        </Text>
+      </View>
+
+      {/* Pastki qator: birlik narxi + miqdor boshqaruvi + o'chirish */}
+      <View className="mt-1 flex-row items-center justify-between gap-2">
+        <Text className="flex-1 text-xs text-muted" numberOfLines={1}>
+          {formatCurrency(item.product.selling_price)} /{" "}
+          {isWeight ? t("common.kg") : t("common.pcs")}
+        </Text>
+
+        <View className="flex-row items-center" style={{ gap: 6 }}>
+          {/*
+            Tugmalar 44px dan 34px ga kichraytirildi, lekin hitSlop={8} bilan
+            haqiqiy bosish maydoni 50px — a11y minimumidan (44px) yuqori.
+          */}
+          {isWeight ? (
+            <Pressable
+              onPress={() => onEditWeight(item)}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={`${t("sell.weight")}: ${item.product.name}`}
+              className="flex-row items-center gap-1.5 rounded-xl bg-bg px-2.5"
+              style={{ height: 34 }}
+            >
+              <Text className="text-sm font-medium text-ink">{formatWeight(item.quantity)}</Text>
+              <Ionicons name="create-outline" size={14} color={colors.muted} />
+            </Pressable>
+          ) : (
+            <>
+              <Pressable
+                onPress={() => decrement(item.product.id)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={`${t("a11y.decrease", "Kamaytirish")}: ${item.product.name}`}
+                className="items-center justify-center rounded-xl bg-bg"
+                style={{ height: 34, width: 34 }}
+              >
+                <Ionicons name="remove" size={18} color={colors.ink} />
+              </Pressable>
+              <Text
+                className="text-base font-medium text-ink"
+                style={{ minWidth: 24, textAlign: "center" }}
+              >
+                {item.quantity}
+              </Text>
+              <Pressable
+                onPress={() => increment(item.product.id)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={`${t("a11y.increase", "Ko'paytirish")}: ${item.product.name}`}
+                className="items-center justify-center rounded-xl bg-primary-tint"
+                style={{ height: 34, width: 34 }}
+              >
+                <Ionicons name="add" size={18} color={colors.primary} />
+              </Pressable>
+            </>
+          )}
+
+          {/*
+            Chapdagi hitSlop ataylab kichik (2px): yonidagi "+" / vazn tugmasi
+            o'ng tomonga 8px cho'ziladi, umumiy oraliq 12px. Aks holda ikki
+            bosish maydoni ustma-ust tushib, "+" ning o'ng chetini bosganda
+            mahsulot tasodifan o'chib ketardi.
+          */}
           <Pressable
             onPress={() => remove(item.product.id)}
-            hitSlop={12}
-            className="mt-2"
-            accessibilityLabel={t("common.delete")}
+            hitSlop={{ top: 10, bottom: 10, left: 2, right: 12 }}
+            className="ml-1.5"
+            accessibilityRole="button"
+            accessibilityLabel={`${t("common.delete")}: ${item.product.name}`}
           >
-            <Ionicons name="trash-outline" size={20} color="#DB2777" />
+            <Ionicons name="trash-outline" size={18} color="#DB2777" />
           </Pressable>
         </View>
       </View>
-
-      <View className="my-3 h-px bg-line" />
-
-      {isWeight ? (
-        <View className="flex-row items-center justify-between">
-          <Text className="text-sm text-muted">{t("sell.weight")}</Text>
-          <Pressable
-            onPress={() => onEditWeight(item)}
-            className="flex-row items-center gap-2 rounded-xl bg-bg px-3"
-            style={{ height: 44 }}
-          >
-            <Text className="text-base font-medium text-ink">{formatWeight(item.quantity)}</Text>
-            <Ionicons name="create-outline" size={16} color={colors.muted} />
-          </Pressable>
-        </View>
-      ) : (
-        <View className="flex-row items-center justify-between">
-          <Text className="text-sm text-muted">{t("addToCart.quantity")}</Text>
-          <View className="flex-row items-center gap-3">
-            <Pressable
-              onPress={() => decrement(item.product.id)}
-              accessibilityRole="button"
-              accessibilityLabel={`${t("a11y.decrease", "Kamaytirish")}: ${item.product.name}`}
-              className="items-center justify-center rounded-xl bg-bg"
-              style={{ height: 44, width: 44 }}
-            >
-              <Ionicons name="remove" size={20} color={colors.ink} />
-            </Pressable>
-            <Text className="text-base font-medium text-ink" style={{ minWidth: 28, textAlign: "center" }}>
-              {item.quantity}
-            </Text>
-            <Pressable
-              onPress={() => increment(item.product.id)}
-              accessibilityRole="button"
-              accessibilityLabel={`${t("a11y.increase", "Ko'paytirish")}: ${item.product.name}`}
-              className="items-center justify-center rounded-xl bg-primary-tint"
-              style={{ height: 44, width: 44 }}
-            >
-              <Ionicons name="add" size={20} color={colors.primary} />
-            </Pressable>
-          </View>
-        </View>
-      )}
     </View>
   );
 });
@@ -322,8 +332,13 @@ export default function SotuvScreen() {
           ) : null}
         </View>
 
-        {/* Tez-tez sotiladigan — shtrix-kodsiz/qidiruvsiz bir bosishda savatga */}
-        {!searching && frequentProducts && frequentProducts.length > 0 ? (
+        {/*
+          Tez-tez sotiladigan — shtrix-kodsiz/qidiruvsiz bir bosishda savatga.
+          Savatga birinchi mahsulot tushishi bilan yashiriladi: bu paneldan
+          keyin diqqat savatga ko'chadi va u ~110px joyni bo'shatadi. Qo'shimcha
+          mahsulot skaner yoki qidiruv orqali qo'shiladi.
+        */}
+        {!searching && items.length === 0 && frequentProducts && frequentProducts.length > 0 ? (
           <View className="mb-1">
             <Text className="mb-2 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>
               {t("sell.frequent").toUpperCase()}

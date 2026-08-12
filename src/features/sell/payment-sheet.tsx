@@ -23,6 +23,19 @@ import { QrPaymentSheet } from "./qr-payment-sheet";
 import { acquiringHasCredentials } from "./acquiring/acquiring-api";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
 
+/*
+  To'lov usullari.
+
+  "card" (Plastik) — do'konda karta alohida terminal orqali o'tkaziladi, ilova
+  esa uni YOZIB QO'YADI. Bu shart: kassa yopishdagi "kutilgan naqd" hisobi
+  (migration 030, `get_expected_cash`) faqat `cash`/`debt` sotuvlarni sanaydi.
+  Agar karta to'lovi "Naqd" deb yozilsa, tizim o'sha pulni kassada kutadi va
+  har safar soxta kamomad chiqadi.
+
+  "qr" — FAQAT ekvayring kalitlari sozlangan do'konda ko'rinadi (pastdagi
+  `methods` filtri). Sozlanmagan do'konda bu tugma QR kod ko'rsatmasdan oddiy
+  sotuvni yozib qo'yardi — ya'ni "ishlamayotgan" tugma edi.
+*/
 const METHODS: { id: PaymentMethod; labelKey: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { id: "cash", labelKey: "sell.payCash", icon: "cash-outline" },
   { id: "card", labelKey: "sell.payCard", icon: "card-outline" },
@@ -70,7 +83,12 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
     staleTime: 5 * 60_000,
   });
 
-  const methods = canManageDebt ? METHODS : METHODS.filter((m) => m.id !== "debt");
+  const methods = METHODS.filter((m) => {
+    if (m.id === "debt") return canManageDebt;
+    // Ekvayring sozlanmagan bo'lsa QR tugmasi ishlamaydi — ko'rsatmaymiz.
+    if (m.id === "qr") return !!hasAcquiring;
+    return true;
+  });
   const debtPaid = parseFloat(debtPaidText.replace(/\s/g, "")) || 0;
 
   const mutation = useMutation({
@@ -225,7 +243,7 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
                 <SheetPressable
                   onPress={handlePrint}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-bg"
-                  style={{ height: 54, borderWidth: 1, borderColor: colors.primary }}
+                  style={{ minHeight: 56, flexShrink: 0, borderWidth: 1, borderColor: colors.primary }}
                 >
                   <Ionicons name="print-outline" size={20} color={colors.primary} />
                   <Text className="text-base font-medium" style={{ color: colors.primary }}>
@@ -235,7 +253,7 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
                 <SheetPressable
                   onPress={onClose}
                   className="flex-1 flex-row items-center justify-center rounded-2xl bg-primary"
-                  style={{ height: 54 }}
+                  style={{ minHeight: 56, flexShrink: 0 }}
                 >
                   <Text className="text-base font-medium text-white">{t("sell.newSale")}</Text>
                 </SheetPressable>
@@ -246,12 +264,12 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
               <Text className="text-center text-xs text-muted" style={{ letterSpacing: 0.5 }}>
                 {t("sell.totalDue").toUpperCase()}
               </Text>
-              <Text className="mb-4 text-center text-3xl font-medium" style={{ color: colors.primary }}>
+              <Text className="mb-3 text-center text-3xl font-medium" style={{ color: colors.primary }}>
                 {formatCurrency(total)}
               </Text>
 
               <Text className="mb-2 text-sm font-medium text-ink">{t("sell.paymentType")}</Text>
-              <View className="mb-4 flex-row gap-2">
+              <View className="mb-3 flex-row gap-2">
                 {methods.map((m) => {
                   const active = method === m.id;
                   return (
@@ -283,7 +301,7 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
               </View>
 
               {method === "cash" ? (
-                <View className="mb-4">
+                <View className="mb-3">
                   <Text className="mb-1 text-sm font-medium text-ink">{t("sell.givenMoney")}</Text>
                   <BottomSheetTextInput
                     value={givenText}
@@ -331,7 +349,7 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
                   ) : null}
                 </View>
               ) : method === "debt" ? (
-                <View className="mb-4" style={{ gap: 10 }}>
+                <View className="mb-3" style={{ gap: 10 }}>
                   {/* Mijoz tanlash */}
                   <SheetPressable
                     onPress={() => setPickerOpen(true)}
@@ -380,11 +398,16 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
                 </Text>
               ) : null}
 
+              {/*
+                minHeight + flexShrink:0 — `height` o'zi yetarli emas edi:
+                oyna balandligi ekranga sig'maganda oxirgi element siqilib/
+                kesilib qolardi va tugma bir necha piksel bo'lib ko'rinardi.
+              */}
               <SheetPressable
                 disabled={!canPay}
                 onPress={onPayPress}
                 className="flex-row items-center justify-center rounded-2xl bg-primary"
-                style={{ height: 54, opacity: canPay ? 1 : 0.5 }}
+                style={{ minHeight: 56, flexShrink: 0, opacity: canPay ? 1 : 0.5 }}
               >
                 {mutation.isPending ? (
                   <ActivityIndicator color="#fff" />
