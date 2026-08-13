@@ -8,6 +8,7 @@ import { useColors } from "@/theme/theme-store";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useAlerts } from "@/features/notifications/use-alerts";
 import type { AlertKind } from "@/features/notifications/alerts-math";
+import { ScreenHeader } from "@/components/ui/screen";
 
 /**
  * Bildirishnomalar markazi.
@@ -64,22 +65,7 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      {/* Sarlavha */}
-      <View className="flex-row items-center gap-3 px-4 pb-3 pt-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          className="items-center justify-center rounded-xl border border-line bg-surface"
-          style={{ width: 36, height: 36 }}
-        >
-          <Ionicons name="chevron-back" size={20} color={colors.ink} />
-        </Pressable>
-        <Text className="flex-1 text-2xl font-medium text-heading">
-          {t("alerts.title", "Bildirishnomalar")}
-        </Text>
-      </View>
+      <ScreenHeader title={t("alerts.title", "Bildirishnomalar")} />
 
       {alerts.length === 0 ? (
         <EmptyState

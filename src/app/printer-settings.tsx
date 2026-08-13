@@ -3,7 +3,6 @@ import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-nati
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
@@ -12,6 +11,7 @@ import { usePrinterStore } from "@/features/print/printer-settings";
 import { listBluetoothDevices } from "@/features/print/bt-print";
 import { printReceipt } from "@/features/print/print-receipt";
 import type { ReceiptData } from "@/features/print/types";
+import { ScreenHeader } from "@/components/ui/screen";
 
 type Device = { name: string; address: string };
 
@@ -44,7 +44,6 @@ function TypeCard({
 export default function PrinterSettingsScreen() {
   const colors = useColors();
 
-  const router = useRouter();
   const { t } = useTranslation();
   const shopName = useActiveMembership()?.shop.name ?? "uscan";
 
@@ -98,17 +97,7 @@ export default function PrinterSettingsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityLabel={t("common.close", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="text-xl font-semibold text-ink">{t("printer.title", "Printer")}</Text>
-      </View>
+      <ScreenHeader title={t("printer.title", "Printer")} />
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <Text className="mb-2 ml-1 text-xs font-medium text-muted" style={{ letterSpacing: 0.5 }}>

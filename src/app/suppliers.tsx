@@ -2,7 +2,6 @@ import { useCallback, useState } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
@@ -14,11 +13,11 @@ import { useSuppliers } from "@/features/suppliers/use-suppliers";
 import { SupplierFormSheet } from "@/features/suppliers/supplier-form-sheet";
 import type { Supplier } from "@/types/database";
 import { radius } from "@/theme/tokens";
+import { ScreenHeader } from "@/components/ui/screen";
 
 export default function SuppliersScreen() {
   const colors = useColors();
 
-  const router = useRouter();
   const { t } = useTranslation();
   const shopId = useActiveShopId();
   const { data: suppliers, isLoading, refetch, isRefetching } = useSuppliers();
@@ -59,18 +58,7 @@ export default function SuppliersScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="text-xl font-semibold text-ink">{t("suppliers.title")}</Text>
-      </View>
+      <ScreenHeader title={t("suppliers.title")} />
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">

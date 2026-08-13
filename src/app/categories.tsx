@@ -11,7 +11,6 @@ import {
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
@@ -25,6 +24,7 @@ import {
   useDeleteCategory,
 } from "@/features/catalog/use-categories";
 import type { CategoryWithCount } from "@/types/database";
+import { ScreenHeader } from "@/components/ui/screen";
 
 /** Nomini o'zgartirish oynasi (bottom-sheet). */
 function RenameSheet({
@@ -83,7 +83,6 @@ function RenameSheet({
 export default function CategoriesScreen() {
   const colors = useColors();
 
-  const router = useRouter();
   const { t } = useTranslation();
   const { canManageProducts } = useActivePermissions();
   const { data: categories, isLoading, isError, error, refetch, isRefetching } =
@@ -175,19 +174,7 @@ export default function CategoriesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="text-xl font-semibold text-ink">{t("category.manageTitle")}</Text>
-      </View>
+      <ScreenHeader title={t("category.manageTitle")} />
 
       {!canManageProducts ? (
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>

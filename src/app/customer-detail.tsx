@@ -18,6 +18,7 @@ import { customerBalance } from "@/features/customers/debt-math";
 import { ReceivePaymentSheet } from "@/features/customers/receive-payment-sheet";
 import type { CustomerPayment } from "@/types/database";
 import type { CustomerSaleRow } from "@/features/customers/customers-api";
+import { ScreenHeader } from "@/components/ui/screen";
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   const colors = useColors();
@@ -99,29 +100,20 @@ export default function CustomerDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="flex-1 text-xl font-semibold text-ink" numberOfLines={1}>
-          {customer?.name ?? t("customers.fallback")}
-        </Text>
-        <Pressable
-          onPress={() => router.push({ pathname: "/customer-form", params: { id: String(id) } })}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t("a11y.editCustomer", "Mijozni tahrirlash")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="create-outline" size={22} color={colors.muted} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title={customer?.name ?? t("customers.fallback")}
+        right={
+          <Pressable
+            onPress={() => router.push({ pathname: "/customer-form", params: { id: String(id) } })}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t("a11y.editCustomer", "Mijozni tahrirlash")}
+            className="h-10 w-10 items-center justify-center"
+          >
+            <Ionicons name="create-outline" size={22} color={colors.muted} />
+          </Pressable>
+        }
+      />
 
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 100, gap: 12 }}

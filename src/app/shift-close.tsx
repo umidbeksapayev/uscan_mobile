@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
@@ -24,6 +23,7 @@ import { useStaff } from "@/features/auth/use-staff";
 import { useExpectedCash, useCloseShift, useCashClosures } from "@/features/shift/use-shift";
 import { parseAmount, closureDifference, diffStatus } from "@/features/shift/shift-math";
 import type { CashClosure } from "@/features/shift/shift-math";
+import { ScreenHeader } from "@/components/ui/screen";
 
 /**
  * Farq holati → rang/fon/label (match=yashil, surplus=sariq, shortage=qizil).
@@ -40,7 +40,6 @@ function diffUi(colors: AppColors) {
 export default function ShiftCloseScreen() {
   const colors = useColors();
 
-  const router = useRouter();
   const { t } = useTranslation();
   const online = useOnline();
   const { session } = useAuth();
@@ -111,17 +110,7 @@ export default function ShiftCloseScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityLabel={t("common.close", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="text-xl font-semibold text-ink">{t("shift.title", "Kassani yopish")}</Text>
-      </View>
+      <ScreenHeader title={t("shift.title", "Kassani yopish")} />
 
       <ScrollView
         className="flex-1"

@@ -17,6 +17,7 @@ import { processPurchase } from "@/features/supply/supply-api";
 import { AddSupplyItemSheet } from "@/features/supply/add-supply-item-sheet";
 import { SupplierPickerSheet, type PickedSupplier } from "@/features/suppliers/supplier-picker-sheet";
 import { radius, text } from "@/theme/tokens";
+import { ScreenHeader } from "@/components/ui/screen";
 
 function SupplyCartRow({ item }: { item: SupplyItem }) {
   const colors = useColors();
@@ -142,18 +143,7 @@ export default function SupplyScreen() {
   if (!canPurchase) {
     return (
       <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-        <View className="flex-row items-center gap-2 px-3 py-2">
-          <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-            <Ionicons name="chevron-back" size={26} color={colors.ink} />
-          </Pressable>
-          <Text className="text-xl font-semibold text-ink">{t("purchases.title")}</Text>
-        </View>
+        <ScreenHeader title={t("purchases.title")} />
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
           <Ionicons name="lock-closed" size={36} color={colors.muted} />
           <Text className="text-center text-sm text-muted">{t("purchases.gatePerm")}</Text>
@@ -164,28 +154,20 @@ export default function SupplyScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="flex-1 text-xl font-semibold text-ink">{t("purchases.title")}</Text>
-        <Pressable
-          onPress={() => router.push("/suppliers")}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t("a11y.suppliersList", "Ta'minotchilar ro'yxati")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="people-outline" size={22} color={colors.kirim} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title={t("purchases.title")}
+        right={
+          <Pressable
+            onPress={() => router.push("/suppliers")}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t("a11y.suppliersList", "Ta'minotchilar ro'yxati")}
+            className="h-10 w-10 items-center justify-center"
+          >
+            <Ionicons name="people-outline" size={22} color={colors.kirim} />
+          </Pressable>
+        }
+      />
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 130 }} keyboardShouldPersistTaps="handled">
         {/* Ta'minotchi tanlash */}

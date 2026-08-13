@@ -16,6 +16,7 @@ import { useCustomersWithBalance } from "@/features/customers/use-customers";
 import { debtTotal } from "@/features/customers/debt-math";
 import type { CustomerWithBalance } from "@/types/database";
 import { radius } from "@/theme/tokens";
+import { ScreenHeader } from "@/components/ui/screen";
 
 const CustomerRow = memo(function CustomerRow({
   c,
@@ -89,19 +90,7 @@ export default function NasiyaScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="text-xl font-semibold text-ink">{t("menu.debtBook")}</Text>
-      </View>
+      <ScreenHeader title={t("menu.debtBook")} />
 
       {!canManageDebt ? (
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>

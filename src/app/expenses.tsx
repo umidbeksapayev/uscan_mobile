@@ -2,7 +2,6 @@ import { useCallback, useState } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
@@ -13,6 +12,7 @@ import { useExpenses } from "@/features/expenses/use-expenses";
 import { expensesTotal, categoryLabel, type Expense } from "@/features/expenses/expense-math";
 import { ExpenseFormSheet, categoryIcon } from "@/features/expenses/expense-form-sheet";
 import { radius, text } from "@/theme/tokens";
+import { ScreenHeader } from "@/components/ui/screen";
 
 const PERIODS = [
   { days: 7, key: "periodWeek", fallback: "Hafta" },
@@ -22,7 +22,6 @@ const PERIODS = [
 export default function ExpensesScreen() {
   const colors = useColors();
 
-  const router = useRouter();
   const { t } = useTranslation();
   const [days, setDays] = useState<7 | 30>(30);
   const { data: expenses, isLoading, isError, error, refetch, isRefetching } = useExpenses(days);
@@ -65,36 +64,32 @@ export default function ExpensesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityLabel={t("common.close", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="flex-1 text-xl font-semibold text-ink">{t("expenses.title", "Xarajatlar")}</Text>
-        {/* Davr toggle */}
-        <View className="flex-row rounded-full p-0.5" style={{ backgroundColor: colors.primaryTint }}>
-          {PERIODS.map((p) => {
-            const active = days === p.days;
-            return (
-              <Pressable
-                key={p.days}
-                onPress={() => setDays(p.days)}
-                accessibilityLabel={t("expenses." + p.key, p.fallback)}
-                className="rounded-full px-4 py-1.5"
-                style={{ backgroundColor: active ? colors.primaryDeep : "transparent" }}
-              >
-                <Text style={{ fontSize: text.sm, fontWeight: "600", color: active ? "#fff" : colors.muted }}>
-                  {t("expenses." + p.key, p.fallback)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
+      <ScreenHeader
+        title={t("expenses.title", "Xarajatlar")}
+        right={
+          /* Davr toggle */
+          <View className="flex-row rounded-full p-0.5" style={{ backgroundColor: colors.primaryTint }}>
+            {PERIODS.map((p) => {
+              const active = days === p.days;
+              return (
+                <Pressable
+                  key={p.days}
+                  onPress={() => setDays(p.days)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  accessibilityLabel={t("expenses." + p.key, p.fallback)}
+                  className="rounded-full px-4 py-1.5"
+                  style={{ backgroundColor: active ? colors.primaryDeep : "transparent" }}
+                >
+                  <Text style={{ fontSize: text.sm, fontWeight: "600", color: active ? "#fff" : colors.muted }}>
+                    {t("expenses." + p.key, p.fallback)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        }
+      />
 
       {/* Jami karta */}
       <View className="mx-4 mb-2 flex-row items-center justify-between rounded-2xl border border-line bg-surface p-4">

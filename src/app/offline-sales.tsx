@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +16,7 @@ import { retrySale } from "@/lib/offline/sync";
 import { useOfflineStore } from "@/lib/offline/offline-store";
 import { logError } from "@/lib/logger";
 import type { QueuedSale, SaleStatus } from "@/lib/offline/sale-queue";
+import { ScreenHeader } from "@/components/ui/screen";
 
 const STATUS: Record<SaleStatus, { label: string; color: string; icon: keyof typeof Ionicons.glyphMap }> = {
   pending: { label: "Kutilmoqda", color: brand.warning, icon: "time-outline" },
@@ -27,7 +27,6 @@ const STATUS: Record<SaleStatus, { label: string; color: string; icon: keyof typ
 
 export default function OfflineSalesScreen() {
   const colors = useColors();
-  const router = useRouter();
   const { t } = useTranslation();
   const shopId = useActiveShopId();
   const qc = useQueryClient();
@@ -140,17 +139,7 @@ export default function OfflineSalesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityLabel={t("common.close", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="text-xl font-semibold text-ink">{t("offlineSales.screenTitle", "Yuborilmagan sotuvlar")}</Text>
-      </View>
+      <ScreenHeader title={t("offlineSales.screenTitle", "Yuborilmagan sotuvlar")} />
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">

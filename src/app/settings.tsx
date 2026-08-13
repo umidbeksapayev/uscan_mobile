@@ -18,11 +18,12 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useThemeStore, useColors, type ThemeMode } from "@/theme/theme-store";
-import { shadowPanel, shadowGlow } from "@/theme/shadows";
-import { tabularNums } from "@/theme/typography";
-import type { AppColors } from "@/theme/colors";
+import { shadowGlow } from "@/theme/shadows";
 import { LANGUAGES, setLanguage, type LangCode } from "@/i18n";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { IconChip } from "@/components/ui/icon-chip";
 import { useActiveMembership } from "@/features/auth/use-memberships";
 import { PERMISSION_LABELS } from "@/features/auth/permissions";
 import { useStaff, useAddMember, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
@@ -31,28 +32,7 @@ import { DailySummaryCard } from "@/features/notifications/daily-summary-card";
 import { FeedbackSheet } from "@/features/feedback/feedback-sheet";
 import type { MemberPermissions, ShopMemberRow } from "@/types/database";
 import { radius, text } from "@/theme/tokens";
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Uslub konstantalari
-───────────────────────────────────────────────────────────────────────── */
-const RADIUS = 18;
-/** Ikonka chipi — barcha qatorlarda bir xil o'lcham (skanerlashni osonlashtiradi). */
-const CHIP = 38;
-
-/** Karta soyasi — rang palitradan olinadi (tungi rejimda sof qora). */
-function cardShadow(colors: AppColors) {
-  return shadowPanel(colors.shadow);
-}
-
-/** Kartalar uchun umumiy "qobiq" uslubi (chegara + fon + radius). */
-function cardStyle(colors: AppColors) {
-  return {
-    borderRadius: RADIUS,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
-  } as const;
-}
+import { ScreenHeader } from "@/components/ui/screen";
 
 /* ─────────────────────────────────────────────────────────────────────────
    SectionLabel — bo'lim sarlavhasi
@@ -126,18 +106,8 @@ function SettingRow({
           backgroundColor: pressed ? colors.bg : colors.surface,
         }}
       >
-        <View
-          style={{
-            width: CHIP,
-            height: CHIP,
-            borderRadius: radius.md,
-            backgroundColor: muted ? colors.neutralTint : colors.primaryTint,
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 14,
-          }}
-        >
-          <Ionicons name={icon} size={19} color={muted ? colors.muted : colors.primary} />
+        <View style={{ marginRight: 14 }}>
+          <IconChip icon={icon} tone={muted ? "neutral" : "brand"} />
         </View>
         <View style={{ flex: 1, justifyContent: "center" }}>
           <Text style={{ fontSize: text.base, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
@@ -280,7 +250,7 @@ function PermissionsSheet({
         </View>
 
         {/* Ruxsatlar */}
-        <View style={{ ...cardStyle(colors), overflow: "hidden", marginBottom: 14 }}>
+        <Card padded={false} style={{ overflow: "hidden", marginBottom: 14 }}>
           {PERMISSION_LABELS.map((p, i) => (
             <View key={p.key}>
               {i > 0 && <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 16 }} />}
@@ -311,7 +281,7 @@ function PermissionsSheet({
               </View>
             </View>
           ))}
-        </View>
+        </Card>
 
         {/* Saqlash tugmasi */}
         <Pressable
@@ -459,7 +429,6 @@ export default function SettingsScreen() {
   const [langOpen, setLangOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [backPressed, setBackPressed] = useState(false);
 
   const themeMode = useThemeStore((s) => s.themeMode);
   const themeModeLabel =
@@ -516,43 +485,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
-      {/* ── Header ─────────────────────────────────────── */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 10,
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.line,
-          backgroundColor: colors.surface,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          onPressIn={() => setBackPressed(true)}
-          onPressOut={() => setBackPressed(false)}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back")}
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: radius.md,
-            backgroundColor: backPressed ? colors.primaryTint : colors.bg,
-            borderWidth: 1,
-            borderColor: backPressed ? colors.primary : colors.line,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Ionicons name="chevron-back" size={20} color={backPressed ? colors.primary : colors.ink} />
-        </Pressable>
-        <Text accessibilityRole="header" style={{ fontSize: text.lg, fontWeight: "700", color: colors.heading }}>
-          {t("settings.title")}
-        </Text>
-      </View>
+      <ScreenHeader title={t("settings.title")} />
 
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
@@ -645,14 +578,7 @@ export default function SettingsScreen() {
             UMUMIY SOZLAMALAR
         ══════════════════════════════════════════════ */}
         <SectionLabel label={t("settings.sectionGeneral")} />
-        <View
-          style={{
-            ...cardStyle(colors),
-            overflow: "hidden",
-            marginBottom: 22,
-            ...cardShadow(colors),
-          }}
-        >
+        <Card padded={false} elevated style={{ overflow: "hidden", marginBottom: 22 }}>
           <SettingRow
             icon="language-outline"
             title={t("settings.rowLanguage")}
@@ -685,7 +611,7 @@ export default function SettingsScreen() {
             muted
             last
           />
-        </View>
+        </Card>
 
         {/* ══════════════════════════════════════════════
             BILDIRISHNOMALAR
@@ -708,28 +634,21 @@ export default function SettingsScreen() {
             KASSIRLAR
         ══════════════════════════════════════════════ */}
         {!isOwner ? (
-          <View
-            style={{
-              ...cardStyle(colors),
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 12,
-              padding: 16,
-            }}
-          >
+          <Card style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <Ionicons name="lock-closed-outline" size={18} color={colors.muted} />
             <Text style={{ flex: 1, fontSize: text.sm, color: colors.muted, lineHeight: 18 }}>
               {t("settings.cashierOnlyOwner")}
             </Text>
-          </View>
+          </Card>
         ) : (
           <>
             <SectionLabel label={t("settings.sectionCashiers")} />
 
             {/* Email qo'shish — kompakt inline karta */}
-            <View
+            <Card
+              padded={false}
+              elevated
               style={{
-                ...cardStyle(colors),
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 10,
@@ -737,7 +656,6 @@ export default function SettingsScreen() {
                 paddingRight: 6,
                 paddingVertical: 6,
                 marginBottom: 6,
-                ...cardShadow(colors),
               }}
             >
               <Ionicons name="mail-outline" size={17} color={colors.muted} />
@@ -786,7 +704,7 @@ export default function SettingsScreen() {
                   </Text>
                 )}
               </Pressable>
-            </View>
+            </Card>
             <Text
               style={{
                 fontSize: text.xs,
@@ -803,33 +721,14 @@ export default function SettingsScreen() {
             {isLoading ? (
               <ActivityIndicator color={colors.primary} style={{ marginVertical: 28 }} />
             ) : isError ? (
-              <View
-                style={{
-                  ...cardStyle(colors),
-                  borderColor: colors.dangerBorder,
-                  backgroundColor: colors.dangerTint,
-                  padding: 20,
-                  alignItems: "center",
-                }}
-              >
+              <Card tone="danger" style={{ alignItems: "center" }}>
                 <Text style={{ fontSize: text.sm, color: colors.dangerInk, textAlign: "center" }}>
                   {(error as Error)?.message ?? t("common.loadError")}
                 </Text>
-              </View>
+              </Card>
             ) : cashiers.length === 0 ? (
-              <View style={{ ...cardStyle(colors), padding: 32, alignItems: "center", gap: 10 }}>
-                <View
-                  style={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: radius.lg,
-                    backgroundColor: colors.primaryTint,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="people-outline" size={26} color={colors.primary} />
-                </View>
+              <Card style={{ padding: 32, alignItems: "center", gap: 10 }}>
+                <IconChip icon="people-outline" size="lg" />
                 <Text style={{ fontSize: text.base, fontWeight: "600", color: colors.ink }}>
                   {t("staff.noCashiers")}
                 </Text>
@@ -843,9 +742,9 @@ export default function SettingsScreen() {
                 >
                   {t("settings.noCashiersHint")}
                 </Text>
-              </View>
+              </Card>
             ) : (
-              <View style={{ ...cardStyle(colors), overflow: "hidden", ...cardShadow(colors) }}>
+              <Card padded={false} elevated style={{ overflow: "hidden" }}>
                 {cashiers.map((m, i) => (
                   <CashierRow
                     key={m.user_id}
@@ -854,7 +753,7 @@ export default function SettingsScreen() {
                     onPress={() => setEditing(m)}
                   />
                 ))}
-              </View>
+              </Card>
             )}
           </>
         )}
@@ -938,27 +837,7 @@ function CashierRow({
           </Text>
         </View>
         {/* Ruxsat soni nishoni — ruxsat yo'q bo'lsa neytral, bor bo'lsa brend ko'ki */}
-        <View
-          style={{
-            paddingHorizontal: 9,
-            paddingVertical: 3,
-            borderRadius: radius.full,
-            backgroundColor: hasPerms ? colors.primaryTint : colors.neutralTint,
-            borderWidth: 1,
-            borderColor: hasPerms ? colors.primary : colors.line,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: text.xs,
-              fontWeight: "700",
-              color: hasPerms ? colors.primary : colors.muted,
-              ...tabularNums,
-            }}
-          >
-            {permCount}/{total}
-          </Text>
-        </View>
+        <Badge label={`${permCount}/${total}`} tone={hasPerms ? "brand" : "neutral"} numeric />
         <Ionicons name="chevron-forward" size={15} color={colors.tabInactive} />
       </Pressable>
     </>

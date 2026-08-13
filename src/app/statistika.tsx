@@ -4,7 +4,6 @@ import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -21,6 +20,7 @@ import { exportPeriodSales } from "@/features/stats/export-csv";
 import { StatsCard } from "@/components/ui/stats-card";
 import type { TopProduct } from "@/types/database";
 import { radius, text } from "@/theme/tokens";
+import { ScreenHeader } from "@/components/ui/screen";
 
 const PERIODS = [
   { days: 1 as const, key: "today", fallback: "Bugun", file: "bugun" },
@@ -227,7 +227,6 @@ function LockedSalesSection() {
 export default function StatistikaScreen() {
   const colors = useColors();
 
-  const router = useRouter();
   const { t } = useTranslation();
   const qc = useQueryClient();
   const shopId = useActiveShopId();
@@ -273,18 +272,7 @@ export default function StatistikaScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityLabel={t("common.close", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="text-xl font-semibold text-ink">{t("statistics.title", "Statistika")}</Text>
-      </View>
+      <ScreenHeader title={t("statistics.title", "Statistika")} />
 
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 14 }}

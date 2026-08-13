@@ -337,6 +337,68 @@ nishoni tabular raqamda va `/6` o'rniga ro'yxat uzunligidan hisoblanadi.
 **Natija:** `tsc` 0 xato · lint 0 xato · 261 test yashil · 55 ta tarjima
 kaliti 3 tilda ham tekshirildi.
 
+## 5.5 Sprint 12 — dizayn tizimi (2026-08-13)
+
+Sababi: Sozlamalar ekrani qayta chizilgandan keyin ham natija "o'rtacha"
+baholandi. O'lchov sabab ko'rsatdi — **ranglar tizimli, o'lchamlar esa yo'q**:
+14 xil `borderRadius`, 13 xil `fontSize`, bo'sh joy shkalasi umuman yo'q,
+24 ta ekrandan atigi 2 tasida animatsiya. Ekranlarni birma-bir qayta
+chizishdan davom etsak, natija yana "o'rtacha" bo'lardi — har ekran o'z
+raqamlarini o'zi o'ylab topgani uchun ritm yo'qolgan edi.
+
+### 1-bosqich — o'lcham tokenlari ✅
+
+Shkala **o'ylab topilmadi**. Shrift 400 ta joyda `className` orqali, atigi
+76 ta joyda inline berilgan (radius: 208 va 55) — ya'ni Tailwind shkalasi
+allaqachon amaldagi kanon edi. Yangi shkala kiritilsa, 400 ta joyning
+ma'nosi jimgina o'zgarardi; shuning uchun teskarisi qilindi — inline
+qiymatlar shkalaga qaytarildi.
+
+`theme/tokens.ts` (radius/text/space) + `text-2xs` (10px, nishonlar uchun —
+Tailwind'da yo'q edi). Ikkalasining ajralishini test bloklaydi.
+
+Radius ko'chirish **ma'noviy** bo'ldi: `r=22` bo'lgan 44px tugma, `r=7`
+bo'lgan 14px nuqta, `r=2` bo'lgan 3px chiziqcha — bularning hammasi aslida
+aylana/pill ekan, "eng yaqin qadam"ga emas `full` ga ketdi. Shu tasnifdan
+keyin 4px qadam ishlatilmay qoldi va tokenlardan olib tashlandi.
+
+125 ta almashtirish. Xom raqam qaytmasligi uchun lint qoidasi qo'shildi.
+
+### 2-bosqich — primitivlar ✅
+
+**`ScreenHeader`** — 15 ta ekranda takrorlangan (ikkitasida ikki martadan,
+jami 17 ta nusxa). Farqlari ataylab emas edi: orqaga ikonkasi 20/24/26
+(uch xil), tugma goh 40×40 bo'sh, goh 36×36 chegarali; sarlavha uch xil
+uslubda; a11y yorlig'i goh `common.back`, goh `common.close` — ya'ni ekran
+o'quvchi bir xil tugmani "Orqaga" va "Yopish" deb turlicha e'lon qilardi.
+
+**`Card`** — 20+ faylda qo'lda yozilgan qobiq. Chegara qalinligi ikki xil
+edi (27 joyda `1`, 11 joyda `0.5`); Android'da 0.5px qurilmaga qarab goh
+ko'rinadi, goh yo'qoladi — kanonik qiymat `1`. `tone` bilan semantik
+variantlar (xato/ogohlantirish banneri) ham shu yerdan.
+
+**`Badge`** va **`IconChip`** — nishon goh `20`, goh `999` radius bilan
+yozilardi; ikonka chipi esa 32/36/38/40/46/52/54 (yetti xil o'lcham) edi.
+Endi `Badge` har doim `full`, chip uch qadamda (`sm`/`md`/`lg`).
+
+Sozlamalar ekrani primitivlarga ko'chirildi (lokal `cardStyle`/`cardShadow`
+yordamchilari va `CHIP`/`RADIUS` konstantalari o'chdi).
+
+> `Screen` (SafeAreaView qobig'i) ATAYIN yozilmadi: u JSX daraxtini o'rashni
+> talab qiladi, ya'ni header almashtirishdan qaltisroq. Header qurilmada
+> tasdiqlangach, 4-bosqichda qo'shiladi. Ishlatilmaydigan komponentni
+> oldindan yozib qo'yish — o'lik kod.
+
+### Qolgan bosqichlar
+
+- **3-bosqich — harakat tili**: `theme/motion.ts` (davomiylik + easing,
+  ichida `useReducedMotion` gate'i), bosilish javobi, ro'yxat kirishi,
+  skeleton yuklanish.
+- **4-bosqich — ekranlarni ko'chirish**: `Screen` qobig'i + qolgan inline
+  uslublar.
+
+**Natija:** `tsc` 0 xato · lint 0 xato · 265 test yashil.
+
 ## 6. Ish tartibi (avvalgi sprintlar uslubida)
 
 branch → kichik Conventional Commits → `tsc` + `jest` yashil → PR (o'zbekcha

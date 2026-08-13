@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { toast } from "@/lib/toast";
-import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -10,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import { useCustomer, useCreateCustomer, useUpdateCustomer } from "@/features/customers/use-customers";
+import { ScreenHeader } from "@/components/ui/screen";
 
 function Field({
   label,
@@ -43,8 +43,6 @@ function Field({
 }
 
 export default function CustomerFormScreen() {
-  const colors = useColors();
-
   const router = useRouter();
   const { t } = useTranslation();
   const shopId = useActiveShopId();
@@ -86,20 +84,7 @@ export default function CustomerFormScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <View className="flex-row items-center gap-2 px-3 py-2">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          className="h-10 w-10 items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={26} color={colors.ink} />
-        </Pressable>
-        <Text className="text-xl font-semibold text-ink">
-          {editing ? t("customers.editTitle") : t("customers.newCustomer")}
-        </Text>
-      </View>
+      <ScreenHeader title={editing ? t("customers.editTitle") : t("customers.newCustomer")} />
 
       <KeyboardAwareScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}

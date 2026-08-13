@@ -2,7 +2,6 @@ import { useCallback, useState } from "react";
 import { View, Text, FlatList, Pressable, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
@@ -11,6 +10,7 @@ import { useColors } from "@/theme/theme-store";
 import { toast } from "@/lib/toast";
 import { clearLog, logAsText, readLog } from "@/lib/logger";
 import type { LogEntry } from "@/lib/log-buffer";
+import { ScreenHeader } from "@/components/ui/screen";
 
 /**
  * Diagnostika (A5) — qurilmadagi xatolik jurnali.
@@ -20,7 +20,6 @@ import type { LogEntry } from "@/lib/log-buffer";
  */
 export default function DiagnosticsScreen() {
   const colors = useColors();
-  const router = useRouter();
   const { t } = useTranslation();
 
   const [entries, setEntries] = useState<LogEntry[]>(() => readLog());
@@ -85,35 +84,31 @@ export default function DiagnosticsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <View className="flex-row items-center gap-2 px-4 py-3">
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          hitSlop={10}
-        >
-          <Ionicons name="chevron-back" size={24} color={colors.ink} />
-        </Pressable>
-        <Text className="flex-1 text-xl font-semibold text-ink">
-          {t("diagnostics.title", "Diagnostika")}
-        </Text>
-        <Pressable
-          onPress={() => void onShare()}
-          accessibilityRole="button"
-          accessibilityLabel={t("diagnostics.share", "Ulashish")}
-          hitSlop={10}
-        >
-          <Ionicons name="share-outline" size={22} color={colors.primary} />
-        </Pressable>
-        <Pressable
-          onPress={onClear}
-          accessibilityRole="button"
-          accessibilityLabel={t("diagnostics.clearBtn", "Tozalash")}
-          hitSlop={10}
-        >
-          <Ionicons name="trash-outline" size={21} color={colors.danger} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title={t("diagnostics.title", "Diagnostika")}
+        right={
+          <>
+            <Pressable
+              onPress={() => void onShare()}
+              accessibilityRole="button"
+              accessibilityLabel={t("diagnostics.share", "Ulashish")}
+              hitSlop={10}
+              className="h-10 w-10 items-center justify-center"
+            >
+              <Ionicons name="share-outline" size={22} color={colors.primary} />
+            </Pressable>
+            <Pressable
+              onPress={onClear}
+              accessibilityRole="button"
+              accessibilityLabel={t("diagnostics.clearBtn", "Tozalash")}
+              hitSlop={10}
+              className="h-10 w-10 items-center justify-center"
+            >
+              <Ionicons name="trash-outline" size={21} color={colors.danger} />
+            </Pressable>
+          </>
+        }
+      />
 
       <Text className="px-4 pb-2 text-xs text-muted" style={{ lineHeight: 17 }}>
         {t(
