@@ -11,19 +11,96 @@ maydonlari, kamera, printer, push.
 | Faqat JS/TSX, tarjima, uslub | `npm start` (dev build ulanadi) yoki OTA |
 | Yangi native paket, `app.json`, `google-services.json` | **Yangi dev build** |
 
-Sprint 11 o'zgarishlari **JS-only** — yangi build kerak emas.
+Sprint 11 va 12 o'zgarishlari **JS-only** — yangi build kerak emas
+(Reanimated allaqachon o'rnatilgan, yangi native modul qo'shilmadi).
 
 ```bash
 npm start
 ```
 
 > Metro keshi shubhali bo'lsa: `npx expo start --clear`.
+> Sprint 12 da uslub tokenlari o'zgargani uchun **NativeWind keshi** eskirgan
+> bo'lishi mumkin — o'lchamlar eski ko'rinsa aynan shu buyruq bilan tozalang.
 
 ---
 
-## 1. Sprint 11 — yangi o'zgarishlar
+## 1. Sprint 12 — dizayn tizimi
 
-### 1.1 Raqamlar (tabular shrift)
+> ⚠️ Sprint 12 ning **uchala bosqichi ham ko'rinishga tegadi** va ular
+> ustma-ust to'plangan (o'lcham → primitivlar → harakat). Muammo topilsa,
+> qaysi bosqich sababchi ekanini aytish uchun ekran nomini va nima
+> noto'g'ri ko'rinayotganini yozib qo'ying — commitlar alohida, orqaga
+> qaytarish oson.
+
+### 1.1 O'lchamlar (matn va radius)
+
+Ilgari kodda 14 xil radius va 13 xil shrift o'lchami bor edi; ular yagona
+shkalaga tortildi. Amalda **36 ta joyda matn 1px kattalashdi**.
+
+- [ ] **Savat qatorlari** (Sotuv) — mahsulot nomi bir qatorga sig'sin,
+      ikkiga tushib ketmasin.
+- [ ] **Katalog** — mahsulot nomi va narxi qator ichida kesilmasin.
+- [ ] **Tarix** — sotuv qatorlari qalashib qolmasin.
+- [ ] Kartalar chetlari bir xil yumaloqlikda ko'rinsin (ilgari 16 va 18
+      aralash edi — yonma-yon turgan kartalarda sezilardi).
+- [ ] Nishonlar (`3/6`, qoldiq belgilari) to'liq **oval** bo'lsin, burchakli
+      emas.
+
+### 1.2 Header (barcha ekranlarda bir xil)
+
+15 ta ekranda header qo'lda yozilgan edi va har birida biroz boshqacha.
+Endi bittasi.
+
+- [ ] Quyidagi ekranlarni ochib chiqing — **orqaga tugmasi bir xil
+      o'lchamda va sarlavha ko'k rangda** bo'lsin:
+      Sozlamalar · Kassa yopish · Printer · Diagnostika · Statistika ·
+      Kategoriyalar · Nasiya · Mijoz · Mijoz formasi · Xarajatlar ·
+      Ta'minotchilar · Kirim · Import · Bildirishnomalar · Yuborilmagan sotuvlar
+- [ ] **O'ng tomonida tugmasi bor to'rttasi** alohida tekshirilsin —
+      joyi siljib qolmaganini ko'ring:
+      - Diagnostika → ulashish + tozalash
+      - Xarajatlar → hafta/oy tanlagichi
+      - Kirim → ta'minotchilar
+      - Mijoz → tahrirlash
+- [ ] **Kirim** va **Import** ekranlarida ikkita header bor edi (yuklanish
+      holati va asosiy ko'rinish) — ikkalasi ham bir xil chiqsin.
+
+### 1.3 Bosilish javobi
+
+- [ ] **Sotuv → To'lash** tugmasi bosilganda biroz kichraysin
+      (ilovadagi eng ko'p bosiladigan tugma).
+- [ ] Orqaga tugmasi bosilganda javob bersin.
+- [ ] **Nasiya / Xarajatlar / Ta'minotchilar** ro'yxat qatorlari bosilganda
+      kichraysin.
+- [ ] Uchta FAB (+ tugmalari) bosilganda kichraysin.
+
+### 1.4 Skeleton yuklanish
+
+- [ ] **Nasiya**, **Xarajatlar**, **Ta'minotchilar** — ochilganda aylanuvchi
+      doira o'rniga kulrang qator o'rindiqlari ko'rinsin, ular sekin
+      "nafas olsin".
+- [ ] Ma'lumot kelganda sahifa **sakramasin** (o'rindiq va haqiqiy qator
+      taxminan bir balandlikda).
+
+### 1.5 Harakatni kamaytirish (a11y)
+
+Sozlamalarda animatsiyani o'chirib qo'ying, keyin:
+
+- [ ] Bosilganda **kichrayish bo'lmasin** (bosish o'zi ishlashda davom etsin).
+- [ ] Skeleton **pulsi to'xtasin** (kulrang qoladi, lekin qimirlamaydi).
+- [ ] Skanerdagi lazer chizig'i qimirlamasin.
+
+### 1.6 Tungi rejim
+
+- [ ] Skeleton o'rindiqlari fonda ko'rinsin (juda och yoki juda to'q emas).
+- [ ] Karta chegaralari yo'qolmasin — Sprint 12 da 0.5px chegaralar 1px ga
+      o'tkazildi, aynan shu tungi rejimda ba'zi qurilmada ko'rinmasdi.
+
+---
+
+## 2. Sprint 11 — yangi o'zgarishlar
+
+### 2.1 Raqamlar (tabular shrift)
 
 Maqsad: raqam o'zgarganda **matn sakramasligi**, ustundagi narxlar tekis turishi.
 
@@ -42,7 +119,7 @@ Maqsad: raqam o'zgarganda **matn sakramasligi**, ustundagi narxlar tekis turishi
 > `fontVariant: ["tabular-nums"]` ni shrift qo'llab-quvvatlamayotgani bo'ladi;
 > shu ekranni aytib qo'ying.
 
-### 1.2 Harakatni kamaytirish (a11y)
+### 2.2 Harakatni kamaytirish (a11y)
 
 - [ ] Android: *Sozlamalar → Maxsus imkoniyatlar → Animatsiyalarni o'chirish*
       (yoki iOS: *Accessibility → Motion → Reduce Motion*) — YOQING.
@@ -50,24 +127,24 @@ Maqsad: raqam o'zgarganda **matn sakramasligi**, ustundagi narxlar tekis turishi
       tursin. Skanerlashning o'zi ishlashda davom etsin.
 - [ ] Sozlamani o'chiring — chiziq yana tebransin.
 
-### 1.3 Tipografika
+### 2.3 Tipografika
 
 - [ ] Yuklanish matnlari `…` bilan tugasin (`...` uchta nuqta emas):
       "Yuklanmoqda…", "Saqlanmoqda…", "Kirilmoqda…".
 - [ ] Uch tilda ham tekshiring (Sozlamalar → Til).
 
-### 1.4 Ekran o'quvchi (ixtiyoriy, lekin foydali)
+### 2.4 Ekran o'quvchi (ixtiyoriy, lekin foydali)
 
 - [ ] TalkBack/VoiceOver yoqib, **Sotuv** ekranidagi "Tez-tez sotiladigan"
       plitkasini bosing — nom va narx **bitta tugma** bo'lib o'qilsin.
 
 ---
 
-## 2. Sprint 10 regressiyasi (hali qurilmada tasdiqlanmagan)
+## 3. Sprint 10 regressiyasi (hali qurilmada tasdiqlanmagan)
 
 Bu o'zgarishlar kod darajasida tuzatilgan, ammo qurilmada ko'rilmagan.
 
-### 2.1 BottomSheet uslublari (ildiz sabab tuzatilgan)
+### 3.1 BottomSheet uslublari (ildiz sabab tuzatilgan)
 
 Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 (ilgari ~25px, fonsiz edi):
@@ -80,20 +157,20 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 - [ ] Kategoriya oynasi · Xarajat formasi · Qaytarish oynasi
 - [ ] Do'kon almashtirish · Fikr bildirish · Kirimga mahsulot qo'shish
 
-### 2.2 Savat kartasi
+### 3.2 Savat kartasi
 
 - [ ] Bir ekranda 7-8 mahsulot ko'rinsin (ilgari 3-4).
 - [ ] **"+" tugmasining o'ng chetini bosing** — mahsulot tasodifan
       o'chib ketmasin (hitSlop ustma-ustligi tuzatilgan).
 - [ ] "Tez-tez sotiladigan" panel savat bo'sh emasligida yashirilsin.
 
-### 2.3 To'lov oynasi mantiqi
+### 3.3 To'lov oynasi mantiqi
 
 - [ ] Ekvayring **sozlanmagan** do'konda "QR to'lov" ko'rinmasin.
 - [ ] "Plastik" bilan sotuv → **Kassa yopish**da kutilgan naqd summasiga
       qo'shilmasin (soxta kamomad chiqmasin).
 
-### 2.4 Bildirishnomalar markazi
+### 3.4 Bildirishnomalar markazi
 
 - [ ] Bosh sahifa header'idagi qo'ng'iroqcha + sanoq ko'rinsin.
 - [ ] Sanoq — muammo **turlari** soni (masalan "kam qoldiq" + "qarzdor" = 2),
@@ -104,7 +181,7 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 
 ---
 
-## 3. Doimiy asosiy oqim (har sprintda)
+## 4. Doimiy asosiy oqim (har sprintda)
 
 - [ ] Kirish → do'kon tanlash
 - [ ] Skaner bilan sotuv → chek chiqarish
@@ -115,7 +192,7 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 
 ---
 
-## 4. Xato topilsa
+## 5. Xato topilsa
 
 Sozlamalar → **Diagnostika** ekranida oxirgi 50 ta xato jurnali bor —
 skrinshot yoki matnini yuboring, bu ildiz sababni topishni tezlashtiradi.
