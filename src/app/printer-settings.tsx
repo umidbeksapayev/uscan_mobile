@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { useActiveMembership } from "@/features/auth/use-memberships";
-import { usePrinterStore, type PrinterType } from "@/features/print/printer-settings";
+import { usePrinterStore } from "@/features/print/printer-settings";
 import { listBluetoothDevices } from "@/features/print/bt-print";
 import { printReceipt } from "@/features/print/print-receipt";
 import type { ReceiptData } from "@/features/print/types";

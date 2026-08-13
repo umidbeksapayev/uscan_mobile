@@ -60,7 +60,6 @@ export class ErrorBoundary extends React.Component<Props, State> {
     // sababi hech qayerda qolmasdi. Endi jurnalga ham tushadi (Diagnostika).
     logError("errorBoundary", error);
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.error("ErrorBoundary:", error, info.componentStack);
     }
   }

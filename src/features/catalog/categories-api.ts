@@ -14,9 +14,7 @@ export async function listCategoriesWithCount(shopId: string): Promise<CategoryW
     .order("name", { ascending: true });
   if (error) throw new Error(error.message);
 
-  return ((data ?? []) as unknown as Array<
-    Category & { products?: { count: number }[] }
-  >).map((c) => ({
+  return ((data ?? []) as unknown as (Category & { products?: { count: number }[] })[]).map((c) => ({
     id: c.id,
     shop_id: c.shop_id,
     name: c.name,

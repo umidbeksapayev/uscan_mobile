@@ -80,7 +80,7 @@ type Props = {
   handle?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
   children: React.ReactNode;
-  snapPoints?: Array<string | number>;
+  snapPoints?: (string | number)[];
   enableDynamicSizing?: boolean;
 };
 

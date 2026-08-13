@@ -854,7 +854,8 @@
     "synced": "{{count}} ta offline sotuv sinxronlandi",
     "failedToast": "{{count}} ta sotuv sinxronlanmadi",
     "queuedToast": "Sotuv navbatga qo'shildi (internetsiz)",
-    "sending": "Sotuvlar yuborilmoqda…"
+    "sending": "Sotuvlar yuborilmoqda…",
+    "conflicts": "{{count}} ta sotuvda konflikt — ko'rib chiqing"
   },
   "shift": {
     "title": "Kassani yopish",

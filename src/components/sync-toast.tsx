@@ -26,22 +26,22 @@ export function SyncToast() {
     if (syncing && pendingCount > 0) {
       setMsg({ text: t("sync.sending"), kind: "info" });
     }
-  }, [syncing, pendingCount]);
+  }, [syncing, pendingCount, t]);
 
   // Natija
   useEffect(() => {
     if (!lastResult || syncing) return;
     if (lastResult.conflicts > 0) {
-      setMsg({ text: `${lastResult.conflicts} ta sotuvda konflikt — ko'rib chiqing`, kind: "warn" });
+      setMsg({ text: t("sync.conflicts", { count: lastResult.conflicts }), kind: "warn" });
     } else if (lastResult.synced > 0) {
-      setMsg({ text: `${lastResult.synced} ta sotuv sinxronlandi`, kind: "success" });
+      setMsg({ text: t("sync.synced", { count: lastResult.synced }), kind: "success" });
     } else {
       setMsg(null);
       return;
     }
-    const t = setTimeout(() => setMsg(null), 3500);
-    return () => clearTimeout(t);
-  }, [lastResult, syncing]);
+    const timer = setTimeout(() => setMsg(null), 3500);
+    return () => clearTimeout(timer);
+  }, [lastResult, syncing, t]);
 
   if (!msg) return null;
   const bg = msg.kind === "warn" ? colors.danger : msg.kind === "success" ? colors.kirim : colors.primaryDeep;

@@ -1,3 +1,6 @@
+// i18next default eksporti — instansiya; `use`/`changeLanguage` uning haqiqiy
+// metodlari. `import/no-named-as-default-member` bu yerda soxta ogohlantirish.
+/* eslint-disable import/no-named-as-default-member */
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 

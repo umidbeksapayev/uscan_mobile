@@ -1,13 +1,18 @@
-import "react-native-gesture-handler";
+// `react-native-gesture-handler` BIRINCHI import bo'lib qolishi shart — u
+// import qilinishi bilan native gesture tizimini o'rnatadi.
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "@/global.css";
 import "@/i18n"; // i18next init (til MMKV'dan yuklanadi) — birinchi renderdan oldin
+// Quyida `useColors` ham shu moduldan olinadi, lekin bu qator ATAYIN alohida:
+// mavzu MMKV'dan aynan shu nuqtada, qolgan importlardan oldin tiklanadi.
+// eslint-disable-next-line import/no-duplicates
 import "@/theme/theme-store"; // mavzu init (rejim MMKV'dan tiklanadi) — birinchi renderdan oldin
 
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import Toast from "react-native-toast-message";
 
@@ -16,6 +21,7 @@ import { persistOptions } from "@/lib/offline/persister";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { AuthGate } from "@/features/auth/auth-gate";
+// eslint-disable-next-line import/no-duplicates -- yuqoridagi init importi bilan juft
 import { useColors, useIsDark } from "@/theme/theme-store";
 import { useToastConfig } from "@/components/ui/toast-config";
 

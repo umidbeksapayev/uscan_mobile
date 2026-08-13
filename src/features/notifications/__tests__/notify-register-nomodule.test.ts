@@ -18,6 +18,9 @@ jest.mock("@/lib/offline/mmkv", () => ({
   meta: { getString: jest.fn(), setString: jest.fn(), remove: jest.fn() },
 }));
 
+// Import mock'lardan KEYIN — o'qiyotgan odam uchun tartib muhim (Jest baribir
+// `jest.mock`ni yuqoriga ko'taradi). ESLint avtomatik tuzatishi buni almashtirmasin.
+// eslint-disable-next-line import/first
 import { registerPushToken } from "../notify";
 
 it("native modul yo'q bo'lsa noModule qaytaradi", async () => {
