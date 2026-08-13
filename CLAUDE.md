@@ -63,9 +63,21 @@ import/eksport, bildirishnomalar, kassa yopish + xarajatlar (migration 030/031),
 i18n 3 til + BottomSheet + tungi rejim, hamda **Sprint 8**: feedback forma,
 xatolik jurnali (Diagnostika), soya tokenlari, umumiy ro'yxat komponentlari,
 `React.memo`, a11y yorliqlari, i18n parity testi va **remote push**
-(migration 032 + web `lib/push/`). Batafsil: `docs/SPRINT_PLAN_2026-07.md`.
+(migration 032 + web `lib/push/`). **Sprint 9–10 ✅** — push'ni FCM bilan
+tasdiqlash, `SheetPressable` uslub yo'qolishi, savat kartasi, bildirishnomalar
+markazi. **Sprint 11 ✅** — ESLint (flat config) birinchi marta sozlandi,
+tabular raqamlar, harakatni kamaytirish (a11y).
+Batafsil: `docs/SPRINT_PLAN_2026-07.md`.
 
-Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · ESLint sozlanmagan.
+Sinov ro'yxati: `docs/QURILMADA_SINOV.md`.
+
+**Lint:** `npm run lint` — 0 xato bo'lishi shart. 18 ta
+`react-hooks/set-state-in-effect` ogohlantirishi ataylab qoldirilgan
+(sabab sprint hujjatida). `className` bilan `style={({pressed}) => …}` ni
+birga ishlatish lint bilan taqiqlangan.
+
+Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · kassir kesimidagi
+kengaytirilgan hisobot (`sale.created_by` mobil kodda ishlatilmaydi).
 
 ## AI Agent (Antigravity) Rules & Skills
 

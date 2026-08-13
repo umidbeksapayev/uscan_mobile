@@ -224,6 +224,80 @@ karta faqat egaga ko'rsatiladi. `push-card.tsx` va
 `web-design-guidelines` va `vercel-react-native-skills`
 (`.claude/skills/`, `skills-lock.json`).
 
+## 5.3 Sprint 11 — ESLint va dizayn auditi (2026-08-13)
+
+### ESLint (birinchi marta sozlandi)
+
+`package.json`da `expo lint` skripti bor edi, lekin **konfiguratsiya fayli
+yo'q** — ya'ni lint hech qachon ishlamagan. Endi `eslint.config.js` (flat
+config) + `eslint-config-expo`.
+
+Yo'ldagi to'siq: `eslint-plugin-react` ESLint 10 da yiqiladi — versiyani
+avtomatik aniqlashda olib tashlangan `context.getFilename()` ni chaqiradi.
+Yechim: `settings.react.version` ni qo'lda ko'rsatish (aniqlash kodi umuman
+ishga tushmaydi).
+
+**Loyihaga xos qoida qo'shildi:** `className` bilan
+`style={({pressed}) => …}` ni birga ishlatish **taqiqlandi**
+(`no-restricted-syntax`). Bu Sprint 10 dagi `SheetPressable` ildiz sababi —
+endi u qaytib kelsa lint darhol to'xtatadi. Hozircha 0 ta buzilish.
+
+**Ataylab yumshatilgan ikki qoida:**
+- `react/no-unescaped-entities` — **o'chirildi**. O'zbek lotinida `'` harf
+  (o', g', ta'minotchi), qoida butun interfeys matnida shovqin qilardi.
+- `react-hooks/set-state-in-effect` — **ogohlantirish** (18 joy). Barcha
+  BottomSheet'lar `@gorhom/bottom-sheet` modalida va yopilganda bolalarini
+  unmount QILMAYDI, shuning uchun "ochilganda formani tozalash" effekti
+  yagona ishlaydigan yo'l (`key` bilan remount qilib bo'lmaydi). Kelajakda
+  sheet arxitekturasi o'zgarsa qayta ko'riladi.
+
+**Tuzatilgan haqiqiy topilmalar:**
+- `sync-toast.tsx` — konflikt va sinxronlash xabarlari **hardcoded o'zbekcha**
+  edi (qolgan ilova tarjima qilingan holda). `t()` ga o'tkazildi,
+  `sync.conflicts` kaliti 3 tilga qo'shildi. Shu yerda `t` (tarjima) ni
+  `setTimeout` natijasi soyalab turgani ham tuzatildi.
+- Ishlatilmagan import, ishlamaydigan `eslint-disable` direktivasi, takroriy
+  importlar, `Array<T>` → `T[]`.
+- `jest-expo` va `react-test-renderer` `dependencies`dan `devDependencies`ga.
+
+### Dizayn auditi (skillar bo'yicha)
+
+`vercel-react-native-skills` + Web Interface Guidelines asosida.
+
+**Tekshirilgan va toza chiqqan:** ro'yxatlarda `keyExtractor` va
+`useCallback`li `renderItem` bor, qatorlar `memo`da (Sprint 8 A10);
+`{count && …}` naqshi (RN da "0" ni matn sifatida chizib yiqiladi) hech
+qayerda yo'q; ikonka-tugmalarda a11y yorliqlari bor.
+
+**Topilgan va tuzatilgan:**
+- **Raqamlar tabular emas edi** (`theme/typography.ts` → `tabularNums`).
+  Standart shriftda `1` boshqa raqamlardan tor — savat jami har mahsulot
+  qo'shilganda sakrab turardi, ro'yxatdagi narxlar tekis ustunga terilmasdi.
+  POS'da raqam eng ko'p o'qiladigan element. Qo'llandi: `StatsCard` (Bosh +
+  Statistika hammasi bir joydan), savat qatori va jami, kassa yopish
+  (kutilgan/sanalgan/farq), nasiya balanslari, tarix, kunlik sof foyda.
+- **Harakatni kamaytirish umuman hisobga olinmasdi.** Skanerdagi lazer
+  chizig'i cheksiz tebranardi — vestibulyar sezgirligi bor foydalanuvchi
+  uchun eng bezovta qiluvchi naqsh. `useReducedMotion()` bilan chiziq
+  o'rtada qotadi, skanerlash ishlashda davom etadi.
+- Tipografika: 3 tilda 32 tadan `...` → `…`.
+
+### Yo'l-yo'lakay: eskirgan roadmap yozuvlari
+
+Audit hujjatidagi ikki band aslida bajarilgan ekan — P9 (shtrix-kodsiz
+tezkor narx: `sell/quick-price-sheet.tsx` + `misc-product.ts`) va P10 ning
+asosiy qismi (kassir bo'yicha tushum — `statistika.tsx` da mavjud).
+`sale.created_by` mobil kodda ishlatilmaydi, shuning uchun **kassir
+kesimidagi kengaytirilgan hisobot** ochiq qolmoqda.
+
+### Sinov
+
+`docs/QURILMADA_SINOV.md` — qurilmada bosib chiqiladigan ro'yxat (Sprint 11
+yangiliklari + hali qurilmada tasdiqlanmagan Sprint 10 tuzatishlari).
+Sprint 11 o'zgarishlari JS-only — yangi dev build kerak emas.
+
+**Natija:** lint 0 xato / 18 ogohlantirish · `tsc` 0 xato · 261 test yashil.
+
 ## 6. Ish tartibi (avvalgi sprintlar uslubida)
 
 branch → kichik Conventional Commits → `tsc` + `jest` yashil → PR (o'zbekcha
