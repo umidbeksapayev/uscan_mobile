@@ -7,6 +7,13 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      // O'lchamlar Tailwind standart shkalasida qoladi — u loyihada allaqachon
+      // kanon (400 ta `text-*` / 208 ta `rounded-*` ishlatilishi). Inline
+      // qiymatlar shu shkalaga tortiladi: `src/theme/tokens.ts`.
+      // Yagona qo'shimcha — nishon (badge) ichidagi matn uchun mikro qadam.
+      fontSize: {
+        "2xs": ["0.625rem", { lineHeight: "0.875rem" }], // 10px — tokens.text.micro
+      },
       // Ranglar CSS o'zgaruvchilariga bog'langan (qarang: src/global.css) —
       // shu tufayli `bg-surface`, `text-ink` kabi klasslar tungi rejimda
       // faylga tegmasdan avtomatik o'zgaradi.
