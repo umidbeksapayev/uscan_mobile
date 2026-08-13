@@ -15,6 +15,7 @@ import { useActivePermissions } from "@/features/auth/use-memberships";
 import { useCustomersWithBalance } from "@/features/customers/use-customers";
 import { debtTotal } from "@/features/customers/debt-math";
 import type { CustomerWithBalance } from "@/types/database";
+import { radius } from "@/theme/tokens";
 
 const CustomerRow = memo(function CustomerRow({
   c,
@@ -197,7 +198,7 @@ export default function NasiyaScreen() {
               bottom: 24,
               width: 56,
               height: 56,
-              borderRadius: 18,
+              borderRadius: radius.lg,
               backgroundColor: colors.primary,
               alignItems: "center",
               justifyContent: "center",

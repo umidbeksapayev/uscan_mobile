@@ -20,6 +20,7 @@ import { useStaff } from "@/features/auth/use-staff";
 import { exportPeriodSales } from "@/features/stats/export-csv";
 import { StatsCard } from "@/components/ui/stats-card";
 import type { TopProduct } from "@/types/database";
+import { radius, text } from "@/theme/tokens";
 
 const PERIODS = [
   { days: 1 as const, key: "today", fallback: "Bugun", file: "bugun" },
@@ -48,7 +49,7 @@ function ProductStatRow({ p, rank }: { p: TopProduct; rank?: number }) {
     <View className="flex-row items-center gap-3 py-1.5">
       {rank ? <Text className="w-4 text-sm font-bold text-muted">{rank}</Text> : null}
       {p.image_url ? (
-        <Image source={{ uri: p.image_url }} style={{ width: 36, height: 36, borderRadius: 10 }} contentFit="cover" />
+        <Image source={{ uri: p.image_url }} style={{ width: 36, height: 36, borderRadius: radius.md }} contentFit="cover" />
       ) : (
         <View className="h-9 w-9 items-center justify-center rounded-xl bg-primary-tint">
           <Ionicons name="cube-outline" size={16} color={colors.primary} />
@@ -385,7 +386,7 @@ export default function StatistikaScreen() {
                     className="rounded-full px-3.5 py-1"
                     style={{ backgroundColor: active ? colors.primaryDeep : "transparent" }}
                   >
-                    <Text style={{ fontSize: 12, fontWeight: "600", color: active ? "#fff" : colors.muted }}>
+                    <Text style={{ fontSize: text.xs, fontWeight: "600", color: active ? "#fff" : colors.muted }}>
                       {t("statistics." + p.key, p.fallback)}
                     </Text>
                   </Pressable>

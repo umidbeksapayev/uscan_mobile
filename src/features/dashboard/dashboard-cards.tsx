@@ -8,6 +8,7 @@ import { useColors } from "@/theme/theme-store";
 import { shadowSm, shadowGlow } from "@/theme/shadows";
 import { formatCurrency, formatWeight } from "@/lib/format";
 import type { Product, TopProduct } from "@/types/database";
+import { radius, text } from "@/theme/tokens";
 
 function DeltaPill({ delta, suffix }: { delta: number; suffix: string }) {
   const up = delta >= 0;
@@ -19,7 +20,7 @@ function DeltaPill({ delta, suffix }: { delta: number; suffix: string }) {
       {/* Brend rangli karta ustida turadi — foni ikkala rejimda bir xil,
           shuning uchun ikonka rangi ham mavzuga bog'lanmaydi. */}
       <Ionicons name={up ? "arrow-up" : "arrow-down"} size={11} color={up ? "#BBF7D0" : "#FECACA"} />
-      <Text style={{ fontSize: 11, fontWeight: "600", color: "#fff" }}>
+      <Text style={{ fontSize: text.xs, fontWeight: "600", color: "#fff" }}>
         {`${up ? "+" : ""}${delta.toFixed(0)}% ${suffix}`}
       </Text>
     </View>
@@ -51,7 +52,7 @@ export function GradientStat({
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{
-        borderRadius: 22,
+        borderRadius: radius.xl,
         padding: 18,
         ...shadowGlow(tone[1]),
       }}
@@ -67,7 +68,7 @@ export function GradientStat({
       </View>
       <Text
         className="mt-3"
-        style={{ fontSize: 11, fontWeight: "600", letterSpacing: 1, color: "rgba(255,255,255,0.8)" }}
+        style={{ fontSize: text.xs, fontWeight: "600", letterSpacing: 1, color: "rgba(255,255,255,0.8)" }}
       >
         {label}
       </Text>
@@ -75,8 +76,8 @@ export function GradientStat({
         <View className="mt-2 h-8 rounded-md" style={{ width: "60%", backgroundColor: "rgba(255,255,255,0.25)" }} />
       ) : (
         <Text className="mt-1" numberOfLines={1} adjustsFontSizeToFit>
-          <Text style={{ fontSize: 30, fontWeight: "800", color: "#fff" }}>{value}</Text>
-          <Text style={{ fontSize: 15, fontWeight: "600", color: "rgba(255,255,255,0.85)" }}>
+          <Text style={{ fontSize: text.xl3, fontWeight: "800", color: "#fff" }}>{value}</Text>
+          <Text style={{ fontSize: text.base, fontWeight: "600", color: "rgba(255,255,255,0.85)" }}>
             {" "}
             {suffix}
           </Text>
@@ -116,7 +117,7 @@ function Thumb({ uri }: { uri: string | null }) {
   const colors = useColors();
 
   return uri ? (
-    <Image source={{ uri }} style={{ width: 40, height: 40, borderRadius: 12 }} contentFit="cover" />
+    <Image source={{ uri }} style={{ width: 40, height: 40, borderRadius: radius.md }} contentFit="cover" />
   ) : (
     <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
       <Ionicons name="cube-outline" size={18} color={colors.primary} />
@@ -158,7 +159,7 @@ export function TopList({ items, loading }: { items: TopProduct[]; loading?: boo
                   height: "100%",
                   width: `${(p.revenue / max) * 100}%`,
                   backgroundColor: colors.primary,
-                  borderRadius: 999,
+                  borderRadius: radius.full,
                 }}
               />
             </View>
@@ -195,7 +196,7 @@ export function SlowList({ items }: { items: TopProduct[] }) {
             </View>
             {unsold ? (
               <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: colors.warningTint }}>
-                <Text style={{ fontSize: 11, fontWeight: "500", color: colors.warningInk }}>
+                <Text style={{ fontSize: text.xs, fontWeight: "500", color: colors.warningInk }}>
                   {t("dashboard.notSold")}
                 </Text>
               </View>
@@ -250,7 +251,7 @@ export function LowStockList({ items, onTap }: { items: Product[]; onTap: () => 
               style={{ gap: 3, backgroundColor: colors.dangerTint }}
             >
               <Ionicons name="alert-circle-outline" size={12} color={colors.dangerInk} />
-              <Text style={{ fontSize: 11, fontWeight: "500", color: colors.dangerInk }}>
+              <Text style={{ fontSize: text.xs, fontWeight: "500", color: colors.dangerInk }}>
                 {out ? t("dashboard.out") : t("dashboard.low")}
               </Text>
             </View>

@@ -9,6 +9,7 @@ import { formatCurrency } from "@/lib/format";
 import { useQrPayment } from "./acquiring/use-qr-payment";
 import { acquiringStatusUI } from "./acquiring/acquiring-status";
 import type { SaleResult } from "./checkout";
+import { radius, text } from "@/theme/tokens";
 
 type Props = {
   visible: boolean;
@@ -36,7 +37,7 @@ export function QrPaymentSheet({ visible, shopId, items, amount, clientId, onPai
           <View
             style={{
               width: 228, height: 228, alignItems: "center", justifyContent: "center",
-              backgroundColor: "#fff", borderRadius: 16, borderWidth: 1, borderColor: colors.line,
+              backgroundColor: "#fff", borderRadius: radius.lg, borderWidth: 1, borderColor: colors.line,
             }}
           >
             {payUrl ? <QRCode value={payUrl} size={200} /> : <ActivityIndicator color={colors.primary} />}
@@ -48,7 +49,7 @@ export function QrPaymentSheet({ visible, shopId, items, amount, clientId, onPai
             ) : (
               <Ionicons name={ui.icon} size={20} color={ui.color} />
             )}
-            <Text style={{ color: ui.color, fontWeight: "500", fontSize: 16 }}>{ui.label}</Text>
+            <Text style={{ color: ui.color, fontWeight: "500", fontSize: text.base }}>{ui.label}</Text>
           </View>
 
           <SheetPressable

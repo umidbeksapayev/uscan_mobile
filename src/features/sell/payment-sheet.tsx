@@ -22,6 +22,7 @@ import type { ReceiptData, ReceiptLine } from "@/features/print/types";
 import { QrPaymentSheet } from "./qr-payment-sheet";
 import { acquiringHasCredentials } from "./acquiring/acquiring-api";
 import { BottomSheet, SheetPressable } from "@/components/ui/bottom-sheet";
+import { text } from "@/theme/tokens";
 
 /*
   To'lov usullari.
@@ -287,7 +288,7 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
                       <Ionicons name={m.icon} size={22} color={active ? "#fff" : colors.muted} />
                       <Text
                         style={{
-                          fontSize: 12,
+                          fontSize: text.xs,
                           marginTop: 4,
                           fontWeight: "500",
                           color: active ? "#fff" : colors.muted,

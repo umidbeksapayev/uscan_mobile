@@ -30,6 +30,7 @@ import { LocalReminderCard } from "@/features/notifications/local-reminder-card"
 import { DailySummaryCard } from "@/features/notifications/daily-summary-card";
 import { FeedbackSheet } from "@/features/feedback/feedback-sheet";
 import type { MemberPermissions, ShopMemberRow } from "@/types/database";
+import { radius, text } from "@/theme/tokens";
 
 /* ─────────────────────────────────────────────────────────────────────────
    Uslub konstantalari
@@ -62,11 +63,11 @@ function SectionLabel({ label }: { label: string }) {
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10, marginLeft: 4 }}>
-      <View style={{ width: 3, height: 13, borderRadius: 2, backgroundColor: colors.primary }} />
+      <View style={{ width: 3, height: 13, borderRadius: radius.full, backgroundColor: colors.primary }} />
       <Text
         accessibilityRole="header"
         style={{
-          fontSize: 11,
+          fontSize: text.xs,
           fontWeight: "700",
           color: colors.heading,
           letterSpacing: 0.9,
@@ -129,7 +130,7 @@ function SettingRow({
           style={{
             width: CHIP,
             height: CHIP,
-            borderRadius: 12,
+            borderRadius: radius.md,
             backgroundColor: muted ? colors.neutralTint : colors.primaryTint,
             alignItems: "center",
             justifyContent: "center",
@@ -139,11 +140,11 @@ function SettingRow({
           <Ionicons name={icon} size={19} color={muted ? colors.muted : colors.primary} />
         </View>
         <View style={{ flex: 1, justifyContent: "center" }}>
-          <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
+          <Text style={{ fontSize: text.base, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
             {title}
           </Text>
           {subtitle ? (
-            <Text style={{ fontSize: 12, color: colors.muted, marginTop: 1, lineHeight: 16 }} numberOfLines={1}>
+            <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 1, lineHeight: 16 }} numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}
@@ -187,7 +188,7 @@ function ChoiceRow({
         gap: 12,
         paddingHorizontal: 14,
         paddingVertical: 13,
-        borderRadius: 16,
+        borderRadius: radius.lg,
         backgroundColor: active ? colors.primaryTint : colors.surface,
         borderWidth: 1.5,
         borderColor: active ? colors.primary : colors.line,
@@ -199,7 +200,7 @@ function ChoiceRow({
       <View style={{ flex: 1 }}>
         <Text
           style={{
-            fontSize: 15,
+            fontSize: text.base,
             fontWeight: active ? "700" : "500",
             color: active ? colors.primary : colors.ink,
           }}
@@ -207,7 +208,7 @@ function ChoiceRow({
           {label}
         </Text>
         {hint ? (
-          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>{hint}</Text>
+          <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2 }}>{hint}</Text>
         ) : null}
       </View>
       <Ionicons
@@ -258,21 +259,21 @@ function PermissionsSheet({
             style={{
               width: 46,
               height: 46,
-              borderRadius: 14,
+              borderRadius: radius.lg,
               backgroundColor: colors.primaryTint,
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Text style={{ fontSize: 20, fontWeight: "800", color: colors.primary }}>
+            <Text style={{ fontSize: text.xl, fontWeight: "800", color: colors.primary }}>
               {(member?.email ?? "?").slice(0, 1).toUpperCase()}
             </Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink }} numberOfLines={1}>
+            <Text style={{ fontSize: text.base, fontWeight: "700", color: colors.ink }} numberOfLines={1}>
               {member?.email}
             </Text>
-            <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
+            <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2 }}>
               {t("settings.permCountShort", { count: enabledCount })}
             </Text>
           </View>
@@ -293,10 +294,10 @@ function PermissionsSheet({
                 }}
               >
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 14, fontWeight: "600", color: colors.ink }}>
+                  <Text style={{ fontSize: text.sm, fontWeight: "600", color: colors.ink }}>
                     {t(`staff.perm_${p.key}`, p.label)}
                   </Text>
-                  <Text style={{ fontSize: 11, color: colors.muted, marginTop: 2, lineHeight: 15 }}>
+                  <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2, lineHeight: 15 }}>
                     {t(`staff.permHint_${p.key}`, p.hint)}
                   </Text>
                 </View>
@@ -321,7 +322,7 @@ function PermissionsSheet({
           accessibilityState={{ disabled: saving }}
           style={{
             height: 52,
-            borderRadius: 16,
+            borderRadius: radius.lg,
             backgroundColor: colors.primary,
             alignItems: "center",
             justifyContent: "center",
@@ -333,7 +334,7 @@ function PermissionsSheet({
           {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={{ fontSize: 16, fontWeight: "700", color: "#fff" }}>{t("common.save")}</Text>
+            <Text style={{ fontSize: text.base, fontWeight: "700", color: "#fff" }}>{t("common.save")}</Text>
           )}
         </Pressable>
 
@@ -344,7 +345,7 @@ function PermissionsSheet({
           accessibilityLabel={t("settings.removeStaffBtn")}
           style={{
             height: 48,
-            borderRadius: 16,
+            borderRadius: radius.lg,
             borderWidth: 1.5,
             borderColor: colors.dangerBorder,
             backgroundColor: colors.dangerTint,
@@ -355,7 +356,7 @@ function PermissionsSheet({
           }}
         >
           <Ionicons name="person-remove-outline" size={17} color={colors.dangerInk} />
-          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dangerInk }}>
+          <Text style={{ fontSize: text.sm, fontWeight: "600", color: colors.dangerInk }}>
             {t("settings.removeStaffBtn")}
           </Text>
         </Pressable>
@@ -373,7 +374,7 @@ function LanguagePickerSheet({ visible, onClose }: { visible: boolean; onClose: 
 
   return (
     <BottomSheet visible={visible} onClose={onClose} snapPoints={["38%"]}>
-      <Text style={{ fontSize: 18, fontWeight: "700", color: colors.ink, marginBottom: 16 }}>
+      <Text style={{ fontSize: text.lg, fontWeight: "700", color: colors.ink, marginBottom: 16 }}>
         {t("settings.rowLanguage")}
       </Text>
       <View style={{ gap: 8 }}>
@@ -415,7 +416,7 @@ function ThemePickerSheet({ visible, onClose }: { visible: boolean; onClose: () 
 
   return (
     <BottomSheet visible={visible} onClose={onClose} snapPoints={["48%"]}>
-      <Text style={{ fontSize: 18, fontWeight: "700", color: colors.ink, marginBottom: 16 }}>
+      <Text style={{ fontSize: text.lg, fontWeight: "700", color: colors.ink, marginBottom: 16 }}>
         {t("settings.rowTheme")}
       </Text>
       <View style={{ gap: 8 }}>
@@ -538,7 +539,7 @@ export default function SettingsScreen() {
           style={{
             width: 36,
             height: 36,
-            borderRadius: 10,
+            borderRadius: radius.md,
             backgroundColor: backPressed ? colors.primaryTint : colors.bg,
             borderWidth: 1,
             borderColor: backPressed ? colors.primary : colors.line,
@@ -548,7 +549,7 @@ export default function SettingsScreen() {
         >
           <Ionicons name="chevron-back" size={20} color={backPressed ? colors.primary : colors.ink} />
         </Pressable>
-        <Text accessibilityRole="header" style={{ fontSize: 18, fontWeight: "700", color: colors.heading }}>
+        <Text accessibilityRole="header" style={{ fontSize: text.lg, fontWeight: "700", color: colors.heading }}>
           {t("settings.title")}
         </Text>
       </View>
@@ -567,7 +568,7 @@ export default function SettingsScreen() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
-            borderRadius: 22,
+            borderRadius: radius.xl,
             padding: 18,
             marginBottom: 22,
             flexDirection: "row",
@@ -581,7 +582,7 @@ export default function SettingsScreen() {
               style={{
                 width: 54,
                 height: 54,
-                borderRadius: 17,
+                borderRadius: radius.lg,
                 backgroundColor: "rgba(255,255,255,0.18)",
                 borderWidth: 1,
                 borderColor: "rgba(255,255,255,0.28)",
@@ -589,7 +590,7 @@ export default function SettingsScreen() {
                 justifyContent: "center",
               }}
             >
-              <Text style={{ fontSize: 19, fontWeight: "800", color: "#fff" }}>{initials}</Text>
+              <Text style={{ fontSize: text.xl, fontWeight: "800", color: "#fff" }}>{initials}</Text>
             </View>
             {/* Faol do'kon belgisi */}
             <View
@@ -599,7 +600,7 @@ export default function SettingsScreen() {
                 right: -2,
                 width: 14,
                 height: 14,
-                borderRadius: 7,
+                borderRadius: radius.full,
                 backgroundColor: colors.success,
                 borderWidth: 2,
                 borderColor: colors.primaryDeep,
@@ -609,7 +610,7 @@ export default function SettingsScreen() {
 
           <View style={{ flex: 1 }}>
             <Text
-              style={{ fontSize: 17, fontWeight: "800", color: "#fff", lineHeight: 22 }}
+              style={{ fontSize: text.lg, fontWeight: "800", color: "#fff", lineHeight: 22 }}
               numberOfLines={1}
             >
               {active?.shop.name ?? t("common.appName")}
@@ -624,7 +625,7 @@ export default function SettingsScreen() {
                 gap: 5,
                 paddingHorizontal: 9,
                 paddingVertical: 3,
-                borderRadius: 20,
+                borderRadius: radius.full,
                 backgroundColor: "rgba(255,255,255,0.18)",
               }}
             >
@@ -633,7 +634,7 @@ export default function SettingsScreen() {
                 size={12}
                 color="#fff"
               />
-              <Text style={{ fontSize: 12, fontWeight: "600", color: "#fff" }}>
+              <Text style={{ fontSize: text.xs, fontWeight: "600", color: "#fff" }}>
                 {isOwner ? t("staff.owner") : t("staff.cashier")}
               </Text>
             </View>
@@ -717,7 +718,7 @@ export default function SettingsScreen() {
             }}
           >
             <Ionicons name="lock-closed-outline" size={18} color={colors.muted} />
-            <Text style={{ flex: 1, fontSize: 13, color: colors.muted, lineHeight: 18 }}>
+            <Text style={{ flex: 1, fontSize: text.sm, color: colors.muted, lineHeight: 18 }}>
               {t("settings.cashierOnlyOwner")}
             </Text>
           </View>
@@ -748,7 +749,7 @@ export default function SettingsScreen() {
                 accessibilityLabel={t("staff.addTitle")}
                 style={{
                   flex: 1,
-                  fontSize: 14,
+                  fontSize: text.sm,
                   color: colors.ink,
                   height: 42,
                   paddingVertical: 0,
@@ -770,7 +771,7 @@ export default function SettingsScreen() {
                 style={{
                   paddingHorizontal: 16,
                   height: 38,
-                  borderRadius: 13,
+                  borderRadius: radius.md,
                   backgroundColor: colors.primary,
                   alignItems: "center",
                   justifyContent: "center",
@@ -780,7 +781,7 @@ export default function SettingsScreen() {
                 {addMut.isPending ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Text style={{ fontSize: 13, fontWeight: "700", color: "#fff" }}>
+                  <Text style={{ fontSize: text.sm, fontWeight: "700", color: "#fff" }}>
                     {t("staff.addBtn")}
                   </Text>
                 )}
@@ -788,7 +789,7 @@ export default function SettingsScreen() {
             </View>
             <Text
               style={{
-                fontSize: 11,
+                fontSize: text.xs,
                 color: colors.muted,
                 marginBottom: 16,
                 marginLeft: 4,
@@ -811,7 +812,7 @@ export default function SettingsScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ fontSize: 13, color: colors.dangerInk, textAlign: "center" }}>
+                <Text style={{ fontSize: text.sm, color: colors.dangerInk, textAlign: "center" }}>
                   {(error as Error)?.message ?? t("common.loadError")}
                 </Text>
               </View>
@@ -821,7 +822,7 @@ export default function SettingsScreen() {
                   style={{
                     width: 52,
                     height: 52,
-                    borderRadius: 16,
+                    borderRadius: radius.lg,
                     backgroundColor: colors.primaryTint,
                     alignItems: "center",
                     justifyContent: "center",
@@ -829,12 +830,12 @@ export default function SettingsScreen() {
                 >
                   <Ionicons name="people-outline" size={26} color={colors.primary} />
                 </View>
-                <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink }}>
+                <Text style={{ fontSize: text.base, fontWeight: "600", color: colors.ink }}>
                   {t("staff.noCashiers")}
                 </Text>
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: text.xs,
                     color: colors.muted,
                     textAlign: "center",
                     lineHeight: 17,
@@ -918,21 +919,21 @@ function CashierRow({
           style={{
             width: 40,
             height: 40,
-            borderRadius: 12,
+            borderRadius: radius.md,
             backgroundColor: colors.primaryTint,
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Text style={{ fontSize: 16, fontWeight: "800", color: colors.primary }}>
+          <Text style={{ fontSize: text.base, fontWeight: "800", color: colors.primary }}>
             {member.email.slice(0, 1).toUpperCase()}
           </Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.ink }} numberOfLines={1}>
+          <Text style={{ fontSize: text.sm, fontWeight: "600", color: colors.ink }} numberOfLines={1}>
             {member.email}
           </Text>
-          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
+          <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2 }}>
             {hasPerms ? t("settings.permGranted", { count: permCount }) : t("settings.permNone")}
           </Text>
         </View>
@@ -941,7 +942,7 @@ function CashierRow({
           style={{
             paddingHorizontal: 9,
             paddingVertical: 3,
-            borderRadius: 20,
+            borderRadius: radius.full,
             backgroundColor: hasPerms ? colors.primaryTint : colors.neutralTint,
             borderWidth: 1,
             borderColor: hasPerms ? colors.primary : colors.line,
@@ -949,7 +950,7 @@ function CashierRow({
         >
           <Text
             style={{
-              fontSize: 11,
+              fontSize: text.xs,
               fontWeight: "700",
               color: hasPerms ? colors.primary : colors.muted,
               ...tabularNums,

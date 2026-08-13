@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import type { SalesTrendPoint } from "@/types/database";
 import { niceMax, compactSom, dayLabel } from "./dashboard-math";
+import { text } from "@/theme/tokens";
 
 const H = 190;
 const PAD_L = 34;
@@ -39,7 +40,7 @@ export function TrendChart({ data }: { data: SalesTrendPoint[] }) {
   if (n === 0 || allZero) {
     return (
       <View style={{ height: H, alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ color: colors.muted, fontSize: 14 }}>{t("dashboard.noSalesPeriod")}</Text>
+        <Text style={{ color: colors.muted, fontSize: text.sm }}>{t("dashboard.noSalesPeriod")}</Text>
       </View>
     );
   }

@@ -57,6 +57,14 @@ module.exports = defineConfig([
       "no-restricted-syntax": [
         "error",
         {
+          // O'lchamlar `theme/tokens.ts` dan olinadi. Ilgari kodda 14 xil
+          // radius va 13 xil shrift o'lchami bor edi — har ekran o'z
+          // raqamini o'zi tanlagani uchun ilova "yig'ilmagan" ko'rinardi.
+          selector: 'Property[key.name=/^(fontSize|borderRadius)$/] > Literal',
+          message:
+            "Xom raqam o'rniga `@/theme/tokens` dan token oling (`text.sm`, `radius.lg`). Nishon va aylana uchun — `radius.full`.",
+        },
+        {
           selector:
             'JSXOpeningElement:has(JSXAttribute[name.name="className"]) > JSXAttribute[name.name="style"] > JSXExpressionContainer > ArrowFunctionExpression',
           message:

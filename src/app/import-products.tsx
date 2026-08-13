@@ -21,6 +21,7 @@ import {
   type ImportRowStatus,
 } from "@/features/products/import-products";
 import { getExistingBarcodes, importProducts, type ImportResult } from "@/features/products/import-api";
+import { text } from "@/theme/tokens";
 
 type Status = "idle" | "loading" | "preview" | "importing" | "done";
 
@@ -75,7 +76,7 @@ const PreviewRowItem = memo(function PreviewRowItem({ row }: { row: ImportPrevie
           {row.name || `#${row.rowNumber}`}
         </Text>
         <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: badge.bg }}>
-          <Text style={{ fontSize: 11, fontWeight: "500", color: badge.text }}>{badgeLabel}</Text>
+          <Text style={{ fontSize: text.xs, fontWeight: "500", color: badge.text }}>{badgeLabel}</Text>
         </View>
       </View>
       {row.status === "error" ? (

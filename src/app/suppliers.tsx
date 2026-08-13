@@ -13,6 +13,7 @@ import { useActiveShopId } from "@/features/auth/use-memberships";
 import { useSuppliers } from "@/features/suppliers/use-suppliers";
 import { SupplierFormSheet } from "@/features/suppliers/supplier-form-sheet";
 import type { Supplier } from "@/types/database";
+import { radius } from "@/theme/tokens";
 
 export default function SuppliersScreen() {
   const colors = useColors();
@@ -97,7 +98,7 @@ export default function SuppliersScreen() {
         onPress={openNew}
         accessibilityRole="button"
         accessibilityLabel={t("a11y.addSupplier", "Yangi ta'minotchi qo'shish")}
-        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.kirim, alignItems: "center", justifyContent: "center", ...shadowMd(colors.shadow) }}
+        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: radius.lg, backgroundColor: colors.kirim, alignItems: "center", justifyContent: "center", ...shadowMd(colors.shadow) }}
       >
         <Ionicons name="add" size={30} color="#fff" />
       </Pressable>

@@ -12,6 +12,7 @@ import { logError } from "@/lib/logger";
 import type { Sale, SaleItem } from "@/types/database";
 import { useReturnedQuantities, useProcessReturn } from "./use-history";
 import { returnableQty, refundPreview } from "./returnable";
+import { radius } from "@/theme/tokens";
 
 type Props = {
   visible: boolean;
@@ -46,7 +47,7 @@ function ReturnRow({
       {item.product?.image_url ? (
         <Image
           source={{ uri: item.product.image_url }}
-          style={{ width: 44, height: 44, borderRadius: 12 }}
+          style={{ width: 44, height: 44, borderRadius: radius.md }}
           contentFit="cover"
         />
       ) : (

@@ -2,6 +2,7 @@ import { View, Text } from "react-native";
 
 import { useColors } from "@/theme/theme-store";
 import { useOfflineStore } from "@/lib/offline/offline-store";
+import { text } from "@/theme/tokens";
 
 /** Yuborilmagan sotuvlar soni — mini badge (0 bo'lsa ko'rinmaydi). */
 export function QueueBadge({ size = 18 }: { size?: number }) {
@@ -17,7 +18,7 @@ export function QueueBadge({ size = 18 }: { size?: number }) {
         alignItems: "center", justifyContent: "center", borderWidth: 1.5, borderColor: "#fff",
       }}
     >
-      <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}>
+      <Text style={{ color: "#fff", fontSize: text.micro, fontWeight: "700" }}>
         {count > 99 ? "99+" : count}
       </Text>
     </View>

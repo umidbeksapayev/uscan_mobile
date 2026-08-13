@@ -1,6 +1,7 @@
 import { BaseToast, ErrorToast, type ToastConfig } from "react-native-toast-message";
 
 import { useColors } from "@/theme/theme-store";
+import { radius, text } from "@/theme/tokens";
 
 /**
  * Toast uslublari — kutubxona standarti QATTIQ oq kartochka, shuning uchun
@@ -17,14 +18,14 @@ export function useToastConfig(): ToastConfig {
     style: {
       backgroundColor: colors.surface,
       borderLeftWidth: 5,
-      borderRadius: 14,
+      borderRadius: radius.lg,
       // To'q fonda kartochka fondan ajralib turishi uchun ingichka chegara
       borderWidth: 1,
       borderColor: colors.line,
     },
     contentContainerStyle: { paddingHorizontal: 14 },
-    text1Style: { fontSize: 15, fontWeight: "600" as const, color: colors.ink },
-    text2Style: { fontSize: 13, color: colors.muted },
+    text1Style: { fontSize: text.base, fontWeight: "600" as const, color: colors.ink },
+    text2Style: { fontSize: text.sm, color: colors.muted },
   };
 
   return {

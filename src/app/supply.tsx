@@ -16,6 +16,7 @@ import { supplyTotalCost } from "@/features/supply/supply-math";
 import { processPurchase } from "@/features/supply/supply-api";
 import { AddSupplyItemSheet } from "@/features/supply/add-supply-item-sheet";
 import { SupplierPickerSheet, type PickedSupplier } from "@/features/suppliers/supplier-picker-sheet";
+import { radius, text } from "@/theme/tokens";
 
 function SupplyCartRow({ item }: { item: SupplyItem }) {
   const colors = useColors();
@@ -33,11 +34,11 @@ function SupplyCartRow({ item }: { item: SupplyItem }) {
     height: 40,
     borderWidth: 1,
     borderColor: colors.line,
-    borderRadius: 12,
+    borderRadius: radius.md,
     paddingHorizontal: 10,
     textAlign: "center" as const,
     color: colors.ink,
-    fontSize: 15,
+    fontSize: text.base,
     fontWeight: "500" as const,
   };
 
@@ -45,7 +46,7 @@ function SupplyCartRow({ item }: { item: SupplyItem }) {
     <View className="mb-2.5 rounded-2xl bg-surface p-3" style={{ borderWidth: 0.5, borderColor: colors.line }}>
       <View className="flex-row items-center gap-3">
         {item.product.image_url ? (
-          <Image source={{ uri: item.product.image_url }} style={{ width: 40, height: 40, borderRadius: 10 }} contentFit="cover" />
+          <Image source={{ uri: item.product.image_url }} style={{ width: 40, height: 40, borderRadius: radius.md }} contentFit="cover" />
         ) : (
           <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
             <Ionicons name="cube-outline" size={18} color={colors.primary} />

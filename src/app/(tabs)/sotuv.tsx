@@ -22,6 +22,7 @@ import { QuickPriceSheet } from "@/features/sell/quick-price-sheet";
 import { priceMiscProduct, isMiscProduct } from "@/features/sell/misc-product";
 import { tabularNums } from "@/theme/typography";
 import type { Product } from "@/types/database";
+import { radius, text } from "@/theme/tokens";
 
 const FrequentTile = memo(function FrequentTile({
   product,
@@ -45,7 +46,7 @@ const FrequentTile = memo(function FrequentTile({
       {product.image_url ? (
         <Image
           source={{ uri: product.image_url }}
-          style={{ width: 40, height: 40, borderRadius: 10 }}
+          style={{ width: 40, height: 40, borderRadius: radius.md }}
           contentFit="cover"
         />
       ) : (
@@ -437,7 +438,7 @@ export default function SotuvScreen() {
             style={{
               height: 54,
               backgroundColor: colors.primary,
-              borderRadius: 16,
+              borderRadius: radius.lg,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
@@ -445,7 +446,7 @@ export default function SotuvScreen() {
               width: "100%",
             }}
           >
-            <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>{t("sell.payment")}</Text>
+            <Text style={{ fontSize: text.base, fontWeight: "600", color: "#fff" }}>{t("sell.payment")}</Text>
             <Ionicons name="arrow-forward" size={18} color="#fff" />
           </TouchableOpacity>
         </View>

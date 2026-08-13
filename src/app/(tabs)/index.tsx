@@ -24,6 +24,7 @@ import { trendTotals, periodSplit, pctChange } from "@/features/dashboard/dashbo
 import { maybeScheduleLowStockReminder } from "@/features/notifications/notify";
 import { useAlerts } from "@/features/notifications/use-alerts";
 import { TrendChart } from "@/features/dashboard/trend-chart";
+import { text } from "@/theme/tokens";
 import {
   GradientStat,
   Section,
@@ -147,7 +148,7 @@ export default function HomeScreen() {
                   borderColor: colors.bg,
                 }}
               >
-                <Text style={{ fontSize: 10, fontWeight: "700", color: "#fff" }}>
+                <Text style={{ fontSize: text.micro, fontWeight: "700", color: "#fff" }}>
                   {alertBadge}
                 </Text>
               </View>
@@ -171,7 +172,7 @@ export default function HomeScreen() {
               >
                 <Text
                   style={{
-                    fontSize: 13,
+                    fontSize: text.sm,
                     fontWeight: "600",
                     color: active ? "#fff" : colors.muted,
                   }}

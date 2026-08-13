@@ -15,6 +15,7 @@ import { useScanReturn } from "@/features/products/scan-return";
 import type { Product } from "@/types/database";
 import { searchSupplyProducts } from "./supply-api";
 import { useSupplyCart } from "./supply-store";
+import { radius } from "@/theme/tokens";
 
 type Props = { visible: boolean; shopId: string; onClose: () => void };
 
@@ -71,7 +72,7 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
         onPress={() => choose(item)}
         leading={
           item.image_url ? (
-            <Image source={{ uri: item.image_url }} style={{ width: 40, height: 40, borderRadius: 10 }} contentFit="cover" />
+            <Image source={{ uri: item.image_url }} style={{ width: 40, height: 40, borderRadius: radius.md }} contentFit="cover" />
           ) : (
             <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
               <Ionicons name="cube-outline" size={18} color={colors.primary} />
@@ -161,7 +162,7 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
               {/* Tanlangan mahsulot */}
               <View className="mb-4 flex-row items-center gap-3">
                 {picked.image_url ? (
-                  <Image source={{ uri: picked.image_url }} style={{ width: 48, height: 48, borderRadius: 12 }} contentFit="cover" />
+                  <Image source={{ uri: picked.image_url }} style={{ width: 48, height: 48, borderRadius: radius.md }} contentFit="cover" />
                 ) : (
                   <View className="h-12 w-12 items-center justify-center rounded-xl bg-primary-tint">
                     <Ionicons name="cube-outline" size={22} color={colors.primary} />

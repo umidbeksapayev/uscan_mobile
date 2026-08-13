@@ -9,6 +9,7 @@ import { toast } from "@/lib/toast";
 import { createOwnerLinkUrl, updateSummaryTime } from "@/features/telegram/owner-telegram";
 import { enablePush, isPushRegistered, type PushFailure } from "./notify";
 import type { Shop, SummaryTime } from "@/types/database";
+import { radius, text } from "@/theme/tokens";
 
 /**
  * Kunlik xulosa — bitta karta (vaqt + yetkazish kanallari).
@@ -114,7 +115,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
   return (
     <View
       style={{
-        borderRadius: 18,
+        borderRadius: radius.lg,
         borderWidth: 1,
         borderColor: colors.line,
         backgroundColor: colors.surface,
@@ -136,7 +137,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
           style={{
             width: 40,
             height: 40,
-            borderRadius: 12,
+            borderRadius: radius.md,
             backgroundColor: colors.primaryTint,
             alignItems: "center",
             justifyContent: "center",
@@ -145,10 +146,10 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
           <Ionicons name="notifications-outline" size={20} color={colors.primary} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
+          <Text style={{ fontSize: text.base, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
             {t("notif.summaryTitle", "Kunlik xulosa")}
           </Text>
-          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
+          <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
             {t("notif.summaryHint", "Savdo va qarz yakuni belgilangan vaqtda yuboriladi")}
           </Text>
         </View>
@@ -158,7 +159,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
 
       {/* Vaqt */}
       <View style={{ paddingHorizontal: 12, paddingTop: 10 }}>
-        <Text style={{ fontSize: 11, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 }}>
+        <Text style={{ fontSize: text.xs, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 }}>
           {t("settings.summaryTimeLabel").toUpperCase()}
         </Text>
       </View>
@@ -181,7 +182,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
                 gap: 5,
                 paddingVertical: 10,
                 paddingHorizontal: 8,
-                borderRadius: 12,
+                borderRadius: radius.md,
                 backgroundColor: active ? colors.primary : colors.surface,
                 borderWidth: 1.5,
                 borderColor: active ? colors.primary : colors.line,
@@ -192,7 +193,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
               <View>
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: text.xs,
                     fontWeight: "700",
                     color: active ? "#fff" : colors.ink,
                     lineHeight: 16,
@@ -202,7 +203,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
                 </Text>
                 <Text
                   style={{
-                    fontSize: 10,
+                    fontSize: text.micro,
                     color: active ? "rgba(255,255,255,0.75)" : colors.muted,
                     lineHeight: 13,
                   }}
@@ -218,7 +219,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
       {/* Kanallar — vaqt "o'chiq" bo'lsa hech narsa yuborilmaydi, shuni aytamiz */}
       <View style={{ height: 1, backgroundColor: colors.line }} />
       <View style={{ paddingHorizontal: 12, paddingTop: 10 }}>
-        <Text style={{ fontSize: 11, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 }}>
+        <Text style={{ fontSize: text.xs, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 }}>
           {t("notif.channels", "Yetkazish kanallari").toUpperCase()}
         </Text>
       </View>
@@ -256,7 +257,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
           accessibilityRole="button"
           style={{ paddingHorizontal: 12, paddingBottom: 12 }}
         >
-          <Text style={{ fontSize: 11, color: colors.muted, lineHeight: 15 }}>
+          <Text style={{ fontSize: text.xs, color: colors.muted, lineHeight: 15 }}>
             {t("settings.tgRefreshHint")}
           </Text>
         </Pressable>
@@ -264,7 +265,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
 
       {time === "off" ? (
         <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
-          <Text style={{ fontSize: 11, color: colors.muted, lineHeight: 15 }}>
+          <Text style={{ fontSize: text.xs, color: colors.muted, lineHeight: 15 }}>
             {t("notif.summaryOffHint", "Vaqt tanlanmagan — xulosa yuborilmaydi.")}
           </Text>
         </View>
@@ -296,12 +297,12 @@ function ChannelRow({
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
       <Ionicons name={icon} size={18} color={colors.muted} />
-      <Text style={{ flex: 1, fontSize: 14, color: colors.ink }}>{label}</Text>
+      <Text style={{ flex: 1, fontSize: text.sm, color: colors.ink }}>{label}</Text>
 
       {connected ? (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
           <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-          <Text style={{ fontSize: 12, fontWeight: "600", color: colors.successInk }}>
+          <Text style={{ fontSize: text.xs, fontWeight: "600", color: colors.successInk }}>
             {connectedLabel}
           </Text>
         </View>
@@ -316,7 +317,7 @@ function ChannelRow({
             minHeight: 36,
             paddingHorizontal: 14,
             justifyContent: "center",
-            borderRadius: 10,
+            borderRadius: radius.md,
             backgroundColor: colors.primary,
             opacity: busy ? 0.6 : 1,
           }}
@@ -324,7 +325,7 @@ function ChannelRow({
           {busy ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (
-            <Text style={{ fontSize: 13, fontWeight: "600", color: "#fff" }}>{actionLabel}</Text>
+            <Text style={{ fontSize: text.sm, fontWeight: "600", color: "#fff" }}>{actionLabel}</Text>
           )}
         </Pressable>
       )}

@@ -27,6 +27,7 @@ import { useLabelPrint } from "@/features/labels/use-print-label";
 import { exportProductsCsv } from "@/features/products/export-products";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/database";
+import { radius, text } from "@/theme/tokens";
 
 function StockBadge({ item }: { item: Product }) {
   const colors = useColors();
@@ -60,11 +61,11 @@ function StockBadge({ item }: { item: Product }) {
         backgroundColor: palette.bg,
         paddingHorizontal: 9,
         paddingVertical: 3,
-        borderRadius: 999,
+        borderRadius: radius.full,
       }}
     >
-      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: palette.dot }} />
-      <Text style={{ fontSize: 12, fontWeight: "500", color: palette.text }}>{label}</Text>
+      <View style={{ width: 6, height: 6, borderRadius: radius.full, backgroundColor: palette.dot }} />
+      <Text style={{ fontSize: text.xs, fontWeight: "500", color: palette.text }}>{label}</Text>
     </View>
   );
 }
@@ -104,7 +105,7 @@ const ProductRow = memo(function ProductRow({
       {item.image_url ? (
         <Image
           source={{ uri: item.image_url }}
-          style={{ width: 56, height: 56, borderRadius: 14 }}
+          style={{ width: 56, height: 56, borderRadius: radius.lg }}
           contentFit="cover"
         />
       ) : (
@@ -316,7 +317,7 @@ export default function KatalogScreen() {
             style={{
               height: 48,
               width: 48,
-              borderRadius: 16,
+              borderRadius: radius.lg,
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: filterActive ? colors.primary : colors.primaryTint,
@@ -349,12 +350,12 @@ export default function KatalogScreen() {
                     borderWidth: 1,
                     paddingHorizontal: 14,
                     paddingVertical: 7,
-                    borderRadius: 999,
+                    borderRadius: radius.full,
                   }}
                 >
                   <Text
                     style={{
-                      fontSize: 13,
+                      fontSize: text.sm,
                       fontWeight: "500",
                       color: active ? "#fff" : colors.muted,
                     }}
@@ -450,7 +451,7 @@ export default function KatalogScreen() {
             bottom: 20,
             width: 56,
             height: 56,
-            borderRadius: 18,
+            borderRadius: radius.lg,
             backgroundColor: colors.primary,
             alignItems: "center",
             justifyContent: "center",

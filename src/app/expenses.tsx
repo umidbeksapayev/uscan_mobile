@@ -12,6 +12,7 @@ import { formatCurrency, formatDateTime } from "@/lib/format";
 import { useExpenses } from "@/features/expenses/use-expenses";
 import { expensesTotal, categoryLabel, type Expense } from "@/features/expenses/expense-math";
 import { ExpenseFormSheet, categoryIcon } from "@/features/expenses/expense-form-sheet";
+import { radius, text } from "@/theme/tokens";
 
 const PERIODS = [
   { days: 7, key: "periodWeek", fallback: "Hafta" },
@@ -86,7 +87,7 @@ export default function ExpensesScreen() {
                 className="rounded-full px-4 py-1.5"
                 style={{ backgroundColor: active ? colors.primaryDeep : "transparent" }}
               >
-                <Text style={{ fontSize: 13, fontWeight: "600", color: active ? "#fff" : colors.muted }}>
+                <Text style={{ fontSize: text.sm, fontWeight: "600", color: active ? "#fff" : colors.muted }}>
                   {t("expenses." + p.key, p.fallback)}
                 </Text>
               </Pressable>
@@ -136,7 +137,7 @@ export default function ExpensesScreen() {
       <Pressable
         onPress={openNew}
         accessibilityLabel={t("expenses.addBtnA11y", "Xarajat qo'shish")}
-        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: 18, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", ...shadowMd(colors.shadow) }}
+        style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: radius.lg, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", ...shadowMd(colors.shadow) }}
       >
         <Ionicons name="add" size={30} color="#fff" />
       </Pressable>

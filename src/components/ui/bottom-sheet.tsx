@@ -3,6 +3,7 @@ import { StyleSheet, Pressable, type StyleProp, type ViewStyle } from "react-nat
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/theme/theme-store";
+import { radius } from "@/theme/tokens";
 
 /* ─────────────────────────────────────────────────────────────────────────
    SheetPressable — BottomSheet ichidagi tugmalar uchun maxsus komponent.
@@ -144,7 +145,7 @@ export function BottomSheet({
       stackBehavior="replace"
       enableContentPanningGesture={false}
       handleIndicatorStyle={handle ? { backgroundColor: colors.line } : { display: "none" }}
-      backgroundStyle={{ backgroundColor: colors.surface, borderRadius: 24 }}
+      backgroundStyle={{ backgroundColor: colors.surface, borderRadius: radius.xl }}
       bottomInset={0}
     >
       <BottomSheetView style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) }, contentStyle]}>

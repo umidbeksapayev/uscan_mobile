@@ -14,6 +14,7 @@ import {
   type FeedbackCategory,
 } from "./validate-feedback";
 import { useSubmitFeedback } from "./use-feedback";
+import { text } from "@/theme/tokens";
 
 /** Kategoriya ikonlari — UI qatlami (validatsiya faylida emas). */
 const CATEGORY_ICONS: Record<FeedbackCategory, keyof typeof Ionicons.glyphMap> = {
@@ -99,7 +100,7 @@ export function FeedbackSheet({ visible, onClose }: Props) {
               }}
             >
               <Ionicons name={CATEGORY_ICONS[c]} size={15} color={active ? "#fff" : colors.muted} />
-              <Text style={{ fontSize: 13, fontWeight: "500", color: active ? "#fff" : colors.muted }}>
+              <Text style={{ fontSize: text.sm, fontWeight: "500", color: active ? "#fff" : colors.muted }}>
                 {label}
               </Text>
             </Pressable>

@@ -16,6 +16,7 @@ import { useSalesHistoryInfinite } from "@/features/history/use-history";
 import { ReturnSheet } from "@/features/history/return-sheet";
 import { buildSaleReceiptData } from "@/features/history/sale-receipt";
 import { printReceipt } from "@/features/print/print-receipt";
+import { radius, text } from "@/theme/tokens";
 
 const METHOD: Record<
   SearchMethod,
@@ -43,7 +44,7 @@ function ItemLine({ it }: { it: SaleItem }) {
       {it.product?.image_url ? (
         <Image
           source={{ uri: it.product.image_url }}
-          style={{ width: 36, height: 36, borderRadius: 10 }}
+          style={{ width: 36, height: 36, borderRadius: radius.md }}
           contentFit="cover"
         />
       ) : (
@@ -119,7 +120,7 @@ const SaleCard = memo(function SaleCard({
               style={{ gap: 3, backgroundColor: colors.primaryTint }}
             >
               <Ionicons name={meta.icon} size={11} color={colors.primary} />
-              <Text style={{ fontSize: 10, fontWeight: "500", color: colors.primary }}>
+              <Text style={{ fontSize: text.micro, fontWeight: "500", color: colors.primary }}>
                 {t(meta.labelKey)}
               </Text>
             </View>
@@ -129,7 +130,7 @@ const SaleCard = memo(function SaleCard({
                 style={{ gap: 3, backgroundColor: colors.dangerTint }}
               >
                 <Ionicons name="arrow-undo-outline" size={11} color={colors.dangerInk} />
-                <Text style={{ fontSize: 10, fontWeight: "500", color: colors.dangerInk }}>
+                <Text style={{ fontSize: text.micro, fontWeight: "500", color: colors.dangerInk }}>
                   {t("returns.badge")}
                 </Text>
               </View>

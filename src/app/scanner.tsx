@@ -33,6 +33,7 @@ import { useActiveShopId } from "@/features/auth/use-memberships";
 import { findProductsByBarcode } from "@/features/sell/lookup";
 import { useCart } from "@/features/sell/cart-store";
 import { useScanReturn } from "@/features/products/scan-return";
+import { radius, text } from "@/theme/tokens";
 
 const MASK = "rgba(15,23,42,0.55)";
 
@@ -247,7 +248,7 @@ export default function ScannerScreen() {
                     right: 14,
                     top: 0,
                     height: 3,
-                    borderRadius: 2,
+                    borderRadius: radius.full,
                     backgroundColor: colors.primary,
                     // Ataylab `theme/shadows.ts` presetlaridan foydalanmaydi:
                     // bu karta soyasi emas, skaner nurining porlashi (elevation
@@ -265,7 +266,7 @@ export default function ScannerScreen() {
           <View style={{ flex: 1, backgroundColor: MASK }} />
         </View>
         <View style={{ flex: 1, backgroundColor: MASK, alignItems: "center", paddingTop: 18 }}>
-          <Text style={{ color: "rgba(255,255,255,0.92)", fontSize: 15, fontWeight: "500" }}>
+          <Text style={{ color: "rgba(255,255,255,0.92)", fontSize: text.base, fontWeight: "500" }}>
             {t("scanner.frameHint", "Shtrix-kodni ramka ichiga tuting")}
           </Text>
         </View>
@@ -311,11 +312,11 @@ export default function ScannerScreen() {
                 backgroundColor: status.error ? colors.danger : "rgba(0,0,0,0.7)",
                 paddingHorizontal: 18,
                 paddingVertical: 12,
-                borderRadius: 14,
+                borderRadius: radius.lg,
               }}
             >
               {!status.error ? <ActivityIndicator color={colors.primaryLight} size="small" /> : null}
-              <Text style={{ color: "#fff", fontWeight: "500", fontSize: 15 }}>{status.text}</Text>
+              <Text style={{ color: "#fff", fontWeight: "500", fontSize: text.base }}>{status.text}</Text>
             </Animated.View>
           ) : null}
         </View>
@@ -328,7 +329,7 @@ const styles = StyleSheet.create({
   iconBtn: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: radius.full,
     backgroundColor: "rgba(0,0,0,0.5)",
     alignItems: "center",
     justifyContent: "center",

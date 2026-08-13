@@ -22,6 +22,7 @@ import { pickAndUpload } from "@/features/products/upload-image";
 import { CategorySheet } from "@/features/products/category-sheet";
 import { useLabelPrint } from "@/features/labels/use-print-label";
 import type { SaleType } from "@/types/database";
+import { radius } from "@/theme/tokens";
 
 const INPUT = "rounded-xl bg-bg px-4 text-base text-ink";
 
@@ -231,7 +232,7 @@ export default function ProductFormScreen() {
             <View>
               <Image
                 source={{ uri: imageUrl }}
-                style={{ width: 120, height: 120, borderRadius: 16 }}
+                style={{ width: 120, height: 120, borderRadius: radius.lg }}
                 contentFit="cover"
               />
               <View

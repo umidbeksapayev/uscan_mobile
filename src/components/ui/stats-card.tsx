@@ -6,6 +6,7 @@ import { useColors } from "@/theme/theme-store";
 import { shadowSm } from "@/theme/shadows";
 import { tabularNums } from "@/theme/typography";
 import type { AppColors } from "@/theme/colors";
+import { text } from "@/theme/tokens";
 
 export type StatTone = "brand" | "green" | "amber" | "muted";
 
@@ -72,7 +73,7 @@ export function StatsCard({
             style={{ gap: 2, backgroundColor: deltaBg }}
           >
             <Ionicons name={up ? "arrow-up" : "arrow-down"} size={10} color={deltaFg} />
-            <Text style={{ fontSize: 10, fontWeight: "600", color: deltaFg, ...tabularNums }}>
+            <Text style={{ fontSize: text.micro, fontWeight: "600", color: deltaFg, ...tabularNums }}>
               {`${Math.abs(delta).toFixed(0)}%`}
             </Text>
           </View>

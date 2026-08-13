@@ -1,6 +1,7 @@
 import { View, Text } from "react-native";
 
 import { useColors } from "@/theme/theme-store";
+import { radius } from "@/theme/tokens";
 
 /**
  * uscan brend logosi: "u" (to'q ko'k) + skaner-ramka ichida "scan" (yorqin ko'k)
@@ -65,7 +66,7 @@ export function Logo({ size = 24 }: { size?: number }) {
             top: frameH / 2 - 1.5,
             height: 3,
             backgroundColor: colors.primaryLight,
-            borderRadius: 2,
+            borderRadius: radius.full,
           }}
         />
       </View>

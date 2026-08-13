@@ -49,7 +49,7 @@ describe("o'lcham tokenlari Tailwind shkalasiga mos", () => {
 
   it("shkala qadamlari o'sib boradi (tasodifiy qiymat kirib qolmasin)", () => {
     const asc = (xs: number[]) => xs.every((v, i) => i === 0 || v > xs[i - 1]);
-    expect(asc([radius.xs, radius.sm, radius.md, radius.lg, radius.xl])).toBe(true);
+    expect(asc([radius.sm, radius.md, radius.lg, radius.xl])).toBe(true);
     expect(asc([text.micro, text.xs, text.sm, text.base, text.lg, text.xl, text.xl2, text.xl3])).toBe(true);
     expect(asc([space.xs, space.sm, space.md, space.lg, space.xl, space.xl2])).toBe(true);
   });

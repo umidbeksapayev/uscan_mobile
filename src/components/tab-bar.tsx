@@ -6,6 +6,7 @@ import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useColors } from "@/theme/theme-store";
 import { shadowNav } from "@/theme/shadows";
 import { QueueBadge } from "./queue-badge";
+import { text } from "@/theme/tokens";
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   index: "home-outline",
@@ -66,7 +67,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 {route.name === "koproq" ? <QueueBadge size={16} /> : null}
               </View>
               <Text
-                style={{ fontSize: 11, color, fontWeight: focused ? "500" : "400" }}
+                style={{ fontSize: text.xs, color, fontWeight: focused ? "500" : "400" }}
               >
                 {label}
               </Text>

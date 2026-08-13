@@ -19,10 +19,13 @@
 /* ── Radius ────────────────────────────────────────────────────────────
    Raqam emas, ROL bo'yicha tanlang: nishon (pill) har doim `full`,
    aylana ham `full` — "yarmi qancha" deb hisoblamang.
+
+   4px qadam ataylab YO'Q: kodni ko'chirishda 2-3px radiusli barcha
+   element (chiziqcha, nuqta) aslida aylana/pill ekani aniqlandi, ya'ni
+   ularning o'rni `full`. Ishlatilmaydigan token esa tasodifiy qiymat
+   kiritish uchun eshik ochib qo'yardi.
 ──────────────────────────────────────────────────────────────────────── */
 export const radius = {
-  /** Mikro bezak: ingichka chiziqcha, nuqta. */
-  xs: 4,
   /** Kichik element. `rounded-lg` */
   sm: 8,
   /** Chip, kichik rasm (≤48px), kichik tugma. `rounded-xl` */

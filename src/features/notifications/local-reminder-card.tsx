@@ -7,6 +7,7 @@ import { useColors } from "@/theme/theme-store";
 import { toast } from "@/lib/toast";
 import { setDailySummaryReminder, getDailySlot } from "./notify";
 import type { ReminderSlot } from "./notify-math";
+import { radius, text } from "@/theme/tokens";
 
 /** Yorliq matni tarjima kaliti sifatida saqlanadi — til almashganda yangilanadi. */
 const OPTIONS: {
@@ -46,7 +47,7 @@ export function LocalReminderCard() {
   return (
     <View
       style={{
-        borderRadius: 18,
+        borderRadius: radius.lg,
         borderWidth: 1,
         borderColor: colors.line,
         backgroundColor: colors.surface,
@@ -68,7 +69,7 @@ export function LocalReminderCard() {
           style={{
             width: 40,
             height: 40,
-            borderRadius: 12,
+            borderRadius: radius.md,
             backgroundColor: "rgba(245,158,11,0.12)",
             alignItems: "center",
             justifyContent: "center",
@@ -77,10 +78,10 @@ export function LocalReminderCard() {
           <Ionicons name="alarm-outline" size={20} color="#d97706" />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
+          <Text style={{ fontSize: text.base, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
             {t("notif.dailyTitle")}
           </Text>
-          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
+          <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
             {t("notif.dailyHint")}
           </Text>
         </View>
@@ -115,7 +116,7 @@ export function LocalReminderCard() {
                 gap: 5,
                 paddingVertical: 10,
                 paddingHorizontal: 8,
-                borderRadius: 12,
+                borderRadius: radius.md,
                 backgroundColor: active ? colors.primary : colors.surface,
                 borderWidth: 1.5,
                 borderColor: active ? colors.primary : colors.line,
@@ -130,7 +131,7 @@ export function LocalReminderCard() {
               <View>
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: text.xs,
                     fontWeight: "700",
                     color: active ? "#fff" : colors.ink,
                     lineHeight: 16,
@@ -140,7 +141,7 @@ export function LocalReminderCard() {
                 </Text>
                 <Text
                   style={{
-                    fontSize: 10,
+                    fontSize: text.micro,
                     color: active ? "rgba(255,255,255,0.75)" : colors.muted,
                     lineHeight: 13,
                   }}

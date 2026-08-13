@@ -10,6 +10,7 @@ import { formatNumber } from "@/lib/format";
 import { parseAmount } from "@/features/shift/shift-math";
 import { EXPENSE_CATEGORIES, categoryLabel, type Expense } from "./expense-math";
 import { useCreateExpense, useUpdateExpense, useDeleteExpense } from "./use-expenses";
+import { text } from "@/theme/tokens";
 
 /** Kategoriya ikonlari (UI qatlami — math faylida emas). */
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -132,7 +133,7 @@ export function ExpenseFormSheet({ visible, expense, onClose }: Props) {
                   }}
                 >
                   <Ionicons name={categoryIcon(c.id)} size={15} color={active ? "#fff" : colors.muted} />
-                  <Text style={{ fontSize: 13, fontWeight: "500", color: active ? "#fff" : colors.muted }}>
+                  <Text style={{ fontSize: text.sm, fontWeight: "500", color: active ? "#fff" : colors.muted }}>
                     {catLabel}
                   </Text>
                 </Pressable>

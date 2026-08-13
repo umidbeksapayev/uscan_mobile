@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { useOfflineStore } from "@/lib/offline/offline-store";
+import { radius } from "@/theme/tokens";
 
 type Kind = "info" | "success" | "warn";
 
@@ -56,7 +57,7 @@ export function SyncToast() {
       <View
         style={{
           flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: bg,
-          paddingHorizontal: 16, paddingVertical: 11, borderRadius: 14,
+          paddingHorizontal: 16, paddingVertical: 11, borderRadius: radius.lg,
         }}
       >
         {msg.kind === "info" ? (
