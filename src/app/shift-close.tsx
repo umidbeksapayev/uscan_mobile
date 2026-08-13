@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import type { AppColors } from "@/theme/colors";
 import { formatCurrency, formatDateTime, formatDateTimeFull, formatNumber } from "@/lib/format";
+import { tabularNums } from "@/theme/typography";
 import { useOnline } from "@/lib/use-online";
 import { useAuth } from "@/features/auth/auth-context";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
@@ -186,7 +187,7 @@ export default function ShiftCloseScreen() {
               <View className="my-2 border-t border-line" />
               <View className="flex-row items-center justify-between">
                 <Text className="text-base font-medium text-ink">{t("shift.totalExpected", "Jami kutilgan")}</Text>
-                <Text className="text-lg font-semibold" style={{ color: colors.primary }}>
+                <Text className="text-lg font-semibold" style={{ color: colors.primary, ...tabularNums }}>
                   {formatCurrency(exp.expectedCash)}
                 </Text>
               </View>
@@ -226,7 +227,7 @@ export default function ShiftCloseScreen() {
               <Text className="text-sm" style={{ color: dui.color }}>
                 {statusLabel}
               </Text>
-              <Text className="text-base font-medium" style={{ color: dui.color }}>
+              <Text className="text-base font-medium" style={{ color: dui.color, ...tabularNums }}>
                 {diff === 0 ? `0 ${t("common.som", "so'm")}` : formatCurrency(Math.abs(diff))}
               </Text>
             </View>
@@ -236,7 +237,7 @@ export default function ShiftCloseScreen() {
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder={diff < 0 ? t("shift.noteShortagePlaceholder", "Kamomad sababi...") : t("shift.notePlaceholder", "Izoh...")}
+            placeholder={diff < 0 ? t("shift.noteShortagePlaceholder", "Kamomad sababi…") : t("shift.notePlaceholder", "Izoh…")}
             placeholderTextColor={colors.tabInactive}
             accessibilityLabel={t("shift.noteLabel", "Yopilish izohi")}
             className="rounded-2xl border border-line bg-bg px-4 text-base text-ink"
@@ -290,7 +291,7 @@ function ResultRow({ label, value, color }: { label: string; value: string; colo
   return (
     <View className="mt-2 w-full flex-row items-center justify-between">
       <Text className="text-sm text-muted">{label}</Text>
-      <Text className="text-base font-medium" style={{ color: color ?? colors.ink }}>
+      <Text className="text-base font-medium" style={{ color: color ?? colors.ink, ...tabularNums }}>
         {value}
       </Text>
     </View>
@@ -303,7 +304,10 @@ function BreakdownRow({ label, value, negative }: { label: string; value: number
   return (
     <View className="flex-row items-center justify-between py-1">
       <Text className="text-sm text-muted">{label}</Text>
-      <Text className="text-sm font-medium" style={{ color: negative ? colors.danger : colors.ink }}>
+      <Text
+        className="text-sm font-medium"
+        style={{ color: negative ? colors.danger : colors.ink, ...tabularNums }}
+      >
         {negative && value !== 0 ? "−" : ""}
         {formatCurrency(Math.abs(value))}
       </Text>

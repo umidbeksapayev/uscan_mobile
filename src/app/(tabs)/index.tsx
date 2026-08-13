@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { shadowGlow } from "@/theme/shadows";
 import { formatCurrency, formatNumber } from "@/lib/format";
+import { tabularNums } from "@/theme/typography";
 import { Logo } from "@/components/logo";
 import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
 import { useExpenses } from "@/features/expenses/use-expenses";
@@ -232,7 +233,7 @@ export default function HomeScreen() {
                   <Ionicons name="wallet-outline" size={16} color={colors.danger} />
                   <Text className="text-sm text-muted">{t("menu.expenses")}</Text>
                 </View>
-                <Text className="text-sm font-semibold" style={{ color: colors.danger }}>
+                <Text className="text-sm font-semibold" style={{ color: colors.danger, ...tabularNums }}>
                   −{formatCurrency(expTotal)}
                 </Text>
               </View>
@@ -241,7 +242,10 @@ export default function HomeScreen() {
                 <Text className="text-sm font-medium text-ink">{t("dashboard.netAfterExpenses")}</Text>
                 <Text
                   className="text-base font-semibold"
-                  style={{ color: netProfit(cur.profit, expTotal) < 0 ? colors.danger : colors.success }}
+                  style={{
+                    color: netProfit(cur.profit, expTotal) < 0 ? colors.danger : colors.success,
+                    ...tabularNums,
+                  }}
                 >
                   {formatCurrency(netProfit(cur.profit, expTotal))}
                 </Text>

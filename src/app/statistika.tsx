@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { formatCurrency, formatWeight } from "@/lib/format";
+import { tabularNums } from "@/theme/typography";
 import { pctChange } from "@/features/dashboard/dashboard-math";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
 import { useInventoryStats, useSalesStats } from "@/features/stats/use-stats";
@@ -59,7 +60,9 @@ function ProductStatRow({ p, rank }: { p: TopProduct; rank?: number }) {
         </Text>
         <Text className="text-xs text-muted">{p.units_sold <= 0 ? t("statistics.unsold", "Sotilmagan") : sold}</Text>
       </View>
-      <Text className="text-sm font-semibold text-ink">{formatCurrency(p.revenue)}</Text>
+      <Text className="text-sm font-semibold text-ink" style={tabularNums}>
+        {formatCurrency(p.revenue)}
+      </Text>
     </View>
   );
 }
@@ -190,7 +193,9 @@ function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string
                   {t("statistics.salesCountStr", "{{count}} ta sotuv", { count: a.salesCount })}
                 </Text>
               </View>
-              <Text className="text-sm font-semibold text-ink">{formatCurrency(a.revenue)}</Text>
+              <Text className="text-sm font-semibold text-ink" style={tabularNums}>
+                {formatCurrency(a.revenue)}
+              </Text>
             </View>
           );
         })

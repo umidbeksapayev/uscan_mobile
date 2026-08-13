@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { shadowSm } from "@/theme/shadows";
+import { tabularNums } from "@/theme/typography";
 import type { AppColors } from "@/theme/colors";
 
 export type StatTone = "brand" | "green" | "amber" | "muted";
@@ -71,7 +72,7 @@ export function StatsCard({
             style={{ gap: 2, backgroundColor: deltaBg }}
           >
             <Ionicons name={up ? "arrow-up" : "arrow-down"} size={10} color={deltaFg} />
-            <Text style={{ fontSize: 10, fontWeight: "600", color: deltaFg }}>
+            <Text style={{ fontSize: 10, fontWeight: "600", color: deltaFg, ...tabularNums }}>
               {`${Math.abs(delta).toFixed(0)}%`}
             </Text>
           </View>
@@ -91,7 +92,12 @@ export function StatsCard({
         </View>
       ) : (
         <>
-          <Text className="mt-1 text-xl font-bold text-ink" numberOfLines={1} adjustsFontSizeToFit>
+          <Text
+            className="mt-1 text-xl font-bold text-ink"
+            style={tabularNums}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
             {value}
           </Text>
           {subtitle ? <Text className="mt-0.5 text-xs text-muted">{subtitle}</Text> : null}

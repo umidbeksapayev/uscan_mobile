@@ -12,6 +12,7 @@ import Animated, {
   FadeOut,
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -81,14 +82,21 @@ export default function ScannerScreen() {
   const WINDOW_H = Math.round(WINDOW_W * 0.68);
 
   // Lazer chizig'i: ramka ichida yuqoridan pastga sekin tebranadi.
+  // Tizimda "harakatni kamaytirish" yoqilgan bo'lsa — cheksiz tebranish
+  // o'rniga chiziq ramka o'rtasida qimirlamay turadi (vestibulyar sezgirlik).
+  const reduceMotion = useReducedMotion();
   const laser = useSharedValue(0);
   useEffect(() => {
+    if (reduceMotion) {
+      laser.value = 0.5;
+      return;
+    }
     laser.value = withRepeat(
       withTiming(1, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
       -1,
       true,
     );
-  }, [laser]);
+  }, [laser, reduceMotion]);
   const laserStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: laser.value * (WINDOW_H - 6) }],
   }));
@@ -112,7 +120,7 @@ export default function ScannerScreen() {
       locked.current = false;
       return;
     }
-    setStatus({ text: t("scanner.searching", "Qidirilmoqda...") });
+    setStatus({ text: t("scanner.searching", "Qidirilmoqda…") });
     try {
       const found = await findProductsByBarcode(raw, shopId);
       if (found.length === 0) {

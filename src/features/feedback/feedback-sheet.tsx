@@ -113,7 +113,7 @@ export function FeedbackSheet({ visible, onClose }: Props) {
         multiline
         textAlignVertical="top"
         maxLength={FEEDBACK_MAX_LENGTH}
-        placeholder={t("settings.feedbackPlaceholder", "Fikringizni yozing...")}
+        placeholder={t("settings.feedbackPlaceholder", "Fikringizni yozing…")}
         placeholderTextColor={colors.tabInactive}
         accessibilityLabel={t("settings.feedbackTitle", "Fikr-mulohaza")}
         className="rounded-2xl border border-line bg-bg px-4 py-3 text-base text-ink"

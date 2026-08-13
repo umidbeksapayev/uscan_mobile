@@ -9,6 +9,7 @@ import { useColors } from "@/theme/theme-store";
 import { ListItemCard } from "@/components/ui/list-item-card";
 import { Avatar } from "@/components/ui/avatar";
 import { shadowMd } from "@/theme/shadows";
+import { tabularNums } from "@/theme/typography";
 import { formatCurrency } from "@/lib/format";
 import { useActivePermissions } from "@/features/auth/use-memberships";
 import { useCustomersWithBalance } from "@/features/customers/use-customers";
@@ -43,7 +44,7 @@ const CustomerRow = memo(function CustomerRow({
       accessibilityLabel={`${c.name}, ${stateLabel} ${formatCurrency(Math.abs(c.balance))}`}
       trailing={
         <View className="items-end">
-          <Text className="text-base font-semibold" style={{ color: stateColor }}>
+          <Text className="text-base font-semibold" style={{ color: stateColor, ...tabularNums }}>
             {formatCurrency(Math.abs(c.balance))}
           </Text>
           <Text className="text-xs" style={{ color: stateColor }}>
@@ -117,7 +118,12 @@ export default function NasiyaScreen() {
               <Text className="text-xs" style={{ color: "rgba(255,255,255,0.8)", letterSpacing: 0.5 }}>
                 {t("customers.allDebts").toUpperCase()}
               </Text>
-              <Text className="mt-1 text-3xl font-bold text-white" numberOfLines={1} adjustsFontSizeToFit>
+              <Text
+                className="mt-1 text-3xl font-bold text-white"
+                style={tabularNums}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
                 {formatCurrency(total)}
               </Text>
             </View>

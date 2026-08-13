@@ -9,6 +9,7 @@ import { useColors } from "@/theme/theme-store";
 import { shadowSm } from "@/theme/shadows";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
+import { tabularNums } from "@/theme/typography";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
 import { useMemberships, useActiveMembership } from "@/features/auth/use-memberships";
 import { useSalesHistoryInfinite } from "@/features/history/use-history";
@@ -58,7 +59,9 @@ function ItemLine({ it }: { it: SaleItem }) {
           {qtyLabel} × {formatCurrency(it.selling_price_snapshot)}
         </Text>
       </View>
-      <Text className="text-sm font-medium text-ink">{formatCurrency(it.total_revenue)}</Text>
+      <Text className="text-sm font-medium text-ink" style={tabularNums}>
+        {formatCurrency(it.total_revenue)}
+      </Text>
     </View>
   );
 }
@@ -135,7 +138,7 @@ const SaleCard = memo(function SaleCard({
         </View>
 
         <View className="items-end" style={{ gap: 4 }}>
-          <Text className="text-base font-medium text-heading">
+          <Text className="text-base font-medium text-heading" style={tabularNums}>
             {formatCurrency(sale.total_revenue)}
           </Text>
           <Ionicons

@@ -20,6 +20,7 @@ import { WeightSheet } from "@/features/sell/weight-sheet";
 import { PaymentSheet } from "@/features/sell/payment-sheet";
 import { QuickPriceSheet } from "@/features/sell/quick-price-sheet";
 import { priceMiscProduct, isMiscProduct } from "@/features/sell/misc-product";
+import { tabularNums } from "@/theme/typography";
 import type { Product } from "@/types/database";
 
 const FrequentTile = memo(function FrequentTile({
@@ -34,6 +35,10 @@ const FrequentTile = memo(function FrequentTile({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      // Ekran o'quvchi nom va narxni alohida ikki element qilib emas, bitta
+      // tugma sifatida o'qiydi.
+      accessibilityLabel={`${product.name}, ${formatCurrency(product.selling_price)}`}
       className="items-center rounded-2xl border border-line bg-surface p-2"
       style={{ width: 80 }}
     >
@@ -88,7 +93,7 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
         <Text className="flex-1 text-base font-medium text-ink" numberOfLines={1}>
           {item.product.name}
         </Text>
-        <Text className="text-base font-medium" style={{ color: accent }}>
+        <Text className="text-base font-medium" style={{ color: accent, ...tabularNums }}>
           {formatCurrency(lineTotal)}
         </Text>
       </View>
@@ -114,7 +119,9 @@ const CartRow = memo(function CartRow({ item, onEditWeight }: CartRowProps) {
               className="flex-row items-center gap-1.5 rounded-xl bg-bg px-2.5"
               style={{ height: 34 }}
             >
-              <Text className="text-sm font-medium text-ink">{formatWeight(item.quantity)}</Text>
+              <Text className="text-sm font-medium text-ink" style={tabularNums}>
+                {formatWeight(item.quantity)}
+              </Text>
               <Ionicons name="create-outline" size={14} color={colors.muted} />
             </Pressable>
           ) : (
@@ -420,7 +427,9 @@ export default function SotuvScreen() {
             <Text className="text-xs text-muted" style={{ letterSpacing: 0.5 }}>
               {t("cart.total").toUpperCase()}
             </Text>
-            <Text className="text-xl font-medium text-ink">{formatCurrency(total)}</Text>
+            <Text className="text-xl font-medium text-ink" style={tabularNums}>
+              {formatCurrency(total)}
+            </Text>
           </View>
           <TouchableOpacity
             activeOpacity={0.7}
