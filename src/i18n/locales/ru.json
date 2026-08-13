@@ -557,7 +557,17 @@
     "tgConnectedShort": "Подключено",
     "tgNotConnectedShort": "Не подключено",
     "tgConnectBtn": "Подключить Telegram",
-    "tgRefreshHint": "Нажали «Start» в боте? → Обновить статус"
+    "tgRefreshHint": "Нажали «Start» в боте? → Обновить статус",
+    "themeSystemHint": "Подстраивается под настройки телефона",
+    "themeLightHint": "Всегда светлый фон",
+    "themeDarkHint": "Всегда тёмный фон",
+    "staffEmailHint": "Кассир должен быть уже зарегистрирован в приложении с этим email.",
+    "noCashiersHint": "Введите email кассира в поле выше и нажмите «Добавить».",
+    "permGranted": "Разрешений выдано: {{count}}",
+    "permNone": "Разрешений нет",
+    "cashierOnlyOwner": "Кассирами и разрешениями управляет только владелец магазина.",
+    "removeStaffBtn": "Удалить сотрудника из магазина",
+    "permCountShort": "Кассир · разрешений: {{count}}"
   },
   "admin": {
     "title": "Панель супер-админа",
@@ -765,7 +775,15 @@
     "perm_returns": "Возвраты",
     "perm_manage_debt": "Долги клиентов",
     "perm_view_reports": "Отчёты",
-    "perm_view_cost": "Видеть себестоимость"
+    "perm_view_cost": "Видеть себестоимость",
+    "removeBtn": "Удалить",
+    "removeError": "Не удалось удалить",
+    "permHint_manage_products": "Добавление/редактирование товаров, категории",
+    "permHint_purchase": "Приёмка товара, ввод себестоимости",
+    "permHint_returns": "Возврат продажи",
+    "permHint_manage_debt": "Книга долгов и погашения",
+    "permHint_view_reports": "Статистика и отчёт по продажам",
+    "permHint_view_cost": "Просмотр себестоимости и прибыли"
   },
   "category": {
     "gatePerm": "Категории доступны только владельцу или сотруднику с правом «Товары».",

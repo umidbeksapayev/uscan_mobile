@@ -298,6 +298,45 @@ Sprint 11 o'zgarishlari JS-only — yangi dev build kerak emas.
 
 **Natija:** lint 0 xato / 18 ogohlantirish · `tsc` 0 xato · 261 test yashil.
 
+## 5.4 Sozlamalar ekrani qayta dizayni (2026-08-13)
+
+Brend ko'kiga to'liq o'tkazish + tushunarlilik.
+
+**Ranglar.** Ikonka chiplari har qatorda boshqa rangda edi (binafsha `#9333ea`,
+sariq `#f59e0b`, yashil `#10b981`, `rgba(...)` qattiq qiymatlar) — bu ranglar
+hech qanday MA'NO bermasdi va palitradan olinmagani uchun tungi rejimda
+tekshirilmagan edi. Hammasi `primaryTint` + `primary` ga birlashtirildi;
+qatorlarni ikonka shakli ajratadi. Diagnostika ataylab neytral (`neutralTint`)
+— u ikkilamchi, texnik ekran. Danger tugmasi ham qattiq `rgba(220,38,38,…)`
+o'rniga `dangerTint`/`dangerBorder`/`dangerInk` tokenlariga o'tdi (tungi
+rejimda endi to'g'ri teskarilanadi).
+
+**Do'kon kartasi** — oq karta o'rniga `primary → primaryDeep` gradient
+(Bosh sahifadagi statistika kartalari bilan bir tilda), ustida rol nishoni
+("Ega" / "Kassir" + ikonka), ya'ni "kim sifatida kirganman" savoliga darhol
+javob beradi.
+
+**Bo'lim sarlavhalari** — brend ko'kida, chapida ingichka ko'k chiziq bilan.
+
+**Tarjima bo'shlig'i (asosiy topilma).** Ekranda **18 ta matn qattiq
+o'zbekcha yozilgan** edi — "Sozlamalar", "Qo'shish", "Hali kassirlar yo'q",
+"Xodimni do'kondan chiqarish", mavzu variantlari va h.k. Rus yoki kirill
+tilida ochilganda ular o'zbekcha qolardi. Hammasi 3 tilga chiqarildi.
+Kassir **ruxsat nomlari** ham (`PERMISSION_LABELS`) tarjimasiz edi, holbuki
+`staff.perm_*` kalitlari allaqachon mavjud edi — endi ular ishlatiladi,
+izohlar uchun `staff.permHint_*` qo'shildi.
+
+**A11y va qulaylik:** har qatorga `accessibilityRole` va nom+tavsifni bitta
+o'qiydigan yorliq; tanlov qatorlari `radio` roli bilan va tanlangani faqat
+rang emas, **belgi** (✓) bilan ham ko'rsatiladi; bosilish holati barcha
+qatorlarda ko'rinadi (ilgari orqaga tugmasi bosilganda ham o'zgarmasdi —
+`({pressed}) => …` ikkala holatda bir xil rang qaytarardi); email maydoniga
+`autoCorrect`/`spellCheck` o'chirildi va `textContentType` berildi; ruxsat
+nishoni tabular raqamda va `/6` o'rniga ro'yxat uzunligidan hisoblanadi.
+
+**Natija:** `tsc` 0 xato · lint 0 xato · 261 test yashil · 55 ta tarjima
+kaliti 3 tilda ham tekshirildi.
+
 ## 6. Ish tartibi (avvalgi sprintlar uslubida)
 
 branch → kichik Conventional Commits → `tsc` + `jest` yashil → PR (o'zbekcha

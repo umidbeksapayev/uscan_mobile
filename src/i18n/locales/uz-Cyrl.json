@@ -557,7 +557,17 @@
     "tgConnectedShort": "Уланган",
     "tgNotConnectedShort": "Уланмаган",
     "tgConnectBtn": "Телеграмга улаш",
-    "tgRefreshHint": "Ботда «Start» босдингизми? → Ҳолатни янгилаш"
+    "tgRefreshHint": "Ботда «Start» босдингизми? → Ҳолатни янгилаш",
+    "themeSystemHint": "Телефон созламасига мослашади",
+    "themeLightHint": "Доим ёруғ фон",
+    "themeDarkHint": "Доим тўқ фон",
+    "staffEmailHint": "Кассир аввал шу email билан иловада рўйхатдан ўтган бўлиши керак.",
+    "noCashiersHint": "Юқоридаги майдонга кассир emailини киритинг ва «Қўшиш» тугмасини босинг.",
+    "permGranted": "{{count}} та рухсат берилган",
+    "permNone": "Рухсат берилмаган",
+    "cashierOnlyOwner": "Кассирлар ва рухсатларни фақат дўкон эгаси бошқаради.",
+    "removeStaffBtn": "Ходимни дўкондан чиқариш",
+    "permCountShort": "Кассир · {{count}} та рухсат"
   },
   "admin": {
     "title": "Супер-админ панели",
@@ -765,7 +775,15 @@
     "perm_returns": "Қайтариш",
     "perm_manage_debt": "Мижоз қарзи",
     "perm_view_reports": "Ҳисоботлар",
-    "perm_view_cost": "Тан нарх кўриш"
+    "perm_view_cost": "Тан нарх кўриш",
+    "removeBtn": "Чиқариш",
+    "removeError": "Чиқариб бўлмади",
+    "permHint_manage_products": "Маҳсулот қўшиш/таҳрирлаш, категориялар",
+    "permHint_purchase": "Кирим қилиш, тан нарх киритиш",
+    "permHint_returns": "Сотувни қайтариш",
+    "permHint_manage_debt": "Насия дафтари ва қарз тўловлари",
+    "permHint_view_reports": "Статистика ва савдо ҳисоботи",
+    "permHint_view_cost": "Тан нархи ва фойдани кўриш"
   },
   "category": {
     "gatePerm": "Категориялар фақат эгаси ёки \"Маҳсулотлар\" рухсати бор ходимга кўринади.",

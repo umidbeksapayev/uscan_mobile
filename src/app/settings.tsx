@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
   Alert,
   Switch,
-  Platform,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,7 +18,8 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useThemeStore, useColors, type ThemeMode } from "@/theme/theme-store";
-import { shadowPanel } from "@/theme/shadows";
+import { shadowPanel, shadowGlow } from "@/theme/shadows";
+import { tabularNums } from "@/theme/typography";
 import type { AppColors } from "@/theme/colors";
 import { LANGUAGES, setLanguage, type LangCode } from "@/i18n";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -34,98 +35,187 @@ import type { MemberPermissions, ShopMemberRow } from "@/types/database";
    Uslub konstantalari
 ───────────────────────────────────────────────────────────────────────── */
 const RADIUS = 18;
+/** Ikonka chipi — barcha qatorlarda bir xil o'lcham (skanerlashni osonlashtiradi). */
+const CHIP = 38;
 
 /** Karta soyasi — rang palitradan olinadi (tungi rejimda sof qora). */
 function cardShadow(colors: AppColors) {
   return shadowPanel(colors.shadow);
 }
 
+/** Kartalar uchun umumiy "qobiq" uslubi (chegara + fon + radius). */
+function cardStyle(colors: AppColors) {
+  return {
+    borderRadius: RADIUS,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  } as const;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
    SectionLabel — bo'lim sarlavhasi
+   Brend ko'kida: ekranni bo'limlarga ajratadi va "moviy" ohangni ushlab turadi.
 ───────────────────────────────────────────────────────────────────────── */
 function SectionLabel({ label }: { label: string }) {
   const colors = useColors();
 
   return (
-    <Text
-      style={{
-        fontSize: 11,
-        fontWeight: "700",
-        color: colors.muted,
-        letterSpacing: 0.9,
-        textTransform: "uppercase",
-        marginBottom: 8,
-        marginLeft: 4,
-      }}
-    >
-      {label}
-    </Text>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10, marginLeft: 4 }}>
+      <View style={{ width: 3, height: 13, borderRadius: 2, backgroundColor: colors.primary }} />
+      <Text
+        accessibilityRole="header"
+        style={{
+          fontSize: 11,
+          fontWeight: "700",
+          color: colors.heading,
+          letterSpacing: 0.9,
+          textTransform: "uppercase",
+        }}
+      >
+        {label}
+      </Text>
+    </View>
   );
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   SettingRow — oddiy qator (chevron bilan)
+   SettingRow — sozlama qatori (chevron bilan)
+
+   Ikonka chiplari ATAYIN bitta rangda (brend ko'ki): ilgari har qatorda
+   boshqa rang bor edi (binafsha/sariq/yashil) — bu ranglar hech qanday
+   ma'no bermasdi, faqat ekranni rang-barang qilardi va tungi rejimda
+   tekshirilmagan qattiq HEX qiymatlar edi. Qatorlarni ikonka SHAKLI
+   ajratadi, rang esa brendni ushlab turadi.
 ───────────────────────────────────────────────────────────────────────── */
 function SettingRow({
   icon,
-  iconBg,
-  iconColor,
   title,
   subtitle,
   onPress,
   last = false,
+  muted = false,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
-  iconBg: string;
-  iconColor: string;
   title: string;
   subtitle?: string;
   onPress?: () => void;
   last?: boolean;
+  /** Ikkilamchi qator (Diagnostika) — brend ko'ki emas, neytral. */
+  muted?: boolean;
 }) {
   const colors = useColors();
+  const [pressed, setPressed] = useState(false);
 
   return (
     <>
       <Pressable
         onPress={onPress}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
+        accessibilityRole="button"
+        accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
+        android_ripple={{ color: colors.line }}
         style={{
           flexDirection: "row",
           alignItems: "center",
           paddingHorizontal: 16,
+          // 38px chip + 2×14px = 66px balandlik — a11y minimumidan (44px) yuqori
           paddingVertical: 14,
-          backgroundColor: colors.surface,
+          backgroundColor: pressed ? colors.bg : colors.surface,
         }}
       >
         <View
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: 11,
-            backgroundColor: iconBg,
+            width: CHIP,
+            height: CHIP,
+            borderRadius: 12,
+            backgroundColor: muted ? colors.neutralTint : colors.primaryTint,
             alignItems: "center",
             justifyContent: "center",
             marginRight: 14,
           }}
         >
-          <Ionicons name={icon} size={19} color={iconColor} />
+          <Ionicons name={icon} size={19} color={muted ? colors.muted : colors.primary} />
         </View>
         <View style={{ flex: 1, justifyContent: "center" }}>
           <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
             {title}
           </Text>
           {subtitle ? (
-            <Text style={{ fontSize: 12, color: colors.muted, marginTop: 1, lineHeight: 16 }}>
+            <Text style={{ fontSize: 12, color: colors.muted, marginTop: 1, lineHeight: 16 }} numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}
         </View>
         <Ionicons name="chevron-forward" size={16} color={colors.tabInactive} style={{ marginLeft: 10 }} />
       </Pressable>
-      {!last && (
-        <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 68 }} />
-      )}
+      {!last && <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 68 }} />}
     </>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ChoiceRow — tanlov qatori (til / mavzu oynalarida)
+   Tanlangan holat: brend ko'ki fon + chegara + belgi. Faqat rang emas,
+   BELGI (checkmark) ham beriladi — rang ko'rmaydigan foydalanuvchi uchun.
+───────────────────────────────────────────────────────────────────────── */
+function ChoiceRow({
+  label,
+  hint,
+  icon,
+  active,
+  onPress,
+}: {
+  label: string;
+  hint?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+  active: boolean;
+  onPress: () => void;
+}) {
+  const colors = useColors();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={hint ? `${label}, ${hint}` : label}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 13,
+        borderRadius: 16,
+        backgroundColor: active ? colors.primaryTint : colors.surface,
+        borderWidth: 1.5,
+        borderColor: active ? colors.primary : colors.line,
+      }}
+    >
+      {icon ? (
+        <Ionicons name={icon} size={20} color={active ? colors.primary : colors.muted} />
+      ) : null}
+      <View style={{ flex: 1 }}>
+        <Text
+          style={{
+            fontSize: 15,
+            fontWeight: active ? "700" : "500",
+            color: active ? colors.primary : colors.ink,
+          }}
+        >
+          {label}
+        </Text>
+        {hint ? (
+          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>{hint}</Text>
+        ) : null}
+      </View>
+      <Ionicons
+        name={active ? "checkmark-circle" : "ellipse-outline"}
+        size={21}
+        color={active ? colors.primary : colors.tabInactive}
+      />
+    </Pressable>
   );
 }
 
@@ -163,7 +253,7 @@ function PermissionsSheet({
     <BottomSheet visible={!!member} onClose={onClose} keyboardAvoiding>
       <View style={{ paddingBottom: 8 }}>
         {/* Avatar + ism */}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 18 }}>
           <View
             style={{
               width: 46,
@@ -183,22 +273,13 @@ function PermissionsSheet({
               {member?.email}
             </Text>
             <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
-              Kassir · {enabledCount} ta ruxsat
+              {t("settings.permCountShort", { count: enabledCount })}
             </Text>
           </View>
         </View>
 
         {/* Ruxsatlar */}
-        <View
-          style={{
-            borderRadius: RADIUS,
-            borderWidth: 1,
-            borderColor: colors.line,
-            backgroundColor: colors.surface,
-            overflow: "hidden",
-            marginBottom: 14,
-          }}
-        >
+        <View style={{ ...cardStyle(colors), overflow: "hidden", marginBottom: 14 }}>
           {PERMISSION_LABELS.map((p, i) => (
             <View key={p.key}>
               {i > 0 && <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 16 }} />}
@@ -212,14 +293,17 @@ function PermissionsSheet({
                 }}
               >
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 14, fontWeight: "600", color: colors.ink }}>{p.label}</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "600", color: colors.ink }}>
+                    {t(`staff.perm_${p.key}`, p.label)}
+                  </Text>
                   <Text style={{ fontSize: 11, color: colors.muted, marginTop: 2, lineHeight: 15 }}>
-                    {p.hint}
+                    {t(`staff.permHint_${p.key}`, p.hint)}
                   </Text>
                 </View>
                 <Switch
                   value={!!perms[p.key]}
                   onValueChange={(v) => setPerms((prev) => ({ ...prev, [p.key]: v }))}
+                  accessibilityLabel={t(`staff.perm_${p.key}`, p.label)}
                   trackColor={{ true: colors.primary, false: colors.line }}
                   thumbColor="#fff"
                 />
@@ -232,6 +316,9 @@ function PermissionsSheet({
         <Pressable
           disabled={saving}
           onPress={() => onSave(perms)}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.save")}
+          accessibilityState={{ disabled: saving }}
           style={{
             height: 52,
             borderRadius: 16,
@@ -240,35 +327,36 @@ function PermissionsSheet({
             justifyContent: "center",
             marginBottom: 10,
             opacity: saving ? 0.6 : 1,
+            ...shadowGlow(colors.primary),
           }}
         >
           {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={{ fontSize: 16, fontWeight: "700", color: "#fff" }}>
-              {t("common.save")}
-            </Text>
+            <Text style={{ fontSize: 16, fontWeight: "700", color: "#fff" }}>{t("common.save")}</Text>
           )}
         </Pressable>
 
         {/* Chiqarish tugmasi */}
         <Pressable
           onPress={onRemove}
+          accessibilityRole="button"
+          accessibilityLabel={t("settings.removeStaffBtn")}
           style={{
             height: 48,
             borderRadius: 16,
             borderWidth: 1.5,
-            borderColor: "rgba(220,38,38,0.2)",
-            backgroundColor: "rgba(220,38,38,0.05)",
+            borderColor: colors.dangerBorder,
+            backgroundColor: colors.dangerTint,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
             gap: 7,
           }}
         >
-          <Ionicons name="person-remove-outline" size={17} color={colors.danger} />
-          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.danger }}>
-            Xodimni do'kondan chiqarish
+          <Ionicons name="person-remove-outline" size={17} color={colors.dangerInk} />
+          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dangerInk }}>
+            {t("settings.removeStaffBtn")}
           </Text>
         </Pressable>
       </View>
@@ -279,57 +367,27 @@ function PermissionsSheet({
 /* ─────────────────────────────────────────────────────────────────────────
    LanguagePickerSheet — til tanlash oynasi
 ───────────────────────────────────────────────────────────────────────── */
-function LanguagePickerSheet({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
+function LanguagePickerSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const colors = useColors();
-
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} snapPoints={["35%"]}>
+    <BottomSheet visible={visible} onClose={onClose} snapPoints={["38%"]}>
       <Text style={{ fontSize: 18, fontWeight: "700", color: colors.ink, marginBottom: 16 }}>
-        Interfeys tili
+        {t("settings.rowLanguage")}
       </Text>
       <View style={{ gap: 8 }}>
-        {LANGUAGES.map((l) => {
-          const isActive = i18n.language === l.code;
-          return (
-            <Pressable
-              key={l.code}
-              onPress={() => {
-                setLanguage(l.code as LangCode);
-                onClose();
-              }}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingHorizontal: 16,
-                paddingVertical: 14,
-                borderRadius: 16,
-                backgroundColor: isActive ? colors.primaryTint : colors.surface,
-                borderWidth: 1,
-                borderColor: isActive ? colors.primary : colors.line,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: isActive ? "600" : "500",
-                  color: isActive ? colors.primary : colors.ink,
-                }}
-              >
-                {l.label}
-              </Text>
-              {isActive && <Ionicons name="checkmark-circle" size={22} color={colors.primary} />}
-            </Pressable>
-          );
-        })}
+        {LANGUAGES.map((l) => (
+          <ChoiceRow
+            key={l.code}
+            label={l.label}
+            active={i18n.language === l.code}
+            onPress={() => {
+              setLanguage(l.code as LangCode);
+              onClose();
+            }}
+          />
+        ))}
       </View>
     </BottomSheet>
   );
@@ -338,68 +396,42 @@ function LanguagePickerSheet({
 /* ─────────────────────────────────────────────────────────────────────────
    ThemePickerSheet — tungi/yorqin rejim tanlash oynasi
 ───────────────────────────────────────────────────────────────────────── */
-const THEME_OPTIONS: { mode: ThemeMode; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { mode: "system", label: "Tizim rejimi (Avto)", icon: "phone-portrait-outline" },
-  { mode: "light", label: "Yorqin rejim (Kun)", icon: "sunny-outline" },
-  { mode: "dark", label: "Tungi rejim (Tun)", icon: "moon-outline" },
+const THEME_OPTIONS: {
+  mode: ThemeMode;
+  labelKey: string;
+  hintKey: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { mode: "system", labelKey: "settings.themeSystem", hintKey: "settings.themeSystemHint", icon: "phone-portrait-outline" },
+  { mode: "light", labelKey: "settings.themeLight", hintKey: "settings.themeLightHint", icon: "sunny-outline" },
+  { mode: "dark", labelKey: "settings.themeDark", hintKey: "settings.themeDarkHint", icon: "moon-outline" },
 ];
 
-function ThemePickerSheet({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
+function ThemePickerSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const mode = useThemeStore((s) => s.themeMode);
   const setThemeMode = useThemeStore((s) => s.setThemeMode);
   const colors = useColors();
+  const { t } = useTranslation();
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} snapPoints={["42%"]}>
+    <BottomSheet visible={visible} onClose={onClose} snapPoints={["48%"]}>
       <Text style={{ fontSize: 18, fontWeight: "700", color: colors.ink, marginBottom: 16 }}>
-        Interfeys mavzusi (Dizayn)
+        {t("settings.rowTheme")}
       </Text>
       <View style={{ gap: 8 }}>
-        {THEME_OPTIONS.map((opt) => {
-          const isActive = mode === opt.mode;
-          return (
-            <Pressable
-              key={opt.mode}
-              onPress={() => {
-                setThemeMode(opt.mode);
-                onClose();
-              }}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingHorizontal: 16,
-                paddingVertical: 14,
-                borderRadius: 16,
-                backgroundColor: isActive ? colors.primaryTint : colors.bg,
-                borderWidth: 1.5,
-                borderColor: isActive ? colors.primary : colors.line,
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                <Ionicons name={opt.icon} size={20} color={isActive ? colors.primary : colors.muted} />
-                <Text
-                  style={{
-                    fontSize: 15,
-                    fontWeight: isActive ? "700" : "500",
-                    color: isActive ? colors.primary : colors.ink,
-                  }}
-                >
-                  {opt.label}
-                </Text>
-              </View>
-              {isActive ? (
-                <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
-              ) : null}
-            </Pressable>
-          );
-        })}
+        {THEME_OPTIONS.map((opt) => (
+          <ChoiceRow
+            key={opt.mode}
+            icon={opt.icon}
+            label={t(opt.labelKey)}
+            hint={t(opt.hintKey)}
+            active={mode === opt.mode}
+            onPress={() => {
+              setThemeMode(opt.mode);
+              onClose();
+            }}
+          />
+        ))}
       </View>
     </BottomSheet>
   );
@@ -426,14 +458,15 @@ export default function SettingsScreen() {
   const [langOpen, setLangOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [backPressed, setBackPressed] = useState(false);
 
   const themeMode = useThemeStore((s) => s.themeMode);
   const themeModeLabel =
     themeMode === "dark"
-      ? "Tungi rejim (Tun)"
+      ? t("settings.themeDark")
       : themeMode === "light"
-        ? "Yorqin rejim (Kun)"
-        : "Tizim rejimi (Avto)";
+        ? t("settings.themeLight")
+        : t("settings.themeSystem");
 
   function onAdd() {
     const e = email.trim();
@@ -441,7 +474,7 @@ export default function SettingsScreen() {
     addMut.mutate(e, {
       onSuccess: () => setEmail(""),
       onError: (err) =>
-        toast.error("Qo'shilmadi", (err as Error)?.message ?? "Foydalanuvchi topilmadi"),
+        toast.error(t("staff.addError"), (err as Error)?.message ?? t("common.unknownError")),
     });
   }
 
@@ -451,7 +484,8 @@ export default function SettingsScreen() {
       { userId: editing.user_id, permissions },
       {
         onSuccess: () => setEditing(null),
-        onError: (err) => toast.error("Saqlanmadi", (err as Error)?.message ?? "Xatolik"),
+        onError: (err) =>
+          toast.error(t("common.saveFailed"), (err as Error)?.message ?? t("common.unknownError")),
       },
     );
   }
@@ -459,15 +493,16 @@ export default function SettingsScreen() {
   function onRemove() {
     if (!editing) return;
     const m = editing;
-    Alert.alert(t("settings.removeStaffTitle"), `"${m.email}" do'kondan chiqarilsinmi?`, [
-      { text: "Bekor", style: "cancel" },
+    Alert.alert(t("settings.removeStaffTitle"), t("staff.removeConfirm", { name: m.email }), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Chiqarish",
+        text: t("staff.removeBtn"),
         style: "destructive",
         onPress: () =>
           removeMut.mutate(m.user_id, {
             onSuccess: () => setEditing(null),
-            onError: (err) => toast.error("Chiqmadi", (err as Error)?.message ?? "Xatolik"),
+            onError: (err) =>
+              toast.error(t("staff.removeError"), (err as Error)?.message ?? t("common.unknownError")),
           }),
       },
     ]);
@@ -475,11 +510,11 @@ export default function SettingsScreen() {
 
   const cashiers = (staff ?? []).filter((m) => m.role === "cashier");
   const initials = (active?.shop.name ?? "U").slice(0, 2).toUpperCase();
-  const currentLangLabel = LANGUAGES.find((l) => l.code === i18n.language)?.label ?? "O'zbekcha";
+  const currentLangLabel = LANGUAGES.find((l) => l.code === i18n.language)?.label ?? LANGUAGES[0].label;
+  const canAdd = !!email.trim() && !addMut.isPending;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
-
       {/* ── Header ─────────────────────────────────────── */}
       <View
         style={{
@@ -495,24 +530,26 @@ export default function SettingsScreen() {
       >
         <Pressable
           onPress={() => router.back()}
+          onPressIn={() => setBackPressed(true)}
+          onPressOut={() => setBackPressed(false)}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel={t("common.back", "Orqaga")}
-          style={({ pressed }) => ({
+          accessibilityLabel={t("common.back")}
+          style={{
             width: 36,
             height: 36,
             borderRadius: 10,
-            backgroundColor: pressed ? colors.bg : colors.bg,
+            backgroundColor: backPressed ? colors.primaryTint : colors.bg,
             borderWidth: 1,
-            borderColor: colors.line,
+            borderColor: backPressed ? colors.primary : colors.line,
             alignItems: "center",
             justifyContent: "center",
-          })}
+          }}
         >
-          <Ionicons name="chevron-back" size={20} color={colors.ink} />
+          <Ionicons name="chevron-back" size={20} color={backPressed ? colors.primary : colors.ink} />
         </Pressable>
-        <Text style={{ fontSize: 18, fontWeight: "700", color: colors.ink }}>
-          Sozlamalar
+        <Text accessibilityRole="header" style={{ fontSize: 18, fontWeight: "700", color: colors.heading }}>
+          {t("settings.title")}
         </Text>
       </View>
 
@@ -521,42 +558,40 @@ export default function SettingsScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-
         {/* ══════════════════════════════════════════════
-            DO'KON PROFILI
+            DO'KON PROFILI — brend ko'ki gradient karta
+            (Bosh sahifadagi statistika kartalari bilan bir tilda)
         ══════════════════════════════════════════════ */}
-        <SectionLabel label={t("settings.profileSection")} />
-        <View
+        <LinearGradient
+          colors={[colors.primary, colors.primaryDeep]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={{
-            borderRadius: RADIUS,
-            borderWidth: 1,
-            borderColor: colors.line,
-            backgroundColor: colors.surface,
+            borderRadius: 22,
+            padding: 18,
+            marginBottom: 22,
             flexDirection: "row",
             alignItems: "center",
             gap: 14,
-            padding: 16,
-            marginBottom: 20,
-            ...cardShadow(colors),
+            ...shadowGlow(colors.primary),
           }}
         >
-          {/* Avatar — gradient simulyatsiya: to'q fon + kichik ring */}
           <View style={{ position: "relative" }}>
             <View
               style={{
-                width: 52,
-                height: 52,
-                borderRadius: 16,
-                backgroundColor: colors.primaryDeep,
+                width: 54,
+                height: 54,
+                borderRadius: 17,
+                backgroundColor: "rgba(255,255,255,0.18)",
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.28)",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Text style={{ fontSize: 18, fontWeight: "800", color: "#fff" }}>
-                {initials}
-              </Text>
+              <Text style={{ fontSize: 19, fontWeight: "800", color: "#fff" }}>{initials}</Text>
             </View>
-            {/* Yashil online nuqta */}
+            {/* Faol do'kon belgisi */}
             <View
               style={{
                 position: "absolute",
@@ -565,25 +600,45 @@ export default function SettingsScreen() {
                 width: 14,
                 height: 14,
                 borderRadius: 7,
-                backgroundColor: "#16A34A",
+                backgroundColor: colors.success,
                 borderWidth: 2,
-                borderColor: colors.surface,
+                borderColor: colors.primaryDeep,
               }}
             />
           </View>
 
           <View style={{ flex: 1 }}>
             <Text
-              style={{ fontSize: 16, fontWeight: "700", color: colors.ink, lineHeight: 21 }}
+              style={{ fontSize: 17, fontWeight: "800", color: "#fff", lineHeight: 22 }}
               numberOfLines={1}
             >
-              {active?.shop.name ?? "Do'kon"}
+              {active?.shop.name ?? t("common.appName")}
             </Text>
-            <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>
-              {isOwner ? t("staff.owner") : t("staff.cashier")}
-            </Text>
+            {/* Rol nishoni — "kim sifatida kirganman" savoliga darhol javob */}
+            <View
+              style={{
+                alignSelf: "flex-start",
+                marginTop: 6,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+                paddingHorizontal: 9,
+                paddingVertical: 3,
+                borderRadius: 20,
+                backgroundColor: "rgba(255,255,255,0.18)",
+              }}
+            >
+              <Ionicons
+                name={isOwner ? "shield-checkmark" : "person"}
+                size={12}
+                color="#fff"
+              />
+              <Text style={{ fontSize: 12, fontWeight: "600", color: "#fff" }}>
+                {isOwner ? t("staff.owner") : t("staff.cashier")}
+              </Text>
+            </View>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* ══════════════════════════════════════════════
             UMUMIY SOZLAMALAR
@@ -591,54 +646,42 @@ export default function SettingsScreen() {
         <SectionLabel label={t("settings.sectionGeneral")} />
         <View
           style={{
-            borderRadius: RADIUS,
-            borderWidth: 1,
-            borderColor: colors.line,
-            backgroundColor: colors.surface,
+            ...cardStyle(colors),
             overflow: "hidden",
-            marginBottom: 20,
+            marginBottom: 22,
             ...cardShadow(colors),
           }}
         >
           <SettingRow
             icon="language-outline"
-            iconBg="rgba(47,128,237,0.12)"
-            iconColor={colors.primary}
             title={t("settings.rowLanguage")}
             subtitle={currentLangLabel}
             onPress={() => setLangOpen(true)}
           />
           <SettingRow
             icon="color-palette-outline"
-            iconBg="rgba(245,158,11,0.12)"
-            iconColor="#f59e0b"
             title={t("settings.rowTheme")}
             subtitle={themeModeLabel}
             onPress={() => setThemeOpen(true)}
           />
           <SettingRow
             icon="print-outline"
-            iconBg="rgba(168,85,247,0.12)"
-            iconColor="#9333ea"
             title={t("settings.rowPrinter")}
             subtitle={t("settings.rowPrinterSub")}
             onPress={() => router.push("/printer-settings")}
           />
           <SettingRow
             icon="chatbubble-ellipses-outline"
-            iconBg="rgba(16,185,129,0.12)"
-            iconColor="#10b981"
-            title={t("settings.feedbackTitle", "Fikr-mulohaza")}
-            subtitle={t("settings.feedbackHint", "Taklif, shikoyat yoki xato? Bizga yozing.")}
+            title={t("settings.feedbackTitle")}
+            subtitle={t("settings.feedbackHint")}
             onPress={() => setFeedbackOpen(true)}
           />
           <SettingRow
             icon="pulse-outline"
-            iconBg="rgba(100,116,139,0.12)"
-            iconColor={colors.muted}
-            title={t("diagnostics.title", "Diagnostika")}
-            subtitle={t("diagnostics.settingsSubtitle", "Xatolik jurnali")}
+            title={t("diagnostics.title")}
+            subtitle={t("diagnostics.settingsSubtitle")}
             onPress={() => router.push("/diagnostics")}
+            muted
             last
           />
         </View>
@@ -655,7 +698,7 @@ export default function SettingsScreen() {
           (`get_push_summaries` faqat `sh.owner_id` tokenlariga yuboradi),
           shuning uchun unga faqat telefondagi lokal eslatma ko'rsatiladi.
         */}
-        <View style={{ gap: 10, marginBottom: 20 }}>
+        <View style={{ gap: 10, marginBottom: 22 }}>
           {isOwner && active?.shop ? <DailySummaryCard shop={active.shop} /> : null}
           <LocalReminderCard />
         </View>
@@ -666,10 +709,7 @@ export default function SettingsScreen() {
         {!isOwner ? (
           <View
             style={{
-              borderRadius: RADIUS,
-              borderWidth: 1,
-              borderColor: colors.line,
-              backgroundColor: colors.surface,
+              ...cardStyle(colors),
               flexDirection: "row",
               alignItems: "center",
               gap: 12,
@@ -678,7 +718,7 @@ export default function SettingsScreen() {
           >
             <Ionicons name="lock-closed-outline" size={18} color={colors.muted} />
             <Text style={{ flex: 1, fontSize: 13, color: colors.muted, lineHeight: 18 }}>
-              Kassirlar va ruxsatlarni faqat do'kon egasi boshqaradi.
+              {t("settings.cashierOnlyOwner")}
             </Text>
           </View>
         ) : (
@@ -688,10 +728,7 @@ export default function SettingsScreen() {
             {/* Email qo'shish — kompakt inline karta */}
             <View
               style={{
-                borderRadius: RADIUS,
-                borderWidth: 1,
-                borderColor: colors.line,
-                backgroundColor: colors.surface,
+                ...cardStyle(colors),
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 10,
@@ -708,6 +745,7 @@ export default function SettingsScreen() {
                 onChangeText={setEmail}
                 placeholder={t("settings.staffEmailPlaceholder")}
                 placeholderTextColor={colors.tabInactive}
+                accessibilityLabel={t("staff.addTitle")}
                 style={{
                   flex: 1,
                   fontSize: 14,
@@ -716,13 +754,19 @@ export default function SettingsScreen() {
                   paddingVertical: 0,
                 }}
                 autoCapitalize="none"
+                autoCorrect={false}
+                spellCheck={false}
                 keyboardType="email-address"
+                textContentType="emailAddress"
                 onSubmitEditing={onAdd}
                 returnKeyType="done"
               />
               <Pressable
                 onPress={onAdd}
-                disabled={!email.trim() || addMut.isPending}
+                disabled={!canAdd}
+                accessibilityRole="button"
+                accessibilityLabel={t("staff.addBtn")}
+                accessibilityState={{ disabled: !canAdd }}
                 style={{
                   paddingHorizontal: 16,
                   height: 38,
@@ -730,14 +774,14 @@ export default function SettingsScreen() {
                   backgroundColor: colors.primary,
                   alignItems: "center",
                   justifyContent: "center",
-                  opacity: email.trim() && !addMut.isPending ? 1 : 0.45,
+                  opacity: canAdd ? 1 : 0.45,
                 }}
               >
                 {addMut.isPending ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
                   <Text style={{ fontSize: 13, fontWeight: "700", color: "#fff" }}>
-                    Qo'shish
+                    {t("staff.addBtn")}
                   </Text>
                 )}
               </Pressable>
@@ -751,7 +795,7 @@ export default function SettingsScreen() {
                 lineHeight: 15,
               }}
             >
-              Kassir ilovadan shu email bilan ro'yxatdan o'tgan bo'lishi kerak.
+              {t("settings.staffEmailHint")}
             </Text>
 
             {/* Kassirlar ro'yxati */}
@@ -760,46 +804,33 @@ export default function SettingsScreen() {
             ) : isError ? (
               <View
                 style={{
-                  borderRadius: RADIUS,
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  backgroundColor: colors.surface,
+                  ...cardStyle(colors),
+                  borderColor: colors.dangerBorder,
+                  backgroundColor: colors.dangerTint,
                   padding: 20,
                   alignItems: "center",
                 }}
               >
-                <Text style={{ fontSize: 13, color: colors.danger, textAlign: "center" }}>
-                  {(error as Error)?.message ?? "Yuklab bo'lmadi"}
+                <Text style={{ fontSize: 13, color: colors.dangerInk, textAlign: "center" }}>
+                  {(error as Error)?.message ?? t("common.loadError")}
                 </Text>
               </View>
             ) : cashiers.length === 0 ? (
-              <View
-                style={{
-                  borderRadius: RADIUS,
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  backgroundColor: colors.surface,
-                  padding: 32,
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
+              <View style={{ ...cardStyle(colors), padding: 32, alignItems: "center", gap: 10 }}>
                 <View
                   style={{
                     width: 52,
                     height: 52,
                     borderRadius: 16,
-                    backgroundColor: colors.bg,
-                    borderWidth: 1,
-                    borderColor: colors.line,
+                    backgroundColor: colors.primaryTint,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <Ionicons name="people-outline" size={26} color={colors.muted} />
+                  <Ionicons name="people-outline" size={26} color={colors.primary} />
                 </View>
                 <Text style={{ fontSize: 15, fontWeight: "600", color: colors.ink }}>
-                  Hali kassirlar yo'q
+                  {t("staff.noCashiers")}
                 </Text>
                 <Text
                   style={{
@@ -809,109 +840,19 @@ export default function SettingsScreen() {
                     lineHeight: 17,
                   }}
                 >
-                  Yuqoriga email kiritib «Qo'shish» tugmasini bosing
+                  {t("settings.noCashiersHint")}
                 </Text>
               </View>
             ) : (
-              <View
-                style={{
-                  borderRadius: RADIUS,
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  backgroundColor: colors.surface,
-                  overflow: "hidden",
-                  ...cardShadow(colors),
-                }}
-              >
-                {cashiers.map((m, i) => {
-                  const permCount = Object.values(m.permissions ?? {}).filter(Boolean).length;
-                  return (
-                    <View key={m.user_id}>
-                      {i > 0 && (
-                        <View
-                          style={{ height: 1, backgroundColor: colors.line, marginLeft: 70 }}
-                        />
-                      )}
-                      <Pressable
-                        onPress={() => setEditing(m)}
-                        android_ripple={{ color: colors.line }}
-                        style={({ pressed }) => ({
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 14,
-                          paddingHorizontal: 16,
-                          paddingVertical: 13,
-                          // iOS bosilish holati — palitradan, aks holda tungi
-                          // rejimda oq chaqnash bo'lardi
-                          backgroundColor:
-                            pressed && Platform.OS === "ios" ? colors.bg : colors.surface,
-                        })}
-                      >
-                        <View
-                          style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 12,
-                            backgroundColor: colors.primaryTint,
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <Text
-                            style={{ fontSize: 16, fontWeight: "800", color: colors.primary }}
-                          >
-                            {m.email.slice(0, 1).toUpperCase()}
-                          </Text>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text
-                            style={{ fontSize: 14, fontWeight: "600", color: colors.ink }}
-                            numberOfLines={1}
-                          >
-                            {m.email}
-                          </Text>
-                          <Text
-                            style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}
-                          >
-                            {permCount > 0
-                              ? `${permCount} ta ruxsat berilgan`
-                              : "Ruxsatlar berilmagan"}
-                          </Text>
-                        </View>
-                        {/* Ruxsat soni badge */}
-                        <View
-                          style={{
-                            paddingHorizontal: 9,
-                            paddingVertical: 3,
-                            borderRadius: 20,
-                            backgroundColor:
-                              permCount > 0 ? colors.primaryTint : colors.bg,
-                            borderWidth: 1,
-                            borderColor:
-                              permCount > 0
-                                ? "rgba(47,128,237,0.2)"
-                                : colors.line,
-                          }}
-                        >
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              fontWeight: "700",
-                              color: permCount > 0 ? colors.primary : colors.muted,
-                            }}
-                          >
-                            {permCount}/6
-                          </Text>
-                        </View>
-                        <Ionicons
-                          name="chevron-forward"
-                          size={15}
-                          color={colors.tabInactive}
-                        />
-                      </Pressable>
-                    </View>
-                  );
-                })}
+              <View style={{ ...cardStyle(colors), overflow: "hidden", ...cardShadow(colors) }}>
+                {cashiers.map((m, i) => (
+                  <CashierRow
+                    key={m.user_id}
+                    member={m}
+                    first={i === 0}
+                    onPress={() => setEditing(m)}
+                  />
+                ))}
               </View>
             )}
           </>
@@ -925,18 +866,100 @@ export default function SettingsScreen() {
         onRemove={onRemove}
         saving={permsMut.isPending}
       />
-      <LanguagePickerSheet
-        visible={langOpen}
-        onClose={() => setLangOpen(false)}
-      />
-      <ThemePickerSheet
-        visible={themeOpen}
-        onClose={() => setThemeOpen(false)}
-      />
-      <FeedbackSheet
-        visible={feedbackOpen}
-        onClose={() => setFeedbackOpen(false)}
-      />
+      <LanguagePickerSheet visible={langOpen} onClose={() => setLangOpen(false)} />
+      <ThemePickerSheet visible={themeOpen} onClose={() => setThemeOpen(false)} />
+      <FeedbackSheet visible={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
     </SafeAreaView>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   CashierRow — kassir qatori (ruxsat soni nishoni bilan)
+───────────────────────────────────────────────────────────────────────── */
+function CashierRow({
+  member,
+  first,
+  onPress,
+}: {
+  member: ShopMemberRow;
+  first: boolean;
+  onPress: () => void;
+}) {
+  const colors = useColors();
+  const { t } = useTranslation();
+  const [pressed, setPressed] = useState(false);
+
+  const permCount = Object.values(member.permissions ?? {}).filter(Boolean).length;
+  const total = PERMISSION_LABELS.length;
+  const hasPerms = permCount > 0;
+
+  return (
+    <>
+      {!first && <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 70 }} />}
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
+        android_ripple={{ color: colors.line }}
+        accessibilityRole="button"
+        accessibilityLabel={`${member.email}, ${
+          hasPerms ? t("settings.permGranted", { count: permCount }) : t("settings.permNone")
+        }`}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 14,
+          paddingHorizontal: 16,
+          paddingVertical: 13,
+          backgroundColor: pressed ? colors.bg : colors.surface,
+        }}
+      >
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            backgroundColor: colors.primaryTint,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "800", color: colors.primary }}>
+            {member.email.slice(0, 1).toUpperCase()}
+          </Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.ink }} numberOfLines={1}>
+            {member.email}
+          </Text>
+          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
+            {hasPerms ? t("settings.permGranted", { count: permCount }) : t("settings.permNone")}
+          </Text>
+        </View>
+        {/* Ruxsat soni nishoni — ruxsat yo'q bo'lsa neytral, bor bo'lsa brend ko'ki */}
+        <View
+          style={{
+            paddingHorizontal: 9,
+            paddingVertical: 3,
+            borderRadius: 20,
+            backgroundColor: hasPerms ? colors.primaryTint : colors.neutralTint,
+            borderWidth: 1,
+            borderColor: hasPerms ? colors.primary : colors.line,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: "700",
+              color: hasPerms ? colors.primary : colors.muted,
+              ...tabularNums,
+            }}
+          >
+            {permCount}/{total}
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={15} color={colors.tabInactive} />
+      </Pressable>
+    </>
   );
 }

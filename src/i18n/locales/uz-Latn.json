@@ -557,7 +557,17 @@
     "tgConnectedShort": "Ulangan",
     "tgNotConnectedShort": "Ulanmagan",
     "tgConnectBtn": "Telegram'ga ulash",
-    "tgRefreshHint": "Botda «Start» bosdingizmi? → Holatni yangilash"
+    "tgRefreshHint": "Botda «Start» bosdingizmi? → Holatni yangilash",
+    "themeSystemHint": "Telefon sozlamasiga moslashadi",
+    "themeLightHint": "Doim yorug' fon",
+    "themeDarkHint": "Doim to'q fon",
+    "staffEmailHint": "Kassir avval shu email bilan ilovada ro'yxatdan o'tgan bo'lishi kerak.",
+    "noCashiersHint": "Yuqoridagi maydonga kassir emailini kiriting va «Qo'shish» tugmasini bosing.",
+    "permGranted": "{{count}} ta ruxsat berilgan",
+    "permNone": "Ruxsat berilmagan",
+    "cashierOnlyOwner": "Kassirlar va ruxsatlarni faqat do'kon egasi boshqaradi.",
+    "removeStaffBtn": "Xodimni do'kondan chiqarish",
+    "permCountShort": "Kassir · {{count}} ta ruxsat"
   },
   "admin": {
     "title": "Super-admin paneli",
@@ -765,7 +775,15 @@
     "perm_returns": "Qaytarish",
     "perm_manage_debt": "Mijoz qarzi",
     "perm_view_reports": "Hisobotlar",
-    "perm_view_cost": "Tan narx ko'rish"
+    "perm_view_cost": "Tan narx ko'rish",
+    "removeBtn": "Chiqarish",
+    "removeError": "Chiqarib bo'lmadi",
+    "permHint_manage_products": "Mahsulot qo'shish/tahrirlash, kategoriyalar",
+    "permHint_purchase": "Kirim qilish, tan narx kiritish",
+    "permHint_returns": "Sotuvni qaytarish",
+    "permHint_manage_debt": "Nasiya daftari va qarz to'lovlari",
+    "permHint_view_reports": "Statistika va savdo hisoboti",
+    "permHint_view_cost": "Tan narxi va foydani ko'rish"
   },
   "category": {
     "gatePerm": "Kategoriyalar faqat egasi yoki \"Mahsulotlar\" ruxsati bor xodimga ko'rinadi.",
