@@ -4,6 +4,7 @@ import { toast } from "@/lib/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -19,8 +20,9 @@ import { useStaff } from "@/features/auth/use-staff";
 import { exportPeriodSales } from "@/features/stats/export-csv";
 import { StatsCard } from "@/components/ui/stats-card";
 import type { TopProduct } from "@/types/database";
-import { radius, text } from "@/theme/tokens";
+import { radius, space, text } from "@/theme/tokens";
 import { ScreenHeader } from "@/components/ui/screen";
+import { PressableScale } from "@/components/ui/pressable-scale";
 
 const PERIODS = [
   { days: 1 as const, key: "today", fallback: "Bugun", file: "bugun" },
@@ -158,6 +160,7 @@ function SalesSection({ period, canViewCost }: { period: 1 | 7 | 30; canViewCost
  *  list_shop_members RPC'dan; kassirlar bir-birining natijasini ko'rmaydi). */
 function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string }) {
   const colors = useColors();
+  const router = useRouter();
 
   const { t } = useTranslation();
   const { data: aggs, isLoading } = useCashierStats(period);
@@ -201,6 +204,27 @@ function CashierSection({ period, shopId }: { period: 1 | 7 | 30; shopId: string
           );
         })
       )}
+
+      {/* To'liq hisobot — o'rtacha chek, to'lov usullari, qaytarishlar */}
+      <PressableScale
+        onPress={() => router.push("/cashier-report")}
+        accessibilityRole="button"
+        accessibilityLabel={t("cashierReport.openBtn", "Kassir hisoboti")}
+        style={{
+          marginTop: space.sm,
+          paddingTop: space.md,
+          borderTopWidth: 1,
+          borderTopColor: colors.line,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        <Text style={{ flex: 1, fontSize: text.sm, fontWeight: "600", color: colors.primary }}>
+          {t("cashierReport.openBtn", "Kassir hisoboti")}
+        </Text>
+        <Ionicons name="chevron-forward" size={15} color={colors.primary} />
+      </PressableScale>
     </ListCard>
   );
 }

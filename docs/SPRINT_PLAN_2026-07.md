@@ -435,6 +435,54 @@ kontent shaklini oldindan egallaydi.
 
 **Natija:** `tsc` 0 xato · lint 0 xato · 265 test yashil.
 
+## 5.6 Sprint 13 — Kassir hisoboti (2026-08-13)
+
+Audit hujjatidagi oxirgi ochiq funksional bo'shliq (P10).
+
+**Avval bir tuzatish:** audit hujjati ustunni `sale.created_by` deb yozgan,
+haqiqiy nom esa **`cashier_id`**. Shu sabab "mobil kodda ishlatilmaydi"
+degan xulosa ham noto'g'ri edi — u `statistika.tsx` da allaqachon
+ishlatilardi (kassir kesimida sotuv soni + tushum).
+
+**Nega server RPC (migration 033):** mavjud `cashier-api.ts` sotuv
+qatorlarini client'ga tortib, **2000 tasi bilan cheklanib** yig'ardi.
+Kuniga 60 ta sotuv qiladigan do'kon oyiga ~1800 ta qiladi — ya'ni real
+do'kon bu chegaraga yetadi va hisobot **jimgina noto'g'ri raqam**
+ko'rsatardi. Statistikadagi kichik blok uchun bunga chidasa bo'ladi,
+hisobot uchun yo'q. Agregatsiya `get_cashier_report` ga ko'chirildi
+(030/032 naqshi).
+
+**Kassir o'z natijasini ko'radi.** Filtrlash server tomonida: client'da
+gate qo'yish soxta xavfsizlik bo'lardi, chunki RPC'ni baribir
+to'g'ridan-to'g'ri chaqirish mumkin.
+
+**Xavfsizlik qarori:** `returns` RLS'i (014) ataylab faqat egaga ochiq.
+RPC `SECURITY DEFINER` bo'lgani uchun RLS'ni chetlab o'tadi — shuning uchun
+kassirga qaytarish va foyda ustunlari `null` qaytariladi. Mavjud chegara
+kengaytirilmadi.
+
+**Qaytarishlarni biriktirish:** `returns` da kassir ustuni yo'q, faqat
+`sale_id`. Qaytarish **sotuvni qilgan** kassirga biriktiriladi — hisobot
+uchun ma'noli savol "bu kassir sotgan tovarning qanchasi qaytdi", kim
+rasmiylashtirgani emas.
+
+**Yangi ekran** `/cashier-report`: davr tanlagich (bugun/hafta/oy), jami
+kartasi, har kassir uchun tushum · o'rtacha chek · foyda (egada) · to'lov
+usullari ulushi (bitta gorizontal chiziq) · qaytarish soni va ulushi.
+Sprint 12 primitivlarida qurilgan (`ScreenHeader`, `Card`, `Badge`,
+`SkeletonList`, `PressableScale`, tokenlar).
+
+**Testlar (+13):** `cashier-report-math.ts` sof funksiyalari. Ular ichida
+bitta nozik joy qoplangan — **o'rtacha chek qatorlar o'rtachasining
+o'rtachasi EMAS**: 10×1000 va 1×100000 misolida noto'g'ri usul 50 500,
+to'g'risi 10 000 beradi.
+
+⚠️ **Migratsiya qo'lda ishga tushiriladi:** `ShopScan_1v/supabase/
+migrations/033_cashier_report.sql` — Supabase SQL Editor'da. Ungacha
+ekran "migration 033 ni ishga tushiring" xabarini ko'rsatadi.
+
+**Natija:** `tsc` 0 xato · lint 0 xato · 278 test yashil.
+
 ## 6. Ish tartibi (avvalgi sprintlar uslubida)
 
 branch → kichik Conventional Commits → `tsc` + `jest` yashil → PR (o'zbekcha

@@ -39,6 +39,9 @@ type MenuItem = {
 
 const MENU: MenuItem[] = [
   { icon: "stats-chart-outline", labelKey: "menu.stats", route: "/statistika" },
+  // Ruxsat gate'i YO'Q: kassir ham kiradi, lekin server (migration 033)
+  // unga faqat o'z natijasini beradi.
+  { icon: "people-outline", labelKey: "cashierReport.title", route: "/cashier-report" },
   { icon: "calculator-outline", labelKey: "menu.shiftClose", route: "/shift-close" },
   { icon: "wallet-outline", labelKey: "menu.expenses", route: "/expenses", ownerGated: true },
   { icon: "book-outline", labelKey: "menu.debtBook", route: "/nasiya", debtGated: true },

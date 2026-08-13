@@ -76,8 +76,17 @@ Sinov ro'yxati: `docs/QURILMADA_SINOV.md`.
 (sabab sprint hujjatida). `className` bilan `style={({pressed}) => …}` ni
 birga ishlatish lint bilan taqiqlangan.
 
-Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · kassir kesimidagi
-kengaytirilgan hisobot (`sale.created_by` mobil kodda ishlatilmaydi).
+**Sprint 12** — dizayn tizimi: o'lcham tokenlari (`theme/tokens.ts`),
+primitivlar (`ui/screen · card · badge · icon-chip · skeleton ·
+pressable-scale`), harakat tili (`theme/motion.ts`).
+**Sprint 13 ✅** — kassir hisoboti (`/cashier-report`, migration 033).
+
+**Qoidalar:** o'lchamlar `theme/tokens.ts` dan (xom raqam lint bilan
+taqiqlangan) · animatsiya `theme/motion.ts` dan (`useMotion()` ichida
+reduced-motion gate'i bor) · `PressableScale` faqat `style` qabul qiladi.
+
+Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · Sprint 12–13 qurilmada
+tekshirilmagan (`docs/QURILMADA_SINOV.md`).
 
 ## AI Agent (Antigravity) Rules & Skills
 

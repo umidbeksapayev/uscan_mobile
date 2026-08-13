@@ -1067,5 +1067,21 @@
     "lowStockBody": "{{count}} та маҳсулот тугаб қоляпти",
     "debtorsTitle": "Қарздорлар",
     "debtorsBody": "{{count}} та мижозда қарз бор"
+  },
+  "cashierReport": {
+    "title": "Кассир ҳисоботи",
+    "subtitleOwner": "Ҳар бир кассирнинг давр натижаси",
+    "subtitleSelf": "Сизнинг давр натижангиз",
+    "openBtn": "Кассир ҳисоботи",
+    "selfBadge": "Сиз",
+    "revenue": "Тушум",
+    "profit": "Фойда",
+    "returnsLabel": "Қайтариш",
+    "refundRateLabel": "Қайтариш улуши",
+    "paymentTitle": "Тўлов усуллари",
+    "payDebt": "Насия",
+    "totalRow": "Жами",
+    "empty": "Бу даврда сотув йўқ",
+    "ownOnlyHint": "Сиз фақат ўз натижангизни кўрасиз."
   }
 }

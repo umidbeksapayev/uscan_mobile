@@ -1067,5 +1067,21 @@
     "lowStockBody": "Заканчивается товаров: {{count}}",
     "debtorsTitle": "Должники",
     "debtorsBody": "Клиентов с долгом: {{count}}"
+  },
+  "cashierReport": {
+    "title": "Отчёт по кассирам",
+    "subtitleOwner": "Результат каждого кассира за период",
+    "subtitleSelf": "Ваш результат за период",
+    "openBtn": "Отчёт по кассирам",
+    "selfBadge": "Вы",
+    "revenue": "Выручка",
+    "profit": "Прибыль",
+    "returnsLabel": "Возвраты",
+    "refundRateLabel": "Доля возвратов",
+    "paymentTitle": "Способы оплаты",
+    "payDebt": "В долг",
+    "totalRow": "Итого",
+    "empty": "За этот период продаж нет",
+    "ownOnlyHint": "Вы видите только свой результат."
   }
 }

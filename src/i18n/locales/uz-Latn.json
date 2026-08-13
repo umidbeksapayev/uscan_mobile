@@ -1067,5 +1067,21 @@
     "lowStockBody": "{{count}} ta mahsulot tugab qolyapti",
     "debtorsTitle": "Qarzdorlar",
     "debtorsBody": "{{count}} ta mijozda qarz bor"
+  },
+  "cashierReport": {
+    "title": "Kassir hisoboti",
+    "subtitleOwner": "Har bir kassirning davr natijasi",
+    "subtitleSelf": "Sizning davr natijangiz",
+    "openBtn": "Kassir hisoboti",
+    "selfBadge": "Siz",
+    "revenue": "Tushum",
+    "profit": "Foyda",
+    "returnsLabel": "Qaytarish",
+    "refundRateLabel": "Qaytarish ulushi",
+    "paymentTitle": "To'lov usullari",
+    "payDebt": "Nasiya",
+    "totalRow": "Jami",
+    "empty": "Bu davrda sotuv yo'q",
+    "ownOnlyHint": "Siz faqat o'z natijangizni ko'rasiz."
   }
 }
