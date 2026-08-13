@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { text } from "@/theme/tokens";
+import { PressableScale } from "@/components/ui/pressable-scale";
 
 /**
  * Ekran header'i — orqaga tugmasi + sarlavha (+ ixtiyoriy o'ng tomon).
@@ -47,15 +48,15 @@ export function ScreenHeader({
           : undefined
       }
     >
-      <Pressable
+      <PressableScale
         onPress={onBack ?? (() => router.back())}
         hitSlop={8}
         accessibilityRole="button"
         accessibilityLabel={t("common.back")}
-        className="h-10 w-10 items-center justify-center"
+        style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}
       >
         <Ionicons name="chevron-back" size={24} color={colors.ink} />
-      </Pressable>
+      </PressableScale>
 
       <Text
         accessibilityRole="header"

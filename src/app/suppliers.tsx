@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -14,6 +14,8 @@ import { SupplierFormSheet } from "@/features/suppliers/supplier-form-sheet";
 import type { Supplier } from "@/types/database";
 import { radius } from "@/theme/tokens";
 import { ScreenHeader } from "@/components/ui/screen";
+import { PressableScale } from "@/components/ui/pressable-scale";
+import { SkeletonList } from "@/components/ui/skeleton";
 
 export default function SuppliersScreen() {
   const colors = useColors();
@@ -61,9 +63,7 @@ export default function SuppliersScreen() {
       <ScreenHeader title={t("suppliers.title")} />
 
       {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color={colors.kirim} />
-        </View>
+        <SkeletonList />
       ) : (suppliers?.length ?? 0) === 0 ? (
         <View className="flex-1 items-center justify-center px-10" style={{ gap: 10 }}>
           <View className="h-20 w-20 items-center justify-center rounded-3xl" style={{ backgroundColor: colors.kirimTint }}>
@@ -82,14 +82,14 @@ export default function SuppliersScreen() {
         />
       )}
 
-      <Pressable
+      <PressableScale
         onPress={openNew}
         accessibilityRole="button"
         accessibilityLabel={t("a11y.addSupplier", "Yangi ta'minotchi qo'shish")}
         style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: radius.lg, backgroundColor: colors.kirim, alignItems: "center", justifyContent: "center", ...shadowMd(colors.shadow) }}
       >
         <Ionicons name="add" size={30} color="#fff" />
-      </Pressable>
+      </PressableScale>
 
       {shopId ? (
         <SupplierFormSheet visible={formOpen} shopId={shopId} supplier={editing} onClose={() => setFormOpen(false)} />

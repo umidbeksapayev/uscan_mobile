@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, memo } from "react";
-import { View, Text, TextInput, Pressable, TouchableOpacity, FlatList, ScrollView, Alert } from "react-native";
+import { View, Text, TextInput, Pressable, FlatList, ScrollView, Alert } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -23,6 +23,7 @@ import { priceMiscProduct, isMiscProduct } from "@/features/sell/misc-product";
 import { tabularNums } from "@/theme/typography";
 import type { Product } from "@/types/database";
 import { radius, text } from "@/theme/tokens";
+import { PressableScale } from "@/components/ui/pressable-scale";
 
 const FrequentTile = memo(function FrequentTile({
   product,
@@ -432,9 +433,12 @@ export default function SotuvScreen() {
               {formatCurrency(total)}
             </Text>
           </View>
-          <TouchableOpacity
-            activeOpacity={0.7}
+          {/* Ilovadagi eng ko'p bosiladigan tugma — bosilish javobi shu yerda
+              eng muhim. `TouchableOpacity` o'rniga `PressableScale`. */}
+          <PressableScale
             onPress={onCheckout}
+            accessibilityRole="button"
+            accessibilityLabel={t("sell.payment")}
             style={{
               height: 54,
               backgroundColor: colors.primary,
@@ -448,7 +452,7 @@ export default function SotuvScreen() {
           >
             <Text style={{ fontSize: text.base, fontWeight: "600", color: "#fff" }}>{t("sell.payment")}</Text>
             <Ionicons name="arrow-forward" size={18} color="#fff" />
-          </TouchableOpacity>
+          </PressableScale>
         </View>
       ) : null}
 

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, FlatList, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -13,6 +13,8 @@ import { expensesTotal, categoryLabel, type Expense } from "@/features/expenses/
 import { ExpenseFormSheet, categoryIcon } from "@/features/expenses/expense-form-sheet";
 import { radius, text } from "@/theme/tokens";
 import { ScreenHeader } from "@/components/ui/screen";
+import { PressableScale } from "@/components/ui/pressable-scale";
+import { SkeletonList } from "@/components/ui/skeleton";
 
 const PERIODS = [
   { days: 7, key: "periodWeek", fallback: "Hafta" },
@@ -100,9 +102,7 @@ export default function ExpensesScreen() {
       </View>
 
       {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color={colors.primary} />
-        </View>
+        <SkeletonList />
       ) : isError ? (
         <View className="flex-1 items-center justify-center px-10">
           <Text className="text-center text-sm text-danger">
@@ -129,13 +129,14 @@ export default function ExpensesScreen() {
         />
       )}
 
-      <Pressable
+      <PressableScale
         onPress={openNew}
+        accessibilityRole="button"
         accessibilityLabel={t("expenses.addBtnA11y", "Xarajat qo'shish")}
         style={{ position: "absolute", right: 20, bottom: 24, width: 56, height: 56, borderRadius: radius.lg, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", ...shadowMd(colors.shadow) }}
       >
         <Ionicons name="add" size={30} color="#fff" />
-      </Pressable>
+      </PressableScale>
 
       <ExpenseFormSheet visible={formOpen} expense={editing} onClose={() => setFormOpen(false)} />
     </SafeAreaView>

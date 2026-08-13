@@ -389,11 +389,47 @@ yordamchilari va `CHIP`/`RADIUS` konstantalari o'chdi).
 > tasdiqlangach, 4-bosqichda qo'shiladi. Ishlatilmaydigan komponentni
 > oldindan yozib qo'yish — o'lik kod.
 
-### Qolgan bosqichlar
+### 3-bosqich — harakat tili ✅
 
-- **3-bosqich — harakat tili**: `theme/motion.ts` (davomiylik + easing,
-  ichida `useReducedMotion` gate'i), bosilish javobi, ro'yxat kirishi,
-  skeleton yuklanish.
+`theme/motion.ts` — davomiylik (150/220/320) va easing tokenlari +
+`useMotion()` hook. Hook ichida `useReducedMotion` gate'i bor: sozlama
+yoqilgan bo'lsa barcha davomiylik **0** bo'ladi, ya'ni animatsiya kodini
+shartlab o'tirish shart emas. Sprint 11 da skanerda aynan shunday gate
+qo'lda yozilgan edi — uni har yangi animatsiyada takrorlash unutish uchun
+ochiq eshik edi.
+
+**`PressableScale`** — bosilganda 0.97 ga kichrayadigan `Pressable`. Ilgari
+bosilish javobi tarqoq edi: ba'zi joyda `android_ripple`, ba'zi joyda fon
+rangi almashishi, ko'p joyda **umuman yo'q**. Ko'lam o'zgarishi ikkala
+platformada bir xil ishlaydi, rangga bog'liq emas (tungi rejimda ham
+seziladi) va `transform` GPU'da chiziladi.
+
+Qo'llandi: barcha ekran header'larining orqaga tugmasi, `ListItemCard`
+(4 ekranda ishlatiladi), sotuv ekranidagi to'lov tugmasi (ilovadagi eng ko'p
+bosiladigan tugma) va uchta FAB.
+
+> `PressableScale` faqat `style` qabul qiladi, `className` emas — NativeWind
+> bilan animatsiyalangan komponentni aralashtirish Sprint 10 dagi uslub
+> yo'qolishi bilan bir xil turdagi xavf. Shu sabab `ListItemCard` va header
+> tugmasi `className`dan `style`ga o'tkazildi.
+
+**`Skeleton`** — yuklanish o'rindiqlari (`nasiya`, `xarajatlar`,
+`ta'minotchilar`). `ActivityIndicator` "nimadir yuklanmoqda" deydi, lekin
+nima ekanini ko'rsatmaydi va yuklangach sahifa sakraydi; skeleton kelayotgan
+kontent shaklini oldindan egallaydi.
+
+**Yo'l-yo'lakay ikkita topilma:**
+- React Compiler qoidasi (`react-hooks/immutability`) Reanimated shared
+  value'ga `.value = …` deb yozishni bloklaydi. To'g'ri API — `.get()` /
+  `.set()`. Skanerdagi mavjud kod ham shu API'ga o'tkazildi.
+- `entering`/`exiting` animatsiyalari (`FadeInDown` va h.k.) uchun qo'lda
+  gate KERAK EMAS: Reanimated ularga standart `ReduceMotion.System` qo'yadi.
+  Hujjatlab qo'yildi, aks holda ortiqcha kod yozilardi.
+- `sotuv.tsx` dagi yagona `TouchableOpacity` ham yo'q qilindi (skill
+  `Pressable` ni tavsiya qiladi).
+
+### Qolgan bosqich
+
 - **4-bosqich — ekranlarni ko'chirish**: `Screen` qobig'i + qolgan inline
   uslublar.
 

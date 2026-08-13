@@ -10,7 +10,6 @@ import {
 import Animated, {
   FadeIn,
   FadeOut,
-  Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -34,6 +33,7 @@ import { findProductsByBarcode } from "@/features/sell/lookup";
 import { useCart } from "@/features/sell/cart-store";
 import { useScanReturn } from "@/features/products/scan-return";
 import { radius, text } from "@/theme/tokens";
+import { easing } from "@/theme/motion";
 
 const MASK = "rgba(15,23,42,0.55)";
 
@@ -89,17 +89,13 @@ export default function ScannerScreen() {
   const laser = useSharedValue(0);
   useEffect(() => {
     if (reduceMotion) {
-      laser.value = 0.5;
+      laser.set(0.5);
       return;
     }
-    laser.value = withRepeat(
-      withTiming(1, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
-      -1,
-      true,
-    );
+    laser.set(withRepeat(withTiming(1, { duration: 2200, easing: easing.inOut }), -1, true));
   }, [laser, reduceMotion]);
   const laserStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: laser.value * (WINDOW_H - 6) }],
+    transform: [{ translateY: laser.get() * (WINDOW_H - 6) }],
   }));
 
   useEffect(() => {

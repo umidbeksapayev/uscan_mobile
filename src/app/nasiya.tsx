@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo, useState } from "react";
-import { View, Text, FlatList, Pressable, ActivityIndicator, TextInput } from "react-native";
+import { View, Text, FlatList, Pressable, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -17,6 +17,8 @@ import { debtTotal } from "@/features/customers/debt-math";
 import type { CustomerWithBalance } from "@/types/database";
 import { radius } from "@/theme/tokens";
 import { ScreenHeader } from "@/components/ui/screen";
+import { PressableScale } from "@/components/ui/pressable-scale";
+import { SkeletonList } from "@/components/ui/skeleton";
 
 const CustomerRow = memo(function CustomerRow({
   c,
@@ -147,9 +149,7 @@ export default function NasiyaScreen() {
           </View>
 
           {isLoading ? (
-            <View className="flex-1 items-center justify-center">
-              <ActivityIndicator color={colors.primary} />
-            </View>
+            <SkeletonList />
           ) : isError ? (
             <View className="flex-1 items-center justify-center px-10" style={{ gap: 8 }}>
               <Ionicons name="cloud-offline-outline" size={36} color={colors.muted} />
@@ -177,7 +177,7 @@ export default function NasiyaScreen() {
           )}
 
           {/* FAB — yangi mijoz */}
-          <Pressable
+          <PressableScale
             onPress={() => router.push("/customer-form")}
             accessibilityRole="button"
             accessibilityLabel={t("a11y.addCustomer", "Yangi mijoz qo'shish")}
@@ -195,7 +195,7 @@ export default function NasiyaScreen() {
             }}
           >
             <Ionicons name="person-add" size={24} color="#fff" />
-          </Pressable>
+          </PressableScale>
         </>
       )}
     </SafeAreaView>

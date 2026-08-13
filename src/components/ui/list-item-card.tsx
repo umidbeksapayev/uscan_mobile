@@ -1,7 +1,9 @@
 import { memo, type ReactNode } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 
 import { useColors } from "@/theme/theme-store";
+import { radius } from "@/theme/tokens";
+import { PressableScale } from "@/components/ui/pressable-scale";
 
 /**
  * Ro'yxat kartasi (audit A6) — "doira/ikonka + nom + tavsif + o'ng tomon"
@@ -58,28 +60,35 @@ export const ListItemCard = memo(function ListItemCard({
     </>
   );
 
-  const className = "mb-2.5 flex-row items-center gap-3 rounded-2xl bg-surface p-3.5";
-  const style = { borderWidth: 0.5, borderColor: colors.line };
+  // `className` emas, `style`: qator `PressableScale` ichida chiziladi va
+  // animatsiyalangan komponentda `className` bilan `style`ni aralashtirish —
+  // Sprint 10 dagi uslub yo'qolishi bilan bir xil turdagi xavf.
+  const style = {
+    marginBottom: 10,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.line,
+  };
 
   // Bosilmaydigan qatorlar uchun `Pressable` ishlatilmaydi — aks holda
   // screen reader ularni tugma deb e'lon qiladi.
   if (!onPress) {
-    return (
-      <View className={className} style={style}>
-        {content}
-      </View>
-    );
+    return <View style={style}>{content}</View>;
   }
 
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? title}
-      className={className}
       style={style}
     >
       {content}
-    </Pressable>
+    </PressableScale>
   );
 });
