@@ -82,7 +82,8 @@
     "lint:fix": "expo lint --fix",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "ai:test": "node ./scripts/ai-chat-test.mjs"
   },
   "private": true,
   "overrides": {

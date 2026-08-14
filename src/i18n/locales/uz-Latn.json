@@ -1083,5 +1083,42 @@
     "totalRow": "Jami",
     "empty": "Bu davrda sotuv yo'q",
     "ownOnlyHint": "Siz faqat o'z natijangizni ko'rasiz."
+  },
+  "ai": {
+    "title": "AI yordamchi",
+    "menuLabel": "AI yordamchi",
+    "ownerOnly": "AI yordamchi faqat do'kon egasi uchun",
+    "placeholder": "Savolingizni yozing…",
+    "send": "Yuborish",
+    "newChat": "Yangi suhbat",
+    "thinking": "O'ylayapti…",
+    "retry": "Qayta urinish",
+    "offline": "Internet yo'q — AI javob bera olmaydi",
+    "disclaimer": "AI xato qilishi mumkin. Muhim raqamlarni tekshiring.",
+    "suggestionsTitle": "Nimadan boshlaymiz?",
+    "s1": "Bugun qancha sotdik?",
+    "s2": "Nima tugab qolyapti?",
+    "s3": "Eng ko'p sotilgan 5 mahsulot",
+    "s4": "Bu hafta savdo qanday?",
+    "toolSearch": "Mahsulotlar",
+    "toolToday": "Bugungi savdo",
+    "toolStats": "Statistika",
+    "toolTop": "Reyting",
+    "toolLowStock": "Kam qoldiq",
+    "consentTitle": "AI yordamchi haqida",
+    "consentBody": "Savollaringiz va do'kon statistikasi javob tayyorlash uchun Google Gemini xizmatiga yuboriladi.",
+    "consentPoint1": "Mijozlarning ismi va telefon raqami yuborilmaydi",
+    "consentPoint2": "AI faqat o'qiydi — hech narsani o'zgartira olmaydi",
+    "consentPoint3": "Suhbat faqat sizga ko'rinadi",
+    "consentAccept": "Roziman, davom etish",
+    "error": {
+      "quota_exceeded": "Bugungi savollar limiti tugadi. Ertaga davom eting.",
+      "rate_limited": "Xizmat band. Bir necha soniyadan keyin urinib ko'ring.",
+      "gemini_error": "AI xizmatida xatolik. Qayta urinib ko'ring.",
+      "timeout": "Javob juda uzoq kutildi. Qayta urinib ko'ring.",
+      "owner_only": "AI yordamchi faqat do'kon egasi uchun.",
+      "message_too_long": "Savol juda uzun — qisqartiring.",
+      "unknown": "Xatolik yuz berdi. Qayta urinib ko'ring."
+    }
   }
 }

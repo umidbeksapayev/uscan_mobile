@@ -226,6 +226,30 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 
 ---
 
+## 4b. AI yordamchi (1-bosqich)
+
+> Ko'proq → **AI yordamchi**. Faqat do'kon **egasida** ko'rinadi.
+
+- [ ] **Rozilik ekrani** birinchi ochilishda chiqsin, "Roziman" bosilgach
+      boshqa chiqmasin (ilova qayta ochilganda ham).
+- [ ] **Kassir akkauntida** menyuda AI bandi umuman ko'rinmasin.
+- [ ] **Taklif chiplari** bosilganda savol yuborilsin.
+- [ ] "Bugun qancha sotdik?" → javob **Bosh ekrandagi tushum** bilan mos kelsin.
+- [ ] "Nima tugab qolyapti?" → javob ostida **"Kam qoldiq" chipi** ko'rinsin va
+      ro'yxat katalogdagi kam-qoldiq bilan mos kelsin.
+- [ ] Ketma-ket ikki savol: ikkinchisida AI birinchi savolni **eslasin**
+      (masalan "Undan qanchasi qoldi?").
+- [ ] **Aviarejim** yoqilganda: ogohlantirish banneri chiqsin, yuborish
+      tugmasi o'chsin.
+- [ ] Javob kelayotganda **"O'ylayapti…"** ko'rsatkichi chiqsin, kiritish
+      maydoni bloklansin.
+- [ ] **Yangi suhbat** tugmasi (o'ngda) ro'yxatni tozalasin va AI oldingi
+      savollarni unutsin.
+- [ ] Uzun javob **ekrandan chiqib ketmasin**, matn belgilanadigan bo'lsin.
+- [ ] Tungi rejimda puffaklar va chiplar o'qilsin.
+
+---
+
 ## 5. Doimiy asosiy oqim (har sprintda)
 
 - [ ] Kirish → do'kon tanlash

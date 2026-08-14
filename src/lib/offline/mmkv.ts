@@ -15,6 +15,7 @@ export const MetaKeys = {
   language: "language", // i18n (P4): uz-Latn | uz-Cyrl | ru
   themeMode: "themeMode", // A9: system | light | dark
   errorLog: "errorLog", // A5: xatolik halqa-buferi (LogEntry[])
+  aiConsent: "aiConsent", // AI: do'kon ma'lumoti Gemini'ga yuborilishiga rozilik
 } as const;
 
 export const meta = {

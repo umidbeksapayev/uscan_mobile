@@ -85,8 +85,22 @@ pressable-scale`), harakat tili (`theme/motion.ts`).
 taqiqlangan) · animatsiya `theme/motion.ts` dan (`useMotion()` ichida
 reduced-motion gate'i bor) · `PressableScale` faqat `style` qabul qiladi.
 
-Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · Sprint 12–13 qurilmada
-tekshirilmagan (`docs/QURILMADA_SINOV.md`).
+**AI yordamchi — 0/1-bosqich ✅** (`docs/AI_ASSISTANT_PLAN_2026-08.md`):
+Supabase Edge Function `ai-chat` (Deno) + Gemini function calling, migration
+`034_ai_chat.sql`, `features/ai` + `/ai-chat` ekrani. Faqat do'kon egasi,
+faqat o'qish, 5 tool (`search_products · get_today_sales · get_sales_stats ·
+get_top_products · get_low_stock`) mavjud RPC'lar ustida.
+
+**AI qoidalari:** `GEMINI_API_KEY` faqat Supabase secrets'da (`EXPO_PUBLIC_*`
+HECH QACHON) · tool'lar foydalanuvchi JWT'si bilan chaqiriladi (RLS), Edge
+Function'da `service_role` yo'q · `cost_price` va mijoz PII AI'ga berilmaydi
+(tekin tier) · model nomi `GEMINI_MODEL` secret'ida, kodga qotirilmaydi.
+Terminal sinovi: `npm run ai:test -- "savol"` · `--diag` · `--models`.
+Deploy: `npx supabase functions deploy ai-chat --project-ref <ref>`.
+
+Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · Sprint 12–13 va AI chat
+qurilmada tekshirilmagan (`docs/QURILMADA_SINOV.md`) · AI 2-bosqichi
+(streaming, tarix siqish, context caching).
 
 ## AI Agent (Antigravity) Rules & Skills
 

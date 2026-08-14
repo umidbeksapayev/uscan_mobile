@@ -13,6 +13,10 @@ module.exports = defineConfig([
       "graphify-out/*",
       "coverage/*",
       "scripts/reset-project.js",
+      // Deno (Edge Function) va Node skriptlari — RN/Expo lint qoidalari
+      // bu muhitlarga taalluqli emas.
+      "supabase/functions/*",
+      "scripts/ai-chat-test.mjs",
     ],
   },
   {

@@ -38,6 +38,15 @@ type MenuItem = {
 };
 
 const MENU: MenuItem[] = [
+  // AI yordamchi — faqat egasi (server ham `is_shop_owner` bilan majburlaydi).
+  // `as Href` — typed-routes tiplari `expo start` da qayta generatsiya bo'ladi
+  // (`/offline-sales` da ham shu naqsh).
+  {
+    icon: "sparkles-outline",
+    labelKey: "ai.menuLabel",
+    route: "/ai-chat" as Href,
+    ownerGated: true,
+  },
   { icon: "stats-chart-outline", labelKey: "menu.stats", route: "/statistika" },
   // Ruxsat gate'i YO'Q: kassir ham kiradi, lekin server (migration 033)
   // unga faqat o'z natijasini beradi.
