@@ -85,7 +85,7 @@ pressable-scale`), harakat tili (`theme/motion.ts`).
 taqiqlangan) · animatsiya `theme/motion.ts` dan (`useMotion()` ichida
 reduced-motion gate'i bor) · `PressableScale` faqat `style` qabul qiladi.
 
-**AI yordamchi — 0–3-bosqich ✅** (`docs/AI_ASSISTANT_PLAN_2026-08.md`):
+**AI yordamchi — 0–4-bosqich ✅** (`docs/AI_ASSISTANT_PLAN_2026-08.md`):
 Supabase Edge Function `ai-chat` (Deno) + Gemini function calling, migration
 `034_ai_chat.sql` / `035_ai_message_rating.sql`, `features/ai` + `/ai-chat`
 ekrani, Bosh ekran header'ida "✨ AI" tugmasi. Faqat do'kon egasi, faqat
@@ -96,6 +96,13 @@ get_inventory_summary`. Javob SSE oqimi bilan keladi (klientda `expo/fetch` —
 RN'ning oddiy `fetch`'ida `response.body` yo'q), uzun suhbat xulosaga
 siqiladi, javobga 👍/👎 qo'yiladi, tool topgan mahsulotlar chat ostida
 bosiladigan karta bo'lib `product-form` ga olib boradi.
+
+**AI yozuv amallari (4-bosqich):** `propose_price_change` /
+`propose_stock_change` — AI faqat TAKLIF yozadi (`ai_actions`, migration 036),
+o'zgarishni foydalanuvchi tasdiqlagach **ilova** bajaradi (`updateProduct`).
+Edge Function'da bitta ham `update` yo'q. Ruxsat Sozlamalarda (default
+yoqilgan; haqiqiy himoya — tasdiq kartasi). Ommaviy amal qo'shilsa alohida
+ruxsat qaytadan kerak bo'ladi.
 
 **AI qoidalari:** `GEMINI_API_KEY` faqat Supabase secrets'da (`EXPO_PUBLIC_*`
 HECH QACHON) · tool'lar foydalanuvchi JWT'si bilan chaqiriladi (RLS), Edge
@@ -112,7 +119,7 @@ ko'riladi (rozilik matni ham yangilanishi kerak).
 
 Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · Sprint 12–13 qurilmada
 tekshirilmagan (`docs/QURILMADA_SINOV.md`) · pullik tier uchun xalqaro karta ·
-AI 4-bosqichi (yozuv amallari, "propose → confirm" tasdiq kartasi).
+AI 5-bosqichi (proaktiv xulosa, anomaliya alerti, buyurtma maslahati, ovoz).
 
 ## AI Agent (Antigravity) Rules & Skills
 

@@ -328,7 +328,7 @@ Mavjud primitivlarga tayanadi: `ScreenHeader`, `Card`, `Badge`, `Skeleton`,
 | **1** | **MVP chat** | Migration 034, `ai-chat`, 5 tool, chat ekrani, rozilik, kvota | 4–6 kun |
 | **2 ✅** | Ishonchlilik | Streaming (SSE), tarix siqish, retry/timeout, Diagnostikaga ulash, 👍/👎 (migration 035). **Context caching qoldirildi** — pastdagi izohga qarang | 3–4 kun |
 | **3 ✅** | Tool kengaytmasi | +4 tool (9 ta), bosiladigan mahsulot kartalari, `product-form` ga deep-link. `get_cashier_report` va `get_debts` — pullik tier'ga qoldirildi (PII) | 3–4 kun |
-| **4** | Yozuv amallari | propose→confirm, L1 amallar, audit jurnali, Sozlamada "AI yozuv" tugmasi | 4–5 kun |
+| **4 ✅** | Yozuv amallari | propose→confirm, narx va qoldiq, `ai_actions` jurnali (migration 036), Sozlamada o'chirish tugmasi (default yoqilgan) | 4–5 kun |
 | **5** | Proaktivlik | Kunlik xulosa push (migration 032 + `get_owner_summaries`), anomaliya alerti, buyurtma maslahati, ovozli kiritish | 5–7 kun |
 | **6** | Kengaytma | Telegram AI-bot (mavjud `telegram` feature), rasm orqali kiritish, PDF hisobot (`expo-print`), ko'p do'kon tahlili | — |
 
