@@ -99,6 +99,54 @@ function ErrorBubble({ code, onRetry }: { code: string; onRetry: () => void }) {
 }
 
 /**
+ * Javob sifatini baholash (👍/👎).
+ *
+ * Nima uchun: AI javobi to'g'ri yoki noto'g'ri ekanini faqat foydalanuvchi
+ * biladi. To'plangan bahо keyinchalik system prompt'ni yaxshilash uchun
+ * ishlatiladi (yaxshi javoblar — few-shot misol, yomonlari — qoida).
+ */
+const RateRow = memo(function RateRow({
+  rating,
+  onRate,
+}: {
+  rating?: 1 | -1;
+  onRate: (value: 1 | -1) => void;
+}) {
+  const colors = useColors();
+  const { t } = useTranslation();
+
+  const buttons: { value: 1 | -1; on: keyof typeof Ionicons.glyphMap; off: keyof typeof Ionicons.glyphMap; label: string }[] = [
+    { value: 1, on: "thumbs-up", off: "thumbs-up-outline", label: t("ai.rateUp") },
+    { value: -1, on: "thumbs-down", off: "thumbs-down-outline", label: t("ai.rateDown") },
+  ];
+
+  return (
+    <View className="mt-2 flex-row justify-end gap-1">
+      {buttons.map((b) => {
+        const active = rating === b.value;
+        return (
+          <PressableScale
+            key={b.value}
+            onPress={() => onRate(b.value)}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={b.label}
+            accessibilityState={{ selected: active }}
+            style={{ padding: space.xs }}
+          >
+            <Ionicons
+              name={active ? b.on : b.off}
+              size={text.base}
+              color={active ? colors.primary : colors.tabInactive}
+            />
+          </PressableScale>
+        );
+      })}
+    </View>
+  );
+});
+
+/**
  * Bitta xabar puffagi.
  *
  * `memo` — chat ro'yxatida har yangi xabar qo'shilganda eskilarni qayta
@@ -107,15 +155,20 @@ function ErrorBubble({ code, onRetry }: { code: string; onRetry: () => void }) {
 export const MessageBubble = memo(function MessageBubble({
   message,
   onRetry,
+  onRate,
 }: {
   message: AiMessage;
   onRetry: () => void;
+  onRate: (id: string, value: 1 | -1) => void;
 }) {
   const colors = useColors();
 
   if (message.errorCode) {
     return <ErrorBubble code={message.errorCode} onRetry={onRetry} />;
   }
+
+  // Oqim boshlanmagan bo'sh puffak ko'rinmaydi — o'rnida "O'ylayapti…" turadi.
+  if (message.role === "model" && !message.text && !message.tools?.length) return null;
 
   const isUser = message.role === "user";
 
@@ -136,6 +189,11 @@ export const MessageBubble = memo(function MessageBubble({
       >
         {message.text}
       </Text>
+
+      {/* Baho faqat saqlangan javobda — oqim tugamaguncha `serverId` yo'q. */}
+      {!isUser && message.serverId ? (
+        <RateRow rating={message.rating} onRate={(value) => onRate(message.id, value)} />
+      ) : null}
     </View>
   );
 });

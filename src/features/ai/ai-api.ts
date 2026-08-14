@@ -10,6 +10,8 @@ import { uuidv4 } from "@/lib/uuid";
 
 export interface AiChatResult {
   chat_id: string;
+  /** Saqlangan javob xabari — 👍/👎 shu qatorga yoziladi. */
+  message_id: string | null;
   text: string;
   /** Javob tayyorlashda chaqirilgan tool nomlari (UI da chip sifatida). */
   tools_used: string[];
@@ -64,6 +66,22 @@ async function parseError(error: unknown): Promise<AiChatError> {
   } catch {
     return new AiChatError("unknown");
   }
+}
+
+/**
+ * Javobga baho (👍 = 1, 👎 = -1).
+ *
+ * To'g'ridan-to'g'ri jadvalga yoziladi: RLS o'z chatini, migration 035 dagi
+ * ustun darajasidagi GRANT esa faqat `rating` ustunini o'zgartirishga ruxsat
+ * beradi — javob matni yoki token hisobi klientdan buzilmaydi.
+ * Xato jim yutiladi: baho — ikkilamchi harakat, u tufayli chat buzilmasin.
+ */
+export async function rateAiMessage(messageId: string, rating: 1 | -1): Promise<void> {
+  const { error } = await supabase
+    .from("ai_messages")
+    .update({ rating })
+    .eq("id", messageId);
+  if (error) throw new Error(error.message);
 }
 
 export interface SendAiMessageParams {

@@ -9,6 +9,13 @@ export interface GeminiPart {
   text?: string;
   functionCall?: { name: string; args?: Record<string, unknown> };
   functionResponse?: { name: string; response: Record<string, unknown> };
+  /**
+   * Gemini 3.x fikrlash imzosi. Tool chaqiruvi tarixga QAYTARILGANDA shu imzo
+   * ham bo'lishi SHART, aks holda 400: "Function call is missing a
+   * thought_signature". Shu sabab model javobining bo'laklari qayta
+   * qurilmaydi — xom holida saqlanadi.
+   */
+  thoughtSignature?: string;
 }
 
 export interface GeminiContent {
@@ -233,6 +240,107 @@ export async function generateWithRetry(
   }
 
   throw lastError;
+}
+
+/**
+ * Oqim hodisasi.
+ *
+ * `part` — Gemini bergan bo'lak XOM holida (`thoughtSignature` bilan birga).
+ * Uni ajratib qayta qurish mumkin emas: 3.x modellari tool tarixida imzoni
+ * talab qiladi.
+ */
+export type StreamEvent =
+  | { type: "part"; part: GeminiPart }
+  | { type: "usage"; input: number; output: number };
+
+/**
+ * Oqimli generatsiya (`streamGenerateContent?alt=sse`).
+ *
+ * Bu yerda `withDeadline` ATAYIN ishlatilmaydi: oqim uzun bo'lishi tabiiy va
+ * har urinish uchun qat'iy 10 s chegara javobni o'rtasidan kesib qo'yardi.
+ * Umumiy byudjet (`opts.signal`) baribir amal qiladi.
+ */
+export async function* streamGenerate(opts: CallOptions): AsyncGenerator<StreamEvent> {
+  const thinking =
+    opts.thinkingOverride !== undefined
+      ? opts.thinkingOverride
+      : THINKING_VARIANTS[thinkingVariant];
+
+  const res = await fetch(`${GEMINI_URL}/${opts.model}:streamGenerateContent?alt=sse`, {
+    method: "POST",
+    signal: opts.signal,
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": opts.apiKey,
+    },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: opts.system }] },
+      contents: opts.contents,
+      tools: opts.tools.length ? [{ functionDeclarations: opts.tools }] : undefined,
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: opts.maxOutputTokens ?? 2048,
+        ...(thinking ? { thinkingConfig: thinking } : {}),
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const raw = await res.text();
+    console.error("gemini_stream_http", res.status, raw.slice(0, 600));
+    let detail = raw.slice(0, 200);
+    try {
+      detail = JSON.parse(raw)?.error?.message?.slice(0, 200) ?? detail;
+    } catch {
+      // JSON emas
+    }
+    throw new GeminiError(`gemini_${res.status}`, res.status, res.status !== 400, detail);
+  }
+  if (!res.body) throw new GeminiError("gemini_no_body", 502, true);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    // SSE: hodisalar `\n` bilan ajraladi; oxirgi to'liqmas qator buferda qoladi.
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+
+      let chunk: Record<string, unknown>;
+      try {
+        chunk = JSON.parse(payload);
+      } catch {
+        continue; // yarim kelgan bo'lak — keyingi o'qishda to'liq bo'ladi
+      }
+
+      const candidate = (chunk as { candidates?: { content?: GeminiContent }[] })
+        .candidates?.[0];
+      for (const part of candidate?.content?.parts ?? []) {
+        yield { type: "part", part };
+      }
+
+      const usage = (chunk as {
+        usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
+      }).usageMetadata;
+      if (usage) {
+        yield {
+          type: "usage",
+          input: usage.promptTokenCount ?? 0,
+          output: usage.candidatesTokenCount ?? 0,
+        };
+      }
+    }
+  }
 }
 
 /** Javobdagi barcha matn bo'laklari. */

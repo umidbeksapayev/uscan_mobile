@@ -248,6 +248,17 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 - [ ] Uzun javob **ekrandan chiqib ketmasin**, matn belgilanadigan bo'lsin.
 - [ ] Tungi rejimda puffaklar va chiplar o'qilsin.
 
+**2-bosqich (oqim + baho):**
+
+- [ ] Javob **so'zma-so'z chiqsin** (oqim) — bo'sh ekranda kutish bo'lmasin.
+- [ ] Tool chaqirilganda chip **javob kelishidan oldin** ko'rinsin.
+- [ ] Javob tugagach ostida **👍/👎** paydo bo'lsin; bosilganda belgilanib
+      qolsin va ilova qayta ochilganda bazada saqlangan bo'lsin.
+- [ ] Oqim o'rtasida internetni uzsangiz — xato puffagi + "Qayta urinish"
+      chiqsin, ilova qotib qolmasin.
+- [ ] 20+ xabarli uzun suhbatda javob sifati pasaymasin (eski qism xulosaga
+      siqiladi — AI oldingi mavzuni umumiy holda eslashi kerak).
+
 ---
 
 ## 5. Doimiy asosiy oqim (har sprintda)

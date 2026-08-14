@@ -326,7 +326,7 @@ Mavjud primitivlarga tayanadi: `ScreenHeader`, `Card`, `Badge`, `Skeleton`,
 |---|---|---|---|
 | **0** | Tayyorgarlik | AI Studio kaliti (tekin), `supabase secrets set`, API restriction, model ID tanlash, "hello world" Edge Function | 1 kun |
 | **1** | **MVP chat** | Migration 034, `ai-chat`, 5 tool, chat ekrani, rozilik, kvota | 4–6 kun |
-| **2** | Ishonchlilik | Streaming (SSE), tarix siqish, context caching, retry/timeout, Diagnostikaga ulash, 👍/👎 | 3–4 kun |
+| **2 ✅** | Ishonchlilik | Streaming (SSE), tarix siqish, retry/timeout, Diagnostikaga ulash, 👍/👎 (migration 035). **Context caching qoldirildi** — pastdagi izohga qarang | 3–4 kun |
 | **3** | Tool kengaytmasi | +5 tool, boy javob kartalari, chatdan ekranga deep-link | 3–4 kun |
 | **4** | Yozuv amallari | propose→confirm, L1 amallar, audit jurnali, Sozlamada "AI yozuv" tugmasi | 4–5 kun |
 | **5** | Proaktivlik | Kunlik xulosa push (migration 032 + `get_owner_summaries`), anomaliya alerti, buyurtma maslahati, ovozli kiritish | 5–7 kun |
@@ -355,6 +355,8 @@ sinov bandlari · `graphify update .`.
 
 | Masala | Holat |
 |---|---|
+| **Context caching** | ❌ Qo'llanmadi. Gemini'ning ANIQ (explicit) keshi minimal token chegarasiga ega, bizning o'zgarmas blok (`systemInstruction` + 5 tool sxemasi) ~900 token — chegaradan past, ya'ni kesh yaratib bo'lmaydi. Yashirin (implicit) kesh Google tomonidan avtomatik qo'llanadi. Tool soni 10 taga yetganda qayta ko'riladi. |
+| **Gemini 3.x `thoughtSignature`** | Tool tarixi qaytarilganda `functionCall` bo'laklari **xom holida** saqlanishi shart (`chat-run.ts`). Bo'laklarni `{name, args}` ga ajratib qayta qurish 400 xatosiga olib keladi. |
 | **Xalqaro karta** (Google Cloud billing) | ❌ Hozircha yo'q. Real chiqishdan oldin hal qilinishi shart. Variantlar: O'zbek banklarining virtual USD Visa kartasi · Payoneer · yuridik shaxs kartasi. Uchinchi tomon API resellerlari **tavsiya qilinmaydi** (ma'lumot yana bir noma'lum tomondan o'tadi). |
 | Gemini model ID | Deploy oldidan tasdiqlanadi; ENV'da saqlanadi, kodga qotirilmaydi |
 | Tekin tier limitlari | Aniq RPM/RPD raqamlari docs'dan tasdiqlanadi |

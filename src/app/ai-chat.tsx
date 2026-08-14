@@ -117,7 +117,7 @@ export default function AiChatScreen() {
 
   const [consent, setConsent] = useState(() => meta.getBool(MetaKeys.aiConsent));
   const [draft, setDraft] = useState("");
-  const { messages, pending, send, retry, reset } = useAiChat(shopId);
+  const { messages, pending, send, retry, reset, rate } = useAiChat(shopId);
 
   const acceptConsent = useCallback(() => {
     meta.setBool(MetaKeys.aiConsent, true);
@@ -142,11 +142,17 @@ export default function AiChatScreen() {
   const data = useMemo(() => [...messages].reverse(), [messages]);
 
   const renderItem = useCallback(
-    ({ item }: { item: AiMessage }) => <MessageBubble message={item} onRetry={retry} />,
-    [retry],
+    ({ item }: { item: AiMessage }) => (
+      <MessageBubble message={item} onRetry={retry} onRate={rate} />
+    ),
+    [retry, rate],
   );
 
   const canSend = draft.trim().length > 0 && !pending && online && Boolean(shopId);
+
+  // "O'ylayapti…" faqat birinchi bo'lakgacha — matn oqa boshlagach ortiqcha.
+  const last = messages[messages.length - 1];
+  const showTyping = pending && !(last?.role === "model" && last.text.length > 0);
 
   if (!isOwner) {
     return (
@@ -187,7 +193,7 @@ export default function AiChatScreen() {
             contentContainerStyle={{ padding: space.lg, gap: space.sm }}
             ListHeaderComponent={
               // `inverted` — header pastda, ya'ni oxirgi xabardan keyin chiqadi.
-              pending ? <TypingRow /> : null
+              showTyping ? <TypingRow /> : null
             }
           />
 

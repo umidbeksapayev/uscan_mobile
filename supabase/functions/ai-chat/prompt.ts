@@ -10,6 +10,8 @@ export interface PromptContext {
   today: string;
   /** Do'kondagi kategoriya nomlari (AI savolni to'g'ri tushunishi uchun). */
   categories: string[];
+  /** Suhbatning siqilgan qismi (uzun chatda eski xabarlar o'rniga). */
+  summary?: string | null;
 }
 
 export function buildSystemPrompt(ctx: PromptContext): string {
@@ -36,6 +38,9 @@ export function buildSystemPrompt(ctx: PromptContext): string {
     "   foydalanuvchini tegishli ekranga yo'naltir.",
     "9. Mijozlarning ismi va telefon raqami senga berilmaydi — so'ralsa,",
     "   Nasiya ekranidan ko'rishni taklif qil.",
+
+    // Eski xabarlar o'rniga siqilgan xulosa (token tejash).
+    ctx.summary ? `SUHBATNING OLDINGI QISMI: ${ctx.summary}` : "",
   ]
     .filter(Boolean)
     .join("\n");

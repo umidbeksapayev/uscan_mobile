@@ -1093,6 +1093,8 @@
     "newChat": "Yangi suhbat",
     "thinking": "O'ylayapti…",
     "retry": "Qayta urinish",
+    "rateUp": "Javob foydali bo'ldi",
+    "rateDown": "Javob foydali bo'lmadi",
     "offline": "Internet yo'q — AI javob bera olmaydi",
     "disclaimer": "AI xato qilishi mumkin. Muhim raqamlarni tekshiring.",
     "suggestionsTitle": "Nimadan boshlaymiz?",

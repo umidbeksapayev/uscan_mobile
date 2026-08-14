@@ -97,8 +97,69 @@ if (memberError || !member) {
 
 // `--models` — kalitga ochiq modellar ro'yxati (Google nomlarni eskirtirganda).
 // `--diag`   — har bosqichni alohida o'lchash (qaysi qadam sekin/yiqilgan).
+// `--stream` — SSE oqimi (matn bo'laklab chiqadi, ilovadagidek).
 const listOnly = question === "--models";
 const diagOnly = question === "--diag";
+const streamMode = question === "--stream";
+
+if (streamMode) {
+  const { data: s } = await supabase.auth.getSession();
+  const streamQuestion = process.argv[3] ?? "Bugun qancha sotdik?";
+  console.log(`\n→ Oqim: ${streamQuestion}\n`);
+
+  const started = Date.now();
+  let firstChunkAt = 0;
+
+  const res = await fetch(`${url}/functions/v1/ai-chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${s.session.access_token}`,
+      apikey: anonKey,
+    },
+    body: JSON.stringify({
+      shop_id: member.shop_id,
+      message: streamQuestion,
+      stream: true,
+    }),
+  });
+
+  if (!res.ok) {
+    console.error("✗ Xato:", res.status, await res.text());
+    process.exit(1);
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for await (const chunk of res.body) {
+    buffer += decoder.decode(chunk, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload) continue;
+      const e = JSON.parse(payload);
+      if (e.type === "delta") {
+        if (!firstChunkAt) firstChunkAt = Date.now() - started;
+        process.stdout.write(e.text);
+      } else if (e.type === "tool") {
+        console.log(`\n[tool: ${e.name}]`);
+      } else if (e.type === "reset") {
+        console.log("\n[reset]");
+      } else if (e.type === "done") {
+        console.log("\n" + "─".repeat(60));
+        console.log("birinchi bo'lak :", `${firstChunkAt} ms`);
+        console.log("jami            :", `${Date.now() - started} ms`);
+        console.log("tool'lar        :", e.tools_used?.join(", ") || "yo'q");
+        console.log("token           :", `${e.usage?.input} / ${e.usage?.output}`);
+      } else if (e.type === "error") {
+        console.error("\n✗ Oqim xatosi:", e.error, e.gemini_status ?? "", e.detail ?? "");
+      }
+    }
+  }
+  process.exit(0);
+}
 
 const body = { shop_id: member.shop_id };
 if (listOnly) body.list_models = true;
