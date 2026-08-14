@@ -233,6 +233,8 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 - [ ] **Rozilik ekrani** birinchi ochilishda chiqsin, "Roziman" bosilgach
       boshqa chiqmasin (ilova qayta ochilganda ham).
 - [ ] **Kassir akkauntida** menyuda AI bandi umuman ko'rinmasin.
+- [ ] **Bosh ekran header'ida** ✨ ikonka (qo'ng'iroqcha yonida) egasida
+      ko'rinsin, kassirda ko'rinmasin; bosilganda chat ochilsin.
 - [ ] **Taklif chiplari** bosilganda savol yuborilsin.
 - [ ] "Bugun qancha sotdik?" → javob **Bosh ekrandagi tushum** bilan mos kelsin.
 - [ ] "Nima tugab qolyapti?" → javob ostida **"Kam qoldiq" chipi** ko'rinsin va

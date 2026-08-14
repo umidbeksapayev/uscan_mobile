@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,7 +25,7 @@ import { trendTotals, periodSplit, pctChange } from "@/features/dashboard/dashbo
 import { maybeScheduleLowStockReminder } from "@/features/notifications/notify";
 import { useAlerts } from "@/features/notifications/use-alerts";
 import { TrendChart } from "@/features/dashboard/trend-chart";
-import { text } from "@/theme/tokens";
+import { radius, text } from "@/theme/tokens";
 import {
   GradientStat,
   Section,
@@ -116,6 +117,53 @@ export default function HomeScreen() {
               </Text>
             ) : null}
           </View>
+
+          {/*
+            AI yordamchi — faqat egasi (server ham `is_shop_owner` bilan
+            majburlaydi). "Ko'proq" menyusidagi band ham qoladi: bu yerdagi
+            ikonka topilishi uchun, u yerdagisi izlab kelganlar uchun.
+
+            Qo'ng'iroqchadan RANG bilan ajratilgan: ikkalasi ham neytral bo'lsa,
+            yonma-yon turgan ikki ikonka "bildirishnoma" bo'lib o'qiladi.
+            Ikonka — ✨ (robot emas): menyu bandi va rozilik ekranida ham shu,
+            ya'ni uch joyda bitta narsa ekani darhol bilinadi.
+          */}
+          {isOwner ? (
+            <Pressable
+              onPress={() => router.push("/ai-chat")}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={t("ai.title")}
+            >
+              <LinearGradient
+                colors={GRAD.blue}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  height: 40,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 5,
+                  paddingHorizontal: 13,
+                  borderRadius: radius.full,
+                  ...shadowGlow(GRAD.blue[0]),
+                }}
+              >
+                <Ionicons name="sparkles" size={15} color="#fff" />
+                {/* "AI" tarjima qilinmaydi — uch tilda ham bir xil o'qiladi. */}
+                <Text
+                  style={{
+                    fontSize: text.xs,
+                    fontWeight: "800",
+                    color: "#fff",
+                    letterSpacing: 0.6,
+                  }}
+                >
+                  AI
+                </Text>
+              </LinearGradient>
+            </Pressable>
+          ) : null}
 
           {/*
             Bildirishnomalar markazi. Sanoq — muammo TURLARI soni (0–3), ularning
