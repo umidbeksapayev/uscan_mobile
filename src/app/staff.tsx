@@ -15,9 +15,11 @@ import { Badge } from "@/components/ui/badge";
 import { IconChip } from "@/components/ui/icon-chip";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ListItemCard } from "@/components/ui/list-item-card";
-import { useActiveMembership } from "@/features/auth/use-memberships";
+import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
 import { PERMISSION_LABELS } from "@/features/auth/permissions";
 import { useStaff, useAddMember, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
+import { parsePlanLimitError, type PlanLimitError } from "@/features/billing/parse-plan-error";
+import { UpgradeSheet } from "@/features/billing/upgrade-sheet";
 import type { MemberPermissions, ShopMemberRow } from "@/types/database";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -251,7 +253,7 @@ export default function StaffScreen() {
   const { t } = useTranslation();
   const active = useActiveMembership();
   const shopId = active?.shop.id;
-  const isOwner = active?.role === "owner";
+  const { isOwner } = useActivePermissions();
 
   const { data: staff, isLoading, isError, error } = useStaff(isOwner ? shopId : undefined);
   const addMut = useAddMember(shopId);
@@ -260,14 +262,22 @@ export default function StaffScreen() {
 
   const [email, setEmail] = useState("");
   const [editing, setEditing] = useState<ShopMemberRow | null>(null);
+  const [planLimitError, setPlanLimitError] = useState<PlanLimitError | null>(null);
 
   function onAdd() {
     const e = email.trim();
     if (!e) return;
     addMut.mutate(e, {
       onSuccess: () => setEmail(""),
-      onError: (err) =>
-        toast.error(t("staff.addError"), (err as Error)?.message ?? t("common.unknownError")),
+      onError: (err) => {
+        const message = (err as Error)?.message;
+        const planErr = parsePlanLimitError(message);
+        if (planErr) {
+          setPlanLimitError(planErr);
+          return;
+        }
+        toast.error(t("staff.addError"), message ?? t("common.unknownError"));
+      },
     });
   }
 
@@ -444,6 +454,13 @@ export default function StaffScreen() {
         onSave={onSavePerms}
         onRemove={onRemove}
         saving={permsMut.isPending}
+      />
+
+      <UpgradeSheet
+        visible={!!planLimitError}
+        onClose={() => setPlanLimitError(null)}
+        limitKey={planLimitError?.key ?? null}
+        limit={planLimitError?.limit}
       />
     </SafeAreaView>
   );

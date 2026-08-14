@@ -48,6 +48,7 @@ export default function RootLayout() {
                     }}
                   >
                     <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="(onboarding)" />
                     <Stack.Screen name="(tabs)" />
                     <Stack.Screen name="scanner" options={{ presentation: "fullScreenModal" }} />
                     <Stack.Screen name="product-form" />
@@ -62,6 +63,7 @@ export default function RootLayout() {
                     <Stack.Screen name="categories" />
                     <Stack.Screen name="import-products" />
                     <Stack.Screen name="settings" />
+                    <Stack.Screen name="subscription" />
                     <Stack.Screen name="offline-sales" />
                     <Stack.Screen name="printer-settings" />
                     <Stack.Screen name="diagnostics" />

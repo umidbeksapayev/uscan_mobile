@@ -6,6 +6,9 @@ jest.mock("@/lib/supabase", () => ({
   supabase: {
     auth: { getUser: jest.fn() },
     from: jest.fn(),
+    // Token yozish `save_push_token` RPC orqali (migration 043) — to'g'ridan-
+    // to'g'ri upsert emas, ko'r. notify.ts dagi izoh.
+    rpc: jest.fn(),
   },
 }));
 
@@ -89,8 +92,7 @@ describe("registerPushToken", () => {
     mockNotif.getPermissionsAsync.mockResolvedValue({ granted: true });
     mockNotif.getExpoPushTokenAsync.mockResolvedValue({ data: "ExponentPushToken[abc]" });
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({ data: { user: { id: "u1" } } });
-    const upsert = jest.fn().mockResolvedValue({ error: { message: "db down" } });
-    (supabase.from as jest.Mock).mockReturnValue({ upsert });
+    (supabase.rpc as jest.Mock).mockResolvedValue({ error: { message: "db down" } });
 
     const res = await registerPushToken("shop-1");
 
@@ -101,15 +103,17 @@ describe("registerPushToken", () => {
     mockNotif.getPermissionsAsync.mockResolvedValue({ granted: true });
     mockNotif.getExpoPushTokenAsync.mockResolvedValue({ data: "ExponentPushToken[abc]" });
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({ data: { user: { id: "u1" } } });
-    const upsert = jest.fn().mockResolvedValue({ error: null });
-    (supabase.from as jest.Mock).mockReturnValue({ upsert });
+    (supabase.rpc as jest.Mock).mockResolvedValue({ error: null });
 
     const res = await registerPushToken("shop-1");
 
     expect(res).toEqual({ ok: true });
-    expect(upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ user_id: "u1", shop_id: "shop-1", token: "ExponentPushToken[abc]" }),
-      { onConflict: "token" },
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      "save_push_token",
+      expect.objectContaining({
+        p_token: "ExponentPushToken[abc]",
+        p_shop_id: "shop-1",
+      }),
     );
     expect(meta.setString).toHaveBeenCalledWith("notifPushToken", "ExponentPushToken[abc]");
   });
@@ -135,8 +139,7 @@ describe("enablePush", () => {
     mockNotif.requestPermissionsAsync.mockResolvedValue({ granted: true });
     mockNotif.getExpoPushTokenAsync.mockResolvedValue({ data: "ExponentPushToken[abc]" });
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({ data: { user: { id: "u1" } } });
-    const upsert = jest.fn().mockResolvedValue({ error: null });
-    (supabase.from as jest.Mock).mockReturnValue({ upsert });
+    (supabase.rpc as jest.Mock).mockResolvedValue({ error: null });
 
     const res = await enablePush("shop-1");
 

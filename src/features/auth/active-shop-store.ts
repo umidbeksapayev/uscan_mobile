@@ -8,6 +8,9 @@ interface ActiveShopState {
    *  yangi a'zolik, `useActiveMembership` hal qiladi). */
   activeShopId: string | null;
   setActiveShopId: (id: string) => void;
+  /** Chiqishda chaqiriladi — aks holda qurilmada keyingi kirgan foydalanuvchi
+   *  avvalgi userning faol do'konini meros qilib olardi. */
+  reset: () => void;
 }
 
 export const useActiveShopStore = create<ActiveShopState>((set) => ({
@@ -15,5 +18,9 @@ export const useActiveShopStore = create<ActiveShopState>((set) => ({
   setActiveShopId: (id) => {
     meta.setString(MetaKeys.activeShopId, id);
     set({ activeShopId: id });
+  },
+  reset: () => {
+    meta.remove(MetaKeys.activeShopId);
+    set({ activeShopId: null });
   },
 }));

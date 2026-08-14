@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import * as Linking from "expo-linking";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
@@ -11,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { parseRecoveryParams } from "@/features/auth/parse-recovery-url";
 import { useRecoveryStore } from "@/features/auth/recovery-store";
+import { AuthShell } from "@/features/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 
@@ -83,8 +83,11 @@ export default function ResetPasswordScreen() {
         return;
       }
       setStatus("done");
+      // Bu yerda qo'lda yo'naltirmaymiz — AuthGate `recoveryActive`
+      // yolg'onga aylanganini ko'rib, do'kon holatiga qarab (tabs) yoki
+      // (onboarding)ga to'g'ri yo'naltiradi (parolni tiklagan user hali
+      // onboarding'ni tugatmagan bo'lishi ham mumkin, garchi kamdan-kam).
       setRecoveryActive(false);
-      router.replace("/(tabs)");
     } catch (e) {
       setErrorMsg(e instanceof Error ? e.message : String(e));
     } finally {
@@ -92,79 +95,67 @@ export default function ResetPasswordScreen() {
     }
   }
 
+  if (status === "checking") {
+    return (
+      <AuthShell title={t("auth.checkingLink")}>
+        <View className="items-center py-4">
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      </AuthShell>
+    );
+  }
+
+  if (status === "invalid") {
+    return (
+      <AuthShell title={t("auth.linkInvalidTitle")} subtitle={errorMsg ?? t("auth.linkInvalidBody")}>
+        <View className="items-center gap-4">
+          <View
+            className="h-16 w-16 items-center justify-center rounded-full"
+            style={{ backgroundColor: colors.dangerTint }}
+          >
+            <Ionicons name="alert-circle-outline" size={30} color={colors.danger} />
+          </View>
+          <Pressable onPress={() => router.replace("/(auth)/forgot-password")} className="p-2">
+            <Text className="text-sm font-medium text-primary">{t("auth.requestAgain")}</Text>
+          </Pressable>
+        </View>
+      </AuthShell>
+    );
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-bg">
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        {status === "checking" ? (
-          <View className="items-center">
-            <ActivityIndicator color={colors.primary} />
-            <Text className="mt-3 text-sm text-muted">{t("auth.checkingLink")}</Text>
-          </View>
-        ) : status === "invalid" ? (
-          <View className="items-center">
-            <View
-              className="mb-4 h-20 w-20 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.dangerTint }}
-            >
-              <Ionicons name="alert-circle-outline" size={36} color={colors.danger} />
-            </View>
-            <Text className="text-center text-xl font-medium text-ink">{t("auth.linkInvalidTitle")}</Text>
-            <Text className="mt-2 text-center text-sm text-muted">
-              {errorMsg ?? t("auth.linkInvalidBody")}
-            </Text>
-            <Pressable
-              onPress={() => router.replace("/(auth)/forgot-password")}
-              className="mt-6 p-2"
-            >
-              <Text className="text-sm font-medium text-primary">{t("auth.requestAgain")}</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <>
-            <Text className="text-center text-2xl font-medium text-ink">{t("auth.newPasswordTitle")}</Text>
-            <Text className="mb-6 mt-1 text-center text-sm text-muted">
-              {t("auth.newPasswordSubtitle")}
-            </Text>
+    <AuthShell title={t("auth.newPasswordTitle")} subtitle={t("auth.newPasswordSubtitle")}>
+      <View style={{ gap: 14 }}>
+        <Field
+          label={t("auth.newPasswordLabel")}
+          value={password}
+          onChangeText={(v) => {
+            setPassword(v);
+            if (errorMsg) setErrorMsg(null);
+          }}
+          placeholder="••••••••"
+          secureTextEntry
+          autoCapitalize="none"
+          autoComplete="off"
+          textContentType="none"
+        />
+        <Field
+          label={t("auth.confirmPasswordLabel")}
+          value={confirm}
+          onChangeText={(v) => {
+            setConfirm(v);
+            if (errorMsg) setErrorMsg(null);
+          }}
+          placeholder="••••••••"
+          secureTextEntry
+          autoCapitalize="none"
+          autoComplete="off"
+          textContentType="none"
+        />
 
-            <View style={{ gap: 16 }}>
-              <Field
-                label={t("auth.newPasswordLabel")}
-                value={password}
-                onChangeText={(t) => {
-                  setPassword(t);
-                  if (errorMsg) setErrorMsg(null);
-                }}
-                placeholder="••••••••"
-                secureTextEntry
-                autoCapitalize="none"
-                autoComplete="off"
-                textContentType="none"
-              />
-              <Field
-                label={t("auth.confirmPasswordLabel")}
-                value={confirm}
-                onChangeText={(t) => {
-                  setConfirm(t);
-                  if (errorMsg) setErrorMsg(null);
-                }}
-                placeholder="••••••••"
-                secureTextEntry
-                autoCapitalize="none"
-                autoComplete="off"
-                textContentType="none"
-              />
-
-              <Button label={t("common.save")} onPress={onSave} loading={saving} />
-              {errorMsg ? (
-                <Text className="text-center text-sm text-danger">{errorMsg}</Text>
-              ) : null}
-            </View>
-          </>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+        <Button label={t("common.save")} onPress={onSave} loading={saving} />
+        {errorMsg ? <Text className="text-center text-sm text-danger">{errorMsg}</Text> : null}
+      </View>
+    </AuthShell>
   );
 }

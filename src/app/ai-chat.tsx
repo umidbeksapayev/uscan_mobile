@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, TextInput, FlatList, ActivityIndicator, ScrollView } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
@@ -11,8 +11,10 @@ import { useOnline } from "@/lib/use-online";
 import { useKeyboardHeight } from "@/lib/use-keyboard-height";
 import { meta, MetaKeys } from "@/lib/offline/mmkv";
 import { useActiveShopId, useActivePermissions } from "@/features/auth/use-memberships";
+import { useShopPlan } from "@/features/billing/use-plan";
 import { ScreenHeader } from "@/components/ui/screen";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { PressableScale } from "@/components/ui/pressable-scale";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MessageBubble } from "@/features/ai/message-bubble";
@@ -111,6 +113,7 @@ export default function AiChatScreen() {
   const online = useOnline();
   const shopId = useActiveShopId();
   const { isOwner } = useActivePermissions();
+  const { data: plan } = useShopPlan();
   const insets = useSafeAreaInsets();
   const keyboard = useKeyboardHeight();
   const { chatId: openChatId } = useLocalSearchParams<{ chatId?: string }>();
@@ -174,6 +177,25 @@ export default function AiChatScreen() {
       <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
         <ScreenHeader title={t("ai.title")} />
         <EmptyState icon="lock-closed-outline" text={t("ai.ownerOnly")} />
+      </SafeAreaView>
+    );
+  }
+
+  // Free tarifda AI umuman yo'q (ai_daily = 0). Server baribir to'sadi
+  // (`ai_consume_quota`), lekin chatni ochib "kvota tugadi" xatosini
+  // ko'rsatish yolg'on — "ertaga tiklanadi" bu holatda to'g'ri emas.
+  // Shuning uchun bu yerda ochiq taklif ko'rsatiladi.
+  if (plan && plan.limits.ai_daily === 0) {
+    return (
+      <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
+        <ScreenHeader title={t("ai.title")} />
+        <EmptyState icon="sparkles-outline" text={t("billing.aiNotInPlan")} />
+        <View className="px-6 pb-8">
+          <Button
+            label={t("billing.viewPlans")}
+            onPress={() => router.push("/subscription" as Href)}
+          />
+        </View>
       </SafeAreaView>
     );
   }

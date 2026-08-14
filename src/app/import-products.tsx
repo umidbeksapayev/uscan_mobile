@@ -21,6 +21,8 @@ import {
   type ImportRowStatus,
 } from "@/features/products/import-products";
 import { getExistingBarcodes, importProducts, type ImportResult } from "@/features/products/import-api";
+import { parsePlanLimitError, type PlanLimitError } from "@/features/billing/parse-plan-error";
+import { UpgradeSheet } from "@/features/billing/upgrade-sheet";
 import { text } from "@/theme/tokens";
 import { ScreenHeader } from "@/components/ui/screen";
 
@@ -115,6 +117,7 @@ export default function ImportProductsScreen() {
   const [preview, setPreview] = useState<ImportPreviewResult | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [planLimitError, setPlanLimitError] = useState<PlanLimitError | null>(null);
 
   if (!canManageProducts) {
     return (
@@ -186,7 +189,17 @@ export default function ImportProductsScreen() {
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["categories"] });
     } catch (e) {
-      toast.error(t("import.importError"), e instanceof Error ? e.message : t("import.importFailed"));
+      const message = e instanceof Error ? e.message : null;
+      // Tarif limiti — `import_products` RPC bitta tranzaksiya, shuning uchun
+      // limitga urilganda BUTUN import bekor bo'ladi (yarim import emas).
+      // Foydalanuvchi tarifni yangilagach yoki ortiqcha qatorlarni olib
+      // tashlagach qaytadan urinadi — shu sabab `preview` holatida qolamiz.
+      const planErr = parsePlanLimitError(message);
+      if (planErr) {
+        setPlanLimitError(planErr);
+      } else {
+        toast.error(t("import.importError"), message ?? t("import.importFailed"));
+      }
       setStatus("preview");
     }
   }
@@ -296,6 +309,13 @@ export default function ImportProductsScreen() {
           </View>
         </View>
       ) : null}
+
+      <UpgradeSheet
+        visible={!!planLimitError}
+        onClose={() => setPlanLimitError(null)}
+        limitKey={planLimitError?.key ?? null}
+        limit={planLimitError?.limit}
+      />
     </SafeAreaView>
   );
 }

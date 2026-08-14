@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
+import { AuthShell } from "@/features/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 
@@ -53,67 +53,53 @@ export default function ForgotPasswordScreen() {
     }
   }
 
-  return (
-    <SafeAreaView className="flex-1 bg-bg">
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.back")}
-          className="absolute left-4 top-4 p-2"
-          hitSlop={10}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.ink} />
-        </Pressable>
+  const backButton = (
+    <Pressable
+      onPress={() => router.back()}
+      accessibilityRole="button"
+      accessibilityLabel={t("common.back")}
+      className="p-2"
+      hitSlop={10}
+    >
+      <Ionicons name="arrow-back" size={22} color="#fff" />
+    </Pressable>
+  );
 
-        {sent ? (
-          <View className="items-center">
-            <View
-              className="mb-4 h-20 w-20 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.successTint }}
-            >
-              <Ionicons name="mail-outline" size={36} color={colors.success} />
-            </View>
-            <Text className="text-center text-xl font-medium text-ink">{t("auth.linkSentTitle")}</Text>
-            <Text className="mt-2 text-center text-sm text-muted">
-              {t("auth.linkSentBody", { email: email.trim() })}
-            </Text>
-            <Pressable onPress={() => router.replace("/(auth)/login")} className="mt-6 p-2">
-              <Text className="text-sm font-medium text-primary">{t("auth.backToLogin")}</Text>
-            </Pressable>
+  if (sent) {
+    return (
+      <AuthShell title={t("auth.linkSentTitle")} subtitle={t("auth.linkSentBody", { email: email.trim() })}>
+        <View className="items-center gap-4">
+          <View
+            className="h-16 w-16 items-center justify-center rounded-full"
+            style={{ backgroundColor: colors.successTint }}
+          >
+            <Ionicons name="mail-outline" size={30} color={colors.success} />
           </View>
-        ) : (
-          <>
-            <Text className="text-center text-2xl font-medium text-ink">{t("auth.forgotTitle")}</Text>
-            <Text className="mb-6 mt-1 text-center text-sm text-muted">
-              {t("auth.forgotSubtitle")}
-            </Text>
+          <Button label={t("auth.backToLogin")} onPress={() => router.replace("/(auth)/login")} />
+        </View>
+      </AuthShell>
+    );
+  }
 
-            <View style={{ gap: 16 }}>
-              <Field
-                label={t("auth.email")}
-                value={email}
-                onChangeText={(t) => {
-                  setEmail(t);
-                  if (errorMsg) setErrorMsg(null);
-                }}
-                placeholder={t("auth.emailPlaceholder")}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                autoComplete="email"
-              />
+  return (
+    <AuthShell title={t("auth.forgotTitle")} subtitle={t("auth.forgotSubtitle")} topLeft={backButton}>
+      <View style={{ gap: 14 }}>
+        <Field
+          label={t("auth.email")}
+          value={email}
+          onChangeText={(v) => {
+            setEmail(v);
+            if (errorMsg) setErrorMsg(null);
+          }}
+          placeholder={t("auth.emailPlaceholder")}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          autoComplete="email"
+        />
 
-              <Button label={t("auth.forgotSend")} onPress={onSubmit} loading={loading} />
-              {errorMsg ? (
-                <Text className="text-center text-sm text-danger">{errorMsg}</Text>
-              ) : null}
-            </View>
-          </>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+        <Button label={t("auth.forgotSend")} onPress={onSubmit} loading={loading} />
+        {errorMsg ? <Text className="text-center text-sm text-danger">{errorMsg}</Text> : null}
+      </View>
+    </AuthShell>
   );
 }

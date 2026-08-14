@@ -12,7 +12,20 @@
           "package_name": "uz.uscan.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "751993060717-q37fd19b933iaoarmv03nhe5bk7go9k0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "uz.uscan.app",
+            "certificate_hash": "b60e950809c68bac0ff2b706a191916c6e39d0b6"
+          }
+        },
+        {
+          "client_id": "751993060717-eg0f8qjl1lanc87gk9ootv4folq6jqma.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCeSChWFcNz8QqfSaoEsxnzTfVZJauXEJc"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "751993060717-eg0f8qjl1lanc87gk9ootv4folq6jqma.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

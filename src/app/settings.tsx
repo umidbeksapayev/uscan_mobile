@@ -14,7 +14,7 @@ import { LANGUAGES, setLanguage, type LangCode } from "@/i18n";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Card } from "@/components/ui/card";
 import { IconChip } from "@/components/ui/icon-chip";
-import { useActiveMembership } from "@/features/auth/use-memberships";
+import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
 import { LocalReminderCard } from "@/features/notifications/local-reminder-card";
 import { DailySummaryCard } from "@/features/notifications/daily-summary-card";
 import { FeedbackSheet } from "@/features/feedback/feedback-sheet";
@@ -256,7 +256,7 @@ function ThemePickerSheet({ visible, onClose }: { visible: boolean; onClose: () 
 export default function SettingsScreen() {
   const router = useRouter();
   const active = useActiveMembership();
-  const isOwner = active?.role === "owner";
+  const { isOwner } = useActivePermissions();
   const { t, i18n } = useTranslation();
 
   const colors = useColors();

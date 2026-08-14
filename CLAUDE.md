@@ -139,9 +139,61 @@ faqat egasi (`isOwner`) uchun.
 Barcha sprintlar (Sprint 10 regressiyasi, 11, 12, 13) va AI 0–5-bosqich
 qurilmada sinovdan o'tdi 2026-08-14 (`docs/QURILMADA_SINOV.md`, hammasi ✅).
 
+## Auth · Onboarding · Obuna (kod tayyor, qurilmada sinov kutilmoqda)
+
+**Autentifikatsiya.** Supabase Auth saqlandi. Google — **native SDK**
+(`@react-native-google-signin/google-signin` + `signInWithIdToken`), brauzer
+ochilmaydi. `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` bo'sh bo'lsa Google tugmasi
+umuman ko'rinmaydi. **Email tasdiqlash YOQILADI** — dublikat akkaunt shu
+bilan yopiladi (Supabase tasdiqlangan email bo'yicha identity'ni avtomatik
+bog'laydi). Sessiya endi **SecureStore**da (`lib/secure-storage.ts`, 2 KB
+chegarasi uchun bo'laklab yoziladi), AsyncStorage'da emas. Chiqishda
+`queryClient.clear()` + persister + `activeShopId` tozalanadi
+(`auth-context.tsx`). Barcha auth ekranlari `AuthShell` qobig'ida.
+
+**Onboarding.** Do'kon nomi ENDI ro'yxatdan o'tishda emas — onboarding'da
+(`(onboarding)/welcome · shop · done · waiting`). `handle_new_user()`
+**shartli** qilindi (migration 040): `shop_name` metadata kelgandagina do'kon
+yaratadi → **web register bir qator ham o'zgarmadi**, mobil esa
+`complete_onboarding()` RPC bilan atomar yaratadi. `AuthGate` endi 3 holatli
+(`(auth)` / `(onboarding)` / `(tabs)`), a'zoliklar so'rovi hal bo'lguncha
+splash ushlab turiladi. Kassir yo'li do'kon YARATMAYDI (kutish ekrani) —
+ilgari har bir kassirga keraksiz do'kon tegardi.
+
+**Obuna.** DO'KON darajasida (`subscriptions.shop_id UNIQUE`), user emas —
+limitlar ham, RLS ham `shop_id` bo'yicha. Migration 041: `plans` (narx/limit
+DB'da, o'zgartirish uchun reliz shart emas) · `subscriptions` ·
+`subscription_events`. Har yangi do'konga **14 kunlik Pro sinov** (trigger
+`shops` INSERT ustida — web va mobil yo'llari birdan qamrab olinadi).
+Mavjud do'konlarga 90 kunlik Pro backfill. `get_shop_limits()` muddatni
+**hisoblash paytida** tekshiradi (cron yo'q, eskirgan holat saqlanmaydi).
+To'lov MVP'da **QO'LDA** — web `/admin` → `admin_set_plan()`; ilovada karta
+integratsiyasi yo'q (App Store/Play siyosati riski ham shu bilan chetlab
+o'tiladi), shuning uchun `payments` jadvali ham yo'q.
+
+Tariflar: **Free** 100 mahsulot / 0 xodim / AI yo'q · **Pro** 79 000 so'm —
+1000 / 3 / AI 30 kun · **Ultra** 199 000 so'm — cheksiz / cheksiz / AI 200.
+Yillik −20%.
+
+**Limitlar (migration 042).** Majburlash **DB'da**: `products` BEFORE INSERT
+trigger + `add_shop_member` + `ai_consume_quota`. Bitta nuqta REST insert,
+`import_products` RPC va offline sync — hammasini yopadi.
+`ai_consume_quota`ning `p_limit` parametri endi **e'tiborga olinmaydi**
+(imzo orqaga moslik uchun qoldi) — limit tarifdan olinadi, ilgari mijoz katta
+qiymat uzatib chetlab o'tishi mumkin edi.
+
+**Obuna qoidalari:** muddati tugaganda **hech narsa o'chirilmaydi va
+read-only bo'lmaydi** — faqat YANGI mahsulot/xodim qo'shish to'siladi.
+**Sotuv, chek, nasiya, qaytarish, offline — HECH QACHON to'silmaydi**
+(kassani to'xtatish = mijozni yo'qotish). Limit faqat *o'sish* amallariga.
+DB `plan_limit_<kalit>:<limit>` shaklida `RAISE` qiladi, mijoz
+`parse-plan-error.ts` bilan ajratib `UpgradeSheet` ochadi.
+
 Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · pullik tier uchun xalqaro
 karta · AI: ovozli kiritish, ertalabki push (web `lib/push/` ga tegish
-kerak).
+kerak) · obuna 6-bosqich: Payme/Click self-servis to'lov, promo-kodlar,
+`shop_invites` (kassirni email bilan taklif qilish — hozirgi "kutish
+ekrani" o'rniga).
 
 ## AI Agent (Antigravity) Rules & Skills
 

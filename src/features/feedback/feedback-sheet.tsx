@@ -33,9 +33,12 @@ const CATEGORY_KEYS: Record<FeedbackCategory, { key: string; fallback: string }>
 type Props = {
   visible: boolean;
   onClose: () => void;
+  /** Ochilganda maydonga oldindan yoziladigan matn (masalan tarif so'rovi
+   *  — ko'r. `subscription.tsx`). Bo'sh bo'lsa avvalgidek xatti-harakat. */
+  initialMessage?: string;
 };
 
-export function FeedbackSheet({ visible, onClose }: Props) {
+export function FeedbackSheet({ visible, onClose, initialMessage = "" }: Props) {
   const colors = useColors();
   const { t } = useTranslation();
   const submitMut = useSubmitFeedback();
@@ -46,11 +49,11 @@ export function FeedbackSheet({ visible, onClose }: Props) {
   useEffect(() => {
     if (visible) {
       setCategory("suggestion");
-      setMessage("");
+      setMessage(initialMessage);
       submitMut.reset();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
+  }, [visible, initialMessage]);
 
   const remaining = remainingChars(message);
   const invalid = validateFeedback({ category, message });

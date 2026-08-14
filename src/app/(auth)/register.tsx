@@ -1,120 +1,117 @@
 import { useState } from "react";
-import { View, Text, ScrollView } from "react-native";
-import { toast } from "@/lib/toast";
-import { Link } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text } from "react-native";
+import { Link, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
-import { Logo } from "@/components/logo";
+import { AuthShell } from "@/features/auth/auth-shell";
+import { GoogleAuthBlock } from "@/features/auth/google-signin-button";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 
 export default function RegisterScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
-  const [shopName, setShopName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   async function onSubmit() {
-    if (!shopName.trim() || !email.trim() || !password) {
-      toast.error("Ma'lumot yetishmaydi", "Barcha maydonlarni to'ldiring.");
+    setErrorMsg(null);
+    if (!email.trim() || !password) {
+      setErrorMsg(t("auth.fillAllFields"));
       return;
     }
     if (password.length < 6) {
-      toast.error("Parol qisqa", "Parol kamida 6 belgidan iborat bo'lsin.");
+      setErrorMsg(t("auth.passwordTooShort"));
       return;
     }
     if (!isSupabaseConfigured) {
-      toast.error("Supabase sozlanmagan", ".env fayliga web bilan bir xil Supabase URL va anon key qo'shing.");
+      setErrorMsg(t("auth.notConfigured"));
       return;
     }
 
     setLoading(true);
-    // Do'kon nomi metadata orqali → DB trigger shops + owner a'zoligini yaratadi.
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
-      password,
-      options: { data: { shop_name: shopName.trim() } },
-    });
-
-    if (error) {
-      setLoading(false);
-      toast.error("Ro'yxatdan o'tish amalga oshmadi", authErrorMessage(error.message));
-      return;
-    }
-
-    // "Confirm email" o'chirilgan bo'lsa signUp sessiya qaytaradi; aks holda
-    // darhol login/parol bilan kirishga harakat qilamiz.
-    if (!data.session) {
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      // Do'kon nomi ENDI bu yerda yo'q — onboarding (welcome → shop → done)
+      // kiritadi. `handle_new_user()` shartli (040_onboarding.sql): shop_name
+      // metadata kelmasa do'kon yaratilmaydi, AuthGate onboarding'ga o'tkazadi.
+      const { data, error } = await supabase.auth.signUp({
+        email: normalizedEmail,
         password,
       });
-      if (signInErr) {
-        setLoading(false);
-        toast.info(
-          "Avtomatik kirish bo'lmadi",
-          "Akkaunt yaratildi. Iltimos, kirish sahifasidan qo'lda kiring.",
-        );
+
+      if (error) {
+        setErrorMsg(authErrorMessage(error.message));
         return;
       }
+
+      // Supabase "email enumeration protection" yoqilganda mavjud email uchun
+      // XATO QAYTARMAYDI — soxta muvaffaqiyat beradi va xat yubormaydi
+      // (buzg'unchi "bu email ro'yxatdami?" deb tekshira olmasligi uchun).
+      // Yagona farqlovchi belgi: `identities` bo'sh massiv bo'ladi. Busiz
+      // foydalanuvchi hech qachon kelmaydigan xatni kutib qolardi.
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        setErrorMsg(t("auth.errAlreadyRegistered"));
+        return;
+      }
+
+      if (data.session) {
+        // "Confirm email" o'chirilgan (masalan lokal sinovda) — sessiya
+        // darhol keldi, AuthGate tabs'ga o'tkazadi.
+        return;
+      }
+      // Email tasdiqlash talab qilinadi.
+      router.replace({ pathname: "/(auth)/verify-email", params: { email: normalizedEmail } });
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    // Sessiya bor → AuthGate tabs'ga yo'naltiradi.
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-bg">
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="mb-8 items-center">
-          <Logo size={34} />
-        </View>
+    <AuthShell title={t("auth.registerBtn")} subtitle={t("auth.registerSubtitle")}>
+      <View style={{ gap: 14 }}>
+        <GoogleAuthBlock onError={setErrorMsg} disabled={loading} />
 
-        <Text className="text-center text-2xl font-medium text-ink">{t("auth.registerBtn")}</Text>
-        <Text className="mb-6 mt-1 text-center text-sm text-muted">
-          {t("auth.registerSubtitle")}
-        </Text>
+        <Field
+          label={t("auth.email")}
+          value={email}
+          onChangeText={(v) => {
+            setEmail(v);
+            if (errorMsg) setErrorMsg(null);
+          }}
+          placeholder={t("auth.emailPlaceholder")}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          autoComplete="email"
+        />
+        <Field
+          label={t("auth.password")}
+          value={password}
+          onChangeText={(v) => {
+            setPassword(v);
+            if (errorMsg) setErrorMsg(null);
+          }}
+          placeholder={t("auth.passwordHint")}
+          secureTextEntry
+          autoComplete="new-password"
+        />
 
-        <View style={{ gap: 16 }}>
-          <Field
-            label={t("auth.shopName")}
-            value={shopName}
-            onChangeText={setShopName}
-            placeholder={t("auth.shopNamePlaceholder")}
-          />
-          <Field
-            label={t("auth.email")}
-            value={email}
-            onChangeText={setEmail}
-            placeholder={t("auth.emailPlaceholder")}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            autoComplete="email"
-          />
-          <Field
-            label={t("auth.password")}
-            value={password}
-            onChangeText={setPassword}
-            placeholder={t("auth.passwordHint")}
-            secureTextEntry
-            autoComplete="new-password"
-          />
-          <Button label={t("auth.registerBtn")} onPress={onSubmit} loading={loading} />
-        </View>
+        <Button label={t("auth.registerBtn")} onPress={onSubmit} loading={loading} />
+        {errorMsg ? <Text className="text-center text-sm text-danger">{errorMsg}</Text> : null}
 
-        <View className="mt-6 flex-row justify-center">
+        <View className="mt-2 flex-row justify-center">
           <Text className="text-sm text-muted">{t("auth.haveAccount")} </Text>
           <Link href="/(auth)/login" className="text-sm font-medium text-primary">
             {t("auth.goLogin")}
           </Link>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </AuthShell>
   );
 }

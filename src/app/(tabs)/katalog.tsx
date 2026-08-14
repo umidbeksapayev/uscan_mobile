@@ -25,6 +25,8 @@ import { useCategories } from "@/features/catalog/use-categories";
 import { useMemberships, useActivePermissions, useActiveShopId } from "@/features/auth/use-memberships";
 import { useLabelPrint } from "@/features/labels/use-print-label";
 import { exportProductsCsv } from "@/features/products/export-products";
+import { useShopPlan, useProductCount } from "@/features/billing/use-plan";
+import { LimitMeter } from "@/features/billing/limit-meter";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/database";
 import { radius, text } from "@/theme/tokens";
@@ -160,6 +162,8 @@ export default function KatalogScreen() {
   const { isLoading: membershipsLoading } = useMemberships();
   const { canManageProducts, canViewCost } = useActivePermissions();
   const shopId = useActiveShopId();
+  const { data: plan } = useShopPlan();
+  const { data: productCount } = useProductCount();
   const [exporting, setExporting] = useState(false);
 
   const chips: { id: CategoryFilter; name: string }[] = [
@@ -244,6 +248,9 @@ export default function KatalogScreen() {
             {labelMode ? t("labels.selectedCount", { count: selected.size }) : t("catalog.title")}
           </Text>
           <View className="flex-row items-center gap-5">
+            {!labelMode && canManageProducts && productCount != null ? (
+              <LimitMeter used={productCount} limit={plan?.limits.products ?? null} />
+            ) : null}
             {!labelMode && canManageProducts ? (
               <Pressable
                 onPress={onExport}

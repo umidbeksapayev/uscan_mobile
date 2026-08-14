@@ -18,6 +18,15 @@ Sprint 11–13 o'zgarishlari **JS-only** — yangi build kerak emas
 migrations/033_cashier_report.sql` Supabase SQL Editor'da bajarilgan
 bo'lsin.
 
+⚠️ **Auth/Onboarding/Obuna (7-bo'lim) — YANGI DEV BUILD SHART.** Ikkita
+native modul qo'shildi (`expo-secure-store`,
+`@react-native-google-signin/google-signin`) va `app.json` plugin ro'yxati
+o'zgardi. OTA yetmaydi:
+
+```bash
+eas build --profile development --platform android
+```
+
 ```bash
 npm start
 ```
@@ -364,6 +373,103 @@ ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
       **o'z** `Kassir hisoboti`ga tushsin (xodim boshqaruvi ko'rinmasin).
 - [x] Sozlamalar ekranida endi "Kassirlar" bo'limi umuman ko'rinmasin —
       faqat Ko'proqda.
+
+---
+
+## 4d. Auth · Onboarding · Obuna (yangi)
+
+> **Yangi dev build shart** (yuqoridagi 0-bo'limga qarang).
+>
+> **Oldindan bajariladigan qadamlar** (bularsiz sinov boshlanmaydi):
+>
+> 1. Supabase SQL Editor: `040_onboarding.sql` → `041_subscriptions.sql` →
+>    `042_plan_limits_enforce.sql` → `043_push_token_claim.sql` — shu tartibda.
+> 2. Google Cloud Console (`uscanmobile`): debug + release SHA-1 qo'shing,
+>    "Web application" turidagi OAuth Client ID yarating, yangi
+>    `google-services.json` ni repo tuguniga qo'ying.
+> 3. `.env`: `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=<Web Client ID>`.
+> 4. Supabase → Authentication → Providers → Google: yoqing, Client ID +
+>    Secret kiriting.
+> 5. Supabase → Authentication: **"Confirm email" yoqing**.
+> 6. Supabase → Authentication → URL Configuration → Redirect URLs:
+>    `uscan://verify-email` qo'shing (mavjud `uscan://reset-password` yoniga).
+> 7. ⚠️ **Eski akkauntlarni tasdiqlangan deb belgilang** — busiz ular
+>    "Confirm email" yoqilgach kira olmay qoladi:
+>    `UPDATE auth.users SET email_confirmed_at = now() WHERE email_confirmed_at IS NULL;`
+
+### 4d-1. Autentifikatsiya
+
+- [ ] Kirish ekrani yangi ko'rinishda: tepada gradient hero, o'rtada karta,
+      "— yoki —" ajratkich ostida Google tugmasi.
+- [ ] Yangi email/parol bilan ro'yxatdan o'ting → "Emailingizni tasdiqlang"
+      ekrani chiqsin (do'kon nomi maydoni **endi yo'q**).
+- [ ] "Qayta yuborish" tugmasi 60 soniya sanoq bilan bloklansin.
+- [ ] Pochtadagi havolani bosing → ilova ochilib avtomatik ichkariga kirsin.
+- [ ] Google tugmasi: bir bosishda kirsin, **brauzer oynasi ochilmasin**.
+- [ ] **Dublikat sinovi (eng muhim)**: bir xil email bilan avval parol orqali
+      ro'yxatdan o'ting va tasdiqlang, keyin chiqib Google bilan kiring →
+      Supabase → Authentication → Users da **bitta** user, ikkita identity
+      bo'lsin (ikkita alohida user EMAS).
+- [ ] Google'da "bekor qilish" bosilsa hech qanday xato xabari chiqmasin.
+- [ ] Parolni tiklash oqimi avvalgidek ishlasin (yangi qobiqda).
+- [ ] Chiqib, **boshqa** foydalanuvchi bilan kiring → avvalgi userning
+      mahsulot/statistika ma'lumotlari bir lahza ham ko'rinmasin.
+
+### 4d-2. Onboarding
+
+- [ ] Yangi akkaunt → Welcome (3 nuqtali progress, 4 ta qisqa bullet).
+- [ ] "Do'kon ochaman" → do'kon nomi + til → Tayyor → Bosh ekran.
+- [ ] Tanlangan til darhol qo'llanilsin (ekran shu tilda ochilsin).
+- [ ] DB'da tekshiring: `shops` da nom to'g'ri, `shop_members` da
+      `role='owner'`, `subscriptions` da `status='trialing'`.
+- [ ] **Yarim yo'lda ilovani o'ldiring** → qayta kirganda yana Welcome'dan
+      boshlansin, DB'da yarim yozuv qolmasin.
+- [ ] Onboarding ichida orqaga gesture ishlamasin.
+- [ ] "Xodim sifatida qo'shilaman" → kutish ekrani, do'kon **yaratilmasin**.
+      Egadan shu emailni qo'shing → "Tekshirish" bosilganda ichkariga kirsin.
+- [ ] **Mavjud akkaunt** bilan kiring → onboarding umuman ko'rinmasin.
+
+### 4d-3. Obuna va limitlar
+
+- [ ] Ko'proq → tepada "Tarif" qatori + nishon (`Sinov — N kun qoldi`).
+      Kassir hisobida bu qator umuman ko'rinmasin.
+- [ ] "Tarif" → Free/Pro/Ultra taqqoslash, joriy tarifda "Joriy" nishoni.
+- [ ] "Tarifni yangilash" → fikr-mulohaza varag'i oldindan to'ldirilgan
+      matn bilan ochilsin.
+
+Limitni sinash uchun do'konni Free'ga tushiring (super_admin hisobidan):
+
+```sql
+SELECT admin_set_plan('<shop_id>', 'free', 'month', 0, 'sinov');
+```
+
+- [ ] Katalog sarlavhasida "N / 100" hisoblagichi va progress chizig'i
+      chiqsin (Ultra tarifda umuman ko'rinmasin — cheksiz).
+- [ ] 100 ta mahsulotdan keyin yangisini qo'shing → **UpgradeSheet** chiqsin
+      (oddiy qizil xato matni EMAS).
+- [ ] CSV import limitdan oshsa → UpgradeSheet chiqsin va **hech bir qator
+      import qilinmasin** (atomar).
+- [ ] Xodim qo'shishga urinish → UpgradeSheet chiqsin.
+- [ ] AI yordamchi ochilsa → "tarifingizga kirmaydi" + "Tarifni ko'rish"
+      tugmasi (chat oynasi ochilib xato bermasin).
+- [ ] ⚠️ **Sotuv, chek, nasiya, qaytarish, offline sinxronizatsiya — hammasi
+      odatdagidek ishlasin.** Kassa hech qachon to'silmasligi shart.
+- [ ] Mavjud mahsulotlarni tahrirlash/arxivlash ishlasin (faqat yangi
+      qo'shish to'silgan).
+- [ ] Mahsulotni arxivlang → hisoblagich kamaysin, yangi qo'shish ochilsin.
+
+Bypass sinovi (server majburlashini tasdiqlash — mijozni chetlab o'tib):
+
+```bash
+curl -X POST "$SUPABASE_URL/rest/v1/products" -H "apikey: $ANON" \
+  -H "Authorization: Bearer $USER_JWT" -H "Content-Type: application/json" \
+  -d '{"shop_id":"<id>","name":"bypass","sale_type":"unit","cost_price":1,"selling_price":2}'
+```
+
+- [ ] Javobda `plan_limit_products:100` xatosi kelsin (mahsulot
+      yaratilmasin).
+- [ ] `ai_consume_quota` ni `p_limit: 99999` bilan chaqiring → limit baribir
+      tarifdan olinsin (`day_limit` katta son EMAS).
 
 ---
 

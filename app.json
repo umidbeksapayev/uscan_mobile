@@ -84,7 +84,9 @@
           "cameraPermission": "Mahsulot rasmini kamerada olish uchun ruxsat kerak."
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-secure-store",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true

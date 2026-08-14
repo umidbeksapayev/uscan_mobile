@@ -21,6 +21,8 @@ import { useScanReturn } from "@/features/products/scan-return";
 import { pickAndUpload } from "@/features/products/upload-image";
 import { CategorySheet } from "@/features/products/category-sheet";
 import { useLabelPrint } from "@/features/labels/use-print-label";
+import { parsePlanLimitError, type PlanLimitError } from "@/features/billing/parse-plan-error";
+import { UpgradeSheet } from "@/features/billing/upgrade-sheet";
 import type { SaleType } from "@/types/database";
 import { radius } from "@/theme/tokens";
 
@@ -65,6 +67,7 @@ export default function ProductFormScreen() {
   const [quantity, setQuantity] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [planLimitError, setPlanLimitError] = useState<PlanLimitError | null>(null);
 
   const { data: existing } = useQuery({
     queryKey: ["product", id, isOwner],
@@ -129,6 +132,12 @@ export default function ProductFormScreen() {
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["product", id] });
       router.back();
+    },
+    onError: (e) => {
+      // Tarif limiti (042_plan_limits_enforce.sql) — bo'lakcha xato o'rniga
+      // UpgradeSheet ochiladi, mutation.error ostidagi umumiy xabar bosilmaydi.
+      const planErr = parsePlanLimitError(e instanceof Error ? e.message : String(e));
+      if (planErr) setPlanLimitError(planErr);
     },
   });
 
@@ -392,12 +401,19 @@ export default function ProductFormScreen() {
           </View>
         </Pressable>
 
-        {mutation.isError ? (
+        {mutation.isError && !planLimitError ? (
           <Text className="mt-2 text-center text-sm text-danger">
             {(mutation.error as Error)?.message ?? t("product.saveError")}
           </Text>
         ) : null}
       </KeyboardAwareScrollView>
+
+      <UpgradeSheet
+        visible={!!planLimitError}
+        onClose={() => setPlanLimitError(null)}
+        limitKey={planLimitError?.key ?? null}
+        limit={planLimitError?.limit}
+      />
 
       <View className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 8 }}>
         {isEdit && existing ? (

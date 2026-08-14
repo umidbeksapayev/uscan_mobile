@@ -16,6 +16,7 @@ import {
 import { useActiveShopStore } from "@/features/auth/active-shop-store";
 import { unregisterPushToken } from "@/features/notifications/notify";
 import { ShopSwitcherSheet } from "@/features/auth/shop-switcher-sheet";
+import { PlanBadge } from "@/features/billing/plan-badge";
 import { useOfflineStore } from "@/lib/offline/offline-store";
 import { useColors } from "@/theme/theme-store";
 
@@ -62,6 +63,8 @@ const MENU: MenuItem[] = [
   { icon: "cube-outline", labelKey: "menu.supply", route: "/supply", purchaseGated: true },
   { icon: "pricetags-outline", labelKey: "category.manageTitle", route: "/categories", productsGated: true },
   { icon: "cloud-upload-outline", labelKey: "menu.importCsv", route: "/import-products", productsGated: true },
+  // Obuna/tarif — faqat egasi ko'radi (to'lov/limit qarori kassirga tegishli emas).
+  { icon: "card-outline", labelKey: "billing.title", route: "/subscription" as Href, ownerGated: true },
   { icon: "settings-outline", labelKey: "settings.title", route: "/settings" },
 ];
 
@@ -154,6 +157,20 @@ export default function KoproqScreen() {
             ) : null}
             <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
           </Pressable>
+
+          {/* Tarif holati — faqat egasi (kassir to'lov/limit qaroriga aralashmaydi) */}
+          {isOwner ? (
+            <Pressable
+              onPress={() => router.navigate("/subscription" as Href)}
+              className="mb-3 flex-row items-center justify-between rounded-2xl border border-line bg-surface p-4"
+            >
+              <Text className="text-sm text-muted">{t("billing.title")}</Text>
+              <View className="flex-row items-center gap-2">
+                <PlanBadge />
+                <Ionicons name="chevron-forward" size={16} color={colors.tabInactive} />
+              </View>
+            </Pressable>
+          ) : null}
 
           {/* Yuborilmagan sotuvlar (offline navbat) */}
           {pendingCount > 0 ? (

@@ -11,7 +11,11 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency, formatWeight, formatDateTime } from "@/lib/format";
 import { tabularNums } from "@/theme/typography";
 import type { Sale, SaleItem, SearchMethod } from "@/types/database";
-import { useMemberships, useActiveMembership } from "@/features/auth/use-memberships";
+import {
+  useMemberships,
+  useActiveMembership,
+  useActivePermissions,
+} from "@/features/auth/use-memberships";
 import { useSalesHistoryInfinite } from "@/features/history/use-history";
 import { ReturnSheet } from "@/features/history/return-sheet";
 import { buildSaleReceiptData } from "@/features/history/sale-receipt";
@@ -210,7 +214,7 @@ export default function TarixScreen() {
 
   const { isLoading: membershipsLoading } = useMemberships();
   const active = useActiveMembership();
-  const isOwner = active?.role === "owner";
+  const { isOwner } = useActivePermissions();
   const shopId = active?.shop.id;
   const shopName = active?.shop.name ?? "Do'kon";
 

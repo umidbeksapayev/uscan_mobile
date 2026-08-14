@@ -124,16 +124,16 @@ export async function registerPushToken(shopId: string | null): Promise<PushResu
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, reason: "noSession" };
 
-  const { error } = await supabase.from("push_tokens").upsert(
-    {
-      user_id: auth.user.id,
-      shop_id: shopId,
-      token,
-      platform: Platform.OS === "ios" || Platform.OS === "android" ? Platform.OS : "unknown",
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "token" },
-  );
+  // To'g'ridan-to'g'ri `upsert` EMAS (migration 043): Expo tokeni qurilmaga
+  // bog'liq va hisob almashtirilganda o'zgarmaydi. Eski qator boshqa
+  // foydalanuvchi nomida bo'lsa ON CONFLICT → UPDATE yo'li RLS'ning USING
+  // shartida yiqilardi ("violates row-level security policy (USING
+  // expression)") va qurilma boshqa hech qachon ro'yxatdan o'tolmasdi.
+  const { error } = await supabase.rpc("save_push_token", {
+    p_token: token,
+    p_shop_id: shopId,
+    p_platform: Platform.OS === "ios" || Platform.OS === "android" ? Platform.OS : "unknown",
+  });
   if (error) {
     logError("push.saveFailed", error.message);
     return { ok: false, reason: "saveFailed", detail: error.message };
