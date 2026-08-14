@@ -25,6 +25,7 @@ import { trendTotals, periodSplit, pctChange } from "@/features/dashboard/dashbo
 import { maybeScheduleLowStockReminder } from "@/features/notifications/notify";
 import { useAlerts } from "@/features/notifications/use-alerts";
 import { TrendChart } from "@/features/dashboard/trend-chart";
+import { AiInsightCard } from "@/features/ai/insight-card";
 import { radius, text } from "@/theme/tokens";
 import {
   GradientStat,
@@ -203,6 +204,9 @@ export default function HomeScreen() {
             ) : null}
           </Pressable>
         </View>
+
+        {/* Kunlik AI xulosasi — so'ralmasdan chiqadi (faqat egasi, rozilik bor). */}
+        <AiInsightCard shopId={shop?.id} enabled={isOwner} />
 
         {/* Davr toggle */}
         <View

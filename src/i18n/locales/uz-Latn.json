@@ -1113,6 +1113,7 @@
     "toolInventory": "Ombor holati",
     "openProduct": "mahsulotni ochish",
     "qtyUnit": "dona",
+    "insightTitle": "Bugungi xulosa",
     "writesTitle": "O'zgarish taklif qilishi",
     "writesHint": "AI narx yoki qoldiqni o'zgartirishni taklif qiladi — o'zgarish faqat siz tasdiqlaganingizdan keyin bajariladi. Takliflarni umuman ko'rishni istamasangiz o'chiring.",
     "proposalConfirm": "Tasdiqlash",

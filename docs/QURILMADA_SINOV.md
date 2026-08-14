@@ -288,6 +288,18 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 - [ ] AI javobida "o'zgartirdim/bajardim" **DEMASIN** — faqat "tasdiqlang".
 - [ ] Kassir akkauntida bu bo'lim Sozlamalarda umuman ko'rinmasin.
 
+**5-bosqich (kunlik xulosa):**
+
+- [ ] Bosh ekranda **"Bugungi xulosa"** kartasi chiqsin (egasi, rozilik berilgan).
+- [ ] Xulosa matni haqiqiy raqamlarga mos kelsin (bugungi tushum, kam qoldiq).
+- [ ] Ilovani yopib qayta ochganda **qayta hisoblanmasin** (server keshi) —
+      matn bir xil qolsin.
+- [ ] Karta bosilganda AI chat ochilsin.
+- [ ] **Rozilik berilmagan** holatda karta umuman chiqmasin (so'rov ham
+      yuborilmasin).
+- [ ] Kassir akkauntida karta ko'rinmasin.
+- [ ] Internet yo'q bo'lsa karta jim yo'qolsin (xato banneri chiqmasin).
+
 ---
 
 ## 5. Doimiy asosiy oqim (har sprintda)

@@ -17,6 +17,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { GeminiError, listModels } from "./gemini.ts";
 import { runChat, type RunEvent } from "./chat-run.ts";
 import { runDiagnostics } from "./diag.ts";
+import { buildInsight } from "./insight.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
@@ -58,11 +59,58 @@ interface Body {
   diag?: unknown;
   /** Sozlamalarda yoqilgan bo'lsa — yozuv TAKLIF tool'lari beriladi. */
   allow_writes?: unknown;
+  /** Bosh ekrandagi kunlik xulosa (proaktiv). */
+  insight?: unknown;
+  /** Xulosani keshdan emas, qaytadan hisoblash. */
+  refresh?: unknown;
 }
 
 const isUuid = (v: unknown): v is string =>
   typeof v === "string" &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+
+/** Do'kon egasi emas — `ai_consume_quota` ichidagi tekshiruv. */
+class ForbiddenError extends Error {}
+/** Kunlik limit tugadi. */
+class QuotaError extends Error {
+  constructor(
+    readonly used: number,
+    readonly limit: number,
+  ) {
+    super("quota_exceeded");
+  }
+}
+
+interface QuotaState {
+  allowed: boolean;
+  used: number;
+  day_limit: number;
+}
+
+/**
+ * Kvotani bittaga oshiradi va egalikni tekshiradi.
+ *
+ * Kvota Gemini'dan OLDIN sarflanadi — muvaffaqiyatsiz so'rov ham hisoblanadi,
+ * aks holda xatoni takrorlab limitni cheksiz aylantirish mumkin bo'lardi.
+ */
+async function consumeQuota(
+  sb: ReturnType<typeof createClient>,
+  shopId: string,
+): Promise<QuotaState> {
+  const { data, error } = await sb.rpc("ai_consume_quota", {
+    p_shop_id: shopId,
+    p_limit: DAILY_LIMIT,
+  });
+
+  if (error) {
+    console.error("quota_failed", error.message);
+    if (error.message?.includes("forbidden")) throw new ForbiddenError();
+    throw new Error("quota_failed");
+  }
+
+  const q = (Array.isArray(data) ? data[0] : data) as QuotaState | undefined;
+  return q ?? { allowed: false, used: 0, day_limit: DAILY_LIMIT };
+}
 
 /** Gemini xatosini HTTP javobiga o'giradi. */
 function errorResponse(e: unknown, aborted: boolean) {
@@ -126,33 +174,51 @@ Deno.serve(async (req) => {
     return json(await runDiagnostics({ apiKey: GEMINI_API_KEY, models, sb, shopId }));
   }
 
+  // 4. Kunlik xulosa (proaktiv). Keshdan qaytsa kvota SARFLANMAYDI —
+  //    ilova kun davomida ko'p marta ochiladi.
+  if (body.insight === true) {
+    const ac = new AbortController();
+    const t = setTimeout(() => ac.abort(), TIMEOUT_MS);
+    try {
+      const res = await buildInsight({
+        sb,
+        shopId,
+        apiKey: GEMINI_API_KEY,
+        models,
+        signal: ac.signal,
+        refresh: body.refresh === true,
+        beforeGenerate: async () => {
+          const q = await consumeQuota(sb, shopId);
+          if (!q.allowed) throw new QuotaError(q.used, q.day_limit);
+        },
+      });
+      return json(res);
+    } catch (e) {
+      if (e instanceof QuotaError) {
+        return json({ error: "quota_exceeded", used: e.used, limit: e.limit }, 429);
+      }
+      if (e instanceof ForbiddenError) return json({ error: "owner_only" }, 403);
+      return errorResponse(e, e instanceof DOMException && e.name === "AbortError");
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
   const message = typeof body.message === "string" ? body.message.trim() : "";
   if (!message) return json({ error: "empty_message" }, 400);
   if (message.length > MAX_MESSAGE_LEN) return json({ error: "message_too_long" }, 400);
 
-  // 4. Kvota + egalik tekshiruvi bitta chaqiruvda.
-  //    Kvota Gemini'dan OLDIN sarflanadi — muvaffaqiyatsiz so'rov ham hisoblanadi
-  //    (aks holda xatoni takrorlab limitni cheksiz aylantirish mumkin bo'lardi).
-  const { data: quota, error: quotaError } = await sb.rpc("ai_consume_quota", {
-    p_shop_id: shopId,
-    p_limit: DAILY_LIMIT,
-  });
-
-  if (quotaError) {
-    const forbidden = quotaError.message?.includes("forbidden");
-    console.error("quota_failed", quotaError.message);
-    return json({ error: forbidden ? "owner_only" : "quota_failed" }, forbidden ? 403 : 500);
+  // 5. Kvota + egalik tekshiruvi bitta chaqiruvda.
+  let q: QuotaState;
+  try {
+    q = await consumeQuota(sb, shopId);
+  } catch (e) {
+    if (e instanceof ForbiddenError) return json({ error: "owner_only" }, 403);
+    return json({ error: "quota_failed" }, 500);
   }
 
-  const q = (Array.isArray(quota) ? quota[0] : quota) as
-    | { allowed: boolean; used: number; day_limit: number }
-    | undefined;
-
-  if (!q?.allowed) {
-    return json(
-      { error: "quota_exceeded", used: q?.used ?? 0, limit: q?.day_limit ?? DAILY_LIMIT },
-      429,
-    );
+  if (!q.allowed) {
+    return json({ error: "quota_exceeded", used: q.used, limit: q.day_limit }, 429);
   }
 
   const controller = new AbortController();
