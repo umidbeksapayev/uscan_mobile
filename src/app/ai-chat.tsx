@@ -18,7 +18,7 @@ import { MessageBubble } from "@/features/ai/message-bubble";
 import { useAiChat, type AiMessage } from "@/features/ai/use-ai-chat";
 
 /** Bo'sh ekrandagi taklif chiplari — foydalanuvchi nima so'rashni bilmaydi. */
-const SUGGESTIONS = ["ai.s1", "ai.s2", "ai.s3", "ai.s4"] as const;
+const SUGGESTIONS = ["ai.s1", "ai.s2", "ai.s5", "ai.s3", "ai.s4"] as const;
 
 const MAX_LEN = 1000;
 

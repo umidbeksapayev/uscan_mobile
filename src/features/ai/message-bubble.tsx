@@ -23,6 +23,7 @@ const TOOL_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; key: str
   get_sales_trend: { icon: "trending-up-outline", key: "ai.toolTrend" },
   get_slow_products: { icon: "hourglass-outline", key: "ai.toolSlow" },
   get_inventory_summary: { icon: "cube-outline", key: "ai.toolInventory" },
+  get_reorder_suggestions: { icon: "cart-outline", key: "ai.toolReorder" },
 };
 
 /**

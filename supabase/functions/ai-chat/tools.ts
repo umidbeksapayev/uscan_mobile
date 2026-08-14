@@ -183,6 +183,25 @@ export const functionDeclarations = [
     },
   },
   {
+    name: "get_reorder_suggestions",
+    description:
+      "Qaysi tovar necha kunga yetishini hisoblaydi (kunlik o'rtacha sotuv " +
+      "bo'yicha) va eng tez tugaydiganlarini qaytaradi. 'Nima buyurtma " +
+      "qilishim kerak?', 'nima tugab qoladi?' kabi savollar uchun. " +
+      "Bu get_low_stock'dan farq qiladi: u faqat chegarani ko'radi, " +
+      "bu esa sotuv tezligini hisobga oladi.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        days: {
+          type: "INTEGER",
+          description: "O'rtachani hisoblash oynasi, kun (7-90, standart 30)",
+        },
+        limit: { type: "INTEGER", description: "Nechta mahsulot (1-20, standart 5)" },
+      },
+    },
+  },
+  {
     name: "get_inventory_summary",
     description:
       "Ombor holati: faol mahsulotlar soni, chakana narxdagi umumiy qiymat, " +
@@ -468,6 +487,40 @@ const handlers: Record<string, ToolHandler> = {
 
   async propose_stock_change(args, ctx) {
     return proposeChange("update_stock", args, ctx);
+  },
+
+  async get_reorder_suggestions(args, { sb, shopId, onCards }) {
+    const days = clampInt(args.days, 7, 90, 30);
+    const limit = clampInt(args.limit, 1, MAX_ROWS, 5);
+    const data = unwrap(
+      await sb.rpc("get_reorder_candidates", {
+        p_shop_id: shopId,
+        p_days: days,
+        p_limit: limit,
+      }),
+    );
+
+    const rows = (data ?? []) as Record<string, unknown>[];
+    onCards?.(
+      rows.map((r) => ({
+        id: r.product_id as string,
+        name: r.name as string,
+        qty: Number(r.quantity),
+      })),
+    );
+
+    return {
+      window_days: days,
+      ...clip(
+        rows.map((r) => ({
+          name: r.name,
+          quantity: r.quantity,
+          avg_daily: r.avg_daily,
+          days_left: r.days_left,
+          sale_type: r.sale_type,
+        })),
+      ),
+    };
   },
 
   async get_inventory_summary(_args, { sb, shopId }) {

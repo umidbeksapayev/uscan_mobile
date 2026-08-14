@@ -26,6 +26,8 @@ const SYSTEM = [
   "3. Pulni bo'sh joy bilan yoz: 2 450 000 so'm.",
   "4. Berilmagan raqamni O'YLAB TOPMA.",
   "5. Savdo tushgan yoki tovar tugayotgan bo'lsa — buni birinchi ayt.",
+  "6. `running_out` da `days_left` kichik bo'lsa, tovar nomi va necha kunga",
+  "   yetishini ayt (masalan: 'Coca-Cola 3 kunga yetadi').",
 ].join("\n");
 
 export interface InsightResult {
@@ -74,14 +76,22 @@ export async function buildInsight(opts: {
   // To'rtta manba — parallel. Tool qatlami qayta ishlatiladi: bir xil
   // filtrlar (cost_price yo'q, qatorlar cheklangan) shu yerda ham amal qiladi.
   const ctx = { sb, shopId };
-  const [today, week, low, top] = await Promise.all([
+  const [today, week, low, top, reorder] = await Promise.all([
     runTool("get_today_sales", {}, ctx),
     runTool("get_sales_stats", { days: 7 }, ctx),
     runTool("get_low_stock", {}, ctx),
     runTool("get_top_products", { days: 7, limit: 3 }, ctx),
+    // Sotuv tezligiga qarab tugash muddati — xulosaning eng amaliy qismi.
+    runTool("get_reorder_suggestions", { days: 30, limit: 3 }, ctx),
   ]);
 
-  const facts = JSON.stringify({ today, week_7d: week, low_stock: low, top_7d: top });
+  const facts = JSON.stringify({
+    today,
+    week_7d: week,
+    low_stock: low,
+    top_7d: top,
+    running_out: reorder,
+  });
 
   const res = await generateWithRetry({
     apiKey,

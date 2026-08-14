@@ -300,6 +300,15 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 - [ ] Kassir akkauntida karta ko'rinmasin.
 - [ ] Internet yo'q bo'lsa karta jim yo'qolsin (xato banneri chiqmasin).
 
+**5-bosqich (buyurtma maslahatchisi):**
+
+- [ ] "Nima buyurtma qilishim kerak?" → tovarlar **necha kunga yetishi**
+      bilan javob bersin (kam qoldiq ro'yxatidan farqli).
+- [ ] Tez sotiladigan, lekin chegaradan yuqori turgan tovar ro'yxatga
+      tushsin (masalan kuniga 20 dona ketadigan, 25 dona qolgan).
+- [ ] Kunlik xulosada "… N kunga yetadi" jumlasi paydo bo'lsin.
+- [ ] Javob ostidagi kartalar bosilganda mahsulot ekrani ochilsin.
+
 ---
 
 ## 5. Doimiy asosiy oqim (har sprintda)
