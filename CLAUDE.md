@@ -85,7 +85,7 @@ pressable-scale`), harakat tili (`theme/motion.ts`).
 taqiqlangan) · animatsiya `theme/motion.ts` dan (`useMotion()` ichida
 reduced-motion gate'i bor) · `PressableScale` faqat `style` qabul qiladi.
 
-**AI yordamchi — 0–4-bosqich ✅** (`docs/AI_ASSISTANT_PLAN_2026-08.md`):
+**AI yordamchi — 0–5-bosqich ✅** (`docs/AI_ASSISTANT_PLAN_2026-08.md`):
 Supabase Edge Function `ai-chat` (Deno) + Gemini function calling, migration
 `034_ai_chat.sql` / `035_ai_message_rating.sql`, `features/ai` + `/ai-chat`
 ekrani, Bosh ekran header'ida "✨ AI" tugmasi. Faqat do'kon egasi, faqat
@@ -104,6 +104,14 @@ Edge Function'da bitta ham `update` yo'q. Ruxsat Sozlamalarda (default
 yoqilgan; haqiqiy himoya — tasdiq kartasi). Ommaviy amal qo'shilsa alohida
 ruxsat qaytadan kerak bo'ladi.
 
+**Proaktiv AI (5-bosqich):** Bosh ekranda kunlik xulosa (`ai_insights`,
+migration 037) — tool chaqiruvisiz, server 5 ta manbani o'zi olib bitta
+Gemini so'rovi yuboradi; kesh server (kunlik) + klient (soatlik), keshdan
+qaytganda kvota sarflanmaydi. `get_reorder_suggestions` (migration 038) —
+sotuv tezligiga qarab "necha kunga yetadi" (kam-qoldiq ro'yxati buni
+bilmaydi). **10 ta tool** — chegaraning yuqori qismi: yangi tool qo'shishdan
+oldin eskilaridan birini birlashtirish kerak.
+
 **AI qoidalari:** `GEMINI_API_KEY` faqat Supabase secrets'da (`EXPO_PUBLIC_*`
 HECH QACHON) · tool'lar foydalanuvchi JWT'si bilan chaqiriladi (RLS), Edge
 Function'da `service_role` yo'q · `cost_price` va mijoz PII AI'ga berilmaydi
@@ -119,7 +127,8 @@ ko'riladi (rozilik matni ham yangilanishi kerak).
 
 Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · Sprint 12–13 qurilmada
 tekshirilmagan (`docs/QURILMADA_SINOV.md`) · pullik tier uchun xalqaro karta ·
-AI 5-bosqichi (proaktiv xulosa, anomaliya alerti, buyurtma maslahati, ovoz).
+AI: chat tarixi ro'yxati (server saqlaydi, UI yo'q), anomaliya alerti,
+ovozli kiritish, ertalabki push (web `lib/push/` ga tegish kerak).
 
 ## AI Agent (Antigravity) Rules & Skills
 
