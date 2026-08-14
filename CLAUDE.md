@@ -85,11 +85,17 @@ pressable-scale`), harakat tili (`theme/motion.ts`).
 taqiqlangan) · animatsiya `theme/motion.ts` dan (`useMotion()` ichida
 reduced-motion gate'i bor) · `PressableScale` faqat `style` qabul qiladi.
 
-**AI yordamchi — 0/1-bosqich ✅** (`docs/AI_ASSISTANT_PLAN_2026-08.md`):
+**AI yordamchi — 0–3-bosqich ✅** (`docs/AI_ASSISTANT_PLAN_2026-08.md`):
 Supabase Edge Function `ai-chat` (Deno) + Gemini function calling, migration
-`034_ai_chat.sql`, `features/ai` + `/ai-chat` ekrani. Faqat do'kon egasi,
-faqat o'qish, 5 tool (`search_products · get_today_sales · get_sales_stats ·
-get_top_products · get_low_stock`) mavjud RPC'lar ustida.
+`034_ai_chat.sql` / `035_ai_message_rating.sql`, `features/ai` + `/ai-chat`
+ekrani, Bosh ekran header'ida "✨ AI" tugmasi. Faqat do'kon egasi, faqat
+o'qish. **9 tool** mavjud RPC'lar ustida: `search_products ·
+get_product_details · get_today_sales · get_sales_stats · get_sales_trend ·
+get_top_products · get_slow_products · get_low_stock ·
+get_inventory_summary`. Javob SSE oqimi bilan keladi (klientda `expo/fetch` —
+RN'ning oddiy `fetch`'ida `response.body` yo'q), uzun suhbat xulosaga
+siqiladi, javobga 👍/👎 qo'yiladi, tool topgan mahsulotlar chat ostida
+bosiladigan karta bo'lib `product-form` ga olib boradi.
 
 **AI qoidalari:** `GEMINI_API_KEY` faqat Supabase secrets'da (`EXPO_PUBLIC_*`
 HECH QACHON) · tool'lar foydalanuvchi JWT'si bilan chaqiriladi (RLS), Edge
@@ -98,9 +104,15 @@ Function'da `service_role` yo'q · `cost_price` va mijoz PII AI'ga berilmaydi
 Terminal sinovi: `npm run ai:test -- "savol"` · `--diag` · `--models`.
 Deploy: `npx supabase functions deploy ai-chat --project-ref <ref>`.
 
-Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · Sprint 12–13 va AI chat
-qurilmada tekshirilmagan (`docs/QURILMADA_SINOV.md`) · AI 2-bosqichi
-(streaming, tarix siqish, context caching).
+**AI cheklovlari (tekin tier qarori):** `cost_price`, foyda, mijoz va xodim
+PII AI'ga BERILMAYDI — shu sabab `get_cashier_report` va `get_debts` tool
+sifatida qo'shilmagan, `get_inventory_summary`dan `cost_value`, trend/slow
+tool'laridan `profit` olib tashlangan. Pullik tier'ga o'tilgach qayta
+ko'riladi (rozilik matni ham yangilanishi kerak).
+
+Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · Sprint 12–13 qurilmada
+tekshirilmagan (`docs/QURILMADA_SINOV.md`) · pullik tier uchun xalqaro karta ·
+AI 4-bosqichi (yozuv amallari, "propose → confirm" tasdiq kartasi).
 
 ## AI Agent (Antigravity) Rules & Skills
 
