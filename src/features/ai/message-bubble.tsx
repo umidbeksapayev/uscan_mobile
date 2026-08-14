@@ -1,11 +1,15 @@
 import { memo } from "react";
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { radius, space, text } from "@/theme/tokens";
+import { tabularNums } from "@/theme/typography";
+import { formatCurrency, formatNumber } from "@/lib/format";
 import { PressableScale } from "@/components/ui/pressable-scale";
+import type { ProductCard } from "./ai-api";
 import type { AiMessage } from "./use-ai-chat";
 
 /** Tool nomi → ikonka va i18n kaliti (javob ostidagi manba chipi uchun). */
@@ -15,6 +19,10 @@ const TOOL_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; key: str
   get_sales_stats: { icon: "stats-chart-outline", key: "ai.toolStats" },
   get_top_products: { icon: "trophy-outline", key: "ai.toolTop" },
   get_low_stock: { icon: "alert-circle-outline", key: "ai.toolLowStock" },
+  get_product_details: { icon: "pricetag-outline", key: "ai.toolProduct" },
+  get_sales_trend: { icon: "trending-up-outline", key: "ai.toolTrend" },
+  get_slow_products: { icon: "hourglass-outline", key: "ai.toolSlow" },
+  get_inventory_summary: { icon: "cube-outline", key: "ai.toolInventory" },
 };
 
 /**
@@ -46,6 +54,62 @@ const ToolChips = memo(function ToolChips({ tools }: { tools: string[] }) {
           </View>
         );
       })}
+    </View>
+  );
+});
+
+/**
+ * Tool topgan mahsulotlar — bosiladigan kartalar.
+ *
+ * Nima uchun: AI "Coca-Cola 7 dona qoldi" desa, foydalanuvchining keyingi
+ * harakati — o'sha mahsulotni ochish. Chatdan katalogga qaytib, qidirib
+ * topish o'rniga bitta bosish yetadi. Kartalar javob matnidan OLDIN keladi,
+ * ya'ni model hali yozayotganda ular allaqachon ekranda.
+ */
+const ProductCards = memo(function ProductCards({ cards }: { cards: ProductCard[] }) {
+  const colors = useColors();
+  const router = useRouter();
+  const { t } = useTranslation();
+
+  return (
+    <View className="mt-2 gap-1">
+      {cards.map((card) => (
+        <PressableScale
+          key={card.id}
+          onPress={() => router.push({ pathname: "/product-form", params: { id: card.id } })}
+          accessibilityRole="button"
+          accessibilityLabel={`${card.name} — ${t("ai.openProduct")}`}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: space.sm,
+            paddingVertical: space.sm,
+            paddingHorizontal: space.md,
+            borderRadius: radius.md,
+            borderWidth: 1,
+            borderColor: colors.line,
+            backgroundColor: colors.bg,
+          }}
+        >
+          <Ionicons name="cube-outline" size={text.base} color={colors.primary} />
+          <View className="flex-1">
+            <Text numberOfLines={1} style={{ fontSize: text.sm, color: colors.ink }}>
+              {card.name}
+            </Text>
+            {card.price !== undefined || card.qty !== undefined ? (
+              <Text style={{ fontSize: text.xs, color: colors.muted, ...tabularNums }}>
+                {[
+                  card.price !== undefined ? formatCurrency(card.price) : null,
+                  card.qty !== undefined ? `${formatNumber(card.qty)} ${t("ai.qtyUnit")}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </Text>
+            ) : null}
+          </View>
+          <Ionicons name="chevron-forward" size={text.base} color={colors.tabInactive} />
+        </PressableScale>
+      ))}
     </View>
   );
 });
@@ -168,7 +232,14 @@ export const MessageBubble = memo(function MessageBubble({
   }
 
   // Oqim boshlanmagan bo'sh puffak ko'rinmaydi — o'rnida "O'ylayapti…" turadi.
-  if (message.role === "model" && !message.text && !message.tools?.length) return null;
+  if (
+    message.role === "model" &&
+    !message.text &&
+    !message.tools?.length &&
+    !message.cards?.length
+  ) {
+    return null;
+  }
 
   const isUser = message.role === "user";
 
@@ -189,6 +260,8 @@ export const MessageBubble = memo(function MessageBubble({
       >
         {message.text}
       </Text>
+
+      {!isUser && message.cards?.length ? <ProductCards cards={message.cards} /> : null}
 
       {/* Baho faqat saqlangan javobda — oqim tugamaguncha `serverId` yo'q. */}
       {!isUser && message.serverId ? (

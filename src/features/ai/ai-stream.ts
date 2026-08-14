@@ -2,7 +2,7 @@ import { fetch as streamFetch } from "expo/fetch";
 
 import { supabase } from "@/lib/supabase";
 import { uuidv4 } from "@/lib/uuid";
-import { AiChatError, type AiChatResult, type AiErrorCode } from "./ai-api";
+import { AiChatError, type AiChatResult, type AiErrorCode, type ProductCard } from "./ai-api";
 
 /**
  * AI javobini OQIM (SSE) sifatida oladi.
@@ -26,14 +26,17 @@ export interface StreamHandlers {
   onDelta: (text: string) => void;
   /** AI ma'lumot uchun funksiya chaqirdi — chip ko'rsatiladi. */
   onTool: (name: string) => void;
+  /** Tool mahsulot topdi — javob matnidan oldin karta ko'rsatiladi. */
+  onCards: (cards: ProductCard[]) => void;
   /** Bu aylanish tool bilan tugadi — buferni tozalash kerak. */
   onReset: () => void;
 }
 
 interface StreamEvent {
-  type: "delta" | "tool" | "reset" | "done" | "error";
+  type: "delta" | "tool" | "cards" | "reset" | "done" | "error";
   text?: string;
   name?: string;
+  cards?: ProductCard[];
   error?: AiErrorCode;
   chat_id?: string;
   message_id?: string | null;
@@ -107,6 +110,9 @@ export async function streamAiMessage(
         case "tool":
           if (event.name) handlers.onTool(event.name);
           break;
+        case "cards":
+          if (event.cards?.length) handlers.onCards(event.cards);
+          break;
         case "reset":
           handlers.onReset();
           break;
@@ -116,6 +122,7 @@ export async function streamAiMessage(
             message_id: event.message_id ?? null,
             text: event.text ?? "",
             tools_used: event.tools_used ?? [],
+            cards: event.cards ?? [],
             model: event.model ?? "",
             usage: event.usage ?? { input: 0, output: 0 },
             quota: event.quota ?? { used: 0, limit: 0 },

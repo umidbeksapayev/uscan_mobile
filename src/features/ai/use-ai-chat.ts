@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 
 import { logError } from "@/lib/logger";
 import { uuidv4 } from "@/lib/uuid";
-import { AiChatError, rateAiMessage, type AiErrorCode } from "./ai-api";
+import { AiChatError, rateAiMessage, type AiErrorCode, type ProductCard } from "./ai-api";
 import { streamAiMessage } from "./ai-stream";
 
 export interface AiMessage {
@@ -11,6 +11,8 @@ export interface AiMessage {
   text: string;
   /** Javob tayyorlashda ishlatilgan tool'lar (faqat `model` xabarida). */
   tools?: string[];
+  /** Bosiladigan mahsulot kartalari — mahsulot ekraniga o'tadi. */
+  cards?: ProductCard[];
   /** Xato xabari — boshqacha ranglanadi va "qayta urinish" beradi. */
   errorCode?: AiErrorCode;
   /** `ai_messages.id` — 👍/👎 shu qatorga yoziladi (javob kelgach to'ladi). */
@@ -68,6 +70,7 @@ export function useAiChat(shopId: string | undefined) {
             onDelta: (chunk) => patch(modelId, (m) => ({ ...m, text: m.text + chunk })),
             onTool: (name) =>
               patch(modelId, (m) => ({ ...m, tools: [...(m.tools ?? []), name] })),
+            onCards: (cards) => patch(modelId, (m) => ({ ...m, cards })),
             // Tool chaqiruvidan oldingi matn yakuniy javob emas — tozalanadi.
             onReset: () => patch(modelId, (m) => ({ ...m, text: "" })),
           },
@@ -79,6 +82,7 @@ export function useAiChat(shopId: string | undefined) {
           ...m,
           text: res.text,
           tools: res.tools_used,
+          cards: res.cards,
           serverId: res.message_id,
         }));
       } catch (e) {
@@ -87,6 +91,7 @@ export function useAiChat(shopId: string | undefined) {
           ...m,
           text: "",
           tools: [],
+          cards: [],
           errorCode: e instanceof AiChatError ? e.code : "unknown",
         }));
       } finally {

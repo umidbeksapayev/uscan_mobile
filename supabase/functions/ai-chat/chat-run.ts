@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import { buildSystemPrompt } from "./prompt.ts";
-import { functionDeclarations, runTool } from "./tools.ts";
+import { functionDeclarations, runTool, type ProductCard } from "./tools.ts";
 import {
   callsOf,
   generateWithRetry,
@@ -25,9 +25,14 @@ const SUMMARIZE_AFTER = 24;
 /** Siqilgandan keyin kontekstda qoladigan so'nggi xabarlar. */
 const KEEP_RECENT = 8;
 
+/** Javob ostida ko'rsatiladigan bosiladigan kartalar chegarasi. */
+const MAX_CARDS = 6;
+
 export type RunEvent =
   | { type: "delta"; text: string }
   | { type: "tool"; name: string }
+  /** Tool topgan mahsulotlar — chat ostida bosiladigan karta bo'ladi. */
+  | { type: "cards"; cards: ProductCard[] }
   /** Shu aylanishdagi matn tool chaqiruvi bilan tugadi — klient buferni tozalasin. */
   | { type: "reset" };
 
@@ -51,6 +56,8 @@ export interface RunResult {
   messageId: string | null;
   text: string;
   toolsUsed: string[];
+  /** Bosiladigan mahsulot kartalari (chat ostida). */
+  cards: ProductCard[];
   usage: { input: number; output: number };
   model: string;
 }
@@ -231,6 +238,8 @@ export async function runChat(params: RunParams): Promise<RunResult> {
     { role: "user", parts: [{ text: message }] },
   ];
   const toolsUsed: string[] = [];
+  /** Tool'lar topgan mahsulotlar — id bo'yicha takrorlanmaydi. */
+  const cardsById = new Map<string, ProductCard>();
   let usageIn = 0;
   let usageOut = 0;
   let usedModel = models[0];
@@ -334,13 +343,27 @@ export async function runChat(params: RunParams): Promise<RunResult> {
       calls.map(async (call) => {
         toolsUsed.push(call.name);
         emit({ type: "tool", name: call.name });
-        const out = await runTool(call.name, call.args, { sb, shopId });
+        const out = await runTool(call.name, call.args, {
+          sb,
+          shopId,
+          onCards: (found) => {
+            for (const c of found) {
+              if (c.id && !cardsById.has(c.id)) cardsById.set(c.id, c);
+            }
+          },
+        });
         return {
           functionResponse: { name: call.name, response: out as Record<string, unknown> },
         };
       }),
     );
     contents.push({ role: "user", parts: responses });
+
+    // Kartalar javob matnidan OLDIN yuboriladi: model javob yozayotganda
+    // foydalanuvchi allaqachon mahsulotni ko'radi va bosa oladi.
+    if (cardsById.size > 0) {
+      emit({ type: "cards", cards: [...cardsById.values()].slice(0, MAX_CARDS) });
+    }
   }
 
   if (!answer) answer = "Kechirasiz, javob tayyorlab bo'lmadi. Qayta urinib ko'ring.";
@@ -377,6 +400,7 @@ export async function runChat(params: RunParams): Promise<RunResult> {
     messageId: (saved?.id as string) ?? null,
     text: answer,
     toolsUsed,
+    cards: [...cardsById.values()].slice(0, MAX_CARDS),
     usage: { input: usageIn, output: usageOut },
     model: usedModel,
   };

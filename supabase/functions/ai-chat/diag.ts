@@ -103,6 +103,10 @@ export async function runDiagnostics(opts: DiagOptions): Promise<{ steps: Step[]
     ["get_sales_stats", { days: 7 }],
     ["get_top_products", { days: 30, limit: 3 }],
     ["get_low_stock", {}],
+    ["get_product_details", { name: "a" }],
+    ["get_sales_trend", { days: 7 }],
+    ["get_slow_products", { days: 30, limit: 3 }],
+    ["get_inventory_summary", {}],
   ];
 
   for (const [tool, args] of probes) {

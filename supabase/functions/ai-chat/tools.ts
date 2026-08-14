@@ -15,9 +15,25 @@ import type { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 /** Bitta tool natijasida Gemini'ga ketadigan maksimal qator soni. */
 const MAX_ROWS = 20;
 
+/**
+ * Klientga ketadigan bosiladigan mahsulot kartasi.
+ *
+ * `id` FAQAT klientga boradi — Gemini'ga UUID yuborish token isrofi va
+ * modelga foydasi yo'q (u nom bilan ishlaydi). Shu sabab tool natijasi
+ * ikkiga bo'linadi: model uchun matn, klient uchun kartalar.
+ */
+export interface ProductCard {
+  id: string;
+  name: string;
+  price?: number;
+  qty?: number;
+}
+
 export interface ToolContext {
   sb: SupabaseClient;
   shopId: string;
+  /** Tool topgan mahsulotlar — chat ostida bosiladigan karta bo'lib chiqadi. */
+  onCards?: (cards: ProductCard[]) => void;
 }
 
 type ToolHandler = (
@@ -109,12 +125,57 @@ export const functionDeclarations = [
       "'Nima tugab qolyapti?' kabi savollar uchun.",
     // Argumentsiz — yuqoridagi izohga qarang.
   },
+  {
+    name: "get_product_details",
+    description:
+      "Bitta mahsulot haqida to'liq ma'lumot: narx, qoldiq, ogohlantirish " +
+      "chegarasi, shtrix-kod, kategoriya. Nom bo'yicha eng mos mahsulot topiladi.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        name: { type: "STRING", description: "Mahsulot nomi yoki uning bir qismi" },
+      },
+      required: ["name"],
+    },
+  },
+  {
+    name: "get_sales_trend",
+    description:
+      "Kunlik savdo dinamikasi: har kun uchun tushum va sotuvlar soni. " +
+      "'Qaysi kun ko'p sotdik?', 'savdo o'symoqdami?' kabi savollar uchun.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        days: { type: "INTEGER", description: "Necha kunlik davr (1-30, standart 7)" },
+      },
+    },
+  },
+  {
+    name: "get_slow_products",
+    description:
+      "Sekin sotilayotgan (qotib qolgan) mahsulotlar: davr ichida eng kam " +
+      "sotilganlar. Chegirma yoki buyurtmani kamaytirish qarori uchun.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        days: { type: "INTEGER", description: "Necha kunlik davr (1-365, standart 30)" },
+        limit: { type: "INTEGER", description: "Nechta mahsulot (1-20, standart 5)" },
+      },
+    },
+  },
+  {
+    name: "get_inventory_summary",
+    description:
+      "Ombor holati: faol mahsulotlar soni, chakana narxdagi umumiy qiymat, " +
+      "kam qolgan va tugagan mahsulotlar soni.",
+    // Argumentsiz.
+  },
 ];
 
 // -------------------------------------------------------------- ijrochilar --
 
 const handlers: Record<string, ToolHandler> = {
-  async search_products(args, { sb, shopId }) {
+  async search_products(args, { sb, shopId, onCards }) {
     const raw = typeof args.query === "string" ? args.query.trim() : "";
     if (!raw) return { error: "query bo'sh" };
     const limit = clampInt(args.limit, 1, MAX_ROWS, 10);
@@ -123,14 +184,28 @@ const handlers: Record<string, ToolHandler> = {
       await sb
         .from("products")
         // cost_price ataylab YO'Q — yuqoridagi izohga qarang.
-        .select("name, selling_price, quantity, sale_type, barcode")
+        .select("id, name, selling_price, quantity, sale_type, barcode")
         .eq("shop_id", shopId)
         .eq("is_active", true)
         .ilike("name", `%${escapeLike(raw.slice(0, 60))}%`)
         .order("name")
         .limit(limit),
     );
-    return clip(data ?? []);
+
+    const rows = (data ?? []) as Record<string, unknown>[];
+    onCards?.(
+      rows.map((r) => ({
+        id: r.id as string,
+        name: r.name as string,
+        price: Number(r.selling_price),
+        qty: Number(r.quantity),
+      })),
+    );
+
+    // Modelga `id`siz — UUID unga kerak emas, faqat token yeydi.
+    return clip(
+      rows.map(({ id: _id, ...rest }) => rest),
+    );
   },
 
   async get_today_sales(_args, { sb, shopId }) {
@@ -160,7 +235,7 @@ const handlers: Record<string, ToolHandler> = {
     };
   },
 
-  async get_top_products(args, { sb, shopId }) {
+  async get_top_products(args, { sb, shopId, onCards }) {
     const days = clampInt(args.days, 1, 365, 30);
     const limit = clampInt(args.limit, 1, MAX_ROWS, 5);
     const data = unwrap(
@@ -171,6 +246,9 @@ const handlers: Record<string, ToolHandler> = {
       }),
     );
     const rows = (data ?? []) as Record<string, unknown>[];
+    onCards?.(
+      rows.map((r) => ({ id: r.product_id as string, name: r.name as string })),
+    );
     return {
       days,
       ...clip(
@@ -183,7 +261,7 @@ const handlers: Record<string, ToolHandler> = {
     };
   },
 
-  async get_low_stock(_args, { sb, shopId }) {
+  async get_low_stock(_args, { sb, shopId, onCards }) {
     // ASOSIY: `get_low_stock_products` RPC (migration 031).
     // FALLBACK: 031 shared DB'ga hali qo'llanmagan bo'lsa — client filtri,
     // `cost_price`siz (ilovadagi `dashboard-api.ts` bilan bir xil naqsh).
@@ -199,7 +277,7 @@ const handlers: Record<string, ToolHandler> = {
       const fb = unwrap(
         await sb
           .from("products")
-          .select("name, quantity, low_stock_alert, sale_type")
+          .select("id, name, quantity, low_stock_alert, sale_type")
           .eq("shop_id", shopId)
           .eq("is_active", true)
           .order("quantity", { ascending: true })
@@ -211,6 +289,13 @@ const handlers: Record<string, ToolHandler> = {
     }
 
     const rows = (data ?? []) as Record<string, unknown>[];
+    onCards?.(
+      rows.map((r) => ({
+        id: r.id as string,
+        name: r.name as string,
+        qty: Number(r.quantity),
+      })),
+    );
     return clip(
       rows.map((r) => ({
         name: r.name,
@@ -219,6 +304,104 @@ const handlers: Record<string, ToolHandler> = {
         sale_type: r.sale_type,
       })),
     );
+  },
+
+  async get_product_details(args, { sb, shopId, onCards }) {
+    const raw = typeof args.name === "string" ? args.name.trim() : "";
+    if (!raw) return { error: "nom bo'sh" };
+
+    const data = unwrap(
+      await sb
+        .from("products")
+        // cost_price YO'Q — yuqoridagi izohga qarang.
+        .select("id, name, selling_price, quantity, low_stock_alert, sale_type, barcode, categories(name)")
+        .eq("shop_id", shopId)
+        .eq("is_active", true)
+        .ilike("name", `%${escapeLike(raw.slice(0, 60))}%`)
+        // Eng mos nom — qisqasi (uzun nomda qidiruv so'zi tasodifan uchraydi).
+        .order("name")
+        .limit(1),
+    );
+
+    const row = (data ?? [])[0] as Record<string, unknown> | undefined;
+    if (!row) return { error: "mahsulot topilmadi", query: raw };
+
+    const category = row.categories as { name?: string } | null;
+    onCards?.([
+      {
+        id: row.id as string,
+        name: row.name as string,
+        price: Number(row.selling_price),
+        qty: Number(row.quantity),
+      },
+    ]);
+    return {
+      name: row.name,
+      selling_price: row.selling_price,
+      quantity: row.quantity,
+      low_stock_alert: row.low_stock_alert,
+      sale_type: row.sale_type,
+      barcode: row.barcode,
+      category: category?.name ?? null,
+      is_low_stock: Number(row.quantity) <= Number(row.low_stock_alert),
+    };
+  },
+
+  async get_sales_trend(args, { sb, shopId }) {
+    // 30 kundan uzun qator token jihatidan qimmat va savolga foyda bermaydi.
+    const days = clampInt(args.days, 1, 30, 7);
+    const data = unwrap(
+      await sb.rpc("get_sales_trend", { p_shop_id: shopId, p_days: days }),
+    );
+    const rows = (data ?? []) as Record<string, unknown>[];
+    return {
+      days,
+      // `profit` ataylab tashlanadi (tan narxdan hisoblanadi).
+      rows: rows.map((r) => ({
+        day: r.day,
+        revenue: r.revenue,
+        sales_count: r.sales_count,
+      })),
+    };
+  },
+
+  async get_slow_products(args, { sb, shopId, onCards }) {
+    const days = clampInt(args.days, 1, 365, 30);
+    const limit = clampInt(args.limit, 1, MAX_ROWS, 5);
+    const data = unwrap(
+      await sb.rpc("get_slow_products", {
+        p_shop_id: shopId,
+        p_days: days,
+        p_limit: limit,
+      }),
+    );
+    const rows = (data ?? []) as Record<string, unknown>[];
+    onCards?.(
+      rows.map((r) => ({ id: r.product_id as string, name: r.name as string })),
+    );
+    return {
+      days,
+      ...clip(
+        rows.map((r) => ({
+          name: r.name,
+          units_sold: r.units_sold,
+          revenue: r.revenue,
+        })),
+      ),
+    };
+  },
+
+  async get_inventory_summary(_args, { sb, shopId }) {
+    const data = unwrap(await sb.rpc("get_inventory_stats", { p_shop_id: shopId }));
+    const d = (data ?? {}) as Record<string, unknown>;
+    // `cost_value` va `potential_profit` ATAYIN olinmaydi — tekin tier'da
+    // tan narx Google tomonidan ko'rilishi mumkin (rejadagi qaror).
+    return {
+      product_count: d.product_count ?? 0,
+      retail_value: d.retail_value ?? 0,
+      low_stock_count: d.low_stock_count ?? 0,
+      out_of_stock_count: d.out_of_stock_count ?? 0,
+    };
   },
 };
 

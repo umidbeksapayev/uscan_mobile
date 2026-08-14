@@ -8,6 +8,14 @@ import { uuidv4 } from "@/lib/uuid";
  * Supabase'iga murojaat qiladi. Batafsil: docs/AI_ASSISTANT_PLAN_2026-08.md
  */
 
+/** Javob ostidagi bosiladigan mahsulot kartasi (mahsulot ekraniga o'tadi). */
+export interface ProductCard {
+  id: string;
+  name: string;
+  price?: number;
+  qty?: number;
+}
+
 export interface AiChatResult {
   chat_id: string;
   /** Saqlangan javob xabari — 👍/👎 shu qatorga yoziladi. */
@@ -15,6 +23,8 @@ export interface AiChatResult {
   text: string;
   /** Javob tayyorlashda chaqirilgan tool nomlari (UI da chip sifatida). */
   tools_used: string[];
+  /** Tool topgan mahsulotlar — chat ostida bosiladigan kartalar. */
+  cards: ProductCard[];
   model: string;
   usage: { input: number; output: number };
   quota: { used: number; limit: number };

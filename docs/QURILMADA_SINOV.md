@@ -261,6 +261,19 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 - [ ] 20+ xabarli uzun suhbatda javob sifati pasaymasin (eski qism xulosaga
       siqiladi — AI oldingi mavzuni umumiy holda eslashi kerak).
 
+**3-bosqich (yangi tool'lar + kartalar):**
+
+- [ ] "Coca-Cola haqida ma'lumot ber" → mahsulot kartasi (narx, qoldiq,
+      shtrix-kod, kategoriya) to'g'ri chiqsin.
+- [ ] "Qaysi tovarlar qotib qolgan?" → sekin tovarlar ro'yxati.
+- [ ] "Omborda nima bor?" → mahsulotlar soni va chakana qiymat.
+- [ ] "Savdo o'symoqdami?" → kunlik dinamika bo'yicha izohli javob.
+- [ ] Mahsulot nomi so'ralganda javob ostida **bosiladigan karta** chiqsin;
+      bosilganda o'sha mahsulot tahrirlash ekrani ochilsin.
+- [ ] Kartalar javob matnidan **oldin** ko'rinsin (model hali yozayotganda).
+- [ ] AI javobida **tan narx, foyda, mijoz yoki xodim ismi CHIQMASIN**
+      (tekin tier cheklovi).
+
 ---
 
 ## 5. Doimiy asosiy oqim (har sprintda)
