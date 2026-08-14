@@ -35,6 +35,8 @@ type MenuItem = {
   productsGated?: boolean;
   /** Faqat egasi (yo'q bo'lsa menyuda ko'rinmaydi). */
   ownerGated?: boolean;
+  /** Faqat kassir (ega bo'lsa menyuda ko'rinmaydi) — `ownerGated`ning teskarisi. */
+  cashierOnly?: boolean;
 };
 
 const MENU: MenuItem[] = [
@@ -48,9 +50,12 @@ const MENU: MenuItem[] = [
     ownerGated: true,
   },
   { icon: "stats-chart-outline", labelKey: "menu.stats", route: "/statistika" },
-  // Ruxsat gate'i YO'Q: kassir ham kiradi, lekin server (migration 033)
-  // unga faqat o'z natijasini beradi.
-  { icon: "people-outline", labelKey: "cashierReport.title", route: "/cashier-report" },
+  // "Kassirlar" — egada xodim boshqaruvi + hisobot (staff.tsx), kassirda
+  // to'g'ridan-to'g'ri o'z hisoboti (server, migration 033, faqat o'z
+  // natijasini beradi). Ikkalasi ham bir xil labelKey — foydalanuvchiga
+  // bitta tugma bo'lib ko'rinadi, faqat manzili rolga qarab farqlanadi.
+  { icon: "people-outline", labelKey: "settings.sectionCashiers", route: "/staff" as Href, ownerGated: true },
+  { icon: "people-outline", labelKey: "settings.sectionCashiers", route: "/cashier-report", cashierOnly: true },
   { icon: "calculator-outline", labelKey: "menu.shiftClose", route: "/shift-close" },
   { icon: "wallet-outline", labelKey: "menu.expenses", route: "/expenses", ownerGated: true },
   { icon: "book-outline", labelKey: "menu.debtBook", route: "/nasiya", debtGated: true },
@@ -79,7 +84,8 @@ export default function KoproqScreen() {
       (!m.debtGated || canManageDebt) &&
       (!m.purchaseGated || canPurchase) &&
       (!m.productsGated || canManageProducts) &&
-      (!m.ownerGated || isOwner),
+      (!m.ownerGated || isOwner) &&
+      (!m.cashierOnly || !isOwner),
   );
 
   function onItem(item: MenuItem) {

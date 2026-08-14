@@ -348,6 +348,25 @@ Supabase'da bajarilgan)
 
 ---
 
+## 4c. Ko'proq — "Kassirlar" bo'limi qayta tuzildi ✅ 2026-08-14 qurilmada
+tasdiqlandi
+
+Ilgari "Kassir hisoboti" Ko'proqda alohida tugma edi, xodim qo'shish va
+ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
+`staff.tsx`, faqat manzil rolga qarab farqlanadi.
+
+- [x] **Egadan**: Ko'proq → "Kassirlar" → yangi ekran ochilsin, tepasida
+      "Kassir hisoboti" qatori, pastda xodim qo'shish/ro'yxat/ruxsat bo'lsin.
+- [x] Egadan "Kassir hisoboti" qatorini bosing → `/cashier-report` ochilsin.
+- [x] Egadan yangi kassir qo'shing, ruxsat bering, o'chiring — hammasi
+      avvalgidek ishlasin (mantiq o'zgarmagan, faqat joyi ko'chgan).
+- [x] **Kassir hisobidan**: Ko'proq → "Kassirlar" → to'g'ridan-to'g'ri
+      **o'z** `Kassir hisoboti`ga tushsin (xodim boshqaruvi ko'rinmasin).
+- [x] Sozlamalar ekranida endi "Kassirlar" bo'limi umuman ko'rinmasin —
+      faqat Ko'proqda.
+
+---
+
 ## 5. Doimiy asosiy oqim (har sprintda) ✅ 2026-08-14 qurilmada tasdiqlandi
 
 - [x] Kirish → do'kon tanlash
