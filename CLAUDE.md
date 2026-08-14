@@ -125,12 +125,23 @@ sifatida qo'shilmagan, `get_inventory_summary`dan `cost_value`, trend/slow
 tool'laridan `profit` olib tashlangan. Pullik tier'ga o'tilgach qayta
 ko'riladi (rozilik matni ham yangilanishi kerak).
 
+**AI chat tarixi:** `ai-chat-history.tsx` — eski suhbatlar ro'yxati va qayta
+ochish (`ai-history-api.ts`, RLS orqali to'g'ridan-to'g'ri, yangi migration
+shart emas). Bosiladigan mahsulot kartalari DB'da saqlanmagani uchun eski
+suhbatda qayta chiqmaydi (ataylab chegara) — hali tasdiqlanmagan takliflar
+(`ai_actions.status='proposed'`) esa sintetik xabar sifatida tiklanadi.
+
+**Anomaliya alerti:** qoidaga asoslangan (Gemini EMAS) — `get_shop_anomalies`
+RPC (migration 039): zararli sotuv (tan narxdan past), qaytarish sakrashi,
+kassa kamomadi. Bildirishnomalar markazi (`alerts-math.ts`) ga qo'shildi,
+faqat egasi (`isOwner`) uchun.
+
 Barcha sprintlar (Sprint 10 regressiyasi, 11, 12, 13) va AI 0–5-bosqich
 qurilmada sinovdan o'tdi 2026-08-14 (`docs/QURILMADA_SINOV.md`, hammasi ✅).
 
 Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · pullik tier uchun xalqaro
-karta · AI: chat tarixi ro'yxati (server saqlaydi, UI yo'q), anomaliya
-alerti, ovozli kiritish, ertalabki push (web `lib/push/` ga tegish kerak).
+karta · AI: ovozli kiritish, ertalabki push (web `lib/push/` ga tegish
+kerak).
 
 ## AI Agent (Antigravity) Rules & Skills
 

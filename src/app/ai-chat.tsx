@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, TextInput, FlatList, ActivityIndicator, ScrollView } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
@@ -106,18 +107,27 @@ function TypingRow() {
 export default function AiChatScreen() {
   const colors = useColors();
   const { t } = useTranslation();
+  const router = useRouter();
   const online = useOnline();
   const shopId = useActiveShopId();
   const { isOwner } = useActivePermissions();
   const insets = useSafeAreaInsets();
   const keyboard = useKeyboardHeight();
+  const { chatId: openChatId } = useLocalSearchParams<{ chatId?: string }>();
 
   // Klaviatura ochiq — panel uning ustida; yopiq — navigatsiya paneli ustida.
   const bottomInset = keyboard > 0 ? keyboard : insets.bottom;
 
   const [consent, setConsent] = useState(() => meta.getBool(MetaKeys.aiConsent));
   const [draft, setDraft] = useState("");
-  const { messages, pending, send, retry, reset, rate, resolveProposal } = useAiChat(shopId);
+  const { messages, pending, historyLoading, send, retry, reset, rate, resolveProposal, loadChat } =
+    useAiChat(shopId);
+
+  // Tarix ro'yxatidan ochilgan bo'lsa — o'sha suhbatni yuklaydi.
+  useEffect(() => {
+    if (openChatId) void loadChat(openChatId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openChatId]);
 
   const acceptConsent = useCallback(() => {
     meta.setBool(MetaKeys.aiConsent, true);
@@ -173,21 +183,36 @@ export default function AiChatScreen() {
       <ScreenHeader
         title={t("ai.title")}
         right={
-          messages.length > 0 ? (
+          <View className="flex-row items-center">
             <PressableScale
-              onPress={reset}
+              onPress={() => router.push("/ai-chat-history")}
               hitSlop={8}
               accessibilityRole="button"
-              accessibilityLabel={t("ai.newChat")}
+              accessibilityLabel={t("ai.openHistory")}
               style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}
             >
-              <Ionicons name="create-outline" size={text.xl} color={colors.primary} />
+              <Ionicons name="time-outline" size={text.xl} color={colors.primary} />
             </PressableScale>
-          ) : undefined
+            {messages.length > 0 ? (
+              <PressableScale
+                onPress={reset}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t("ai.newChat")}
+                style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}
+              >
+                <Ionicons name="create-outline" size={text.xl} color={colors.primary} />
+              </PressableScale>
+            ) : null}
+          </View>
         }
       />
 
-      {consent ? (
+      {consent && historyLoading && messages.length === 0 ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      ) : consent ? (
         <View className="flex-1" style={{ paddingBottom: bottomInset }}>
           <FlatList
             inverted

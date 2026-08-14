@@ -49,6 +49,27 @@ const META: Record<AlertKind, Meta> = {
     titleKey: "alerts.debtorsTitle",
     bodyKey: "alerts.debtorsBody",
   },
+  lossSales: {
+    icon: "trending-down-outline",
+    route: "/statistika",
+    tone: "danger",
+    titleKey: "alerts.lossSalesTitle",
+    bodyKey: "alerts.lossSalesBody",
+  },
+  returnsSpike: {
+    icon: "return-up-back-outline",
+    route: "/tarix",
+    tone: "warning",
+    titleKey: "alerts.returnsSpikeTitle",
+    bodyKey: "alerts.returnsSpikeBody",
+  },
+  cashShortfall: {
+    icon: "cash-outline",
+    route: "/shift-close",
+    tone: "danger",
+    titleKey: "alerts.cashShortfallTitle",
+    bodyKey: "alerts.cashShortfallBody",
+  },
 };
 
 export default function NotificationsScreen() {

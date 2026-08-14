@@ -15,6 +15,7 @@ import {
   type Proposal,
 } from "./ai-api";
 import { streamAiMessage } from "./ai-stream";
+import { loadChatDetail } from "./ai-history-api";
 
 export interface AiMessage {
   id: string;
@@ -43,9 +44,9 @@ export interface AiMessage {
  * matn bo'laklab to'ldiriladi. Shu sabab foydalanuvchi 6 soniya bo'sh ekranga
  * qaramaydi — birinchi so'z ~1 soniyada chiqadi.
  *
- * Xabarlar RAM'da: server tarixni `ai_messages` ga yozadi (034 migration),
- * lekin tarixni qayta yuklash UI'si hali yo'q — ekran har ochilganda yangi
- * suhbat boshlanadi. Chat ro'yxati keyingi bosqichda.
+ * Xabarlar RAM'da: server tarixni `ai_messages` ga yozadi (034 migration).
+ * Yangi ochilganda bo'sh suhbat boshlanadi; eski suhbatni davom ettirish
+ * uchun {@link loadChat} chaqiriladi (`ai-chat-history.tsx` ro'yxatidan).
  *
  * `chatId` birinchi javobdan keyin serverdan keladi va keyingi so'rovlarga
  * qo'shiladi — shu tufayli AI oldingi savollarni eslab qoladi.
@@ -54,6 +55,7 @@ export function useAiChat(shopId: string | undefined) {
   const { t } = useTranslation();
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [pending, setPending] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const chatId = useRef<string | undefined>(undefined);
   /** Xato bo'lganda qayta yuborish uchun oxirgi matn. */
   const lastText = useRef<string>("");
@@ -201,5 +203,24 @@ export function useAiChat(shopId: string | undefined) {
     setMessages([]);
   }, []);
 
-  return { messages, pending, send, retry, reset, rate, resolveProposal };
+  /**
+   * Tarixdan eski suhbatni ochadi — xabarlar tiklanadi, `chatId` shu suhbatga
+   * bog'lanadi (keyingi savol xuddi shu kontekstda davom etadi).
+   */
+  const loadChat = useCallback(async (id: string) => {
+    setHistoryLoading(true);
+    try {
+      const loaded = await loadChatDetail(id);
+      chatId.current = id;
+      lastText.current = "";
+      setMessages(loaded);
+    } catch (e) {
+      logError("ai-history-load", e);
+      toast.error(t("ai.historyLoadFailed"));
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [t]);
+
+  return { messages, pending, historyLoading, send, retry, reset, rate, resolveProposal, loadChat };
 }

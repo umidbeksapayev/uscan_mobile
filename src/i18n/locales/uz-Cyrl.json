@@ -1066,7 +1066,13 @@
     "lowStockTitle": "Кам қолдиқ",
     "lowStockBody": "{{count}} та маҳсулот тугаб қоляпти",
     "debtorsTitle": "Қарздорлар",
-    "debtorsBody": "{{count}} та мижозда қарз бор"
+    "debtorsBody": "{{count}} та мижозда қарз бор",
+    "lossSalesTitle": "Зарарли сотувлар",
+    "lossSalesBody": "{{count}} та сотув тан нархдан паст қилинган (охирги 7 кун)",
+    "returnsSpikeTitle": "Қайтариш кўпайди",
+    "returnsSpikeBody": "Бугун {{count}} та қайтариш — одатийдан сезиларли кўп",
+    "cashShortfallTitle": "Касса камомади",
+    "cashShortfallBody": "{{count}} та ёпилишда нақд кам чиққан (охирги 7 кун)"
   },
   "cashierReport": {
     "title": "Кассир ҳисоботи",
@@ -1137,6 +1143,13 @@
       "owner_only": "AI ёрдамчи фақат дўкон эгаси учун.",
       "message_too_long": "Савол жуда узун — қисқартиринг.",
       "unknown": "Хатолик юз берди. Қайта уриниб кўринг."
-    }
+    },
+    "historyTitle": "Суҳбатлар тарихи",
+    "historyEmpty": "Ҳали суҳбат йўқ",
+    "historyLoadFailed": "Суҳбатни юклаб бўлмади",
+    "untitledChat": "Номсиз суҳбат",
+    "openHistory": "Суҳбатлар тарихи",
+    "deleteChatTitle": "Суҳбатни ўчириш",
+    "deleteChatMsg": "\"{{title}}\" ўчирилсинми? Бу амални ортга қайтариб бўлмайди."
   }
 }

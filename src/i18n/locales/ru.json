@@ -1066,7 +1066,13 @@
     "lowStockTitle": "Мало остатка",
     "lowStockBody": "Заканчивается товаров: {{count}}",
     "debtorsTitle": "Должники",
-    "debtorsBody": "Клиентов с долгом: {{count}}"
+    "debtorsBody": "Клиентов с долгом: {{count}}",
+    "lossSalesTitle": "Убыточные продажи",
+    "lossSalesBody": "{{count}} продаж ниже себестоимости (за 7 дней)",
+    "returnsSpikeTitle": "Рост возвратов",
+    "returnsSpikeBody": "Сегодня {{count}} возвратов — заметно больше обычного",
+    "cashShortfallTitle": "Недостача в кассе",
+    "cashShortfallBody": "{{count}} закрытий смены с недостачей (за 7 дней)"
   },
   "cashierReport": {
     "title": "Отчёт по кассирам",
@@ -1137,6 +1143,13 @@
       "owner_only": "AI помощник доступен только владельцу магазина.",
       "message_too_long": "Вопрос слишком длинный — сократите.",
       "unknown": "Произошла ошибка. Попробуйте ещё раз."
-    }
+    },
+    "historyTitle": "История чатов",
+    "historyEmpty": "Пока нет чатов",
+    "historyLoadFailed": "Не удалось загрузить чат",
+    "untitledChat": "Чат без названия",
+    "openHistory": "История чатов",
+    "deleteChatTitle": "Удалить чат",
+    "deleteChatMsg": "Удалить \"{{title}}\"? Это действие нельзя отменить."
   }
 }

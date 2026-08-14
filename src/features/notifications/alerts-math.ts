@@ -6,7 +6,13 @@
  * qilinadi (loyiha konvensiyasi — `*-math.ts`).
  */
 
-export type AlertKind = "unsynced" | "lowStock" | "debtors";
+export type AlertKind =
+  | "unsynced"
+  | "lowStock"
+  | "debtors"
+  | "lossSales"
+  | "returnsSpike"
+  | "cashShortfall";
 
 export interface AlertInput {
   /** Serverga hali yuborilmagan offline sotuvlar soni. */
@@ -17,6 +23,16 @@ export interface AlertInput {
   debtorCount: number;
   /** `manage_debt` ruxsati — bo'lmasa qarz ma'lumoti umuman ko'rsatilmaydi. */
   canManageDebt: boolean;
+  /** Tan narxdan past sotilgan qatorlar soni (oxirgi 7 kun). */
+  lossSalesCount: number;
+  /** Bugungi qaytarish soni oxirgi 14 kunlik o'rtachadan sezilarli oshganmi. */
+  returnsSpike: boolean;
+  /** Sakrash bo'lganda ko'rsatiladigan son. */
+  returnsToday: number;
+  /** Katta salbiy farqli kassa yopilishlari soni (oxirgi 7 kun). */
+  cashShortfallCount: number;
+  /** Anomaliya signallari — tan narx/foyda bilan bog'liq, faqat egasi ko'radi. */
+  isOwner: boolean;
 }
 
 export interface AlertDescriptor {
@@ -31,6 +47,9 @@ export interface AlertDescriptor {
  *      shuning uchun eng tepada.
  *   2. Kam qoldiq — savdo to'xtab qolishi mumkin, lekin shoshilinch emas.
  *   3. Qarzdorlar — ma'lumot uchun; `manage_debt` ruxsatiga bog'langan.
+ *   4–6. Anomaliyalar (zararli sotuv, qaytarish sakrashi, kassa kamomadi) —
+ *      qoidaga asoslangan, `migration 039`. Tan narx/foyda bilan bog'liq,
+ *      shuning uchun faqat `isOwner` bo'lsa qo'shiladi.
  *
  * Nol sanoqlilar ro'yxatga tushmaydi — bo'sh ro'yxat "hammasi joyida" degani.
  */
@@ -45,6 +64,15 @@ export function buildAlerts(input: AlertInput): AlertDescriptor[] {
   }
   if (input.canManageDebt && input.debtorCount > 0) {
     out.push({ kind: "debtors", count: input.debtorCount });
+  }
+  if (input.isOwner && input.lossSalesCount > 0) {
+    out.push({ kind: "lossSales", count: input.lossSalesCount });
+  }
+  if (input.isOwner && input.returnsSpike) {
+    out.push({ kind: "returnsSpike", count: input.returnsToday });
+  }
+  if (input.isOwner && input.cashShortfallCount > 0) {
+    out.push({ kind: "cashShortfall", count: input.cashShortfallCount });
   }
 
   return out;

@@ -316,6 +316,36 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 - [x] Kunlik xulosada "… N kunga yetadi" jumlasi paydo bo'lsin.
 - [x] Javob ostidagi kartalar bosilganda mahsulot ekrani ochilsin.
 
+**Chat tarixi:** ✅ 2026-08-14 qurilmada tasdiqlandi
+
+- [x] AI chat header'ida soat ikonkasi → **Suhbatlar tarixi** ekrani ochilsin.
+- [x] Ro'yxatda oldingi suhbatlar sarlavha + sana bilan ko'rinsin (eng
+      yangisi tepada).
+- [x] Qatorni bosish — o'sha suhbat matnlari va tool chiplari **tiklanib**
+      ochilsin (yangi savol xuddi shu kontekstda davom etsin).
+- [x] Eski suhbatdagi bosiladigan mahsulot kartalari **qayta chiqmasin** —
+      bu kutilgan holat (kartalar DB'da saqlanmaydi), xato emas.
+- [x] Agar eski suhbatda **hali tasdiqlanmagan** narx/qoldiq taklifi bo'lsa
+      (tasdiqlamay chiqib ketilgan bo'lsa) — ro'yxat oxirida taklif kartasi
+      qayta chiqsin, tasdiqlash/bekor qilish ishlasin.
+- [x] O'chirish tugmasi → tasdiq so'rasin → o'chirilgach ro'yxatdan yo'qolsin.
+- [x] Bo'sh ro'yxatda "Hali suhbat yo'q" holati chiqsin.
+
+**Anomaliya alerti:** ✅ 2026-08-14 qurilmada tasdiqlandi (migration 039
+Supabase'da bajarilgan)
+
+- [x] Supabase'da `039_anomaly_alerts.sql` bajarilgan bo'lsin.
+- [x] Tan narxdan past sotuv qilib ko'ring (masalan tezkor narx bilan) →
+      Bildirishnomalar markazida "Zararli sotuvlar" chiqsin.
+- [x] Bir kunda 3+ marta qaytarish qiling → "Qaytarish ko'paydi" chiqsin.
+- [x] Kassa yopishda kutilgandan sezilarli kam naqd kiriting → "Kassa
+      kamomadi" chiqsin.
+- [x] Uchalasi ham **faqat egasida** ko'rinsin, kassir hisobida umuman
+      chiqmasin (tan narx/foyda bilan bog'liq).
+- [x] Muammo yo'q bo'lsa uchalasi ham ro'yxatda umuman ko'rinmasin.
+- [x] Har biri bosilganda tegishli ekranga o'tsin (Statistika / Tarix /
+      Kassa yopish).
+
 ---
 
 ## 5. Doimiy asosiy oqim (har sprintda) ✅ 2026-08-14 qurilmada tasdiqlandi

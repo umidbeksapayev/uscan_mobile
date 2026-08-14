@@ -1066,7 +1066,13 @@
     "lowStockTitle": "Kam qoldiq",
     "lowStockBody": "{{count}} ta mahsulot tugab qolyapti",
     "debtorsTitle": "Qarzdorlar",
-    "debtorsBody": "{{count}} ta mijozda qarz bor"
+    "debtorsBody": "{{count}} ta mijozda qarz bor",
+    "lossSalesTitle": "Zararli sotuvlar",
+    "lossSalesBody": "{{count}} ta sotuv tan narxdan past qilingan (oxirgi 7 kun)",
+    "returnsSpikeTitle": "Qaytarish ko'paydi",
+    "returnsSpikeBody": "Bugun {{count}} ta qaytarish — odatiydan sezilarli ko'p",
+    "cashShortfallTitle": "Kassa kamomadi",
+    "cashShortfallBody": "{{count}} ta yopilishda naqd kam chiqqan (oxirgi 7 kun)"
   },
   "cashierReport": {
     "title": "Kassir hisoboti",
@@ -1137,6 +1143,13 @@
       "owner_only": "AI yordamchi faqat do'kon egasi uchun.",
       "message_too_long": "Savol juda uzun — qisqartiring.",
       "unknown": "Xatolik yuz berdi. Qayta urinib ko'ring."
-    }
+    },
+    "historyTitle": "Suhbatlar tarixi",
+    "historyEmpty": "Hali suhbat yo'q",
+    "historyLoadFailed": "Suhbatni yuklab bo'lmadi",
+    "untitledChat": "Nomsiz suhbat",
+    "openHistory": "Suhbatlar tarixi",
+    "deleteChatTitle": "Suhbatni o'chirish",
+    "deleteChatMsg": "\"{{title}}\" o'chirilsinmi? Bu amalni ortga qaytarib bo'lmaydi."
   }
 }
