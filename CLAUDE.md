@@ -104,7 +104,7 @@ Edge Function'da bitta ham `update` yo'q. Ruxsat Sozlamalarda (default
 yoqilgan; haqiqiy himoya — tasdiq kartasi). Ommaviy amal qo'shilsa alohida
 ruxsat qaytadan kerak bo'ladi.
 
-**Proaktiv AI (5-bosqich):** Bosh ekranda kunlik xulosa (`ai_insights`,
+**Proaktiv AI (5-bosqich ✅ qurilmada tasdiqlandi 2026-08-14):** Bosh ekranda kunlik xulosa (`ai_insights`,
 migration 037) — tool chaqiruvisiz, server 5 ta manbani o'zi olib bitta
 Gemini so'rovi yuboradi; kesh server (kunlik) + klient (soatlik), keshdan
 qaytganda kvota sarflanmaydi. `get_reorder_suggestions` (migration 038) —
@@ -125,10 +125,12 @@ sifatida qo'shilmagan, `get_inventory_summary`dan `cost_value`, trend/slow
 tool'laridan `profit` olib tashlangan. Pullik tier'ga o'tilgach qayta
 ko'riladi (rozilik matni ham yangilanishi kerak).
 
-Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · Sprint 12–13 qurilmada
-tekshirilmagan (`docs/QURILMADA_SINOV.md`) · pullik tier uchun xalqaro karta ·
-AI: chat tarixi ro'yxati (server saqlaydi, UI yo'q), anomaliya alerti,
-ovozli kiritish, ertalabki push (web `lib/push/` ga tegish kerak).
+Barcha sprintlar (Sprint 10 regressiyasi, 11, 12, 13) va AI 0–5-bosqich
+qurilmada sinovdan o'tdi 2026-08-14 (`docs/QURILMADA_SINOV.md`, hammasi ✅).
+
+Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · pullik tier uchun xalqaro
+karta · AI: chat tarixi ro'yxati (server saqlaydi, UI yo'q), anomaliya
+alerti, ovozli kiritish, ertalabki push (web `lib/push/` ga tegish kerak).
 
 ## AI Agent (Antigravity) Rules & Skills
 
