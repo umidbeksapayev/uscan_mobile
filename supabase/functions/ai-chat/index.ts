@@ -56,6 +56,8 @@ interface Body {
   list_models?: unknown;
   /** Diagnostika: har bosqichni alohida o'lchash (kvota sarflamaydi). */
   diag?: unknown;
+  /** Sozlamalarda yoqilgan bo'lsa — yozuv TAKLIF tool'lari beriladi. */
+  allow_writes?: unknown;
 }
 
 const isUuid = (v: unknown): v is string =>
@@ -166,6 +168,9 @@ Deno.serve(async (req) => {
     apiKey: GEMINI_API_KEY,
     models,
     signal: controller.signal,
+    // Ruxsat Sozlamalarda beriladi. Ruxsat bo'lsa ham AI faqat TAKLIF
+    // yozadi — o'zgarishni foydalanuvchi tasdiqlaydi.
+    allowWrites: body.allow_writes === true,
   };
 
   // 5a. Oddiy (oqimsiz) javob.
@@ -178,6 +183,7 @@ Deno.serve(async (req) => {
         text: res.text,
         tools_used: res.toolsUsed,
         cards: res.cards,
+        proposals: res.proposals,
         model: res.model,
         usage: res.usage,
         quota: { used: q.used, limit: q.day_limit },
@@ -210,6 +216,7 @@ Deno.serve(async (req) => {
           text: res.text,
           tools_used: res.toolsUsed,
           cards: res.cards,
+          proposals: res.proposals,
           model: res.model,
           usage: res.usage,
           quota: { used: q.used, limit: q.day_limit },

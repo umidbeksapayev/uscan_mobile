@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 
 import { toast } from "@/lib/toast";
+import { meta, MetaKeys } from "@/lib/offline/mmkv";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -426,6 +427,9 @@ export default function SettingsScreen() {
   const colors = useColors();
   const [email, setEmail] = useState("");
   const [editing, setEditing] = useState<ShopMemberRow | null>(null);
+  // AI yozuv ruxsati — default YOQILGAN. Haqiqiy himoya tasdiq kartasi;
+  // bu tugma "o'chirish" uchun (mmkv.ts dagi izohga qarang).
+  const [aiWrites, setAiWrites] = useState(() => meta.getBoolOr(MetaKeys.aiWrites, true));
   const [langOpen, setLangOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -612,6 +616,39 @@ export default function SettingsScreen() {
             last
           />
         </Card>
+
+        {/* ══════════════════════════════════════════════
+            AI YORDAMCHI — faqat egasi
+        ══════════════════════════════════════════════ */}
+        {isOwner ? (
+          <>
+            <SectionLabel label={t("ai.title")} />
+            <Card style={{ marginBottom: 22, gap: 12 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: text.sm, fontWeight: "600", color: colors.ink }}>
+                    {t("ai.writesTitle")}
+                  </Text>
+                  <Text
+                    style={{ fontSize: text.xs, color: colors.muted, marginTop: 2, lineHeight: 16 }}
+                  >
+                    {t("ai.writesHint")}
+                  </Text>
+                </View>
+                <Switch
+                  value={aiWrites}
+                  onValueChange={(v) => {
+                    meta.setBool(MetaKeys.aiWrites, v);
+                    setAiWrites(v);
+                  }}
+                  accessibilityLabel={t("ai.writesTitle")}
+                  trackColor={{ true: colors.primary, false: colors.line }}
+                  thumbColor="#fff"
+                />
+              </View>
+            </Card>
+          </>
+        ) : null}
 
         {/* ══════════════════════════════════════════════
             BILDIRISHNOMALAR

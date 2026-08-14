@@ -117,7 +117,7 @@ export default function AiChatScreen() {
 
   const [consent, setConsent] = useState(() => meta.getBool(MetaKeys.aiConsent));
   const [draft, setDraft] = useState("");
-  const { messages, pending, send, retry, reset, rate } = useAiChat(shopId);
+  const { messages, pending, send, retry, reset, rate, resolveProposal } = useAiChat(shopId);
 
   const acceptConsent = useCallback(() => {
     meta.setBool(MetaKeys.aiConsent, true);
@@ -143,9 +143,14 @@ export default function AiChatScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: AiMessage }) => (
-      <MessageBubble message={item} onRetry={retry} onRate={rate} />
+      <MessageBubble
+        message={item}
+        onRetry={retry}
+        onRate={rate}
+        onResolveProposal={(id, accept) => void resolveProposal(id, accept)}
+      />
     ),
-    [retry, rate],
+    [retry, rate, resolveProposal],
   );
 
   const canSend = draft.trim().length > 0 && !pending && online && Boolean(shopId);

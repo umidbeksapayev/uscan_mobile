@@ -2,7 +2,13 @@ import { fetch as streamFetch } from "expo/fetch";
 
 import { supabase } from "@/lib/supabase";
 import { uuidv4 } from "@/lib/uuid";
-import { AiChatError, type AiChatResult, type AiErrorCode, type ProductCard } from "./ai-api";
+import {
+  AiChatError,
+  type AiChatResult,
+  type AiErrorCode,
+  type ProductCard,
+  type Proposal,
+} from "./ai-api";
 
 /**
  * AI javobini OQIM (SSE) sifatida oladi.
@@ -28,15 +34,19 @@ export interface StreamHandlers {
   onTool: (name: string) => void;
   /** Tool mahsulot topdi — javob matnidan oldin karta ko'rsatiladi. */
   onCards: (cards: ProductCard[]) => void;
+  /** AI o'zgarish taklif qildi — tasdiq kartasi ko'rsatiladi. */
+  onProposal: (proposal: Proposal) => void;
   /** Bu aylanish tool bilan tugadi — buferni tozalash kerak. */
   onReset: () => void;
 }
 
 interface StreamEvent {
-  type: "delta" | "tool" | "cards" | "reset" | "done" | "error";
+  type: "delta" | "tool" | "cards" | "proposal" | "reset" | "done" | "error";
   text?: string;
   name?: string;
   cards?: ProductCard[];
+  proposal?: Proposal;
+  proposals?: Proposal[];
   error?: AiErrorCode;
   chat_id?: string;
   message_id?: string | null;
@@ -50,10 +60,12 @@ export interface StreamAiParams {
   shopId: string;
   message: string;
   chatId?: string;
+  /** Sozlamalardagi ruxsat — yozuv TAKLIF tool'lari beriladimi. */
+  allowWrites?: boolean;
 }
 
 export async function streamAiMessage(
-  { shopId, message, chatId }: StreamAiParams,
+  { shopId, message, chatId, allowWrites }: StreamAiParams,
   handlers: StreamHandlers,
 ): Promise<AiChatResult> {
   const { data } = await supabase.auth.getSession();
@@ -78,6 +90,7 @@ export async function streamAiMessage(
         chat_id: chatId,
         client_message_id: uuidv4(),
         stream: true,
+        allow_writes: allowWrites === true,
       }),
     });
 
@@ -113,6 +126,9 @@ export async function streamAiMessage(
         case "cards":
           if (event.cards?.length) handlers.onCards(event.cards);
           break;
+        case "proposal":
+          if (event.proposal) handlers.onProposal(event.proposal);
+          break;
         case "reset":
           handlers.onReset();
           break;
@@ -123,6 +139,7 @@ export async function streamAiMessage(
             text: event.text ?? "",
             tools_used: event.tools_used ?? [],
             cards: event.cards ?? [],
+            proposals: event.proposals ?? [],
             model: event.model ?? "",
             usage: event.usage ?? { input: 0, output: 0 },
             quota: event.quota ?? { used: 0, limit: 0 },

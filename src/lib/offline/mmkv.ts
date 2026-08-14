@@ -16,6 +16,10 @@ export const MetaKeys = {
   themeMode: "themeMode", // A9: system | light | dark
   errorLog: "errorLog", // A5: xatolik halqa-buferi (LogEntry[])
   aiConsent: "aiConsent", // AI: do'kon ma'lumoti Gemini'ga yuborilishiga rozilik
+  // AI: o'zgarish TAKLIF qilishiga ruxsat. Default YOQILGAN — haqiqiy himoya
+  // tasdiq kartasi (foydalanuvchi bosmasa hech nima o'zgarmaydi), bu esa
+  // o'chirish tugmasi.
+  aiWrites: "aiWrites",
 } as const;
 
 export const meta = {
@@ -24,6 +28,12 @@ export const meta = {
   getNumber: (k: string): number => storage.getNumber(k) ?? 0,
   setNumber: (k: string, v: number) => storage.set(k, v),
   getBool: (k: string): boolean => storage.getBoolean(k) ?? false,
+  /**
+   * Default `true` bo'lgan bayroqlar uchun: "hali tanlanmagan" holatini
+   * `false` dan ajratadi. `getBool` bilan buni ifodalab bo'lmasdi — u
+   * yozilmagan kalitni ham `false` deb qaytaradi.
+   */
+  getBoolOr: (k: string, fallback: boolean): boolean => storage.getBoolean(k) ?? fallback,
   setBool: (k: string, v: boolean) => storage.set(k, v),
   getJSON: <T>(k: string): T | null => {
     const s = storage.getString(k);

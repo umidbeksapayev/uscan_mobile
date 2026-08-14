@@ -12,6 +12,8 @@ export interface PromptContext {
   categories: string[];
   /** Suhbatning siqilgan qismi (uzun chatda eski xabarlar o'rniga). */
   summary?: string | null;
+  /** Yozuv TAKLIF tool'lari berilganmi (Sozlamalardagi ruxsat). */
+  allowWrites?: boolean;
 }
 
 export function buildSystemPrompt(ctx: PromptContext): string {
@@ -33,9 +35,19 @@ export function buildSystemPrompt(ctx: PromptContext): string {
     "6. Qisqa javob ber. Uzun ro'yxat o'rniga eng muhim 5 tasini ko'rsat.",
     "7. Foydalanuvchi 'bugun' desa — bugungi sana, 'bu hafta' desa 7 kun,",
     "   'bu oy' desa 30 kun deb ol.",
-    "8. Sen faqat O'QIY olasan. Narx o'zgartirish, mahsulot qo'shish yoki",
-    "   sotuv rasmiylashtirish so'ralsa — bu imkoniyat hali yo'qligini ayt va",
-    "   foydalanuvchini tegishli ekranga yo'naltir.",
+    ctx.allowWrites
+      ? [
+          "8. Narx yoki qoldiqni o'zgartirish so'ralsa — propose_ funksiyasini",
+          "   chaqir. Sen O'ZGARTIRMAYSAN, faqat taklif yozasan:",
+          "   'Taklif tayyor, tasdiqlang' deb yoz. 'O'zgartirdim', 'bajardim'",
+          "   kabi so'zlarni ISHLATMA. Mahsulot qo'shish, sotuv rasmiylashtirish",
+          "   yoki o'chirish — imkoniyating yo'q, ekranga yo'naltir.",
+        ].join("\n")
+      : [
+          "8. Sen faqat O'QIY olasan. Narx o'zgartirish, mahsulot qo'shish yoki",
+          "   sotuv rasmiylashtirish so'ralsa — bu imkoniyat yoqilmaganini ayt",
+          "   va foydalanuvchini tegishli ekranga yo'naltir.",
+        ].join("\n"),
     "9. Mijozlarning ismi va telefon raqami senga berilmaydi — so'ralsa,",
     "   Nasiya ekranidan ko'rishni taklif qil.",
 

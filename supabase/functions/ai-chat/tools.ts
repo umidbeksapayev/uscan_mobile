@@ -29,11 +29,30 @@ export interface ProductCard {
   qty?: number;
 }
 
+/**
+ * AI taklif qilgan o'zgarish. Server uni BAJARMAYDI — faqat `ai_actions` ga
+ * `proposed` holatida yozadi va klientga uzatadi. O'zgarishni foydalanuvchi
+ * tasdiqlagach ilovaning o'zi bajaradi (migration 036 dagi izohga qarang).
+ */
+export interface Proposal {
+  action_id: string;
+  action: "update_price" | "update_stock";
+  product_id: string;
+  product_name: string;
+  old_value: number;
+  new_value: number;
+}
+
 export interface ToolContext {
   sb: SupabaseClient;
   shopId: string;
   /** Tool topgan mahsulotlar — chat ostida bosiladigan karta bo'lib chiqadi. */
   onCards?: (cards: ProductCard[]) => void;
+  /** Taklif tayyor — chat ostida tasdiq kartasi bo'lib chiqadi. */
+  onProposal?: (proposal: Proposal) => void;
+  /** `ai_actions` yozuvi uchun. */
+  chatId?: string;
+  userId?: string;
 }
 
 type ToolHandler = (
@@ -171,6 +190,58 @@ export const functionDeclarations = [
     // Argumentsiz.
   },
 ];
+
+/**
+ * Yozuv TAKLIFLARI — faqat Sozlamalarda ruxsat berilganda beriladi.
+ *
+ * Tavsifda "taklif qilasan, o'zgartirmaysan" ochiq yozilgan: model
+ * foydalanuvchiga "bajardim" deb aytmasligi kerak.
+ */
+const writeDeclarations = [
+  {
+    name: "propose_price_change",
+    description:
+      "Mahsulot sotuv narxini o'zgartirishni TAKLIF qiladi. Sen o'zgartira " +
+      "olmaysan — foydalanuvchi chatda tasdiqlagach ilova bajaradi. " +
+      "Javobda 'taklif tayyor, tasdiqlang' deb yoz, 'o'zgartirdim' DEMA.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        product_name: { type: "STRING", description: "Mahsulot nomi" },
+        new_price: { type: "NUMBER", description: "Yangi sotuv narxi (so'm)" },
+      },
+      required: ["product_name", "new_price"],
+    },
+  },
+  {
+    name: "propose_stock_change",
+    description:
+      "Mahsulot qoldig'ini to'g'rilashni TAKLIF qiladi (inventarizatsiya). " +
+      "Sen o'zgartira olmaysan — foydalanuvchi tasdiqlagach ilova bajaradi. " +
+      "Javobda 'taklif tayyor, tasdiqlang' deb yoz, 'o'zgartirdim' DEMA.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        product_name: { type: "STRING", description: "Mahsulot nomi" },
+        new_quantity: {
+          type: "NUMBER",
+          description: "Yangi qoldiq (donali — butun son, vaznli — kg)",
+        },
+      },
+      required: ["product_name", "new_quantity"],
+    },
+  },
+];
+
+/**
+ * Modelga beriladigan tool ro'yxati.
+ *
+ * Ruxsat yo'q bo'lsa yozuv tool'lari RO'YXATGA UMUMAN KIRMAYDI — "iltimos
+ * o'zgartirma" deb promptda yozishdan ancha ishonchli: mavjud bo'lmagan
+ * funksiyani chaqirib bo'lmaydi.
+ */
+export const declarationsFor = (allowWrites: boolean) =>
+  allowWrites ? [...functionDeclarations, ...writeDeclarations] : functionDeclarations;
 
 // -------------------------------------------------------------- ijrochilar --
 
@@ -391,6 +462,14 @@ const handlers: Record<string, ToolHandler> = {
     };
   },
 
+  async propose_price_change(args, ctx) {
+    return proposeChange("update_price", args, ctx);
+  },
+
+  async propose_stock_change(args, ctx) {
+    return proposeChange("update_stock", args, ctx);
+  },
+
   async get_inventory_summary(_args, { sb, shopId }) {
     const data = unwrap(await sb.rpc("get_inventory_stats", { p_shop_id: shopId }));
     const d = (data ?? {}) as Record<string, unknown>;
@@ -404,6 +483,97 @@ const handlers: Record<string, ToolHandler> = {
     };
   },
 };
+
+/**
+ * Yozuv taklifi — umumiy mantiq (narx va qoldiq uchun bir xil).
+ *
+ * Bazaga TEGMAYDI: mahsulotni topadi, qiymatni tekshiradi va `ai_actions` ga
+ * `proposed` yozadi. Haqiqiy o'zgarish foydalanuvchi tasdiqlagach ilovada
+ * bajariladi.
+ */
+async function proposeChange(
+  action: Proposal["action"],
+  args: Record<string, unknown>,
+  { sb, shopId, chatId, userId, onProposal }: ToolContext,
+): Promise<unknown> {
+  const name = typeof args.product_name === "string" ? args.product_name.trim() : "";
+  if (!name) return { error: "mahsulot nomi bo'sh" };
+
+  const rawValue = action === "update_price" ? args.new_price : args.new_quantity;
+  const value = typeof rawValue === "number" ? rawValue : Number(rawValue);
+  if (!Number.isFinite(value)) return { error: "qiymat noto'g'ri" };
+
+  // Chegaralar: model adashsa ham bema'ni taklif yozilmasin.
+  if (action === "update_price" && (value <= 0 || value > 1_000_000_000)) {
+    return { error: "narx 0 dan katta va 1 mlrd dan kichik bo'lishi kerak" };
+  }
+  if (action === "update_stock" && (value < 0 || value > 1_000_000)) {
+    return { error: "qoldiq 0 dan kichik yoki 1 000 000 dan katta bo'la olmaydi" };
+  }
+
+  const found = unwrap(
+    await sb
+      .from("products")
+      .select("id, name, selling_price, quantity")
+      .eq("shop_id", shopId)
+      .eq("is_active", true)
+      .ilike("name", `%${escapeLike(name.slice(0, 60))}%`)
+      .limit(5),
+  ) as Record<string, unknown>[] | null;
+
+  const rows = found ?? [];
+  if (rows.length === 0) return { error: "mahsulot topilmadi", query: name };
+  if (rows.length > 1) {
+    // Bir nechta mos kelsa — TAKLIF YOZILMAYDI. Model aniqlashtirib so'raydi.
+    return {
+      ambiguous: rows.map((r) => r.name),
+      note: "Bir nechta mahsulot mos keldi — qaysi biri kerakligini so'ra.",
+    };
+  }
+
+  const row = rows[0];
+  const oldValue = Number(action === "update_price" ? row.selling_price : row.quantity);
+  if (oldValue === value) {
+    return { error: "qiymat allaqachon shunday", product: row.name, value };
+  }
+
+  const { data: saved, error } = await sb
+    .from("ai_actions")
+    .insert({
+      chat_id: chatId ?? null,
+      shop_id: shopId,
+      user_id: userId,
+      action,
+      product_id: row.id,
+      product_name: row.name,
+      old_value: oldValue,
+      new_value: value,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("proposal_insert_failed", error.message);
+    return { error: "taklifni saqlab bo'lmadi" };
+  }
+
+  onProposal?.({
+    action_id: saved.id as string,
+    action,
+    product_id: row.id as string,
+    product_name: row.name as string,
+    old_value: oldValue,
+    new_value: value,
+  });
+
+  return {
+    status: "proposed",
+    product: row.name,
+    old_value: oldValue,
+    new_value: value,
+    note: "Taklif tayyor. Foydalanuvchi tasdiqlamaguncha HECH NIMA o'zgarmadi.",
+  };
+}
 
 /**
  * Gemini so'ragan funksiyani bajaradi.

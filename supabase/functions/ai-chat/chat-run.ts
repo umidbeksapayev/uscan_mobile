@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import { buildSystemPrompt } from "./prompt.ts";
-import { functionDeclarations, runTool, type ProductCard } from "./tools.ts";
+import { declarationsFor, runTool, type ProductCard, type Proposal } from "./tools.ts";
 import {
   callsOf,
   generateWithRetry,
@@ -33,6 +33,8 @@ export type RunEvent =
   | { type: "tool"; name: string }
   /** Tool topgan mahsulotlar — chat ostida bosiladigan karta bo'ladi. */
   | { type: "cards"; cards: ProductCard[] }
+  /** AI o'zgarish taklif qildi — chat ostida tasdiq kartasi bo'ladi. */
+  | { type: "proposal"; proposal: Proposal }
   /** Shu aylanishdagi matn tool chaqiruvi bilan tugadi — klient buferni tozalasin. */
   | { type: "reset" };
 
@@ -47,6 +49,8 @@ export interface RunParams {
   models: string[];
   signal: AbortSignal;
   stream: boolean;
+  /** Sozlamalarda yoqilgan bo'lsa — yozuv TAKLIF tool'lari beriladi. */
+  allowWrites: boolean;
   onEvent?: (e: RunEvent) => void;
 }
 
@@ -58,6 +62,8 @@ export interface RunResult {
   toolsUsed: string[];
   /** Bosiladigan mahsulot kartalari (chat ostida). */
   cards: ProductCard[];
+  /** Tasdiq kutayotgan o'zgarish takliflari. */
+  proposals: Proposal[];
   usage: { input: number; output: number };
   model: string;
 }
@@ -231,6 +237,7 @@ export async function runChat(params: RunParams): Promise<RunResult> {
     today: todayTashkent(),
     categories: ((catRes.data ?? []) as { name: string }[]).map((c) => c.name),
     summary: chat.summary,
+    allowWrites: params.allowWrites,
   });
 
   const contents: GeminiContent[] = [
@@ -240,6 +247,7 @@ export async function runChat(params: RunParams): Promise<RunResult> {
   const toolsUsed: string[] = [];
   /** Tool'lar topgan mahsulotlar — id bo'yicha takrorlanmaydi. */
   const cardsById = new Map<string, ProductCard>();
+  const proposals: Proposal[] = [];
   let usageIn = 0;
   let usageOut = 0;
   let usedModel = models[0];
@@ -247,7 +255,7 @@ export async function runChat(params: RunParams): Promise<RunResult> {
 
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     // Oxirgi aylanishda tool berilmaydi — model matn bilan yakunlashi shart.
-    const tools = round === MAX_TOOL_ROUNDS ? [] : functionDeclarations;
+    const tools = round === MAX_TOOL_ROUNDS ? [] : declarationsFor(params.allowWrites);
     const calls: { name: string; args: Record<string, unknown> }[] = [];
     const textParts: string[] = [];
     /** Model javobining xom bo'laklari (oqim rejimida tarixga shular ketadi). */
@@ -346,10 +354,16 @@ export async function runChat(params: RunParams): Promise<RunResult> {
         const out = await runTool(call.name, call.args, {
           sb,
           shopId,
+          chatId: chat.id,
+          userId,
           onCards: (found) => {
             for (const c of found) {
               if (c.id && !cardsById.has(c.id)) cardsById.set(c.id, c);
             }
+          },
+          onProposal: (p) => {
+            proposals.push(p);
+            emit({ type: "proposal", proposal: p });
           },
         });
         return {
@@ -401,6 +415,7 @@ export async function runChat(params: RunParams): Promise<RunResult> {
     text: answer,
     toolsUsed,
     cards: [...cardsById.values()].slice(0, MAX_CARDS),
+    proposals,
     usage: { input: usageIn, output: usageOut },
     model: usedModel,
   };

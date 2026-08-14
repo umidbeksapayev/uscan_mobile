@@ -1,8 +1,19 @@
 import { useCallback, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { logError } from "@/lib/logger";
 import { uuidv4 } from "@/lib/uuid";
-import { AiChatError, rateAiMessage, type AiErrorCode, type ProductCard } from "./ai-api";
+import { meta, MetaKeys } from "@/lib/offline/mmkv";
+import { toast } from "@/lib/toast";
+import {
+  AiChatError,
+  cancelProposal,
+  confirmProposal,
+  rateAiMessage,
+  type AiErrorCode,
+  type ProductCard,
+  type Proposal,
+} from "./ai-api";
 import { streamAiMessage } from "./ai-stream";
 
 export interface AiMessage {
@@ -13,6 +24,10 @@ export interface AiMessage {
   tools?: string[];
   /** Bosiladigan mahsulot kartalari — mahsulot ekraniga o'tadi. */
   cards?: ProductCard[];
+  /** AI taklif qilgan o'zgarish (hali bajarilmagan). */
+  proposal?: Proposal;
+  /** Taklif holati — UI tugmalarini boshqaradi. */
+  proposalStatus?: "pending" | "working" | "confirmed" | "cancelled";
   /** Xato xabari — boshqacha ranglanadi va "qayta urinish" beradi. */
   errorCode?: AiErrorCode;
   /** `ai_messages.id` — 👍/👎 shu qatorga yoziladi (javob kelgach to'ladi). */
@@ -36,6 +51,7 @@ export interface AiMessage {
  * qo'shiladi — shu tufayli AI oldingi savollarni eslab qoladi.
  */
 export function useAiChat(shopId: string | undefined) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [pending, setPending] = useState(false);
   const chatId = useRef<string | undefined>(undefined);
@@ -65,12 +81,21 @@ export function useAiChat(shopId: string | undefined) {
 
       try {
         const res = await streamAiMessage(
-          { shopId, message: textToSend, chatId: chatId.current },
+          {
+            shopId,
+            message: textToSend,
+            chatId: chatId.current,
+            // Har yuborishda o'qiladi — Sozlamalarda o'chirilsa darhol kuchga
+            // kiradi. Default yoqilgan (mmkv.ts dagi izohga qarang).
+            allowWrites: meta.getBoolOr(MetaKeys.aiWrites, true),
+          },
           {
             onDelta: (chunk) => patch(modelId, (m) => ({ ...m, text: m.text + chunk })),
             onTool: (name) =>
               patch(modelId, (m) => ({ ...m, tools: [...(m.tools ?? []), name] })),
             onCards: (cards) => patch(modelId, (m) => ({ ...m, cards })),
+            onProposal: (proposal) =>
+              patch(modelId, (m) => ({ ...m, proposal, proposalStatus: "pending" })),
             // Tool chaqiruvidan oldingi matn yakuniy javob emas — tozalanadi.
             onReset: () => patch(modelId, (m) => ({ ...m, text: "" })),
           },
@@ -84,6 +109,9 @@ export function useAiChat(shopId: string | undefined) {
           tools: res.tools_used,
           cards: res.cards,
           serverId: res.message_id,
+          // Oqimda taklif kelmagan bo'lsa (masalan oqimsiz yo'l) — yakunda olamiz.
+          proposal: m.proposal ?? res.proposals[0],
+          proposalStatus: m.proposalStatus ?? (res.proposals[0] ? "pending" : undefined),
         }));
       } catch (e) {
         logError("ai-chat", e);
@@ -99,6 +127,42 @@ export function useAiChat(shopId: string | undefined) {
       }
     },
     [shopId, pending, patch],
+  );
+
+  /**
+   * Taklifni tasdiqlash yoki bekor qilish.
+   *
+   * Tasdiqlanganda o'zgarishni ILOVA bajaradi (`confirmProposal` ichida
+   * mavjud `updateProduct`), AI emas. Xato bo'lsa holat `pending` ga
+   * qaytadi — foydalanuvchi qayta urinishi mumkin.
+   */
+  const resolveProposal = useCallback(
+    async (messageId: string, accept: boolean) => {
+      let proposal: Proposal | undefined;
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== messageId || m.proposalStatus !== "pending") return m;
+          proposal = m.proposal;
+          return { ...m, proposalStatus: "working" };
+        }),
+      );
+      if (!proposal) return;
+
+      try {
+        if (accept) await confirmProposal(proposal);
+        else await cancelProposal(proposal.action_id);
+
+        patch(messageId, (m) => ({
+          ...m,
+          proposalStatus: accept ? "confirmed" : "cancelled",
+        }));
+      } catch (e) {
+        logError("ai-proposal", e);
+        toast.error(t("ai.proposalFailed"));
+        patch(messageId, (m) => ({ ...m, proposalStatus: "pending" }));
+      }
+    },
+    [patch, t],
   );
 
   /**
@@ -137,5 +201,5 @@ export function useAiChat(shopId: string | undefined) {
     setMessages([]);
   }, []);
 
-  return { messages, pending, send, retry, reset, rate };
+  return { messages, pending, send, retry, reset, rate, resolveProposal };
 }

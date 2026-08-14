@@ -274,6 +274,20 @@ Har bir oyna ochilsin va **tugmalar to'liq balandlikda, fon bilan** chiqsin
 - [ ] AI javobida **tan narx, foyda, mijoz yoki xodim ismi CHIQMASIN**
       (tekin tier cheklovi).
 
+**4-bosqich (yozuv takliflari):**
+
+- [ ] Sozlamalarga tegmasdan (default **yoqilgan**): "Coca-Cola narxini
+      14 000 qil" → **tasdiq kartasi** chiqsin (eski → yangi qiymat ko'rinsin).
+- [ ] Sozlamalar → AI yordamchi → tugmani **o'chirib**: xuddi shu savol → AI
+      imkoniyat yoqilmaganini aytsin, tasdiq kartasi CHIQMASIN.
+- [ ] **Bekor** bosilsa: mahsulot narxi O'ZGARMASIN, karta "Bekor qilindi"ga aylansin.
+- [ ] **Tasdiqlash** bosilsa: katalogda narx yangilanganini tekshiring.
+- [ ] "Qoldiqni 20 qil" → xuddi shu oqim qoldiq uchun ishlasin.
+- [ ] Nomi o'xshash bir nechta mahsulot bo'lsa → AI qaysi biri kerakligini
+      **so'rasin**, taklif yozmasin.
+- [ ] AI javobida "o'zgartirdim/bajardim" **DEMASIN** — faqat "tasdiqlang".
+- [ ] Kassir akkauntida bu bo'lim Sozlamalarda umuman ko'rinmasin.
+
 ---
 
 ## 5. Doimiy asosiy oqim (har sprintda)

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { updateProduct } from "@/lib/products";
 import { uuidv4 } from "@/lib/uuid";
 
 /**
@@ -16,6 +17,22 @@ export interface ProductCard {
   qty?: number;
 }
 
+/**
+ * AI taklif qilgan o'zgarish.
+ *
+ * Server buni BAJARMAGAN — `ai_actions` da `proposed` holatida turibdi.
+ * Foydalanuvchi tasdiqlagach {@link confirmProposal} ilovaning o'z mutatsiyasi
+ * bilan bajaradi (migration 036 dagi izohga qarang).
+ */
+export interface Proposal {
+  action_id: string;
+  action: "update_price" | "update_stock";
+  product_id: string;
+  product_name: string;
+  old_value: number;
+  new_value: number;
+}
+
 export interface AiChatResult {
   chat_id: string;
   /** Saqlangan javob xabari — 👍/👎 shu qatorga yoziladi. */
@@ -25,6 +42,8 @@ export interface AiChatResult {
   tools_used: string[];
   /** Tool topgan mahsulotlar — chat ostida bosiladigan kartalar. */
   cards: ProductCard[];
+  /** Tasdiq kutayotgan o'zgarish takliflari. */
+  proposals: Proposal[];
   model: string;
   usage: { input: number; output: number };
   quota: { used: number; limit: number };
@@ -91,6 +110,42 @@ export async function rateAiMessage(messageId: string, rating: 1 | -1): Promise<
     .from("ai_messages")
     .update({ rating })
     .eq("id", messageId);
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Taklifni bajaradi.
+ *
+ * MUHIM: o'zgarish AI yo'lidan TASHQARIDA, ilovaning o'z `updateProduct`
+ * funksiyasi bilan bajariladi — xuddi foydalanuvchi mahsulot ekranida qo'lda
+ * tahrirlagandek. Shu tufayli yozuv mantig'i bitta joyda qoladi va AI
+ * ikkinchi "yashirin backend"ga aylanmaydi.
+ *
+ * Jurnal holati o'zgarish MUVAFFAQIYATLI bo'lgandan keyin yangilanadi.
+ */
+export async function confirmProposal(p: Proposal): Promise<void> {
+  await updateProduct(
+    p.product_id,
+    p.action === "update_price"
+      ? { selling_price: p.new_value }
+      : { quantity: p.new_value },
+  );
+
+  const { error } = await supabase
+    .from("ai_actions")
+    .update({ status: "confirmed", resolved_at: new Date().toISOString() })
+    .eq("id", p.action_id);
+  // Jurnal yozilmasa ham o'zgarish kuchga kirgan — foydalanuvchini
+  // to'xtatmaymiz, faqat qayd etamiz.
+  if (error) throw new Error(error.message);
+}
+
+/** Taklifni bekor qiladi — mahsulotga TEGILMAYDI, faqat jurnal holati. */
+export async function cancelProposal(actionId: string): Promise<void> {
+  const { error } = await supabase
+    .from("ai_actions")
+    .update({ status: "cancelled", resolved_at: new Date().toISOString() })
+    .eq("id", actionId);
   if (error) throw new Error(error.message);
 }
 

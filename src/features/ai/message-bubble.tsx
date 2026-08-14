@@ -9,7 +9,7 @@ import { radius, space, text } from "@/theme/tokens";
 import { tabularNums } from "@/theme/typography";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { PressableScale } from "@/components/ui/pressable-scale";
-import type { ProductCard } from "./ai-api";
+import type { ProductCard, Proposal } from "./ai-api";
 import type { AiMessage } from "./use-ai-chat";
 
 /** Tool nomi → ikonka va i18n kaliti (javob ostidagi manba chipi uchun). */
@@ -110,6 +110,127 @@ const ProductCards = memo(function ProductCards({ cards }: { cards: ProductCard[
           <Ionicons name="chevron-forward" size={text.base} color={colors.tabInactive} />
         </PressableScale>
       ))}
+    </View>
+  );
+});
+
+/**
+ * Tasdiq kartasi — AI taklif qilgan o'zgarish.
+ *
+ * Bu 4-bosqichning yuragi: AI hech narsani o'zgartirmaydi, u faqat taklif
+ * yozadi. Model savolni noto'g'ri tushunsa ham (masalan boshqa mahsulotni
+ * tanlasa) foydalanuvchi eski → yangi qiymatni ko'radi va rad etadi.
+ */
+const ProposalCard = memo(function ProposalCard({
+  proposal,
+  status,
+  onResolve,
+}: {
+  proposal: Proposal;
+  status: AiMessage["proposalStatus"];
+  onResolve: (accept: boolean) => void;
+}) {
+  const colors = useColors();
+  const { t } = useTranslation();
+
+  const isPrice = proposal.action === "update_price";
+  const fmt = (v: number) =>
+    isPrice ? formatCurrency(v) : `${formatNumber(v)} ${t("ai.qtyUnit")}`;
+
+  const done = status === "confirmed" || status === "cancelled";
+  const busy = status === "working";
+
+  return (
+    <View
+      className="mt-2 p-3"
+      style={{
+        borderRadius: radius.md,
+        borderWidth: 1,
+        borderColor: done ? colors.line : colors.warning,
+        backgroundColor: done ? colors.bg : colors.warningTint,
+      }}
+    >
+      <View className="mb-2 flex-row items-center gap-2">
+        <Ionicons
+          name={isPrice ? "pricetag-outline" : "cube-outline"}
+          size={text.base}
+          color={done ? colors.muted : colors.warningInk}
+        />
+        <Text
+          className="flex-1"
+          numberOfLines={1}
+          style={{ fontSize: text.sm, fontWeight: "600", color: done ? colors.muted : colors.ink }}
+        >
+          {proposal.product_name}
+        </Text>
+      </View>
+
+      <View className="mb-1 flex-row items-center gap-2">
+        <Text style={{ fontSize: text.sm, color: colors.muted, ...tabularNums }}>
+          {fmt(proposal.old_value)}
+        </Text>
+        <Ionicons name="arrow-forward" size={text.xs} color={colors.muted} />
+        <Text
+          style={{
+            fontSize: text.base,
+            fontWeight: "700",
+            color: done ? colors.muted : colors.ink,
+            ...tabularNums,
+          }}
+        >
+          {fmt(proposal.new_value)}
+        </Text>
+      </View>
+
+      {status === "confirmed" ? (
+        <View className="mt-1 flex-row items-center gap-1">
+          <Ionicons name="checkmark-circle" size={text.sm} color={colors.success} />
+          <Text style={{ fontSize: text.xs, color: colors.success }}>
+            {t("ai.proposalDone")}
+          </Text>
+        </View>
+      ) : status === "cancelled" ? (
+        <Text style={{ fontSize: text.xs, color: colors.muted }}>{t("ai.proposalCancelled")}</Text>
+      ) : (
+        <View className="mt-2 flex-row gap-2">
+          <PressableScale
+            onPress={() => onResolve(true)}
+            disabled={busy}
+            accessibilityRole="button"
+            accessibilityLabel={t("ai.proposalConfirm")}
+            style={{
+              flex: 1,
+              alignItems: "center",
+              paddingVertical: space.sm,
+              borderRadius: radius.md,
+              backgroundColor: busy ? colors.neutralTint : colors.primary,
+            }}
+          >
+            <Text style={{ fontSize: text.sm, fontWeight: "600", color: busy ? colors.muted : "#fff" }}>
+              {busy ? t("ai.proposalWorking") : t("ai.proposalConfirm")}
+            </Text>
+          </PressableScale>
+          <PressableScale
+            onPress={() => onResolve(false)}
+            disabled={busy}
+            accessibilityRole="button"
+            accessibilityLabel={t("common.cancel")}
+            style={{
+              flex: 1,
+              alignItems: "center",
+              paddingVertical: space.sm,
+              borderRadius: radius.md,
+              borderWidth: 1,
+              borderColor: colors.line,
+              backgroundColor: colors.surface,
+            }}
+          >
+            <Text style={{ fontSize: text.sm, fontWeight: "600", color: colors.ink }}>
+              {t("common.cancel")}
+            </Text>
+          </PressableScale>
+        </View>
+      )}
     </View>
   );
 });
@@ -220,10 +341,12 @@ export const MessageBubble = memo(function MessageBubble({
   message,
   onRetry,
   onRate,
+  onResolveProposal,
 }: {
   message: AiMessage;
   onRetry: () => void;
   onRate: (id: string, value: 1 | -1) => void;
+  onResolveProposal: (id: string, accept: boolean) => void;
 }) {
   const colors = useColors();
 
@@ -236,7 +359,8 @@ export const MessageBubble = memo(function MessageBubble({
     message.role === "model" &&
     !message.text &&
     !message.tools?.length &&
-    !message.cards?.length
+    !message.cards?.length &&
+    !message.proposal
   ) {
     return null;
   }
@@ -260,6 +384,14 @@ export const MessageBubble = memo(function MessageBubble({
       >
         {message.text}
       </Text>
+
+      {!isUser && message.proposal ? (
+        <ProposalCard
+          proposal={message.proposal}
+          status={message.proposalStatus}
+          onResolve={(accept) => onResolveProposal(message.id, accept)}
+        />
+      ) : null}
 
       {!isUser && message.cards?.length ? <ProductCards cards={message.cards} /> : null}
 
