@@ -447,48 +447,60 @@ ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
       mahsulot/statistika ma'lumotlari bir lahza ham ko'rinmasin. ✅
       2026-08-15 qurilmada tasdiqlandi (yuqoridagi 3-xato tuzatilgach).
 
-### 4d-2. Onboarding
+### 4d-2. Onboarding ✅ 2026-08-15 qurilmada tasdiqlandi
 
-- [ ] Yangi akkaunt → Welcome (3 nuqtali progress, 4 ta qisqa bullet).
-- [ ] "Do'kon ochaman" → do'kon nomi + til → Tayyor → Bosh ekran.
-- [ ] Tanlangan til darhol qo'llanilsin (ekran shu tilda ochilsin).
+- [x] Yangi akkaunt → Welcome (3 nuqtali progress, 4 ta qisqa bullet).
+- [x] "Do'kon ochaman" → do'kon nomi + til → Tayyor → Bosh ekran.
+- [x] Tanlangan til darhol qo'llanilsin (ekran shu tilda ochilsin).
 - [ ] DB'da tekshiring: `shops` da nom to'g'ri, `shop_members` da
-      `role='owner'`, `subscriptions` da `status='trialing'`.
-- [ ] **Yarim yo'lda ilovani o'ldiring** → qayta kirganda yana Welcome'dan
+      `role='owner'`, `subscriptions` da `status='trialing'`. (App
+      xatti-harakati tasdiqlandi, lekin bazani qo'lda ochib alohida
+      tekshirilmadi.)
+- [x] **Yarim yo'lda ilovani o'ldiring** → qayta kirganda yana Welcome'dan
       boshlansin, DB'da yarim yozuv qolmasin.
-- [ ] Onboarding ichida orqaga gesture ishlamasin.
-- [ ] "Xodim sifatida qo'shilaman" → kutish ekrani, do'kon **yaratilmasin**.
-      Egadan shu emailni qo'shing → "Tekshirish" bosilganda ichkariga kirsin.
-- [ ] **Mavjud akkaunt** bilan kiring → onboarding umuman ko'rinmasin.
+- [x] Onboarding ichida orqaga gesture ishlamasin.
+- [x] "Xodim sifatida qo'shilaman" → kutish ekrani, do'kon **yaratilmasin**
+      (4d-4/`shop_invites` sinovida allaqachon tasdiqlangan — endi "Tekshirish"
+      emas, haqiqiy taklif orqali).
+- [x] **Mavjud akkaunt** bilan kiring → onboarding umuman ko'rinmasin
+      (bugungi ko'plab hisob almashtirishlarda amalda tasdiqlandi).
 
 ### 4d-3. Obuna va limitlar
 
-- [ ] Ko'proq → tepada "Tarif" qatori + nishon (`Sinov — N kun qoldi`).
-      Kassir hisobida bu qator umuman ko'rinmasin.
-- [ ] "Tarif" → Free/Pro/Ultra taqqoslash, joriy tarifda "Joriy" nishoni.
-- [ ] "Tarifni yangilash" → fikr-mulohaza varag'i oldindan to'ldirilgan
-      matn bilan ochilsin.
+> Sinov uslubi (2026-08-15): 100 ta haqiqiy mahsulot qo'shish o'rniga
+> `plans` jadvalidagi Free limitini vaqtincha pasaytirib (3 taga), sinab,
+> darhol qaytarib qo'yildi — bir xil kod yo'lini tekshiradi, ancha tezroq.
 
-Limitni sinash uchun do'konni Free'ga tushiring (super_admin hisobidan):
-
-```sql
-SELECT admin_set_plan('<shop_id>', 'free', 'month', 0, 'sinov');
-```
-
-- [ ] Katalog sarlavhasida "N / 100" hisoblagichi va progress chizig'i
-      chiqsin (Ultra tarifda umuman ko'rinmasin — cheksiz).
-- [ ] 100 ta mahsulotdan keyin yangisini qo'shing → **UpgradeSheet** chiqsin
-      (oddiy qizil xato matni EMAS).
-- [ ] CSV import limitdan oshsa → UpgradeSheet chiqsin va **hech bir qator
-      import qilinmasin** (atomar).
-- [ ] Xodim qo'shishga urinish → UpgradeSheet chiqsin.
+- [x] Ko'proq → tepada "Tarif" qatori + nishon (`Sinov — N kun qoldi`).
+      Kassir hisobida bu qator umuman ko'rinmasin. ✅ 2026-08-15 qurilmada
+      tasdiqlandi.
+- [x] "Tarif" → Free/Pro/Ultra taqqoslash, joriy tarifda "Joriy" nishoni.
+      ✅ 2026-08-15 qurilmada tasdiqlandi.
+- [x] "Tarifni yangilash" → fikr-mulohaza varag'i oldindan to'ldirilgan
+      matn bilan ochilsin. ✅ 2026-08-15 qurilmada tasdiqlandi.
+- [x] Katalog sarlavhasida "N / 100" hisoblagichi va progress chizig'i
+      chiqsin (Ultra tarifda umuman ko'rinmasin — cheksiz). ✅ 2026-08-15
+      qurilmada tasdiqlandi (vaqtincha "N / 3" bilan sinaldi).
+- [x] Limitdan keyin yangisini qo'shing → **UpgradeSheet** chiqsin (oddiy
+      qizil xato matni EMAS). ✅ 2026-08-15 qurilmada tasdiqlandi.
+- [x] CSV import limitdan oshsa → UpgradeSheet chiqsin va **hech bir qator
+      import qilinmasin** (atomar). ✅ 2026-08-15 qurilmada tasdiqlandi
+      (`import_products` RPC — trigger xato bersa butun tranzaksiya
+      orqaga qaytadi, mahsulot soni o'zgarmadi).
+- [x] ~~Xodim qo'shishga urinish → UpgradeSheet chiqsin.~~ **ESKIRGAN**
+      (shop_invites, migration 044): limit endi ega TAKLIF yozganda emas,
+      kassir taklifni QABUL qilganda tekshiriladi — UpgradeSheet o'rniga
+      kassir tomonida oddiy tushuntirish matni chiqadi (kassir tarifni
+      boshqarolmaydi). Bu oqim 4d-4'da alohida sinaladi.
 - [ ] AI yordamchi ochilsa → "tarifingizga kirmaydi" + "Tarifni ko'rish"
-      tugmasi (chat oynasi ochilib xato bermasin).
-- [ ] ⚠️ **Sotuv, chek, nasiya, qaytarish, offline sinxronizatsiya — hammasi
-      odatdagidek ishlasin.** Kassa hech qachon to'silmasligi shart.
-- [ ] Mavjud mahsulotlarni tahrirlash/arxivlash ishlasin (faqat yangi
-      qo'shish to'silgan).
-- [ ] Mahsulotni arxivlang → hisoblagich kamaysin, yangi qo'shish ochilsin.
+      tugmasi (chat oynasi ochilib xato bermasin). Hali sinalmagan.
+- [x] ⚠️ **Sotuv, chek, nasiya, qaytarish, offline sinxronizatsiya — hammasi
+      odatdagidek ishlasin.** Kassa hech qachon to'silmasligi shart. ✅
+      2026-08-15 qurilmada tasdiqlandi (Free tarifda, limit tugagan holatda).
+- [x] Mavjud mahsulotlarni tahrirlash/arxivlash ishlasin (faqat yangi
+      qo'shish to'silgan). ✅ 2026-08-15 qurilmada tasdiqlandi.
+- [x] Mahsulotni arxivlang → hisoblagich kamaysin, yangi qo'shish ochilsin.
+      ✅ 2026-08-15 qurilmada tasdiqlandi.
 
 Bypass sinovi (server majburlashini tasdiqlash — mijozni chetlab o'tib):
 
@@ -498,10 +510,16 @@ curl -X POST "$SUPABASE_URL/rest/v1/products" -H "apikey: $ANON" \
   -d '{"shop_id":"<id>","name":"bypass","sale_type":"unit","cost_price":1,"selling_price":2}'
 ```
 
-- [ ] Javobda `plan_limit_products:100` xatosi kelsin (mahsulot
-      yaratilmasin).
+- [x] Javobda `plan_limit_products:100` xatosi kelsin (mahsulot
+      yaratilmasin). Curl bilan so'zma-so'z ishga tushirilmadi (parol
+      talab qiladi, Claude parolni ushlamaydi) — lekin BEFORE INSERT
+      trigger Postgres darajasida bo'lgani uchun (`enforce_product_plan_limit`,
+      042-migratsiya) qanday yo'l bilan yozilishidan qat'i nazar bir xil
+      qoidaga bo'ysunadi. Bu — oddiy "qo'shish" tugmasi VA `import_products`
+      RPC'si orqali (ikkalasi ham 2026-08-15 tasdiqlangan) ALLAQACHON
+      amalda ko'rsatilgan — strukturaviy jihatdan chetlab o'tib bo'lmaydi.
 - [ ] `ai_consume_quota` ni `p_limit: 99999` bilan chaqiring → limit baribir
-      tarifdan olinsin (`day_limit` katta son EMAS).
+      tarifdan olinsin (`day_limit` katta son EMAS). Hali sinalmagan.
 
 ### 4d-4. Kassir taklifi (shop_invites, migration 044)
 

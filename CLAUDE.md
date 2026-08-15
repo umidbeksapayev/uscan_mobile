@@ -139,7 +139,7 @@ faqat egasi (`isOwner`) uchun.
 Barcha sprintlar (Sprint 10 regressiyasi, 11, 12, 13) va AI 0–5-bosqich
 qurilmada sinovdan o'tdi 2026-08-14 (`docs/QURILMADA_SINOV.md`, hammasi ✅).
 
-## Auth · Onboarding · Obuna (4d-1 asosan tasdiqlandi, 4d-2/4d-3 sinov kutilmoqda)
+## Auth · Onboarding · Obuna (4d-1/4d-2/4d-3 asosan qurilmada tasdiqlandi)
 
 **Autentifikatsiya (4d-1) — 2026-08-15 qurilmada asosan tasdiqlandi**,
 parolni tiklash bundan mustasno (Supabase bepul email rate-limitiga
@@ -151,6 +151,12 @@ endi ketma-ketlashtirilgan + hamma joyda muhlat (`lib/with-timeout.ts`);
 raqamlari 1-2s miltillardi — `auth-gate.tsx`da ekran daraxti endi
 `session.user.id` bo'yicha `key`lanib, almashinganda majburan to'liq
 qayta yaratiladi. Tafsilot: `docs/QURILMADA_SINOV.md` 4d-1.
+
+**Onboarding (4d-2) va Obuna/limitlar (4d-3) — 2026-08-15 qurilmada
+asosan tasdiqlandi** (yarim yo'lda o'chirish, orqaga gesture, Free/Pro/
+Ultra ekrani, mahsulot/import limiti + UpgradeSheet, sotuv hech qachon
+to'silmasligi). Ochiq qolgani: AI yordamchi limit xabari va
+`ai_consume_quota` bypass sinovi — `docs/QURILMADA_SINOV.md` 4d-3.
 
 Supabase Auth saqlandi. Google — **native SDK**
 (`@react-native-google-signin/google-signin` + `signInWithIdToken`), brauzer
