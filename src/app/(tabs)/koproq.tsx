@@ -14,6 +14,7 @@ import {
   useActivePermissions,
 } from "@/features/auth/use-memberships";
 import { useActiveShopStore } from "@/features/auth/active-shop-store";
+import { useIsSuperAdmin } from "@/features/billing/use-payments";
 import { unregisterPushToken } from "@/features/notifications/notify";
 import { ShopSwitcherSheet } from "@/features/auth/shop-switcher-sheet";
 import { PlanBadge } from "@/features/billing/plan-badge";
@@ -38,6 +39,8 @@ type MenuItem = {
   ownerGated?: boolean;
   /** Faqat kassir (ega bo'lsa menyuda ko'rinmaydi) — `ownerGated`ning teskarisi. */
   cashierOnly?: boolean;
+  /** Faqat super_admin (`profiles.role`) — to'lovlarni tekshirish paneli. */
+  adminOnly?: boolean;
 };
 
 const MENU: MenuItem[] = [
@@ -65,6 +68,14 @@ const MENU: MenuItem[] = [
   { icon: "cloud-upload-outline", labelKey: "menu.importCsv", route: "/import-products", productsGated: true },
   // Obuna/tarif — faqat egasi ko'radi (to'lov/limit qarori kassirga tegishli emas).
   { icon: "card-outline", labelKey: "billing.title", route: "/subscription" as Href, ownerGated: true },
+  // To'lovlarni tekshirish — faqat super_admin (045-migratsiya). Server ham
+  // `is_super_admin()` bilan majburlaydi, bu faqat menyuni yashirish.
+  {
+    icon: "shield-checkmark-outline",
+    labelKey: "billing.adminTitle",
+    route: "/admin-payments" as Href,
+    adminOnly: true,
+  },
   { icon: "settings-outline", labelKey: "settings.title", route: "/settings" },
 ];
 
@@ -79,6 +90,7 @@ export default function KoproqScreen() {
   const setActiveShopId = useActiveShopStore((s) => s.setActiveShopId);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const { canManageDebt, canPurchase, canManageProducts, isOwner } = useActivePermissions();
+  const { data: isSuperAdmin } = useIsSuperAdmin();
   const pendingCount = useOfflineStore((s) => s.pendingCount);
   const canSwitchShop = (memberships?.length ?? 0) > 1;
   // Ruxsatga qarab gate qilingan bandlarni yashiramiz
@@ -88,7 +100,8 @@ export default function KoproqScreen() {
       (!m.purchaseGated || canPurchase) &&
       (!m.productsGated || canManageProducts) &&
       (!m.ownerGated || isOwner) &&
-      (!m.cashierOnly || !isOwner),
+      (!m.cashierOnly || !isOwner) &&
+      (!m.adminOnly || !!isSuperAdmin),
   );
 
   function onItem(item: MenuItem) {

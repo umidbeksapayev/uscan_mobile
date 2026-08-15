@@ -217,9 +217,41 @@ DB'da, o'zgartirish uchun reliz shart emas) · `subscriptions` ·
 `shops` INSERT ustida — web va mobil yo'llari birdan qamrab olinadi).
 Mavjud do'konlarga 90 kunlik Pro backfill. `get_shop_limits()` muddatni
 **hisoblash paytida** tekshiradi (cron yo'q, eskirgan holat saqlanmaydi).
-To'lov MVP'da **QO'LDA** — web `/admin` → `admin_set_plan()`; ilovada karta
-integratsiyasi yo'q (App Store/Play siyosati riski ham shu bilan chetlab
-o'tiladi), shuning uchun `payments` jadvali ham yo'q.
+**To'lov (migration 045 — kod tayyor, qurilmada sinov kutilmoqda).**
+Ilgari to'lov butunlay ilova TASHQARISIDA edi (web `/admin` →
+`admin_set_plan()`). Endi oqim ilova ichida: tarif tanlash → `/checkout`
+(karta rekvizitlari, maskalangan raqam + nusxalash) → chek yuklash
+(rasm/PDF, PRIVATE `payment-receipts` bucket) → admin tekshiruvi
+(`/admin-payments`, faqat `super_admin`) → obuna avtomatik faollashadi.
+
+⚠️ **App Store/Play siyosati riski ONGLI ravishda qabul qilindi** — ilgari
+aynan shu sababdan qochilgan edi (Apple 3.1.1 / Play Billing: raqamli
+obunani ilova ichida tashqi usul bilan sotish rad etilish sababi bo'lishi
+mumkin). Store'ga yuborishdan oldin qayta ko'rib chiqilsin.
+
+`payments` jadvali: `provider` ustuni (`manual_card` | `payme` | `click` |
+`uzum` | `telegram`) kelajakdagi gateway'lar uchun joy qoldiradi — manual
+mantiq obuna arxitekturasiga qattiq bog'lanmagan. Statuslar:
+`pending → reviewing → approved|rejected`, `expired` (7 kun). Duplicate
+himoyasi — `uq_payments_active` qisman UNIQUE indeksi: bitta do'konda bir
+vaqtda faqat BITTA faol to'lov, `create_payment` mavjudini qaytaradi.
+
+**To'lov qoidalari:** summa SERVERDA `plans` jadvalidan hisoblanadi (mijoz
+narx uzatmaydi — `ai_consume_quota.p_limit` darsi) · cheklar PRIVATE
+bucket'da, faqat signed URL bilan o'qiladi (`product-images` PUBLIC —
+unga yaramaydi) · `payments`da yozish siyosati yo'q, faqat SECURITY
+DEFINER RPC'lar · admin RPC'lari `is_super_admin()` bilan gate qilingan.
+
+**Muddat QO'SHILADI, reset EMAS** (`apply_subscription_period`):
+`GREATEST(now(), current_period_end, trial_ends_at) + N oy` — 15 kun
+qolganda 30 kunlik to'lov = 45 kun. Mavjud `admin_set_plan()` esa
+`now() + months` qiladi (qolgan kunlarni o'chiradi) — u ATAYLAB
+o'zgarishsiz qoldirildi, chunki u "qo'lda o'rnatish/tuzatish" vositasi
+va web `/admin` unga tayanadi.
+
+Karta raqami `features/billing/payment-config.ts` da (maxfiy emas — pul
+qabul qilish uchun beriladigan raqam). ⚠️ Hozircha PLACEHOLDER —
+haqiqiy raqam yozilishi kerak.
 
 Tariflar: **Free** 100 mahsulot / 0 xodim / AI yo'q · **Pro** 79 000 so'm —
 1000 / 3 / AI 30 kun · **Ultra** 199 000 so'm — cheksiz / cheksiz / AI 200.
@@ -243,7 +275,9 @@ DB `plan_limit_<kalit>:<limit>` shaklida `RAISE` qiladi, mijoz
 
 Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · pullik tier uchun xalqaro
 karta · AI: ovozli kiritish, ertalabki push (web `lib/push/` ga tegish
-kerak) · obuna 6-bosqich: Payme/Click self-servis to'lov, promo-kodlar.
+kerak) · obuna: Payme/Click self-servis to'lov (`payments.provider`
+allaqachon tayyor), promo-kodlar, to'lov holati o'zgarganda push
+bildirishnoma (hozir foydalanuvchi ekranni ochib ko'radi).
 
 ## AI Agent (Antigravity) Rules & Skills
 

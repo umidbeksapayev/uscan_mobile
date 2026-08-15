@@ -18,10 +18,14 @@ Sprint 11–13 o'zgarishlari **JS-only** — yangi build kerak emas
 migrations/033_cashier_report.sql` Supabase SQL Editor'da bajarilgan
 bo'lsin.
 
-⚠️ **Auth/Onboarding/Obuna (7-bo'lim) — YANGI DEV BUILD SHART.** Ikkita
+⚠️ **Auth/Onboarding/Obuna (4d-bo'lim) — YANGI DEV BUILD SHART.** Ikkita
 native modul qo'shildi (`expo-secure-store`,
 `@react-native-google-signin/google-signin`) va `app.json` plugin ro'yxati
-o'zgardi. OTA yetmaydi:
+o'zgardi. OTA yetmaydi.
+
+⚠️ **To'lov tizimi (4d-5) — YANA YANGI DEV BUILD SHART**: `expo-clipboard`
+qo'shildi (karta raqamini nusxalash uchun). Avvalgi build'da bu ekran
+"Nusxalash" bosilganda yiqiladi.
 
 ```bash
 eas build --profile development --platform android
@@ -384,7 +388,7 @@ ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
 >
 > 1. Supabase SQL Editor: `040_onboarding.sql` → `041_subscriptions.sql` →
 >    `042_plan_limits_enforce.sql` → `043_push_token_claim.sql` →
->    `044_shop_invites.sql` — shu tartibda.
+>    `044_shop_invites.sql` → `045_payments.sql` — shu tartibda.
 > 2. Google Cloud Console (`uscanmobile`): debug + release SHA-1 qo'shing,
 >    "Web application" turidagi OAuth Client ID yarating, yangi
 >    `google-services.json` ni repo tuguniga qo'ying.
@@ -593,6 +597,75 @@ curl -X POST "$SUPABASE_URL/rest/v1/products" -H "apikey: $ANON" \
       ochilib, xuddi shu Qabul/Rad kartasi ko'rinsin. ✅ 2026-08-15
       qurilmada tasdiqlandi (qabul qilingach `shop_members`ga qo'shildi,
       dashboard `view_reports` ruxsati berilgach to'g'ri ko'rindi).
+
+### 4d-5. To'lov va chek tekshiruvi (payments, migration 045)
+
+> **Oldindan:**
+> 1. Supabase SQL Editor: `045_payments.sql` bajarilsin.
+> 2. ⚠️ `src/features/billing/payment-config.ts` da `MANUAL_CARD.number`
+>    hozircha PLACEHOLDER — haqiqiy 16 xonali karta raqamini yozing,
+>    aks holda "Nusxalash" noto'g'ri raqam beradi.
+> 3. ⚠️ **Yangi dev build shart** (`expo-clipboard` qo'shildi).
+> 4. Admin sinovi uchun hisobingiz `profiles.role = 'super_admin'`
+>    bo'lishi kerak:
+>    `UPDATE profiles SET role='super_admin' WHERE id = '<user_id>';`
+
+**Foydalanuvchi tomoni:**
+
+- [ ] Ko'proq → Tarif → Pro kartasida **"Obuna bo'lish"** tugmasi chiqsin.
+      Free kartasida tugma umuman bo'lmasin (sotib olinmaydi).
+- [ ] Tugma bosilganda `/checkout` ochilsin: 1-2-3 qadam ko'rsatkichi,
+      tarif nomi, muddat va **summa** aniq ko'rinsin.
+- [ ] Karta raqami **maskalangan** ko'rinsin (`9860 **** **** 8200`),
+      "Nusxalash" bosilganda **to'liq** raqam nusxalansin (bank ilovasiga
+      qo'yib tekshiring).
+- [ ] Summani bosib nusxalash ham ishlasin.
+- [ ] Chek yuklash: **Kamera**, **Galereya**, **Fayl** — uchalasi ham
+      ishlasin. Rasm tanlangach preview + fayl nomi + hajmi ko'rinsin.
+- [ ] **PDF** yuklab ko'ring (Fayl orqali) — PDF ikonkasi bilan ko'rinsin.
+- [ ] Savat ichidagi **o'chirish** (trash) tugmasi — fayl tozalansin,
+      qaytadan tanlash mumkin bo'lsin.
+- [ ] 10 MB dan katta fayl → tushunarli xato ("Fayl juda katta"), texnik
+      xato EMAS.
+- [ ] "Chekni yuborish" → "Chekingiz qabul qilindi" + ekran
+      **"Tekshirilmoqda"** holatiga o'tsin (2-qadam yonsin).
+- [ ] Tarif ekraniga qayting → tepada **"Davom etayotgan to'lov"** banneri
+      chiqsin, bosilganda checkout'ga qaytsin.
+- [ ] Xuddi shu tarifni qayta tanlang → **yangi to'lov yaratilmasin**,
+      mavjudi ochilsin (duplicate himoyasi).
+- [ ] **Telegram** tugmasi: matn nusxalansin, Telegram ochilsin, holat
+      "Tekshirilmoqda"ga o'tsin.
+- [ ] "Bekor qilish" → tasdiq so'ralsin → to'lov yopilsin, tarif ekraniga
+      qaytsin.
+
+**Admin tomoni (super_admin):**
+
+- [ ] Ko'proq → **"To'lovlar"** bandi faqat super_admin hisobida ko'rinsin.
+      Oddiy ega hisobida umuman bo'lmasin.
+- [ ] Ro'yxatda do'kon nomi, egasining emaili, tarif, summa,
+      ma'lumotnoma va sana ko'rinsin.
+- [ ] **"Chekni ko'rish"** → chek to'liq ekranda ochilsin (PRIVATE
+      bucket'dan signed URL bilan).
+- [ ] **"Tasdiqlash"** → to'lov `approved` bo'lsin, foydalanuvchi tomonida
+      obuna **darhol** faollashsin (tarif ekranida yangi muddat ko'rinsin).
+- [ ] ⚠️ **Muddat QO'SHILISHI (eng muhim)**: obunada 10+ kun qolgan
+      holatda 1 oylik to'lovni tasdiqlang → yangi muddat ≈ **eski qolgan
+      kun + 30**, faqat 30 EMAS. (`apply_subscription_period`.)
+- [ ] **"Rad etish"** → sabab tanlash varag'i chiqsin, izoh yozib rad
+      eting → foydalanuvchi tomonida sabab ko'rinsin + "Qaytadan urinish"
+      tugmasi ishlasin.
+- [ ] Filtr chiplari (Tekshirilmoqda / Kutilmoqda / Tasdiqlangan /
+      Rad etilgan / Hammasi) to'g'ri filtrlasin.
+
+**Xavfsizlik (talab #11, #12):**
+
+- [ ] Tasdiqlangan to'lovga qayta chek yuborishga urinish → "Bu to'lov
+      allaqachon tasdiqlangan".
+- [ ] **Boshqa** foydalanuvchi hisobida `/admin-payments` ni ochib ko'ring
+      → "faqat administrator uchun" chiqsin, ro'yxat ko'rinmasin.
+- [ ] Chek havolasini (signed URL) brauzerga nusxalab, 5 daqiqadan keyin
+      oching → ishlamasligi kerak (muddati o'tgan).
+- [ ] Uch tilda tekshiring (Sozlamalar → Til).
 
 ---
 
