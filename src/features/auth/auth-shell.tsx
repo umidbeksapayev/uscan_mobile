@@ -1,12 +1,10 @@
 import type { ReactNode } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useColors } from "@/theme/theme-store";
-import { radius, text } from "@/theme/tokens";
-import { shadowGlow } from "@/theme/shadows";
+import { radius } from "@/theme/tokens";
 import { Logo } from "@/components/logo";
 import { Card } from "@/components/ui/card";
 
@@ -48,46 +46,27 @@ export function AuthShell({
           end={{ x: 1, y: 1 }}
           style={{
             alignItems: "center",
-            paddingTop: 20,
-            paddingBottom: 56,
+            // Belgi bitta bo'lgach hero pastroq: klaviatura ochilganda forma
+            // ko'proq joy oladi, karta esa hero'ga -40 bilan kirib turadi.
+            paddingTop: 28,
+            paddingBottom: 60,
             borderBottomLeftRadius: radius.xl,
             borderBottomRightRadius: radius.xl,
           }}
         >
           {topLeft ? <View style={{ position: "absolute", left: 8, top: 12 }}>{topLeft}</View> : null}
-          <View
-            style={{
-              width: 60,
-              height: 60,
-              borderRadius: radius.lg,
-              backgroundColor: "rgba(255,255,255,0.18)",
-              borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.28)",
-              alignItems: "center",
-              justifyContent: "center",
-              ...shadowGlow(colors.primaryDeep),
-            }}
-          >
-            <Ionicons name="scan-outline" size={28} color="#fff" />
-          </View>
-          <Text
-            style={{
-              marginTop: 12,
-              fontSize: text.xl2,
-              fontWeight: "800",
-              color: "#fff",
-              letterSpacing: -0.5,
-            }}
-          >
-            uscan
-          </Text>
+          {/* BITTA belgi: ilgari bu yerda umumiy "scan" ikonasi + "uscan"
+              matni turardi, karta ichida esa yana brend logosi — foydalanuvchi
+              bitta ekranda ikkita logo ko'rardi. Endi hero'da faqat haqiqiy
+              brend belgisi (oq variantda), karta esa to'g'ridan-to'g'ri
+              sarlavhadan boshlanadi. */}
+          <Logo size={30} tone="onDark" />
         </LinearGradient>
 
         <View style={{ flex: 1, paddingHorizontal: 20, marginTop: -40, paddingBottom: 24 }}>
           <Card elevated style={{ padding: 22 }}>
             <View style={{ alignItems: "center", marginBottom: 20 }}>
-              <Logo size={24} />
-              <Text className="mt-4 text-center text-xl font-medium text-ink">{title}</Text>
+              <Text className="text-center text-xl font-medium text-ink">{title}</Text>
               {subtitle ? (
                 <Text className="mt-1 text-center text-sm text-muted">{subtitle}</Text>
               ) : null}

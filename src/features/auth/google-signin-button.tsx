@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { View, Text, Pressable, ActivityIndicator } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { isGoogleSignInConfigured, signInWithGoogle, GoogleSignInError } from "./google-signin";
+import { GoogleGIcon } from "./google-g-icon";
 
 /**
  * Google native SDK bilan bitta bosishda kirish. `.env`da
@@ -66,7 +66,7 @@ export function GoogleAuthBlock({
           <ActivityIndicator color={colors.ink} />
         ) : (
           <>
-            <Ionicons name="logo-google" size={19} color="#4285F4" />
+            <GoogleGIcon size={20} />
             <Text className="text-base font-medium text-ink">{t("auth.continueWithGoogle")}</Text>
           </>
         )}

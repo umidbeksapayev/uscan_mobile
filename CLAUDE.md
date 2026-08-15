@@ -39,6 +39,12 @@ src/
 - Offline sotuvda **`client_id` idempotency** (DB migration 019) qayta ishlatiladi.
 - Valyuta: **so'm** · raqam formati: **bo'sh joy** (`2 450 000`).
 - Brend: `#2F80ED` (urg'u) · `#0F3D6E` (asosiy) · `#7DB4F5` (ochiq).
+- Brend belgisi — **"Kadr-u"** (`components/logo.tsx`): skaner kadrining to'rt
+  burchagi + "u" harfi, `react-native-svg` bilan (matn EMAS — tizim shrifti
+  iOS/Android'da har xil chizardi). `LogoMark` = faqat belgi, `Logo` = belgi +
+  "uscan". Ilova ikonkalari shu geometriyadan `scripts/make-icons.ps1` bilan
+  chiziladi — belgi o'zgarsa ikkalasi ham yangilanadi, aks holda ilova ichidagi
+  logo bilan ikonka ajralib qoladi (ilgari shu sabab ikkita belgi bor edi).
 - Pastki nav **qat'iy 5 tugma**: Bosh · Sotuv · Katalog · Tarix · Ko'proq
   (Nasiya/Hisobot/Sozlama "Ko'proq" ichida).
 
