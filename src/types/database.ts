@@ -25,6 +25,27 @@ export interface ShopMemberRow {
   created_at: string;
 }
 
+/** Kutilayotgan taklif — ega tarafida (list_shop_invites RPC). */
+export interface ShopInviteRow {
+  id: string;
+  shop_id: string;
+  email: string;
+  role: MemberRole;
+  status: "pending" | "accepted" | "declined" | "cancelled";
+  invited_by: string | null;
+  created_at: string;
+  responded_at: string | null;
+}
+
+/** Menga kelgan taklif — taklif qilingan tarafida (list_my_invites RPC). */
+export interface MyInviteRow {
+  id: string;
+  shop_id: string;
+  shop_name: string;
+  role: MemberRole;
+  created_at: string;
+}
+
 export type SaleType = "unit" | "weight";
 /** Sotuvda mahsulot qanday topilgan: shtrix-kod yoki qo'lda. ('visual' eski yozuvlar.) */
 export type SearchMethod = "barcode" | "visual" | "manual";

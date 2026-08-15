@@ -10,6 +10,12 @@ import { GoogleAuthBlock } from "@/features/auth/google-signin-button";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 
+/** Tasdiqlash xabaridagi havola shu yerga qaytadi (`verify-email.tsx`dagi
+ *  bilan bir xil) — Supabase loyihasida Authentication → URL Configuration
+ *  → Redirect URLs'ga qo'shilgan bo'lishi shart, aks holda standart Site
+ *  URL'ga (web ilova) tushib qoladi. */
+const REDIRECT_TO = "uscan://verify-email";
+
 export default function RegisterScreen() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -42,6 +48,7 @@ export default function RegisterScreen() {
       const { data, error } = await supabase.auth.signUp({
         email: normalizedEmail,
         password,
+        options: { emailRedirectTo: REDIRECT_TO },
       });
 
       if (error) {

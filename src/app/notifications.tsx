@@ -35,6 +35,13 @@ const META: Record<AlertKind, Meta> = {
     titleKey: "alerts.unsyncedTitle",
     bodyKey: "alerts.unsyncedBody",
   },
+  invites: {
+    icon: "mail-open-outline",
+    route: "/my-invites",
+    tone: "info",
+    titleKey: "alerts.invitesTitle",
+    bodyKey: "alerts.invitesBody",
+  },
   lowStock: {
     icon: "alert-circle-outline",
     route: "/katalog",

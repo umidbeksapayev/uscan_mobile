@@ -160,6 +160,37 @@ yaratadi → **web register bir qator ham o'zgarmadi**, mobil esa
 splash ushlab turiladi. Kassir yo'li do'kon YARATMAYDI (kutish ekrani) —
 ilgari har bir kassirga keraksiz do'kon tegardi.
 
+**Kassir taklifi (`shop_invites`, migration 044 — kod tayyor, qurilmada
+sinov kutilmoqda).** `add_shop_member` DARHOL biriktirar edi, lekin FAQAT
+email `auth.users`da allaqachon bor bo'lsa — ega va kassir aniq tartibda
+harakat qilishi kerak edi. Endi `staff.tsx`dagi email maydoni haqiqiy TAKLIF
+yozadi (`invite_shop_member`): kassir hali ro'yxatdan o'tmagan bo'lsa ham
+ishlaydi, tartib muhim emas. Kassir tomonida `waiting.tsx` endi ko'r
+"Tekshirish" emas — `list_my_invites()` bilan o'ziga kelgan takliflarni
+ko'radi va `respond_shop_invite()` bilan ANIQ qabul/rad qiladi (bir
+tomonlama biriktirish emas, rozilik talab qilinadi). `add_shop_member`
+o'zi DB'da o'zgarishsiz qoladi (web ilova unga tegishi mumkin) — mobil
+faqat yangi RPC'larga o'tdi.
+
+`waiting.tsx` faqat do'koni YO'Q foydalanuvchida ko'rinadi (onboarding
+guruhi) — allaqachon do'koni bor foydalanuvchi (masalan boshqa do'konga
+kassir sifatida taklif qilingan ega) buni hech qachon ko'rmasdi. Shuning
+uchun takliflar Bosh sahifa qo'ng'iroqchasi/bildirishnomalar markaziga ham
+qo'shildi (`alerts-math.ts` — yangi `invites` turi, rolga bog'liq emas) va
+yangi `/my-invites` ekraniga olib boradi. `InviteCard` (`features/auth/
+invite-card.tsx`) ikkala ekranda ham bir xil — faqat qobiq farq qiladi.
+
+Asosiy oqim (ega taklif yozadi → allaqachon do'koni bor foydalanuvchi
+qo'ng'iroqcha orqali ko'radi → qabul qiladi → `shop_members`ga qo'shiladi)
+✅ 2026-08-14 qurilmada tasdiqlandi. Qolgan holatlar (rad etish, bekor
+qilish, dublikat taklif, limit sinovi, uch til) hali ochiq —
+`docs/QURILMADA_SINOV.md` 4d-4. Sinov paytida topilgan 3 ta xato (SQL
+ambiguous column, `get_shop_limits()`ning o'z-o'ziga bog'liqligi,
+`register.tsx`da yetishmagan `emailRedirectTo`) tuzatildi — tafsilot shu
+faylda. Shu bilan birga `lib/query-client.ts`ga markazlashtirilgan xato
+jurnali qo'shildi (`QueryCache`/`MutationCache` `onError` → `logError`) —
+ilgari so'rov/mutation xatolari Diagnostika'ga tushmasdi, endi tushadi.
+
 **Obuna.** DO'KON darajasida (`subscriptions.shop_id UNIQUE`), user emas —
 limitlar ham, RLS ham `shop_id` bo'yicha. Migration 041: `plans` (narx/limit
 DB'da, o'zgartirish uchun reliz shart emas) · `subscriptions` ·
@@ -175,9 +206,11 @@ Tariflar: **Free** 100 mahsulot / 0 xodim / AI yo'q · **Pro** 79 000 so'm —
 1000 / 3 / AI 30 kun · **Ultra** 199 000 so'm — cheksiz / cheksiz / AI 200.
 Yillik −20%.
 
-**Limitlar (migration 042).** Majburlash **DB'da**: `products` BEFORE INSERT
-trigger + `add_shop_member` + `ai_consume_quota`. Bitta nuqta REST insert,
-`import_products` RPC va offline sync — hammasini yopadi.
+**Limitlar (migration 042, 044).** Majburlash **DB'da**: `products` BEFORE
+INSERT trigger + `add_shop_member` + `ai_consume_quota` + `respond_shop_invite`
+(xodim limiti — taklif QABUL qilinganda tekshiriladi, chunki `invite_shop_member`
+hali a'zolik yaratmaydi; haqiqiy resurs sarflanganda majburlash naqshi). Bitta
+nuqta REST insert, `import_products` RPC va offline sync — hammasini yopadi.
 `ai_consume_quota`ning `p_limit` parametri endi **e'tiborga olinmaydi**
 (imzo orqaga moslik uchun qoldi) — limit tarifdan olinadi, ilgari mijoz katta
 qiymat uzatib chetlab o'tishi mumkin edi.
@@ -191,9 +224,7 @@ DB `plan_limit_<kalit>:<limit>` shaklida `RAISE` qiladi, mijoz
 
 Ochiq: Fiskal/OFD (Payme sandbox kutilmoqda) · pullik tier uchun xalqaro
 karta · AI: ovozli kiritish, ertalabki push (web `lib/push/` ga tegish
-kerak) · obuna 6-bosqich: Payme/Click self-servis to'lov, promo-kodlar,
-`shop_invites` (kassirni email bilan taklif qilish — hozirgi "kutish
-ekrani" o'rniga).
+kerak) · obuna 6-bosqich: Payme/Click self-servis to'lov, promo-kodlar.
 
 ## AI Agent (Antigravity) Rules & Skills
 

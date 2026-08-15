@@ -17,10 +17,10 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ListItemCard } from "@/components/ui/list-item-card";
 import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
 import { PERMISSION_LABELS } from "@/features/auth/permissions";
-import { useStaff, useAddMember, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
-import { parsePlanLimitError, type PlanLimitError } from "@/features/billing/parse-plan-error";
-import { UpgradeSheet } from "@/features/billing/upgrade-sheet";
-import type { MemberPermissions, ShopMemberRow } from "@/types/database";
+import { useStaff, useRemoveMember, useSetPermissions } from "@/features/auth/use-staff";
+import { useShopInvites, useInviteMember, useCancelInvite } from "@/features/auth/use-invites";
+import { inviteErrorMessage } from "@/features/auth/invite-errors";
+import type { MemberPermissions, ShopMemberRow, ShopInviteRow } from "@/types/database";
 
 /* ─────────────────────────────────────────────────────────────────────────
    PermissionsSheet — kassir ruxsatlari (settings.tsx dan ko'chirildi,
@@ -239,6 +239,99 @@ function CashierRow({
   );
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   SectionLabel — bo'lim sarlavhasi (settings.tsx dagi bilan bir xil naqsh)
+───────────────────────────────────────────────────────────────────────── */
+function SectionLabel({ label }: { label: string }) {
+  const colors = useColors();
+
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10, marginLeft: 4 }}>
+      <View style={{ width: 3, height: 13, borderRadius: radius.full, backgroundColor: colors.primary }} />
+      <Text
+        accessibilityRole="header"
+        style={{
+          fontSize: text.xs,
+          fontWeight: "700",
+          color: colors.heading,
+          letterSpacing: 0.9,
+          textTransform: "uppercase",
+        }}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   InviteRow — kutilayotgan taklif qatori (hali qabul qilinmagan)
+───────────────────────────────────────────────────────────────────────── */
+function InviteRow({
+  invite,
+  first,
+  onCancel,
+  canceling,
+}: {
+  invite: ShopInviteRow;
+  first: boolean;
+  onCancel: () => void;
+  canceling: boolean;
+}) {
+  const colors = useColors();
+  const { t } = useTranslation();
+
+  return (
+    <>
+      {!first && <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 70 }} />}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 14,
+          paddingHorizontal: 16,
+          paddingVertical: 13,
+        }}
+      >
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: radius.md,
+            backgroundColor: colors.neutralTint,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Ionicons name="hourglass-outline" size={18} color={colors.muted} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: text.sm, fontWeight: "600", color: colors.ink }} numberOfLines={1}>
+            {invite.email}
+          </Text>
+          <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2 }}>
+            {t("staff.inviteWaiting")}
+          </Text>
+        </View>
+        <Pressable
+          onPress={onCancel}
+          disabled={canceling}
+          accessibilityRole="button"
+          accessibilityLabel={t("staff.cancelInviteBtn")}
+          hitSlop={8}
+          style={{ padding: 6, opacity: canceling ? 0.5 : 1 }}
+        >
+          {canceling ? (
+            <ActivityIndicator size="small" color={colors.muted} />
+          ) : (
+            <Ionicons name="close-circle-outline" size={20} color={colors.dangerInk} />
+          )}
+        </Pressable>
+      </View>
+    </>
+  );
+}
+
 /**
  * Kassirlar boshqaruvi — Ko'proq → Kassirlar.
  *
@@ -246,6 +339,12 @@ function CashierRow({
  * ichida, "Kassir hisoboti" esa Ko'proqda alohida tugma. Ega "kassirlarni
  * boshqarmoqchiman" deganda ikkalasi ham shu yerda — hisobot tepada,
  * xodim ro'yxati pastda.
+ *
+ * Email kiritish endi DARHOL biriktirmaydi (`add_shop_member`) — TAKLIF
+ * yozadi (`shop_invites`, 044-migratsiya). Kassir hali ro'yxatdan o'tmagan
+ * bo'lsa ham ishlaydi (avvalgi "avval ro'yxatdan o'tsin" cheklovi yo'q);
+ * ro'yxatga kirgach o'ziga kelgan taklifni onboarding "kutish" ekranida
+ * (`(onboarding)/waiting.tsx`) ko'rib ANIQ qabul qiladi.
  */
 export default function StaffScreen() {
   const router = useRouter();
@@ -256,29 +355,49 @@ export default function StaffScreen() {
   const { isOwner } = useActivePermissions();
 
   const { data: staff, isLoading, isError, error } = useStaff(isOwner ? shopId : undefined);
-  const addMut = useAddMember(shopId);
+  const { data: invites } = useShopInvites(isOwner ? shopId : undefined);
+  const inviteMut = useInviteMember(shopId);
+  const cancelMut = useCancelInvite(shopId);
   const removeMut = useRemoveMember(shopId);
   const permsMut = useSetPermissions(shopId);
 
   const [email, setEmail] = useState("");
   const [editing, setEditing] = useState<ShopMemberRow | null>(null);
-  const [planLimitError, setPlanLimitError] = useState<PlanLimitError | null>(null);
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
 
   function onAdd() {
     const e = email.trim();
     if (!e) return;
-    addMut.mutate(e, {
-      onSuccess: () => setEmail(""),
-      onError: (err) => {
-        const message = (err as Error)?.message;
-        const planErr = parsePlanLimitError(message);
-        if (planErr) {
-          setPlanLimitError(planErr);
-          return;
-        }
-        toast.error(t("staff.addError"), message ?? t("common.unknownError"));
+    inviteMut.mutate(
+      { email: e },
+      {
+        onSuccess: () => {
+          setEmail("");
+          toast.success(t("staff.invited"));
+        },
+        onError: (err) => {
+          toast.error(t("staff.addError"), inviteErrorMessage((err as Error)?.message));
+        },
       },
-    });
+    );
+  }
+
+  function onCancelInvite(invite: ShopInviteRow) {
+    Alert.alert(t("staff.cancelInviteTitle"), t("staff.cancelInviteConfirm", { email: invite.email }), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("staff.cancelInviteBtn"),
+        style: "destructive",
+        onPress: () => {
+          setCancelingId(invite.id);
+          cancelMut.mutate(invite.id, {
+            onSettled: () => setCancelingId(null),
+            onError: (err) =>
+              toast.error(t("staff.cancelInviteError"), (err as Error)?.message ?? t("common.unknownError")),
+          });
+        },
+      },
+    ]);
   }
 
   function onSavePerms(permissions: MemberPermissions) {
@@ -312,7 +431,8 @@ export default function StaffScreen() {
   }
 
   const cashiers = (staff ?? []).filter((m) => m.role === "cashier");
-  const canAdd = !!email.trim() && !addMut.isPending;
+  const pendingInvites = invites ?? [];
+  const canAdd = !!email.trim() && !inviteMut.isPending;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
@@ -391,7 +511,7 @@ export default function StaffScreen() {
                 opacity: canAdd ? 1 : 0.45,
               }}
             >
-              {addMut.isPending ? (
+              {inviteMut.isPending ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
                 <Text style={{ fontSize: text.sm, fontWeight: "700", color: "#fff" }}>
@@ -411,6 +531,24 @@ export default function StaffScreen() {
           >
             {t("settings.staffEmailHint")}
           </Text>
+
+          {/* Kutilayotgan takliflar — hali qabul qilinmagan */}
+          {pendingInvites.length > 0 && (
+            <>
+              <SectionLabel label={t("staff.pendingInvitesTitle")} />
+              <Card padded={false} elevated style={{ overflow: "hidden", marginBottom: 22 }}>
+                {pendingInvites.map((inv, i) => (
+                  <InviteRow
+                    key={inv.id}
+                    invite={inv}
+                    first={i === 0}
+                    onCancel={() => onCancelInvite(inv)}
+                    canceling={cancelingId === inv.id}
+                  />
+                ))}
+              </Card>
+            </>
+          )}
 
           {/* Kassirlar ro'yxati */}
           {isLoading ? (
@@ -454,13 +592,6 @@ export default function StaffScreen() {
         onSave={onSavePerms}
         onRemove={onRemove}
         saving={permsMut.isPending}
-      />
-
-      <UpgradeSheet
-        visible={!!planLimitError}
-        onClose={() => setPlanLimitError(null)}
-        limitKey={planLimitError?.key ?? null}
-        limit={planLimitError?.limit}
       />
     </SafeAreaView>
   );

@@ -383,7 +383,8 @@ ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
 > **Oldindan bajariladigan qadamlar** (bularsiz sinov boshlanmaydi):
 >
 > 1. Supabase SQL Editor: `040_onboarding.sql` → `041_subscriptions.sql` →
->    `042_plan_limits_enforce.sql` → `043_push_token_claim.sql` — shu tartibda.
+>    `042_plan_limits_enforce.sql` → `043_push_token_claim.sql` →
+>    `044_shop_invites.sql` — shu tartibda.
 > 2. Google Cloud Console (`uscanmobile`): debug + release SHA-1 qo'shing,
 >    "Web application" turidagi OAuth Client ID yarating, yangi
 >    `google-services.json` ni repo tuguniga qo'ying.
@@ -470,6 +471,70 @@ curl -X POST "$SUPABASE_URL/rest/v1/products" -H "apikey: $ANON" \
       yaratilmasin).
 - [ ] `ai_consume_quota` ni `p_limit: 99999` bilan chaqiring → limit baribir
       tarifdan olinsin (`day_limit` katta son EMAS).
+
+### 4d-4. Kassir taklifi (shop_invites, migration 044)
+
+> `044_shop_invites.sql` bajarilgan bo'lishi shart (yuqoridagi 1-qadamga
+> qarang). Ikkita akkaunt kerak: ega va bo'lajak kassir.
+
+> ⚠️ **Birinchi qurilma sinovida (2026-08-15) 3 ta haqiqiy xato topildi va
+> tuzatildi** — migratsiya `Run query` bergan ogohlantirishga qaramay
+> to'g'ri bajarilgan, lekin funksiyalarning o'zida mantiq xatosi bor edi:
+> 1. `list_my_invites()` — `RETURNS TABLE (id UUID, ...)` o'zining `id`
+>    o'zgaruvchisini yaratadi, `WHERE id = auth.uid()` (auth.users) shu bilan
+>    to'qnashib "column reference id is ambiguous" berardi.
+> 2. `respond_shop_invite()` limitni `get_shop_limits()` orqali tekshirardi,
+>    u esa "chaqiruvchi shu do'konning a'zosi bo'lishi shart" deb talab
+>    qilardi — lekin kassir aynan shu funksiya orqali a'zo bo'lishga
+>    harakat qilyapti, ya'ni hali a'zo emas → "Ruxsat yo'q". Yechim: limit
+>    mantig'i a'zolik talabisiz `get_effective_plan_limits()`ga ajratildi,
+>    `get_shop_limits()` shunga ustki qobiq bo'lib qoladi.
+> 3. Register ekranida (`register.tsx`) `emailRedirectTo` umuman
+>    berilmagan edi — tasdiqlash xabari ilovaga emas, `uscan.uz`ga
+>    yo'naltirardi (endi tuzatildi, boshqa auth ekranlaridagi bilan bir xil).
+>
+> Bundan tashqari markazlashtirilgan xato jurnali qo'shildi
+> (`lib/query-client.ts` — `QueryCache`/`MutationCache` `onError`) — endi
+> HAR QANDAY so'rov/mutation xatosi Diagnostika'ga yoziladi, oldin jim
+> yutilardi.
+
+- [x] **Ega**: Ko'proq → Kassirlar → email kiriting → "Taklif qilish".
+      Kassir hali ro'yxatdan o'tmagan bo'lsin (yangi email) — xato
+      chiqmasligi kerak (eski "avval ro'yxatdan o'tsin" xatosi YO'Q).
+      ✅ 2026-08-15 qurilmada tasdiqlandi.
+- [x] Yuborilgan taklif "Kutilayotgan takliflar" ostida email bilan
+      ko'rinsin. ✅ 2026-08-15 qurilmada tasdiqlandi.
+- [ ] Xuddi shu emailga qayta "Taklif qilish" bosing → ikkinchi qator
+      QO'SHILMASIN, faqat sana yangilansin (bitta pending taklif).
+- [ ] Kassir emaili bilan ro'yxatdan o'ting → onboarding'da "Xodim sifatida
+      qo'shilaman" → **taklif kartasi darhol ko'rinsin** (do'kon nomi +
+      "Kassir" bilan), eski "Taklif kutilmoqda" bo'sh holati EMAS.
+- [ ] Kartadagi **"Qabul qilish"** bosing → bir necha soniyada Bosh ekranga
+      o'tsin (qo'lda "Tekshirish" bosish shart emas).
+- [ ] Boshqa test: taklifni **"Rad etish"** bosing (tasdiq so'ralsin) →
+      ega tomonida "Kutilayotgan takliflar"dan yo'qolsin, kassir hali
+      do'konsiz qoladi.
+- [ ] **Ega**: kutilayotgan taklifni "Bekor qilish" (tasdiq bilan) →
+      kassir tomonida karta yo'qolsin (keyingi ochilishda).
+- [ ] Allaqachon xodim bo'lgan emailni qayta taklif qiling → tushunarli
+      xato ("allaqachon xodim"), taklif yaratilmasin.
+- [ ] **Limit sinovi**: do'konni Free'ga tushiring (4d-3 dagi SQL), 0 xodim
+      limiti bilan taklif yuboring → kassir "Qabul qilish" bosganda
+      **kassir tomonida** tushunarli xabar chiqsin ("do'kon egasiga tarifni
+      yangilashini so'rang" — UpgradeSheet EMAS, kassir tarifni
+      boshqarolmaydi), do'kon egasi ekranida esa taklif hali
+      "kutilayotgan" holatda qolaveradi.
+- [ ] Uch tilda tekshiring (Sozlamalar → Til) — ega tomoni ("Taklif
+      qilish" tugmasi, "Kutilayotgan takliflar") va kassir tomoni ("Sizga
+      taklif bor!", Qabul/Rad tugmalari).
+- [x] **Do'koni bor foydalanuvchiga taklif**: allaqachon o'z do'koni bor
+      egadan (yoki mavjud kassirdan) boshqa do'konga taklif yuboring →
+      taklif qilingan tomonda Bosh sahifa **qo'ng'iroqchasida** sanoq
+      chiqsin (onboarding orqali emas — u do'koni borlar uchun ko'rinmaydi).
+      Qo'ng'iroqcha → Bildirishnomalar → "Taklif kelgan" qatori → `/my-invites`
+      ochilib, xuddi shu Qabul/Rad kartasi ko'rinsin. ✅ 2026-08-15
+      qurilmada tasdiqlandi (qabul qilingach `shop_members`ga qo'shildi,
+      dashboard `view_reports` ruxsati berilgach to'g'ri ko'rindi).
 
 ---
 

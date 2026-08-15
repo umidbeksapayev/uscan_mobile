@@ -8,6 +8,7 @@
 
 export type AlertKind =
   | "unsynced"
+  | "invites"
   | "lowStock"
   | "debtors"
   | "lossSales"
@@ -17,6 +18,9 @@ export type AlertKind =
 export interface AlertInput {
   /** Serverga hali yuborilmagan offline sotuvlar soni. */
   unsyncedCount: number;
+  /** Boshqa do'kondan kelgan, hali javob berilmagan takliflar soni — ega
+   *  yoki kassir bo'lishidan qat'i nazar (ko'p-do'konli a'zolik). */
+  invitesCount: number;
   /** `quantity <= low_stock_alert` bo'lgan mahsulotlar soni. */
   lowStockCount: number;
   /** Balansi musbat (qarzi bor) mijozlar soni. */
@@ -45,9 +49,12 @@ export interface AlertDescriptor {
  *
  *   1. Yuborilmagan sotuvlar — ma'lumot xavf ostida (telefon sinsa yo'qoladi),
  *      shuning uchun eng tepada.
- *   2. Kam qoldiq — savdo to'xtab qolishi mumkin, lekin shoshilinch emas.
- *   3. Qarzdorlar — ma'lumot uchun; `manage_debt` ruxsatiga bog'langan.
- *   4–6. Anomaliyalar (zararli sotuv, qaytarish sakrashi, kassa kamomadi) —
+ *   2. Takliflar — kimdir javobingizni kutmoqda; rol/ruxsatdan mustaqil
+ *      (`shop_invites`, 044-migratsiya) — ega ham boshqa do'konga kassir
+ *      sifatida taklif qilinishi mumkin.
+ *   3. Kam qoldiq — savdo to'xtab qolishi mumkin, lekin shoshilinch emas.
+ *   4. Qarzdorlar — ma'lumot uchun; `manage_debt` ruxsatiga bog'langan.
+ *   5–7. Anomaliyalar (zararli sotuv, qaytarish sakrashi, kassa kamomadi) —
  *      qoidaga asoslangan, `migration 039`. Tan narx/foyda bilan bog'liq,
  *      shuning uchun faqat `isOwner` bo'lsa qo'shiladi.
  *
@@ -58,6 +65,9 @@ export function buildAlerts(input: AlertInput): AlertDescriptor[] {
 
   if (input.unsyncedCount > 0) {
     out.push({ kind: "unsynced", count: input.unsyncedCount });
+  }
+  if (input.invitesCount > 0) {
+    out.push({ kind: "invites", count: input.invitesCount });
   }
   if (input.lowStockCount > 0) {
     out.push({ kind: "lowStock", count: input.lowStockCount });

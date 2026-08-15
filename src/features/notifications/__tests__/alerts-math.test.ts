@@ -2,6 +2,7 @@ import { buildAlerts, alertBadgeCount } from "../alerts-math";
 
 const base = {
   unsyncedCount: 0,
+  invitesCount: 0,
   lowStockCount: 0,
   debtorCount: 0,
   canManageDebt: true,
@@ -24,6 +25,16 @@ describe("buildAlerts", () => {
   it("ustuvorlik: yuborilmagan sotuvlar birinchi, keyin kam qoldiq, keyin qarzdorlar", () => {
     const alerts = buildAlerts({ ...base, unsyncedCount: 2, lowStockCount: 5, debtorCount: 7 });
     expect(alerts.map((a) => a.kind)).toEqual(["unsynced", "lowStock", "debtors"]);
+  });
+
+  it("takliflar soni rolga bog'liq emas (ega bo'lsa ham chiqadi)", () => {
+    const alerts = buildAlerts({ ...base, invitesCount: 2 });
+    expect(alerts).toEqual([{ kind: "invites", count: 2 }]);
+  });
+
+  it("ustuvorlik: takliflar yuborilmagan sotuvdan keyin, kam qoldiqdan oldin", () => {
+    const alerts = buildAlerts({ ...base, unsyncedCount: 1, invitesCount: 1, lowStockCount: 1 });
+    expect(alerts.map((a) => a.kind)).toEqual(["unsynced", "invites", "lowStock"]);
   });
 
   it("manage_debt ruxsati yo'q bo'lsa qarzdorlar ko'rsatilmaydi", () => {
