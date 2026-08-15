@@ -481,13 +481,13 @@ ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
       tasdiqlandi.
 - [x] Google'da "bekor qilish" bosilsa hech qanday xato xabari chiqmasin.
       ✅ 2026-08-15 qurilmada tasdiqlandi.
-- [ ] Parolni tiklash oqimi avvalgidek ishlasin (yangi qobiqda). Kod ikki
-      marta tuzatildi (yuqoridagi 1-xato, so'ng "yaroqsiz havola" xatosi) —
-      qurilmada QAYTA sinash kerak: havolani bosgach yangi parol maydoni
-      chiqsin, parol saqlangach avtomatik ichkariga kirsin.
-- [ ] Login muhlati: agar yana "Tarmoq javob bermadi" chiqsa —
-      Sozlamalar → Diagnostika'da `login.timeout` / `secureStorage.*`
-      yozuvlarini tekshiring va shu faylni yuboring (endi sabab yoziladi).
+- [x] Parolni tiklash oqimi to'liq ishlasin: havolani bosgach yangi parol
+      maydoni chiqsin, parol saqlangach avtomatik ichkariga kirsin. ✅
+      2026-08-15 qurilmada tasdiqlandi (yuqoridagi ikkala tuzatishdan
+      keyin). Login ham shu sinovda muammosiz o'tdi — ya'ni "Tarmoq javob
+      bermadi" xabari o'tkinchi aloqa uzilishi bo'lgan ko'rinadi.
+      Takrorlansa: Sozlamalar → Diagnostika'da `login.timeout` /
+      `secureStorage.*` yozuvlarini qarash kerak (endi sabab yoziladi).
 - [x] Chiqib, **boshqa** foydalanuvchi bilan kiring → avvalgi userning
       mahsulot/statistika ma'lumotlari bir lahza ham ko'rinmasin. ✅
       2026-08-15 qurilmada tasdiqlandi (yuqoridagi 3-xato tuzatilgach).

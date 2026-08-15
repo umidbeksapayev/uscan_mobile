@@ -147,10 +147,9 @@ qurilmada sinovdan o'tdi 2026-08-14 (`docs/QURILMADA_SINOV.md`, hammasi ✅).
 
 ## Auth · Onboarding · Obuna (4d-1/4d-2/4d-3 asosan qurilmada tasdiqlandi)
 
-**Autentifikatsiya (4d-1) — 2026-08-15 qurilmada asosan tasdiqlandi**,
-parolni tiklash bundan mustasno (Supabase bepul email rate-limitiga
-uchradi, keyinroq qaytiladi). Sinov paytida yana 2 ta jiddiy xato
-tuzatildi: (1) email/parol havolasi ochilganda `getSession()`/`setSession()`
+**Autentifikatsiya (4d-1) — 2026-08-15 qurilmada TO'LIQ tasdiqlandi**
+(parolni tiklash ham: havola → yangi parol → avtomatik kirish). Sinov
+paytida yana 2 ta jiddiy xato tuzatildi: (1) email/parol havolasi ochilganda `getSession()`/`setSession()`
 bir vaqtda ketib GoTrueClient RN'da abadiy osilib qolishi mumkin edi —
 endi ketma-ketlashtirilgan + hamma joyda muhlat (`lib/with-timeout.ts`);
 (2) hisob almashtirilganda (ilova yopilmasdan) avvalgi foydalanuvchining
