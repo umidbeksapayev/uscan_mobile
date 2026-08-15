@@ -424,6 +424,44 @@ ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
 >    bo'yicha `key`lanadi — foydalanuvchi almashganda majburan to'liq
 >    qayta yaratiladi, eski holatdan hech narsa qololmaydi.
 
+> ⚠️ **2026-08-15 (kechqurun) — parolni tiklash havolasi: "yaroqsiz"
+> xabari.** Havola TO'G'RI kelayotgan edi, xato ilovada:
+> 1. **O'z-o'zini buzadigan effekt.** Token topilgach ekran ushlangan
+>    havolani `clearDeepLink()` bilan tozalardi. Havola REAKTIV do'konda
+>    bo'lgani uchun tozalash effektni QAYTA ishga tushirardi — ikkinchi
+>    yurishda havola yo'q, ekran esa "yaroqsiz havola" deb ko'rsatardi,
+>    holbuki `setSession()` orqa fonda muvaffaqiyatli tugardi. Jurnal buni
+>    aniq ko'rsatdi: `deepLink.event ... fragment=[access_token,...]` kelgan,
+>    287 ms keyin esa `reset-password.unexpectedLink ... url=null` (uchala
+>    manba ham bo'sh). Yechim: ishlatilgan havola endi o'chirilmaydi, balki
+>    REAKTIV BO'LMAGAN modul to'plamida belgilanadi (`consumeDeepLink` /
+>    `isDeepLinkConsumed`).
+> 2. **Holat qayta yaratishda yo'qolardi.** Sessiya o'rnatilishi bilan
+>    `auth-gate.tsx`ning `key`i o'zgarib (yuqoridagi 3-tuzatish) butun ekran
+>    daraxtini qayta yaratadi — `useState`dagi bosqich nolga qaytib, ekran
+>    yana "yaroqsiz" ko'rsatardi (jurnaldagi ikkinchi yozuv, 2.1 s keyin).
+>    Yechim: bosqich endi `recovery-store.ts` do'konida
+>    (`idle · establishing · ready · invalid · done`) — qayta yaratish
+>    holatni buzmaydi. `active` bayrog'i ham shu yerdan hisoblanadi, ya'ni
+>    oqim uzilganda AuthGate abadiy "kutish"da qolmaydi.
+> 3. Xuddi shu naqsh `verify-email.tsx`da ham bor edi — u ham tuzatildi
+>    (xato holatida xabar `cancelled` sababli butunlay yo'qolardi).
+>
+> **Login "Tarmoq javob bermadi" xabari** (shu sinovda ko'rilgan): bu
+> `login.tsx`dagi 30 s muhlat — ya'ni `signInWithPassword()` javob
+> qaytarmagan. Tarmoq xatosi bo'lganda Supabase boshqa matn qaytaradi
+> ("Internet yo'q…"), demak so'rov yiqilmagan, osilgan. Sabab qurilmada
+> aniqlanishi uchun uchta o'zgarish kiritildi:
+> - login xatolari endi **jurnalga yoziladi** (`login.error` /
+>   `login.timeout`) — ilgari umuman yozilmasdi, shuning uchun
+>   diagnostikada bu haqda bitta ham qator yo'q edi;
+> - muhlat tugaganda aloqa tekshiriladi (`isOnlineNow()`) va "internet
+>   yo'q" holati alohida xabar bilan ajratiladi;
+> - `lib/secure-storage.ts` amallari endi bitta navbatda ketma-ket
+>   bajariladi (+10 s muhlat). GoTrue lock'i o'chirilgani uchun
+>   (`noopLock`) sessiyani bir vaqtda bir necha chaqiruv yozishi mumkin
+>   edi — bo'laklab yozishda bu saqlangan sessiyani buzishi mumkin.
+
 - [x] Kirish ekrani yangi ko'rinishda: tepada gradient hero, o'rtada karta,
       "— yoki —" ajratkich ostida Google tugmasi. ✅ 2026-08-15 (amalda
       ko'p marta ko'rilgan, muammo yo'q).
@@ -443,10 +481,13 @@ ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
       tasdiqlandi.
 - [x] Google'da "bekor qilish" bosilsa hech qanday xato xabari chiqmasin.
       ✅ 2026-08-15 qurilmada tasdiqlandi.
-- [ ] Parolni tiklash oqimi avvalgidek ishlasin (yangi qobiqda). Kod
-      tuzatildi (yuqoridagi 1-xato), lekin qurilmada sinov Supabase'ning
-      bepul email xizmati rate-limitiga (juda ko'p test emaili
-      yuborilgani sabab) uchrab yakunlanmadi — keyinroq qaytiladi.
+- [ ] Parolni tiklash oqimi avvalgidek ishlasin (yangi qobiqda). Kod ikki
+      marta tuzatildi (yuqoridagi 1-xato, so'ng "yaroqsiz havola" xatosi) —
+      qurilmada QAYTA sinash kerak: havolani bosgach yangi parol maydoni
+      chiqsin, parol saqlangach avtomatik ichkariga kirsin.
+- [ ] Login muhlati: agar yana "Tarmoq javob bermadi" chiqsa —
+      Sozlamalar → Diagnostika'da `login.timeout` / `secureStorage.*`
+      yozuvlarini tekshiring va shu faylni yuboring (endi sabab yoziladi).
 - [x] Chiqib, **boshqa** foydalanuvchi bilan kiring → avvalgi userning
       mahsulot/statistika ma'lumotlari bir lahza ham ko'rinmasin. ✅
       2026-08-15 qurilmada tasdiqlandi (yuqoridagi 3-xato tuzatilgach).

@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { authErrorMessage, authLinkErrorMessage } from "@/lib/auth-errors";
 import { logError } from "@/lib/logger";
 import { withTimeout } from "@/lib/with-timeout";
+import { useDeepLinkStore, consumeDeepLink, isDeepLinkConsumed } from "@/lib/deep-link";
 import { parseAuthUrlTokens, parseAuthUrlError } from "@/features/auth/parse-auth-url";
 import { useAuth } from "@/features/auth/auth-context";
 import { AuthShell } from "@/features/auth/auth-shell";
@@ -27,6 +28,16 @@ const SET_SESSION_TIMEOUT_MS = 15_000;
 type Status = "waiting" | "confirming" | "invalid";
 
 /**
+ * Tasdiqlash havolasi ayni damda ishlanmoqdami — MODUL darajasida, chunki
+ * sessiya o'rnatilishi bilan AuthGate butun ekran daraxtini qayta yaratadi
+ * (`auth-gate.tsx` `key`) va ekran holati yo'qoladi. Busiz foydalanuvchi
+ * bir lahza "pochtangizni tekshiring" ekranini qaytadan ko'rardi. Faqat
+ * boshlang'ich ko'rinish uchun — takroriy ishlashdan `consumeDeepLink`
+ * himoya qiladi.
+ */
+let confirmInFlight = false;
+
+/**
  * Ro'yxatdan o'tgach shu ekranga tushiladi (`?email=...`). Ikki holatda ham
  * shu fayl ishlaydi:
  *  1) Oddiy holat — "pochtangizni tekshiring" xabari + qayta yuborish.
@@ -42,8 +53,10 @@ export default function VerifyEmailScreen() {
   const url = Linking.useURL();
   const { email } = useLocalSearchParams<{ email?: string }>();
   const { initializing } = useAuth();
+  // Reaktiv: havola ekran ochilgandan KEYIN kelsa ham effekt qayta ishlaydi.
+  const capturedUrl = useDeepLinkStore((s) => s.url);
 
-  const [status, setStatus] = useState<Status>("waiting");
+  const [status, setStatus] = useState<Status>(() => (confirmInFlight ? "confirming" : "waiting"));
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -58,25 +71,51 @@ export default function VerifyEmailScreen() {
   // boshqa bo'lsa ham ekran hech qachon abadiy "tekshirilmoqda"da qolmasin.
   useEffect(() => {
     if (initializing) return;
-    let cancelled = false;
+
     async function tryConfirm() {
       const initialUrl = await Linking.getInitialURL();
-      const tokens =
-        parseAuthUrlTokens(url, "signup") ?? parseAuthUrlTokens(initialUrl, "signup");
+      // Uchinchi manba — ilova ishga tushishida ushlangan havola (ilova
+      // allaqachon ochiq bo'lganda faqat shu ishlaydi, `lib/deep-link.ts`).
+      // Allaqachon ishlatilgan havolani qaytadan qaramaymiz.
+      const candidates = [url, initialUrl, capturedUrl].filter(
+        (u): u is string => Boolean(u) && !isDeepLinkConsumed(u),
+      );
+
+      let tokens: ReturnType<typeof parseAuthUrlTokens> = null;
+      let tokenUrl: string | null = null;
+      for (const candidate of candidates) {
+        const parsed = parseAuthUrlTokens(candidate, "signup");
+        if (parsed) {
+          tokens = parsed;
+          tokenUrl = candidate;
+          break;
+        }
+      }
+
       if (!tokens) {
         // Havola xato bilan qaytgan bo'lsa sababini ko'rsatamiz; aks holda
         // bu oddiy holat — foydalanuvchi ekranni to'g'ridan-to'g'ri ochgan
         // va "pochtangizni tekshiring" matni ko'rinaveradi.
-        const linkError = parseAuthUrlError(url) ?? parseAuthUrlError(initialUrl);
-        if (linkError && !cancelled) {
-          logError("verify-email.linkError", `${linkError.code}: ${linkError.description ?? ""}`);
-          setErrorMsg(authLinkErrorMessage(linkError.code));
+        const failure = candidates.map((c) => parseAuthUrlError(c)).find(Boolean);
+        if (failure) {
+          candidates.forEach(consumeDeepLink);
+          logError("verify-email.linkError", `${failure.code}: ${failure.description ?? ""}`);
+          setErrorMsg(authLinkErrorMessage(failure.code));
           setStatus("invalid");
         }
         return;
       }
 
+      // Token olindi — havolani "ishlatilgan" deb belgilaymiz (bir martalik).
+      // ATAYLAB do'kon tozalanmaydi: reaktiv qiymatni null qilish shu
+      // effektni qayta ishga tushirib, oqimni buzardi (`lib/deep-link.ts`).
+      // Qaytish qiymati parallel yurishlardan himoya qiladi (birinchisi oladi).
+      if (!consumeDeepLink(tokenUrl)) return;
+      confirmInFlight = true;
       setStatus("confirming");
+      // `cancelled` bayrog'i YO'Q: sessiya o'rnatilishi bilan AuthGate ekran
+      // daraxtini qayta yaratadi — natijani tashlab yuborsak, xato xabari
+      // yo'qolib, ekran abadiy "tekshirilmoqda"da qolardi.
       try {
         const { error } = await withTimeout(
           supabase.auth.setSession({
@@ -85,25 +124,24 @@ export default function VerifyEmailScreen() {
           }),
           SET_SESSION_TIMEOUT_MS,
         );
-        if (cancelled) return;
         if (error) {
+          confirmInFlight = false;
+          logError("verify-email.setSession", error.message);
           setErrorMsg(authErrorMessage(error.message));
           setStatus("invalid");
           return;
         }
         // Sessiya o'rnatildi → AuthGate avtomatik yo'naltiradi.
+        confirmInFlight = false;
       } catch (e) {
-        if (cancelled) return;
+        confirmInFlight = false;
         logError("verify-email.setSession", e);
         setErrorMsg("Ulanish juda uzoq davom etdi. Pastdagi tugma orqali qaytadan urinib ko'ring.");
         setStatus("invalid");
       }
     }
     void tryConfirm();
-    return () => {
-      cancelled = true;
-    };
-  }, [url, initializing]);
+  }, [url, initializing, capturedUrl]);
 
   useEffect(() => {
     if (cooldown <= 0) return;

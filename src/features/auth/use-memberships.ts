@@ -13,25 +13,33 @@ import { pickActiveMembership } from "./pick-active-membership";
  */
 export function useMemberships() {
   const { session } = useAuth();
+  const userId = session?.user.id;
 
   return useQuery({
-    queryKey: ["memberships", session?.user.id],
-    enabled: !!session,
+    queryKey: ["memberships", userId],
+    enabled: !!userId,
     queryFn: async (): Promise<Membership[]> => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return [];
-
+      // ATAYLAB `supabase.auth.getUser()` EMAS: u qo'shimcha GoTrue
+      // chaqiruvi va RN'da osilib qolishi mumkin (`lib/supabase.ts`dagi
+      // `noopLock` izohi). Osilganda bu so'rov hech qachon tugamasdi,
+      // `AuthGate` esa "a'zoliklar hali hal bo'lmadi" deb kutib turardi —
+      // natijada login muvaffaqiyatli bo'lsa ham foydalanuvchi kirish
+      // ekranida XATOSIZ qotib qolardi (qurilmada tasdiqlangan).
+      // `session.user.id` allaqachon qo'limizda — tarmoqqa chiqish shart emas.
       const { data, error } = await supabase
         .from("shop_members")
         .select("role, permissions, shop:shops(*)")
-        .eq("user_id", user.id)
+        .eq("user_id", userId!)
         .order("created_at", { ascending: false });
 
-      if (error || !data) return [];
+      // Xatoni YUTMAYMIZ. Ilgari `return []` qilinardi — bu tarmoq xatosini
+      // "do'koni yo'q" deb ko'rsatardi va do'kon EGASINI onboarding'ga
+      // uloqtirardi. `AuthGate` ataylab `isSuccess` ni tekshiradi (xatoda
+      // hech qayerga yo'naltirmaydi) — buning ishlashi uchun xato
+      // haqiqatan ham xato bo'lib qaytishi kerak.
+      if (error) throw new Error(error.message);
 
-      return data
+      return (data ?? [])
         .filter((d) => d.shop)
         .map((d) => ({
           shop: d.shop as unknown as Shop,

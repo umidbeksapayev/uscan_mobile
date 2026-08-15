@@ -16,6 +16,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import Toast from "react-native-toast-message";
 
+// Import qilinishining O'ZI deep-link obunasini o'rnatadi — bu birinchi
+// ekran mount bo'lishidan OLDIN bo'lishi shart, aks holda ilova ochiq
+// bo'lganda kelgan havola o'tkazib yuboriladi (`lib/deep-link.ts` izohi).
+import "@/lib/deep-link";
 import { queryClient } from "@/lib/query-client";
 import { persistOptions } from "@/lib/offline/persister";
 import { ErrorBoundary } from "@/components/error-boundary";

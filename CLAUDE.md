@@ -152,6 +152,16 @@ raqamlari 1-2s miltillardi — `auth-gate.tsx`da ekran daraxti endi
 `session.user.id` bo'yicha `key`lanib, almashinganda majburan to'liq
 qayta yaratiladi. Tafsilot: `docs/QURILMADA_SINOV.md` 4d-1.
 
+**Deep-link qoidasi (parolni tiklash "yaroqsiz havola" xatosidan keyin):**
+ishlatilgan havola HECH QACHON reaktiv do'kondan o'chirilmaydi —
+`consumeDeepLink()` bilan reaktiv bo'lmagan to'plamda belgilanadi
+(`setUrl(null)` ekran effektini qayta ishga tushirib, to'g'ri havolani
+"yaroqsiz" qilib ko'rsatardi). Havola oqimining bosqichi ham ekran
+`useState`ida emas, do'konda (`recovery-store.ts`) — `auth-gate.tsx`
+sessiya paydo bo'lganda `key` orqali butun daraxtni qayta yaratadi va
+ekran holati yo'qoladi. `lib/secure-storage.ts` amallari bitta navbatda
+(GoTrue lock'i `noopLock` bilan o'chirilgani uchun).
+
 **Onboarding (4d-2) va Obuna/limitlar (4d-3) — 2026-08-15 qurilmada
 asosan tasdiqlandi** (yarim yo'lda o'chirish, orqaga gesture, Free/Pro/
 Ultra ekrani, mahsulot/import limiti + UpgradeSheet, sotuv hech qachon

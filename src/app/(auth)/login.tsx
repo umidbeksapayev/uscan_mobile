@@ -7,10 +7,16 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
+import { logError } from "@/lib/logger";
+import { withTimeout } from "@/lib/with-timeout";
+import { isOnlineNow } from "@/lib/use-online";
 import { AuthShell } from "@/features/auth/auth-shell";
 import { GoogleAuthBlock } from "@/features/auth/google-signin-button";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+
+/** Sekin tarmoqda ham yetarli, lekin ekran abadiy kutmasligi uchun chegara. */
+const SIGN_IN_TIMEOUT_MS = 30_000;
 
 export default function LoginScreen() {
   const colors = useColors();
@@ -35,17 +41,20 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const signIn = supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
-        password,
-      });
-      // Sekin internet (3G / qishloq) uchun keng oraliq.
-      const timeout = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(t("auth.errNetworkTimeout"))), 30000),
+      const { data, error } = await withTimeout(
+        supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+        // Sekin internet (3G / qishloq) uchun keng oraliq.
+        SIGN_IN_TIMEOUT_MS,
+        "signInWithPassword timeout",
       );
-      const { data, error } = await Promise.race([signIn, timeout]);
 
       if (error) {
+        // Xato foydalanuvchiga ko'rsatiladi, lekin sababi (inglizcha asl
+        // matn) faqat jurnalda qoladi — Diagnostika'dan o'qib bo'ladi.
+        logError("login.error", error.message);
         setErrorMsg(authErrorMessage(error.message));
         return;
       }
@@ -55,7 +64,15 @@ export default function LoginScreen() {
       }
       // Muvaffaqiyat → AuthGate avtomatik tabs'ga yo'naltiradi.
     } catch (e) {
-      setErrorMsg(e instanceof Error ? e.message : String(e));
+      // Bu yerga faqat muhlat (yoki kutilmagan istisno) tushadi — tarmoq
+      // xatosi `error` bo'lib qaytadi. Ilgari bu holat jurnalga UMUMAN
+      // yozilmasdi va qurilmadagi "Tarmoq javob bermadi" xabarining sababini
+      // keyin aniqlash imkonsiz edi.
+      logError("login.timeout", e);
+      // "Javob kelmadi"ning eng ko'p uchraydigan sababi — aloqa uzilgan
+      // (LTE ko'rinadi, lekin ma'lumot o'tmaydi). Shuni ajratib aytamiz.
+      const online = await isOnlineNow();
+      setErrorMsg(online ? t("auth.errNetworkTimeout") : t("auth.errNetwork"));
     } finally {
       setLoading(false);
     }

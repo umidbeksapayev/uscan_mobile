@@ -10,15 +10,14 @@ import { supabase } from "@/lib/supabase";
 import { authErrorMessage, authLinkErrorMessage } from "@/lib/auth-errors";
 import { logError } from "@/lib/logger";
 import { withTimeout } from "@/lib/with-timeout";
+import { useDeepLinkStore, consumeDeepLink, isDeepLinkConsumed } from "@/lib/deep-link";
 import { parseAuthUrlError, describeAuthUrl } from "@/features/auth/parse-auth-url";
-import { parseRecoveryParams } from "@/features/auth/parse-recovery-url";
+import { parseRecoveryParams, type RecoveryTokens } from "@/features/auth/parse-recovery-url";
 import { useRecoveryStore } from "@/features/auth/recovery-store";
 import { useAuth } from "@/features/auth/auth-context";
 import { AuthShell } from "@/features/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-
-type Status = "checking" | "ready" | "invalid" | "done";
 
 /** GoTrueClient RN'da ba'zan abadiy osilib qoladi (`lib/supabase.ts`dagi
  *  `noopLock` izohi) — shuning uchun bu ekran ham muhlatsiz kuta olmaydi. */
@@ -36,14 +35,19 @@ export default function ResetPasswordScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const url = Linking.useURL();
-  const setRecoveryActive = useRecoveryStore((s) => s.setActive);
   const { initializing } = useAuth();
+  // Reaktiv: havola ekran ochilgandan KEYIN kelsa ham effekt qayta ishlaydi.
+  const capturedUrl = useDeepLinkStore((s) => s.url);
+  // Oqim holati do'konda — sabab `recovery-store.ts` izohida (ekran sessiya
+  // o'rnatilganda AuthGate tomonidan qayta yaratiladi).
+  const phase = useRecoveryStore((s) => s.phase);
+  const linkError = useRecoveryStore((s) => s.error);
+  const setPhase = useRecoveryStore((s) => s.setPhase);
 
-  const [status, setStatus] = useState<Status>("checking");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [saving, setSaving] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // `initializing` tugashini kutamiz: `auth-context.tsx`ning o'z
   // `getSession()` chaqiruvi bilan bu yerdagi `setSession()` bir vaqtda
@@ -51,30 +55,66 @@ export default function ResetPasswordScreen() {
   // shu poyga holatini oldini oladi. `withTimeout` esa qo'shimcha himoya.
   useEffect(() => {
     if (initializing) return;
-    let cancelled = false;
+    // `setSession()` ketayotgan bo'lsa aralashmaymiz. Qolgan bosqichlarda
+    // effekt ishlayveradi, lekin pastda faqat HALI ISHLATILMAGAN havola
+    // qaraladi — yangisi kelmasa hech narsa o'zgarmaydi. (Bu effekt har
+    // render'da, shu jumladan AuthGate qayta yaratgan yangi mount'da ham
+    // ishga tushadi.)
+    if (phase === "establishing") return;
+
     async function establishSession() {
       const initialUrl = await Linking.getInitialURL();
-      const tokens = parseRecoveryParams(url) ?? parseRecoveryParams(initialUrl);
+      // Uchta manba: `useURL()`, sovuq start va ilova ISHLAB TURGANDA
+      // ushlangan havola (`lib/deep-link.ts`). Allaqachon ishlatilganini
+      // chetlab o'tamiz — bir martalik token ikkinchi marta yaramaydi.
+      const candidates = [url, initialUrl, capturedUrl].filter(
+        (u): u is string => Boolean(u) && !isDeepLinkConsumed(u),
+      );
+
+      let tokens: RecoveryTokens | null = null;
+      let tokenUrl: string | null = null;
+      for (const candidate of candidates) {
+        const parsed = parseRecoveryParams(candidate);
+        if (parsed) {
+          tokens = parsed;
+          tokenUrl = candidate;
+          break;
+        }
+      }
+
       if (!tokens) {
-        if (cancelled) return;
         // Havola XATO bilan qaytgan bo'lishi mumkin — sababini ko'rsatamiz
         // (avval hamma holat bir xil "yaroqsiz" bo'lib ko'rinardi).
-        const linkError = parseAuthUrlError(url) ?? parseAuthUrlError(initialUrl);
-        if (linkError) {
-          logError("reset-password.linkError", `${linkError.code}: ${linkError.description ?? ""}`);
-          setErrorMsg(authLinkErrorMessage(linkError.code));
-        } else {
-          // Na token, na xato — havola kutilmagan shaklda kelgan. Aynan
-          // NIMA kelganini jurnalga yozamiz (token qiymatlarisiz).
+        const failure = candidates.map((c) => parseAuthUrlError(c)).find(Boolean);
+        if (failure) {
+          candidates.forEach(consumeDeepLink);
+          logError("reset-password.linkError", `${failure.code}: ${failure.description ?? ""}`);
+          setPhase("invalid", authLinkErrorMessage(failure.code));
+          return;
+        }
+        // Na token, na xato. Birinchi marta — aynan NIMA kelganini jurnalga
+        // yozamiz (token qiymatlarisiz); keyingi render'larda jim, aks holda
+        // jurnal bir xil yozuv bilan to'lib ketadi.
+        if (phase === "idle") {
           logError(
             "reset-password.unexpectedLink",
-            `useURL: ${describeAuthUrl(url)} | initial: ${describeAuthUrl(initialUrl)}`,
+            `useURL: ${describeAuthUrl(url)} | initial: ${describeAuthUrl(initialUrl)} | captured: ${describeAuthUrl(capturedUrl)}`,
           );
+          setPhase("invalid", null);
         }
-        setStatus((s) => (s === "checking" ? "invalid" : s));
         return;
       }
-      setRecoveryActive(true);
+
+      // Token topildi. Havolani DARHOL "ishlatilgan" deb belgilaymiz —
+      // ilgari bu yerda do'kon tozalanardi (`setUrl(null)`), bu esa shu
+      // effektni qayta ishga tushirib, oqimni o'zi buzardi. Qaytish qiymati
+      // parallel yurishlardan himoya qiladi (birinchisi oladi).
+      if (!consumeDeepLink(tokenUrl)) return;
+      setPhase("establishing");
+      // ATAYLAB `cancelled` bayrog'i yo'q: sessiya o'rnatilishi bilan
+      // AuthGate ekran daraxtini qayta yaratadi va bu effekt "bekor
+      // qilingan" bo'lib qoladi. Natijani tashlab yuborsak — ekran abadiy
+      // kutishda qolardi. Holat do'konda bo'lgani uchun unmount muhim emas.
       try {
         const { error } = await withTimeout(
           supabase.auth.setSession({
@@ -83,60 +123,52 @@ export default function ResetPasswordScreen() {
           }),
           SET_SESSION_TIMEOUT_MS,
         );
-        if (cancelled) return;
         if (error) {
-          setRecoveryActive(false);
-          setErrorMsg(authErrorMessage(error.message));
-          setStatus("invalid");
+          logError("reset-password.setSession", error.message);
+          setPhase("invalid", authErrorMessage(error.message));
           return;
         }
-        setStatus("ready");
+        setPhase("ready");
       } catch (e) {
-        if (cancelled) return;
         logError("reset-password.setSession", e);
-        setRecoveryActive(false);
-        setErrorMsg("Ulanish juda uzoq davom etdi. Havolani qaytadan so'rang.");
-        setStatus("invalid");
+        setPhase("invalid", "Ulanish juda uzoq davom etdi. Havolani qaytadan so'rang.");
       }
     }
+
     void establishSession();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url, initializing]);
+  }, [url, initializing, capturedUrl, phase, setPhase]);
 
   async function onSave() {
-    setErrorMsg(null);
+    setFormError(null);
     if (password.length < 6) {
-      setErrorMsg(t("auth.passwordTooShort"));
+      setFormError(t("auth.passwordTooShort"));
       return;
     }
     if (password !== confirm) {
-      setErrorMsg(t("auth.passwordsMismatch"));
+      setFormError(t("auth.passwordsMismatch"));
       return;
     }
     setSaving(true);
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) {
-        setErrorMsg(authErrorMessage(error.message));
+        setFormError(authErrorMessage(error.message));
         return;
       }
-      setStatus("done");
       // Bu yerda qo'lda yo'naltirmaymiz — AuthGate `recoveryActive`
       // yolg'onga aylanganini ko'rib, do'kon holatiga qarab (tabs) yoki
       // (onboarding)ga to'g'ri yo'naltiradi (parolni tiklagan user hali
       // onboarding'ni tugatmagan bo'lishi ham mumkin, garchi kamdan-kam).
-      setRecoveryActive(false);
+      setPhase("done");
     } catch (e) {
-      setErrorMsg(e instanceof Error ? e.message : String(e));
+      logError("reset-password.updateUser", e);
+      setFormError(e instanceof Error ? e.message : String(e));
     } finally {
       setSaving(false);
     }
   }
 
-  if (status === "checking") {
+  if (phase !== "ready" && phase !== "invalid") {
     return (
       <AuthShell title={t("auth.checkingLink")}>
         <View className="items-center py-4">
@@ -146,9 +178,9 @@ export default function ResetPasswordScreen() {
     );
   }
 
-  if (status === "invalid") {
+  if (phase === "invalid") {
     return (
-      <AuthShell title={t("auth.linkInvalidTitle")} subtitle={errorMsg ?? t("auth.linkInvalidBody")}>
+      <AuthShell title={t("auth.linkInvalidTitle")} subtitle={linkError ?? t("auth.linkInvalidBody")}>
         <View className="items-center gap-4">
           <View
             className="h-16 w-16 items-center justify-center rounded-full"
@@ -156,7 +188,15 @@ export default function ResetPasswordScreen() {
           >
             <Ionicons name="alert-circle-outline" size={30} color={colors.danger} />
           </View>
-          <Pressable onPress={() => router.replace("/(auth)/forgot-password")} className="p-2">
+          <Pressable
+            onPress={() => {
+              // Oqim qaytadan boshlanadi — eski "yaroqsiz" holati yangi
+              // havolani kutib turmasligi kerak.
+              setPhase("idle");
+              router.replace("/(auth)/forgot-password");
+            }}
+            className="p-2"
+          >
             <Text className="text-sm font-medium text-primary">{t("auth.requestAgain")}</Text>
           </Pressable>
         </View>
@@ -172,7 +212,7 @@ export default function ResetPasswordScreen() {
           value={password}
           onChangeText={(v) => {
             setPassword(v);
-            if (errorMsg) setErrorMsg(null);
+            if (formError) setFormError(null);
           }}
           placeholder="••••••••"
           secureTextEntry
@@ -185,7 +225,7 @@ export default function ResetPasswordScreen() {
           value={confirm}
           onChangeText={(v) => {
             setConfirm(v);
-            if (errorMsg) setErrorMsg(null);
+            if (formError) setFormError(null);
           }}
           placeholder="••••••••"
           secureTextEntry
@@ -195,7 +235,7 @@ export default function ResetPasswordScreen() {
         />
 
         <Button label={t("common.save")} onPress={onSave} loading={saving} />
-        {errorMsg ? <Text className="text-center text-sm text-danger">{errorMsg}</Text> : null}
+        {formError ? <Text className="text-center text-sm text-danger">{formError}</Text> : null}
       </View>
     </AuthShell>
   );

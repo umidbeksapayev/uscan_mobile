@@ -2,6 +2,9 @@ import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { logError } from "./logger";
+import { withTimeout } from "./with-timeout";
+
 /**
  * Supabase sessiyasi (JWT + refresh token + user metadata) uchun xavfsiz
  * saqlash. Avval oddiy AsyncStorage ishlatilgan — bu ochiq matn, qurilma
@@ -67,9 +70,45 @@ async function removeItemAsync(key: string): Promise<void> {
   await SecureStore.deleteItemAsync(`${key}${CHUNK_COUNT_SUFFIX}`);
 }
 
+/**
+ * Barcha amallar BITTA navbatda, ketma-ket bajariladi.
+ *
+ * Nega kerak: `lib/supabase.ts`da GoTrue'ning o'z lock'i o'chirilgan
+ * (`noopLock` — RN'dagi deadlock sababi). Demak `setSession()`,
+ * `signInWithPassword()` va avtomatik token yangilash sessiyani BIR VAQTDA
+ * yozishi mumkin. Bo'laklab yozishda bu xavfli: bir chaqiruvning bo'laklari
+ * ikkinchisiniki bilan aralashib, `_chunks` soni bir sessiyaga, bo'laklar
+ * boshqasiga tegishli bo'lib qolishi mumkin — natijada saqlangan sessiya
+ * buziladi va foydalanuvchi sababsiz "chiqib ketadi".
+ *
+ * Muhlat: agar native chaqiruv osilib qolsa, navbat butun auth'ni abadiy
+ * bloklamasligi kerak — bunda amal XATO bilan tugaydi (Supabase buni
+ * "sessiya yo'q" deb o'qiydi va qayta login so'raydi), sabab esa
+ * Diagnostika jurnaliga tushadi.
+ */
+const OP_TIMEOUT_MS = 10_000;
+let queue: Promise<unknown> = Promise.resolve();
+
+function enqueue<T>(name: string, task: () => Promise<T>): Promise<T> {
+  const start = () => withTimeout(task(), OP_TIMEOUT_MS, `secure-storage.${name}: timeout`);
+  // Oldingi amal xato bersa ham navbat to'xtamaydi (ikkala tarmoq ham `start`).
+  const run = queue.then(start, start);
+  queue = run.then(
+    () => undefined,
+    (e) => {
+      logError(`secureStorage.${name}`, e);
+    },
+  );
+  return run;
+}
+
 // Web'da SecureStore mavjud emas (faqat `expo start --web` lokal ishlab
 // chiqish uchun — productionda web target yo'q, ko'r. app.json).
 export const secureStorage =
   Platform.OS === "web"
     ? AsyncStorage
-    : { getItem: getItemAsync, setItem: setItemAsync, removeItem: removeItemAsync };
+    : {
+        getItem: (key: string) => enqueue("getItem", () => getItemAsync(key)),
+        setItem: (key: string, value: string) => enqueue("setItem", () => setItemAsync(key, value)),
+        removeItem: (key: string) => enqueue("removeItem", () => removeItemAsync(key)),
+      };
