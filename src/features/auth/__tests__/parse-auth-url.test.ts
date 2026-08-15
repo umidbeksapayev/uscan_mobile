@@ -1,4 +1,4 @@
-import { parseAuthUrlTokens } from "../parse-auth-url";
+import { parseAuthUrlTokens, parseAuthUrlError } from "../parse-auth-url";
 
 const BASE = "uscan://verify-email";
 
@@ -29,5 +29,38 @@ describe("parseAuthUrlTokens", () => {
   it("token yetishmasa → null", () => {
     expect(parseAuthUrlTokens(`${BASE}#type=signup&access_token=abc`, "signup")).toBeNull();
     expect(parseAuthUrlTokens(`${BASE}#type=signup&refresh_token=def`, "signup")).toBeNull();
+  });
+});
+
+describe("parseAuthUrlError", () => {
+  it("fragment'dagi xatoni ajratadi (eng ko'p uchraydigan holat)", () => {
+    const url = `uscan://reset-password#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired`;
+    expect(parseAuthUrlError(url)).toEqual({
+      code: "otp_expired",
+      description: "Email link is invalid or has expired",
+    });
+  });
+
+  it("query'dagi xatoni ham ajratadi", () => {
+    const url = `uscan://reset-password?error=access_denied&error_code=otp_expired`;
+    expect(parseAuthUrlError(url)?.code).toBe("otp_expired");
+  });
+
+  it("error_code bo'lmasa error qiymatiga tushadi", () => {
+    expect(parseAuthUrlError(`${BASE}#error=access_denied`)).toEqual({
+      code: "access_denied",
+      description: null,
+    });
+  });
+
+  it("muvaffaqiyatli havolada xato yo'q", () => {
+    const url = `${BASE}#access_token=abc&refresh_token=def&type=signup`;
+    expect(parseAuthUrlError(url)).toBeNull();
+  });
+
+  it("null/bo'sh/fragmentsiz → null", () => {
+    expect(parseAuthUrlError(null)).toBeNull();
+    expect(parseAuthUrlError("")).toBeNull();
+    expect(parseAuthUrlError(BASE)).toBeNull();
   });
 });

@@ -7,9 +7,10 @@ import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { supabase } from "@/lib/supabase";
-import { authErrorMessage } from "@/lib/auth-errors";
+import { authErrorMessage, authLinkErrorMessage } from "@/lib/auth-errors";
 import { logError } from "@/lib/logger";
 import { withTimeout } from "@/lib/with-timeout";
+import { parseAuthUrlError, describeAuthUrl } from "@/features/auth/parse-auth-url";
 import { parseRecoveryParams } from "@/features/auth/parse-recovery-url";
 import { useRecoveryStore } from "@/features/auth/recovery-store";
 import { useAuth } from "@/features/auth/auth-context";
@@ -52,9 +53,25 @@ export default function ResetPasswordScreen() {
     if (initializing) return;
     let cancelled = false;
     async function establishSession() {
-      const tokens = parseRecoveryParams(url) ?? parseRecoveryParams(await Linking.getInitialURL());
+      const initialUrl = await Linking.getInitialURL();
+      const tokens = parseRecoveryParams(url) ?? parseRecoveryParams(initialUrl);
       if (!tokens) {
-        if (!cancelled) setStatus((s) => (s === "checking" ? "invalid" : s));
+        if (cancelled) return;
+        // Havola XATO bilan qaytgan bo'lishi mumkin — sababini ko'rsatamiz
+        // (avval hamma holat bir xil "yaroqsiz" bo'lib ko'rinardi).
+        const linkError = parseAuthUrlError(url) ?? parseAuthUrlError(initialUrl);
+        if (linkError) {
+          logError("reset-password.linkError", `${linkError.code}: ${linkError.description ?? ""}`);
+          setErrorMsg(authLinkErrorMessage(linkError.code));
+        } else {
+          // Na token, na xato — havola kutilmagan shaklda kelgan. Aynan
+          // NIMA kelganini jurnalga yozamiz (token qiymatlarisiz).
+          logError(
+            "reset-password.unexpectedLink",
+            `useURL: ${describeAuthUrl(url)} | initial: ${describeAuthUrl(initialUrl)}`,
+          );
+        }
+        setStatus((s) => (s === "checking" ? "invalid" : s));
         return;
       }
       setRecoveryActive(true);

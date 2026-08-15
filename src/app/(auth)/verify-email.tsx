@@ -7,10 +7,10 @@ import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
 import { supabase } from "@/lib/supabase";
-import { authErrorMessage } from "@/lib/auth-errors";
+import { authErrorMessage, authLinkErrorMessage } from "@/lib/auth-errors";
 import { logError } from "@/lib/logger";
 import { withTimeout } from "@/lib/with-timeout";
-import { parseAuthUrlTokens } from "@/features/auth/parse-auth-url";
+import { parseAuthUrlTokens, parseAuthUrlError } from "@/features/auth/parse-auth-url";
 import { useAuth } from "@/features/auth/auth-context";
 import { AuthShell } from "@/features/auth/auth-shell";
 import { Button } from "@/components/ui/button";
@@ -60,9 +60,21 @@ export default function VerifyEmailScreen() {
     if (initializing) return;
     let cancelled = false;
     async function tryConfirm() {
+      const initialUrl = await Linking.getInitialURL();
       const tokens =
-        parseAuthUrlTokens(url, "signup") ?? parseAuthUrlTokens(await Linking.getInitialURL(), "signup");
-      if (!tokens) return; // oddiy holat — "pochtangizni tekshiring" ko'rsatiladi
+        parseAuthUrlTokens(url, "signup") ?? parseAuthUrlTokens(initialUrl, "signup");
+      if (!tokens) {
+        // Havola xato bilan qaytgan bo'lsa sababini ko'rsatamiz; aks holda
+        // bu oddiy holat — foydalanuvchi ekranni to'g'ridan-to'g'ri ochgan
+        // va "pochtangizni tekshiring" matni ko'rinaveradi.
+        const linkError = parseAuthUrlError(url) ?? parseAuthUrlError(initialUrl);
+        if (linkError && !cancelled) {
+          logError("verify-email.linkError", `${linkError.code}: ${linkError.description ?? ""}`);
+          setErrorMsg(authLinkErrorMessage(linkError.code));
+          setStatus("invalid");
+        }
+        return;
+      }
 
       setStatus("confirming");
       try {

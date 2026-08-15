@@ -34,3 +34,24 @@ export function authErrorMessage(message?: string | null): string {
 
   return "Xatolik yuz berdi. Qayta urinib ko'ring.";
 }
+
+/**
+ * Email havolasi XATO bilan qaytganda ko'rsatiladigan matn
+ * (`parseAuthUrlError` kodi bo'yicha).
+ *
+ * `otp_expired` — eng ko'p uchraydigani va u ko'pincha "muddati o'tgan"
+ * emas, "allaqachon ishlatilgan" degani: pochta xizmati havolani
+ * xavfsizlik tekshiruvi uchun oldindan ochib, bir martalik tokenni sarflab
+ * yuboradi. Shuning uchun matn ikkala holatni ham qamrab oladi.
+ */
+export function authLinkErrorMessage(code: string): string {
+  const c = code.toLowerCase();
+
+  if (c.includes("otp_expired") || c.includes("expired")) {
+    return "Havola muddati o'tgan yoki allaqachon ishlatilgan. Yangi havola so'rang va uni pochta ochilishi bilan darhol bosing.";
+  }
+  if (c.includes("access_denied")) {
+    return "Havola qabul qilinmadi. Yangi havola so'rab qayta urinib ko'ring.";
+  }
+  return "Havola yaroqsiz. Yangi havola so'rang.";
+}
