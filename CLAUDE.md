@@ -180,11 +180,13 @@ qo'shildi (`alerts-math.ts` — yangi `invites` turi, rolga bog'liq emas) va
 yangi `/my-invites` ekraniga olib boradi. `InviteCard` (`features/auth/
 invite-card.tsx`) ikkala ekranda ham bir xil — faqat qobiq farq qiladi.
 
-Asosiy oqim (ega taklif yozadi → allaqachon do'koni bor foydalanuvchi
-qo'ng'iroqcha orqali ko'radi → qabul qiladi → `shop_members`ga qo'shiladi)
-✅ 2026-08-14 qurilmada tasdiqlandi. Qolgan holatlar (rad etish, bekor
-qilish, dublikat taklif, limit sinovi, uch til) hali ochiq —
-`docs/QURILMADA_SINOV.md` 4d-4. Sinov paytida topilgan 3 ta xato (SQL
+Asosiy oqim (taklif yaratish, dublikat, rad etish, bekor qilish,
+allaqachon-a'zo xatosi, allaqachon do'koni bor foydalanuvchiga
+qo'ng'iroqcha orqali yetkazish) ✅ 2026-08-15 qurilmada tasdiqlandi.
+Ochiq qolgan: limit sinovi (mantiq ko'rib chiqilgan, qurilmada
+tasdiqlanmagan), onboarding "kutish" ekranidagi karta aynan shu yo'l
+bilan alohida sinalmagan, uch til tekshiruvi — `docs/QURILMADA_SINOV.md`
+4d-4. Sinov paytida topilgan 3 ta xato (SQL
 ambiguous column, `get_shop_limits()`ning o'z-o'ziga bog'liqligi,
 `register.tsx`da yetishmagan `emailRedirectTo`) tuzatildi — tafsilot shu
 faylda. Shu bilan birga `lib/query-client.ts`ga markazlashtirilgan xato

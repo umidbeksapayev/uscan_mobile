@@ -504,29 +504,38 @@ curl -X POST "$SUPABASE_URL/rest/v1/products" -H "apikey: $ANON" \
       ✅ 2026-08-15 qurilmada tasdiqlandi.
 - [x] Yuborilgan taklif "Kutilayotgan takliflar" ostida email bilan
       ko'rinsin. ✅ 2026-08-15 qurilmada tasdiqlandi.
-- [ ] Xuddi shu emailga qayta "Taklif qilish" bosing → ikkinchi qator
+- [x] Xuddi shu emailga qayta "Taklif qilish" bosing → ikkinchi qator
       QO'SHILMASIN, faqat sana yangilansin (bitta pending taklif).
+      ✅ 2026-08-15 qurilmada tasdiqlandi.
 - [ ] Kassir emaili bilan ro'yxatdan o'ting → onboarding'da "Xodim sifatida
       qo'shilaman" → **taklif kartasi darhol ko'rinsin** (do'kon nomi +
       "Kassir" bilan), eski "Taklif kutilmoqda" bo'sh holati EMAS.
+      (Qabul/rad mexanizmi bell-icon yo'li orqali sinaldi — aynan shu
+      onboarding ekrani hali alohida tekshirilmagan.)
 - [ ] Kartadagi **"Qabul qilish"** bosing → bir necha soniyada Bosh ekranga
       o'tsin (qo'lda "Tekshirish" bosish shart emas).
-- [ ] Boshqa test: taklifni **"Rad etish"** bosing (tasdiq so'ralsin) →
+- [x] Boshqa test: taklifni **"Rad etish"** bosing (tasdiq so'ralsin) →
       ega tomonida "Kutilayotgan takliflar"dan yo'qolsin, kassir hali
-      do'konsiz qoladi.
-- [ ] **Ega**: kutilayotgan taklifni "Bekor qilish" (tasdiq bilan) →
-      kassir tomonida karta yo'qolsin (keyingi ochilishda).
-- [ ] Allaqachon xodim bo'lgan emailni qayta taklif qiling → tushunarli
-      xato ("allaqachon xodim"), taklif yaratilmasin.
+      do'konsiz qoladi. ✅ 2026-08-15 qurilmada tasdiqlandi.
+- [x] **Ega**: kutilayotgan taklifni "Bekor qilish" (tasdiq bilan) →
+      kassir tomonida karta yo'qolsin (keyingi ochilishda). ✅ 2026-08-15
+      qurilmada tasdiqlandi.
+- [x] Allaqachon xodim bo'lgan emailni qayta taklif qiling → tushunarli
+      xato ("allaqachon xodim"), taklif yaratilmasin. ✅ 2026-08-15
+      qurilmada tasdiqlandi.
 - [ ] **Limit sinovi**: do'konni Free'ga tushiring (4d-3 dagi SQL), 0 xodim
       limiti bilan taklif yuboring → kassir "Qabul qilish" bosganda
       **kassir tomonida** tushunarli xabar chiqsin ("do'kon egasiga tarifni
       yangilashini so'rang" — UpgradeSheet EMAS, kassir tarifni
       boshqarolmaydi), do'kon egasi ekranida esa taklif hali
-      "kutilayotgan" holatda qolaveradi.
+      "kutilayotgan" holatda qolaveradi. Boshlangan (shop_id topilgan,
+      `subscriptions` Free'ga tushirilgan), lekin yakunlanmagan — sinov
+      uchun ishlatilgan email allaqachon a'zo bo'lib chiqib, "already_member"
+      qaytardi. Mantiq kodda ko'rib chiqilgan (`get_effective_plan_limits`),
+      lekin qurilmada hali TASDIQLANMAGAN.
 - [ ] Uch tilda tekshiring (Sozlamalar → Til) — ega tomoni ("Taklif
       qilish" tugmasi, "Kutilayotgan takliflar") va kassir tomoni ("Sizga
-      taklif bor!", Qabul/Rad tugmalari).
+      taklif bor!", Qabul/Rad tugmalari). Sinov shu yerda to'xtatildi.
 - [x] **Do'koni bor foydalanuvchiga taklif**: allaqachon o'z do'koni bor
       egadan (yoki mavjud kassirdan) boshqa do'konga taklif yuboring →
       taklif qilingan tomonda Bosh sahifa **qo'ng'iroqchasida** sanoq
