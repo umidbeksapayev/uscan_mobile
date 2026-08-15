@@ -516,9 +516,11 @@ ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
 > `plans` jadvalidagi Free limitini vaqtincha pasaytirib (3 taga), sinab,
 > darhol qaytarib qo'yildi — bir xil kod yo'lini tekshiradi, ancha tezroq.
 
-- [x] Ko'proq → tepada "Tarif" qatori + nishon (`Sinov — N kun qoldi`).
+- [x] Ko'proq → "Tarif" qatori + nishon (`Sinov — N kun qoldi`).
       Kassir hisobida bu qator umuman ko'rinmasin. ✅ 2026-08-15 qurilmada
-      tasdiqlandi.
+      tasdiqlandi. ⚠️ 2026-08-16: qator MENYU ichiga ko'chdi (alohida karta
+      olib tashlandi — u xuddi shu ekranni ochardi), nishon menyu qatorining
+      o'zida. Qayta ko'z tashlash kerak.
 - [x] "Tarif" → Free/Pro/Ultra taqqoslash, joriy tarifda "Joriy" nishoni.
       ✅ 2026-08-15 qurilmada tasdiqlandi.
 - [x] "Tarifni yangilash" → fikr-mulohaza varag'i oldindan to'ldirilgan
@@ -707,6 +709,54 @@ curl -X POST "$SUPABASE_URL/rest/v1/products" -H "apikey: $ANON" \
 - [ ] Chek havolasini (signed URL) brauzerga nusxalab, 5 daqiqadan keyin
       oching → ishlamasligi kerak (muddati o'tgan).
 - [ ] Uch tilda tekshiring (Sozlamalar → Til).
+
+### 4d-6. Profil (migration 046)
+
+> ⚠️ Avval `046_profile.sql` ni Supabase SQL Editor da bajaring — busiz
+> ekran ochiladi, lekin ism/rasm saqlanmaydi ("update_my_profile topilmadi").
+
+**Kirish nuqtasi**
+
+- [ ] Ko'proq → menyudagi birinchi qator **"Profil"** shu ekranni ochsin.
+      Eski email'li tepa karta endi YO'Q: u xuddi shu ekranga olib borardi,
+      ya'ni bitta sahifada ikkita bir xil yo'l bor edi.
+- [ ] Tepadagi "Do'kon" qatori: bir nechta do'kon bo'lsa almashtirish
+      varag'i, bitta bo'lsa tushuntiruvchi xabar (avvalgi xatti-harakat).
+
+**Ism va rasm**
+
+- [ ] Ism yozing → "Saqlash" tugmasi paydo bo'lsin → saqlangach yo'qolsin,
+      Ko'proq kartasida ism darhol yangilansin.
+- [ ] Ismni tozalab saqlang → email prefiksiga qaytsin (masalan `umid`).
+- [ ] Rasm: kamera va galereyadan qo'ying, kesish oynasi kvadrat bo'lsin.
+- [ ] Rasmni o'chiring → bosh harf qaytsin.
+- [ ] Ilovani yopib qayta oching → rasm va ism joyida.
+- [ ] Boshqa hisobga kiring → **avvalgi foydalanuvchining rasmi/ismi
+      ko'rinmasin** (kesh `["profile", userId]` bo'yicha).
+
+**Parol**
+
+- [ ] "Parolni o'zgartirish" → joriy parolni **noto'g'ri** kiriting →
+      "Joriy parol noto'g'ri".
+- [ ] To'g'ri joriy parol + yangi parol → muvaffaqiyat xabari → chiqib,
+      **yangi parol bilan** kiring.
+- [ ] Yangi parol eskisi bilan bir xil bo'lsa ogohlantirish chiqsin.
+- [ ] "Parolni tiklash havolasi" → email kelsin, havola `uscan://
+      reset-password` ni ochsin va parol o'rnatilsin (4d-1 oqimi).
+- [ ] **Faqat Google bilan kirilgan hisobda**: "Parolni o'zgartirish"
+      qatori umuman ko'rinmasin, o'rniga "Parol o'rnatish" bo'lsin;
+      havola orqali parol o'rnatilgach, keyingi kirishda email+parol
+      ishlasin.
+
+**Boshqa**
+
+- [ ] Kassir hisobida ochilsin: rol nishoni "Kassir", do'kon nomi to'g'ri.
+- [ ] "Chiqish" tasdiq so'rasin va ishlasin.
+- [ ] Uch tilda tekshiring (Sozlamalar → Til).
+- [ ] Xavfsizlik: boshqa foydalanuvchi papkasiga rasm yuklashga urinib
+      bo'lmasligi kerak (Storage RLS `{user_id}` papkasi bo'yicha) —
+      kod darajasida yo'l `auth.uid()` dan olinadi, DB siyosati ikkinchi
+      qatlam.
 
 ---
 

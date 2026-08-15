@@ -48,6 +48,12 @@ function tashkentParts(iso: string) {
   };
 }
 
+/** ISO -> "07.06.2026" (kun.oy.yil, Asia/Tashkent) — vaqtsiz. */
+export function formatDate(iso: string): string {
+  const d = tashkentParts(iso);
+  return `${d.day}.${d.month}.${d.year}`;
+}
+
 /** ISO -> "07.06 14:18" (kun.oy soat:daqiqa, Asia/Tashkent). */
 export function formatDateTime(iso: string): string {
   const d = tashkentParts(iso);

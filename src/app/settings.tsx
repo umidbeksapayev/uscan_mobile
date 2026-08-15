@@ -13,105 +13,14 @@ import { shadowGlow } from "@/theme/shadows";
 import { LANGUAGES, setLanguage, type LangCode } from "@/i18n";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Card } from "@/components/ui/card";
-import { IconChip } from "@/components/ui/icon-chip";
+import { SectionLabel } from "@/components/ui/section-label";
+import { SettingRow } from "@/components/ui/setting-row";
 import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
 import { LocalReminderCard } from "@/features/notifications/local-reminder-card";
 import { DailySummaryCard } from "@/features/notifications/daily-summary-card";
 import { FeedbackSheet } from "@/features/feedback/feedback-sheet";
 import { radius, text } from "@/theme/tokens";
 import { ScreenHeader } from "@/components/ui/screen";
-
-/* ─────────────────────────────────────────────────────────────────────────
-   SectionLabel — bo'lim sarlavhasi
-   Brend ko'kida: ekranni bo'limlarga ajratadi va "moviy" ohangni ushlab turadi.
-───────────────────────────────────────────────────────────────────────── */
-function SectionLabel({ label }: { label: string }) {
-  const colors = useColors();
-
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10, marginLeft: 4 }}>
-      <View style={{ width: 3, height: 13, borderRadius: radius.full, backgroundColor: colors.primary }} />
-      <Text
-        accessibilityRole="header"
-        style={{
-          fontSize: text.xs,
-          fontWeight: "700",
-          color: colors.heading,
-          letterSpacing: 0.9,
-          textTransform: "uppercase",
-        }}
-      >
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   SettingRow — sozlama qatori (chevron bilan)
-
-   Ikonka chiplari ATAYIN bitta rangda (brend ko'ki): ilgari har qatorda
-   boshqa rang bor edi (binafsha/sariq/yashil) — bu ranglar hech qanday
-   ma'no bermasdi, faqat ekranni rang-barang qilardi va tungi rejimda
-   tekshirilmagan qattiq HEX qiymatlar edi. Qatorlarni ikonka SHAKLI
-   ajratadi, rang esa brendni ushlab turadi.
-───────────────────────────────────────────────────────────────────────── */
-function SettingRow({
-  icon,
-  title,
-  subtitle,
-  onPress,
-  last = false,
-  muted = false,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  subtitle?: string;
-  onPress?: () => void;
-  last?: boolean;
-  /** Ikkilamchi qator (Diagnostika) — brend ko'ki emas, neytral. */
-  muted?: boolean;
-}) {
-  const colors = useColors();
-  const [pressed, setPressed] = useState(false);
-
-  return (
-    <>
-      <Pressable
-        onPress={onPress}
-        onPressIn={() => setPressed(true)}
-        onPressOut={() => setPressed(false)}
-        accessibilityRole="button"
-        accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
-        android_ripple={{ color: colors.line }}
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 16,
-          // 38px chip + 2×14px = 66px balandlik — a11y minimumidan (44px) yuqori
-          paddingVertical: 14,
-          backgroundColor: pressed ? colors.bg : colors.surface,
-        }}
-      >
-        <View style={{ marginRight: 14 }}>
-          <IconChip icon={icon} tone={muted ? "neutral" : "brand"} />
-        </View>
-        <View style={{ flex: 1, justifyContent: "center" }}>
-          <Text style={{ fontSize: text.base, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
-            {title}
-          </Text>
-          {subtitle ? (
-            <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 1, lineHeight: 16 }} numberOfLines={1}>
-              {subtitle}
-            </Text>
-          ) : null}
-        </View>
-        <Ionicons name="chevron-forward" size={16} color={colors.tabInactive} style={{ marginLeft: 10 }} />
-      </Pressable>
-      {!last && <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 68 }} />}
-    </>
-  );
-}
 
 /* ─────────────────────────────────────────────────────────────────────────
    ChoiceRow — tanlov qatori (til / mavzu oynalarida)

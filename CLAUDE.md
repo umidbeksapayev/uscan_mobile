@@ -225,6 +225,21 @@ faylda. Shu bilan birga `lib/query-client.ts`ga markazlashtirilgan xato
 jurnali qo'shildi (`QueryCache`/`MutationCache` `onError` → `logError`) —
 ilgari so'rov/mutation xatolari Diagnostika'ga tushmasdi, endi tushadi.
 
+**Profil (`/profile`, migration 046).** Foydalanuvchining o'z ekrani: rasm,
+ism, email (faqat ko'rsatiladi), kirish usuli, parolni o'zgartirish, parolni
+tiklash havolasi, hisob ma'lumoti va chiqish. Ism/rasm **`profiles`
+jadvalida**, `user_metadata` da EMAS — Supabase OAuth identity ma'lumotini
+har kirishda `raw_user_meta_data` ustiga qayta yozadi va foydalanuvchi
+qo'ygan qiymat Google'nikiga almashib ketardi. `profiles` da `role` ham
+borligi uchun o'z-qatorini UPDATE siyosati BERILMAGAN (o'zini `super_admin`
+qilib qo'yish mumkin bo'lardi) — yozish faqat `update_my_profile()` RPC
+orqali. Rasm `avatars` PUBLIC bucket'ida, yo'l `{user_id}/…`
+(`product-images` do'kon papkasi bo'yicha qulflangan, avatar esa odamga
+tegishli). Parolni o'zgartirishda **joriy parol so'raladi** —
+`updateUser({password})` uni talab qilmaydi, ya'ni ochiq telefon bilan
+hisobni egallab olish mumkin edi. Email o'zgartirish va hisobni o'chirish
+ATAYLAB kiritilmagan.
+
 **Obuna.** DO'KON darajasida (`subscriptions.shop_id UNIQUE`), user emas —
 limitlar ham, RLS ham `shop_id` bo'yicha. Migration 041: `plans` (narx/limit
 DB'da, o'zgartirish uchun reliz shart emas) · `subscriptions` ·

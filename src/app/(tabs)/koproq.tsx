@@ -7,7 +7,6 @@ import { useRouter, type Href } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/features/auth/auth-context";
 import {
   useMemberships,
   useActiveMembership,
@@ -41,9 +40,14 @@ type MenuItem = {
   cashierOnly?: boolean;
   /** Faqat super_admin (`profiles.role`) — to'lovlarni tekshirish paneli. */
   adminOnly?: boolean;
+  /** O'ng tomonda joriy tarif nishoni (chevrondan oldin). */
+  showPlanBadge?: boolean;
 };
 
 const MENU: MenuItem[] = [
+  // Profil — tepadagi karta ham shu yerga olib boradi; menyuda ham turadi,
+  // chunki foydalanuvchilarning bir qismi kartani "sarlavha" deb o'qiydi.
+  { icon: "person-circle-outline", labelKey: "profile.title", route: "/profile" as Href },
   // AI yordamchi — faqat egasi (server ham `is_shop_owner` bilan majburlaydi).
   // `as Href` — typed-routes tiplari `expo start` da qayta generatsiya bo'ladi
   // (`/offline-sales` da ham shu naqsh).
@@ -67,7 +71,13 @@ const MENU: MenuItem[] = [
   { icon: "pricetags-outline", labelKey: "category.manageTitle", route: "/categories", productsGated: true },
   { icon: "cloud-upload-outline", labelKey: "menu.importCsv", route: "/import-products", productsGated: true },
   // Obuna/tarif — faqat egasi ko'radi (to'lov/limit qarori kassirga tegishli emas).
-  { icon: "card-outline", labelKey: "billing.title", route: "/subscription" as Href, ownerGated: true },
+  {
+    icon: "card-outline",
+    labelKey: "billing.title",
+    route: "/subscription" as Href,
+    ownerGated: true,
+    showPlanBadge: true,
+  },
   // To'lovlarni tekshirish — faqat super_admin (045-migratsiya). Server ham
   // `is_super_admin()` bilan majburlaydi, bu faqat menyuni yashirish.
   {
@@ -84,7 +94,6 @@ export default function KoproqScreen() {
 
   const router = useRouter();
   const { t } = useTranslation();
-  const { session } = useAuth();
   const { data: memberships } = useMemberships();
   const active = useActiveMembership();
   const setActiveShopId = useActiveShopStore((s) => s.setActiveShopId);
@@ -112,7 +121,7 @@ export default function KoproqScreen() {
     }
   }
 
-  function onProfilePress() {
+  function onShopPress() {
     if (canSwitchShop) {
       setSwitcherOpen(true);
     } else {
@@ -147,47 +156,33 @@ export default function KoproqScreen() {
         <View className="px-4 pb-10">
           <Text className="pb-4 pt-2 text-2xl font-medium text-heading">{t("nav.more")}</Text>
 
-          {/* Profil — bosilganda ko'p do'konda almashtirish oynasi, bitta
-              do'konda tushuntiruvchi xabar chiqadi (har doim bosiladigan) */}
+          {/* Foydalanuvchi kartasi ATAYLAB yo'q: u menyudagi "Profil" qatori
+              bilan aynan bir joyga olib borardi — bitta ekranda ikkita bir xil
+              yo'l. Ism/email/rasm profil ekranining o'zida. */}
+
+          {/* Do'kon — ko'p do'konda almashtirish oynasi, bitta do'konda
+              tushuntiruvchi xabar (har doim bosiladigan, avvalgidek) */}
           <Pressable
-            onPress={onProfilePress}
+            onPress={onShopPress}
             android_ripple={{ color: colors.line }}
             className="mb-3 flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-4"
           >
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-primary-deep">
-              <Text className="text-base font-medium text-white">
-                {(active?.shop.name ?? "u").slice(0, 2).toUpperCase()}
-              </Text>
-            </View>
+            <Ionicons name="storefront-outline" size={20} color={colors.primary} />
             <View className="flex-1">
-              <Text className="text-base font-medium text-ink">
-                {active?.shop.name ?? "Do'kon"}
+              <Text className="text-base font-medium text-ink" numberOfLines={1}>
+                {active?.shop.name ?? t("menu.shop")}
               </Text>
-              <Text className="text-sm text-muted">{session?.user.email}</Text>
+              {canSwitchShop ? (
+                <Text className="text-sm text-muted">{t("menu.switchShop")}</Text>
+              ) : null}
             </View>
-            {active ? (
-              <View className="rounded-full bg-primary-tint px-3 py-1">
-                <Text className="text-xs font-medium text-primary">
-                  {active.role === "owner" ? t("staff.owner") : t("staff.cashier")}
-                </Text>
-              </View>
-            ) : null}
             <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
           </Pressable>
 
-          {/* Tarif holati — faqat egasi (kassir to'lov/limit qaroriga aralashmaydi) */}
-          {isOwner ? (
-            <Pressable
-              onPress={() => router.navigate("/subscription" as Href)}
-              className="mb-3 flex-row items-center justify-between rounded-2xl border border-line bg-surface p-4"
-            >
-              <Text className="text-sm text-muted">{t("billing.title")}</Text>
-              <View className="flex-row items-center gap-2">
-                <PlanBadge />
-                <Ionicons name="chevron-forward" size={16} color={colors.tabInactive} />
-              </View>
-            </Pressable>
-          ) : null}
+          {/* Alohida "Tarif" kartasi ATAYLAB yo'q: u menyudagi "Tarif" qatori
+              bilan aynan bir joyga olib borardi. Karta faqat tarif NISHONINI
+              qo'shimcha ko'rsatardi — endi nishon menyu qatorining o'zida
+              (`showPlanBadge`), ya'ni ma'lumot yo'qolmadi, takror ketdi. */}
 
           {/* Yuborilmagan sotuvlar (offline navbat) */}
           {pendingCount > 0 ? (
@@ -219,6 +214,7 @@ export default function KoproqScreen() {
                 >
                   <Ionicons name={item.icon} size={20} color={colors.primary} />
                   <Text className="flex-1 text-base text-ink">{t(item.labelKey)}</Text>
+                  {item.showPlanBadge ? <PlanBadge /> : null}
                   {ready ? (
                     <Ionicons name="chevron-forward" size={18} color={colors.tabInactive} />
                   ) : (

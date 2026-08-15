@@ -5,6 +5,19 @@
 
 export type MemberRole = "owner" | "cashier";
 
+/**
+ * Foydalanuvchi profili (`profiles`, migration 046 bilan kengaytirilgan).
+ * `role` — bu do'kondagi rol EMAS, tizim roli (`super_admin` to'lovlarni
+ * tekshiradi); do'kondagi rol `shop_members.role` da.
+ */
+export interface Profile {
+  id: string;
+  role: "owner" | "super_admin";
+  full_name: string | null;
+  avatar_url: string | null;
+  language: string | null;
+}
+
 /** Kassirga yoqib/o'chiriladigan ruxsatlar (ega = hammasi). Web bilan bir xil. */
 export type PermissionKey =
   | "manage_products"

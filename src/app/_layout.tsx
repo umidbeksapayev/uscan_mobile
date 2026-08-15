@@ -66,6 +66,7 @@ export default function RootLayout() {
                     <Stack.Screen name="suppliers" />
                     <Stack.Screen name="categories" />
                     <Stack.Screen name="import-products" />
+                    <Stack.Screen name="profile" />
                     <Stack.Screen name="settings" />
                     <Stack.Screen name="subscription" />
                     <Stack.Screen name="checkout" />
