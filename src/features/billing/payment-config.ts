@@ -23,9 +23,8 @@
  * raqam), shuning uchun mijoz kodida turishi xavfsizlik muammosi emas.
  */
 export const MANUAL_CARD = {
-  // TODO: haqiqiy 16 xonali karta raqamini shu yerga yozing.
-  number: "9860XXXXXXXX8200",
-  holder: "USCAN",
+  number: "9860160133458200",
+  holder: "Sapayev Umidbek",
 } as const;
 
 /** Chekni yuborish uchun zaxira kanal (talab #5). */
