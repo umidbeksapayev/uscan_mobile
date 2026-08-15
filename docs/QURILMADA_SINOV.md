@@ -400,21 +400,52 @@ ruxsat berish esa Sozlamalar ichida edi. Endi ikkalasi bitta joyda —
 
 ### 4d-1. Autentifikatsiya
 
-- [ ] Kirish ekrani yangi ko'rinishda: tepada gradient hero, o'rtada karta,
-      "— yoki —" ajratkich ostida Google tugmasi.
-- [ ] Yangi email/parol bilan ro'yxatdan o'ting → "Emailingizni tasdiqlang"
-      ekrani chiqsin (do'kon nomi maydoni **endi yo'q**).
-- [ ] "Qayta yuborish" tugmasi 60 soniya sanoq bilan bloklansin.
-- [ ] Pochtadagi havolani bosing → ilova ochilib avtomatik ichkariga kirsin.
-- [ ] Google tugmasi: bir bosishda kirsin, **brauzer oynasi ochilmasin**.
-- [ ] **Dublikat sinovi (eng muhim)**: bir xil email bilan avval parol orqali
+> ⚠️ **2026-08-15 qurilmada sinovida yana 2 ta jiddiy xato topildi va
+> tuzatildi:**
+> 1. Email tasdiqlash/parolni tiklash havolasi ochilganda ekran **abadiy**
+>    "tekshirilmoqda"da qotib qolishi mumkin edi (ba'zan 15+ daqiqa).
+>    Sabab: `auth-context.tsx` (`getSession`) va `verify-email.tsx`/
+>    `reset-password.tsx` (`setSession`) ilova ochilganda bir vaqtda
+>    GoTrueClient'ga murojaat qiladi — RN'da bu ba'zan abadiy osiladi
+>    (`lib/supabase.ts`dagi `noopLock` izohida oldindan ma'lum bo'lgan
+>    xavf edi). Yechim: ikkisi ketma-ketlashtirildi + hamma joyga muhlat
+>    qo'shildi (`lib/with-timeout.ts`).
+> 2. Sekin tarmoqda "Chiqish" tugmasi daqiqalab osilib qolardi
+>    (`unregisterPushToken`/`signOut` muhlatsiz tarmoq so'rovi edi —
+>    endi 8s muhlat va `signOut({scope:"local"})`).
+> 3. Hisob almashtirilganda (ilovani yopmasdan) **avvalgi foydalanuvchining
+>    raqamlari 1-2 soniya miltillab ko'rinardi** — `queryClient.clear()`
+>    keshni tozalasa-da, navigatsiya daraxti to'liq qayta yaratilmasdi.
+>    Yechim: `auth-gate.tsx`da ekran daraxti endi `session.user.id`
+>    bo'yicha `key`lanadi — foydalanuvchi almashganda majburan to'liq
+>    qayta yaratiladi, eski holatdan hech narsa qololmaydi.
+
+- [x] Kirish ekrani yangi ko'rinishda: tepada gradient hero, o'rtada karta,
+      "— yoki —" ajratkich ostida Google tugmasi. ✅ 2026-08-15 (amalda
+      ko'p marta ko'rilgan, muammo yo'q).
+- [x] Yangi email/parol bilan ro'yxatdan o'ting → "Emailingizni tasdiqlang"
+      ekrani chiqsin (do'kon nomi maydoni **endi yo'q**). ✅ 2026-08-15
+      qurilmada tasdiqlandi.
+- [x] "Qayta yuborish" tugmasi 60 soniya sanoq bilan bloklansin. ✅
+      2026-08-15 qurilmada tasdiqlandi.
+- [x] Pochtadagi havolani bosing → ilova ochilib avtomatik ichkariga kirsin.
+      ✅ 2026-08-15 qurilmada tasdiqlandi (yuqoridagi 1-xato tuzatilgach).
+- [x] Google tugmasi: bir bosishda kirsin, **brauzer oynasi ochilmasin**.
+      ✅ 2026-08-15 qurilmada tasdiqlandi.
+- [x] **Dublikat sinovi (eng muhim)**: bir xil email bilan avval parol orqali
       ro'yxatdan o'ting va tasdiqlang, keyin chiqib Google bilan kiring →
       Supabase → Authentication → Users da **bitta** user, ikkita identity
-      bo'lsin (ikkita alohida user EMAS).
-- [ ] Google'da "bekor qilish" bosilsa hech qanday xato xabari chiqmasin.
-- [ ] Parolni tiklash oqimi avvalgidek ishlasin (yangi qobiqda).
-- [ ] Chiqib, **boshqa** foydalanuvchi bilan kiring → avvalgi userning
-      mahsulot/statistika ma'lumotlari bir lahza ham ko'rinmasin.
+      bo'lsin (ikkita alohida user EMAS). ✅ 2026-08-15 qurilmada
+      tasdiqlandi.
+- [x] Google'da "bekor qilish" bosilsa hech qanday xato xabari chiqmasin.
+      ✅ 2026-08-15 qurilmada tasdiqlandi.
+- [ ] Parolni tiklash oqimi avvalgidek ishlasin (yangi qobiqda). Kod
+      tuzatildi (yuqoridagi 1-xato), lekin qurilmada sinov Supabase'ning
+      bepul email xizmati rate-limitiga (juda ko'p test emaili
+      yuborilgani sabab) uchrab yakunlanmadi — keyinroq qaytiladi.
+- [x] Chiqib, **boshqa** foydalanuvchi bilan kiring → avvalgi userning
+      mahsulot/statistika ma'lumotlari bir lahza ham ko'rinmasin. ✅
+      2026-08-15 qurilmada tasdiqlandi (yuqoridagi 3-xato tuzatilgach).
 
 ### 4d-2. Onboarding
 

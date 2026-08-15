@@ -139,9 +139,20 @@ faqat egasi (`isOwner`) uchun.
 Barcha sprintlar (Sprint 10 regressiyasi, 11, 12, 13) va AI 0–5-bosqich
 qurilmada sinovdan o'tdi 2026-08-14 (`docs/QURILMADA_SINOV.md`, hammasi ✅).
 
-## Auth · Onboarding · Obuna (kod tayyor, qurilmada sinov kutilmoqda)
+## Auth · Onboarding · Obuna (4d-1 asosan tasdiqlandi, 4d-2/4d-3 sinov kutilmoqda)
 
-**Autentifikatsiya.** Supabase Auth saqlandi. Google — **native SDK**
+**Autentifikatsiya (4d-1) — 2026-08-15 qurilmada asosan tasdiqlandi**,
+parolni tiklash bundan mustasno (Supabase bepul email rate-limitiga
+uchradi, keyinroq qaytiladi). Sinov paytida yana 2 ta jiddiy xato
+tuzatildi: (1) email/parol havolasi ochilganda `getSession()`/`setSession()`
+bir vaqtda ketib GoTrueClient RN'da abadiy osilib qolishi mumkin edi —
+endi ketma-ketlashtirilgan + hamma joyda muhlat (`lib/with-timeout.ts`);
+(2) hisob almashtirilganda (ilova yopilmasdan) avvalgi foydalanuvchining
+raqamlari 1-2s miltillardi — `auth-gate.tsx`da ekran daraxti endi
+`session.user.id` bo'yicha `key`lanib, almashinganda majburan to'liq
+qayta yaratiladi. Tafsilot: `docs/QURILMADA_SINOV.md` 4d-1.
+
+Supabase Auth saqlandi. Google — **native SDK**
 (`@react-native-google-signin/google-signin` + `signInWithIdToken`), brauzer
 ochilmaydi. `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` bo'sh bo'lsa Google tugmasi
 umuman ko'rinmaydi. **Email tasdiqlash YOQILADI** — dublikat akkaunt shu

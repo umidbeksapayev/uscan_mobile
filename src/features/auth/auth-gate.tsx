@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, Fragment, type ReactNode } from "react";
 import { useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 
@@ -84,7 +84,18 @@ export function AuthGate({ children }: { children: ReactNode }) {
   return (
     <>
       <OfflineBanner />
-      {children}
+      {/*
+        `key` — foydalanuvchi almashganda (chiqib boshqa hisob bilan
+        kirganda, ilova qayta ochilmasdan) butun ekran daraxti (Stack)
+        majburan qayta yaratiladi. `queryClient.clear()` (auth-context.tsx)
+        keshni tozalaydi, lekin React navigatsiya daraxtini har doim ham
+        to'liq unmount qilib qaytadan yig'maydi — natijada eski hisobning
+        oxirgi chizilgan raqamlari bir lahza (1-2s) ko'rinib qolishi mumkin
+        edi (qurilmada tasdiqlangan xato). `key` o'zgarishi React'ni butun
+        pastki daraxtni buzib, tozadan yig'ishga majburlaydi — eski holatdan
+        hech narsa qololmaydi.
+      */}
+      <Fragment key={session?.user.id ?? "anon"}>{children}</Fragment>
       {session ? <SyncManager /> : null}
     </>
   );
