@@ -75,10 +75,11 @@ export default function OnboardingWaitingScreen() {
         text: t("nav.logout"),
         style: "destructive",
         // Tokenni AVVAL o'chiramiz — signOut'dan keyin RLS `auth.uid()` yo'q
-        // bo'ladi va qator o'chmay qolardi (koproq.tsx dagi bilan bir xil).
+        // bo'ladi va qator o'chmay qolardi (koproq.tsx dagi bilan bir xil,
+        // shu jumladan `scope: "local"` — sekin tarmoqda osilib qolmasin).
         onPress: async () => {
           await unregisterPushToken();
-          await supabase.auth.signOut();
+          await supabase.auth.signOut({ scope: "local" });
         },
       },
     ]);

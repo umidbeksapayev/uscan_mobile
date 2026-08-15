@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 
 import { meta } from "@/lib/offline/mmkv";
 import { logError } from "@/lib/logger";
+import { withTimeout } from "@/lib/with-timeout";
 import { supabase } from "@/lib/supabase";
 import {
   SLOT_TIME,
@@ -146,12 +147,17 @@ export async function registerPushToken(shopId: string | null): Promise<PushResu
 /**
  * Tokenni o'chiradi — logout'da chaqiriladi, aks holda telefonni boshqa
  * foydalanuvchiga bergan ega begona do'kon xulosasini olishda davom etardi.
+ *
+ * Muhlat bilan (8s): sekin tarmoqda logout tugmasi daqiqalab osilib
+ * qolmasligi kerak — server javob bermasa ham lokal nusxa baribir
+ * tozalanadi (`finally`), chaqiruvchi (koproq.tsx) buni kutib bo'lgach
+ * `signOut()` ga o'tadi.
  */
 export async function unregisterPushToken(): Promise<void> {
   const token = meta.getString(NotifKeys.pushToken);
   if (!token) return;
   try {
-    const { error } = await supabase.from("push_tokens").delete().eq("token", token);
+    const { error } = await withTimeout(supabase.from("push_tokens").delete().eq("token", token), 8_000);
     if (error) throw new Error(error.message);
   } catch (e) {
     logError("push.unregister", e);

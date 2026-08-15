@@ -8,7 +8,10 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { supabase } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
+import { logError } from "@/lib/logger";
+import { withTimeout } from "@/lib/with-timeout";
 import { parseAuthUrlTokens } from "@/features/auth/parse-auth-url";
+import { useAuth } from "@/features/auth/auth-context";
 import { AuthShell } from "@/features/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +20,9 @@ import { Button } from "@/components/ui/button";
  *  (xuddi `uscan://reset-password` kabi — ko'r. forgot-password.tsx). */
 const REDIRECT_TO = "uscan://verify-email";
 const RESEND_COOLDOWN = 60;
+/** GoTrueClient RN'da ba'zan abadiy osilib qoladi (`lib/supabase.ts`dagi
+ *  `noopLock` izohi) — shuning uchun bu ekran ham muhlatsiz kuta olmaydi. */
+const SET_SESSION_TIMEOUT_MS = 15_000;
 
 type Status = "waiting" | "confirming" | "invalid";
 
@@ -35,6 +41,7 @@ export default function VerifyEmailScreen() {
   const { t } = useTranslation();
   const url = Linking.useURL();
   const { email } = useLocalSearchParams<{ email?: string }>();
+  const { initializing } = useAuth();
 
   const [status, setStatus] = useState<Status>("waiting");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -42,7 +49,15 @@ export default function VerifyEmailScreen() {
   const [cooldown, setCooldown] = useState(0);
 
   // Tasdiqlash havolasi orqali ochilganmi — bo'lsa sessiyani o'rnatamiz.
+  //
+  // `initializing` tugashini kutamiz: `auth-context.tsx`ning o'z
+  // `getSession()` chaqiruvi bilan bu yerdagi `setSession()` bir vaqtda
+  // ketsa, GoTrueClient RN'da ba'zan abadiy osilib qoladi (`lib/supabase.ts`
+  // dagi `noopLock` izohiga qarang) — ketma-ketlashtirish shu poyga holatini
+  // oldini oladi. Qo'shimcha himoya sifatida `withTimeout` ham bor — sabab
+  // boshqa bo'lsa ham ekran hech qachon abadiy "tekshirilmoqda"da qolmasin.
   useEffect(() => {
+    if (initializing) return;
     let cancelled = false;
     async function tryConfirm() {
       const tokens =
@@ -50,23 +65,33 @@ export default function VerifyEmailScreen() {
       if (!tokens) return; // oddiy holat — "pochtangizni tekshiring" ko'rsatiladi
 
       setStatus("confirming");
-      const { error } = await supabase.auth.setSession({
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken,
-      });
-      if (cancelled) return;
-      if (error) {
-        setErrorMsg(authErrorMessage(error.message));
+      try {
+        const { error } = await withTimeout(
+          supabase.auth.setSession({
+            access_token: tokens.accessToken,
+            refresh_token: tokens.refreshToken,
+          }),
+          SET_SESSION_TIMEOUT_MS,
+        );
+        if (cancelled) return;
+        if (error) {
+          setErrorMsg(authErrorMessage(error.message));
+          setStatus("invalid");
+          return;
+        }
+        // Sessiya o'rnatildi → AuthGate avtomatik yo'naltiradi.
+      } catch (e) {
+        if (cancelled) return;
+        logError("verify-email.setSession", e);
+        setErrorMsg("Ulanish juda uzoq davom etdi. Pastdagi tugma orqali qaytadan urinib ko'ring.");
         setStatus("invalid");
-        return;
       }
-      // Sessiya o'rnatildi → AuthGate avtomatik yo'naltiradi.
     }
     void tryConfirm();
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [url, initializing]);
 
   useEffect(() => {
     if (cooldown <= 0) return;

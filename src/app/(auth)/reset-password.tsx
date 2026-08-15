@@ -8,13 +8,20 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/theme/theme-store";
 import { supabase } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
+import { logError } from "@/lib/logger";
+import { withTimeout } from "@/lib/with-timeout";
 import { parseRecoveryParams } from "@/features/auth/parse-recovery-url";
 import { useRecoveryStore } from "@/features/auth/recovery-store";
+import { useAuth } from "@/features/auth/auth-context";
 import { AuthShell } from "@/features/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 
 type Status = "checking" | "ready" | "invalid" | "done";
+
+/** GoTrueClient RN'da ba'zan abadiy osilib qoladi (`lib/supabase.ts`dagi
+ *  `noopLock` izohi) — shuning uchun bu ekran ham muhlatsiz kuta olmaydi. */
+const SET_SESSION_TIMEOUT_MS = 15_000;
 
 /**
  * Email'dagi "parolni tiklash" havolasi shu yerga tushadi
@@ -29,6 +36,7 @@ export default function ResetPasswordScreen() {
   const { t } = useTranslation();
   const url = Linking.useURL();
   const setRecoveryActive = useRecoveryStore((s) => s.setActive);
+  const { initializing } = useAuth();
 
   const [status, setStatus] = useState<Status>("checking");
   const [password, setPassword] = useState("");
@@ -36,7 +44,12 @@ export default function ResetPasswordScreen() {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // `initializing` tugashini kutamiz: `auth-context.tsx`ning o'z
+  // `getSession()` chaqiruvi bilan bu yerdagi `setSession()` bir vaqtda
+  // ketsa, GoTrueClient RN'da ba'zan abadiy osilib qoladi — ketma-ketlik
+  // shu poyga holatini oldini oladi. `withTimeout` esa qo'shimcha himoya.
   useEffect(() => {
+    if (initializing) return;
     let cancelled = false;
     async function establishSession() {
       const tokens = parseRecoveryParams(url) ?? parseRecoveryParams(await Linking.getInitialURL());
@@ -45,25 +58,36 @@ export default function ResetPasswordScreen() {
         return;
       }
       setRecoveryActive(true);
-      const { error } = await supabase.auth.setSession({
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken,
-      });
-      if (cancelled) return;
-      if (error) {
+      try {
+        const { error } = await withTimeout(
+          supabase.auth.setSession({
+            access_token: tokens.accessToken,
+            refresh_token: tokens.refreshToken,
+          }),
+          SET_SESSION_TIMEOUT_MS,
+        );
+        if (cancelled) return;
+        if (error) {
+          setRecoveryActive(false);
+          setErrorMsg(authErrorMessage(error.message));
+          setStatus("invalid");
+          return;
+        }
+        setStatus("ready");
+      } catch (e) {
+        if (cancelled) return;
+        logError("reset-password.setSession", e);
         setRecoveryActive(false);
-        setErrorMsg(authErrorMessage(error.message));
+        setErrorMsg("Ulanish juda uzoq davom etdi. Havolani qaytadan so'rang.");
         setStatus("invalid");
-        return;
       }
-      setStatus("ready");
     }
     void establishSession();
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url]);
+  }, [url, initializing]);
 
   async function onSave() {
     setErrorMsg(null);

@@ -10,7 +10,17 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/query-client";
 import { storage } from "@/lib/offline/mmkv";
+import { logError } from "@/lib/logger";
 import { useActiveShopStore } from "./active-shop-store";
+
+/**
+ * GoTrueClient RN'da ba'zan (tarmoq/lock sharoitiga qarab) `getSession()`ni
+ * abadiy hal qilmasdan qoldiradi (`lib/supabase.ts` dagi `noopLock` izohiga
+ * qarang — bu shu muammoning ikkinchi qatlam himoyasi). Muhlat tugasa ham
+ * ilova splash ekranida "muzlab" qolmasligi kerak — `session = null` bilan
+ * davom etadi, haqiqiy natija keyinroq kelsa o'zi to'g'rilaydi (pastda).
+ */
+const GET_SESSION_TIMEOUT_MS = 10_000;
 
 /** Persister (src/lib/offline/persister.ts) shu MMKV kalitiga yozadi. */
 const PERSISTED_QUERY_CACHE_KEY = "uscan-query-cache";
@@ -30,7 +40,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      logError("auth.getSession.timeout", new Error(`${GET_SESSION_TIMEOUT_MS}ms ichida javob kelmadi`));
+      setInitializing(false);
+    }, GET_SESSION_TIMEOUT_MS);
+
     supabase.auth.getSession().then(({ data }) => {
+      clearTimeout(timeoutId);
       setSession(data.session);
       setInitializing(false);
     });
@@ -52,7 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (

@@ -116,9 +116,13 @@ export default function KoproqScreen() {
         // Tokenni AVVAL o'chiramiz — signOut'dan keyin RLS `auth.uid()` yo'q
         // bo'ladi va o'chirish qatorga tegmay qolardi (telefonni boshqa
         // foydalanuvchiga bergan ega begona do'kon xulosasini olishda davom etardi).
+        // `scope: "local"` — server bilan tarmoq orqali gaplashmasdan FAQAT
+        // lokal sessiyani tozalaydi (sekin tarmoqda logout tugmasi
+        // daqiqalab osilib qolmasin, `unregisterPushToken` ham endi 8s
+        // muhlat bilan — ikkalasi ham `lib/with-timeout.ts`).
         onPress: async () => {
           await unregisterPushToken();
-          await supabase.auth.signOut();
+          await supabase.auth.signOut({ scope: "local" });
         },
       },
     ]);
