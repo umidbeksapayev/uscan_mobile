@@ -45,8 +45,17 @@ src/
   "uscan". Ilova ikonkalari shu geometriyadan `scripts/make-icons.ps1` bilan
   chiziladi — belgi o'zgarsa ikkalasi ham yangilanadi, aks holda ilova ichidagi
   logo bilan ikonka ajralib qoladi (ilgari shu sabab ikkita belgi bor edi).
-- Pastki nav **qat'iy 5 tugma**: Bosh · Sotuv · Katalog · Tarix · Ko'proq
-  (Nasiya/Hisobot/Sozlama "Ko'proq" ichida).
+- Pastki nav **qat'iy 5 tugma**: Bosh · Mahsulotlar · Sotuv · Tarix ·
+  Ko'proq (Nasiya/Hisobot/Sozlama "Ko'proq" ichida). O'rtadagi Sotuv —
+  ko'tarilgan tugma (`components/tab-bar.tsx`, belgisi `LogoMark`) va
+  **kontekstga qarab** ishlaydi: boshqa ekranda — Sotuv tabini ochadi,
+  Sotuv ekranida turganda — `/scanner`. Faqat skaner qilib qo'yilsa
+  savatni skanersiz ochish yo'li qolmasdi.
+  `scanner.tsx` DONALI mahsulotda ekranda QOLADI (ketma-ket skanerlash,
+  pastdagi "Savatga o'tish" paneli bilan), VAZNLI mahsulotda esa
+  `router.dismissTo("/sotuv")` qiladi — kg so'raydigan oyna Sotuv
+  ekranida yashaydi, `router.back()` esa skaner boshqa ekrandan ochilsa
+  uni ochmasdan mahsulotni yo'qotardi.
 
 ## Ishga tushirish
 
@@ -76,6 +85,14 @@ tabular raqamlar, harakatni kamaytirish (a11y).
 Batafsil: `docs/SPRINT_PLAN_2026-07.md`.
 
 Sinov ro'yxati: `docs/QURILMADA_SINOV.md`.
+
+⚠️ **NativeWind keshi.** Loyihada ILGARI ishlatilmagan Tailwind klassi
+(`pl-6`, `pr-3` kabi) kompilyatsiya qilingan CSS'ga tushmaydi va jimgina
+E'TIBORSIZ qoldiriladi — xato ham, ogohlantirish ham yo'q, Metro'da `r`
+bosilganda "hech nima o'zgarmadi" bo'lib ko'rinadi. Yo `npx expo start
+--clear` bilan kesh tozalanadi, yo (ishonchliroq) bir martalik bo'shliq
+inline `style` da beriladi. Klass loyihada boshqa joyda bormi —
+tekshirib ko'ring.
 
 **Lint:** `npm run lint` — 0 xato bo'lishi shart. 18 ta
 `react-hooks/set-state-in-effect` ogohlantirishi ataylab qoldirilgan

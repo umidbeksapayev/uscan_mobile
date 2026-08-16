@@ -60,7 +60,6 @@ export default function HomeScreen() {
 
   const shop = useActiveMembership()?.shop;
   const { isOwner } = useActivePermissions();
-  const initials = (shop?.name ?? "uS").slice(0, 2).toUpperCase();
   const { badge: alertBadge } = useAlerts();
 
   // 2× oyna: joriy + oldingi davr (foiz o'zgarish uchun)
@@ -107,9 +106,12 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View className="flex-row items-center gap-3">
-          <View className="h-10 w-10 items-center justify-center rounded-full bg-primary-deep">
-            <Text className="font-medium text-white">{initials}</Text>
-          </View>
+          {/*
+            Do'kon bosh harflari yozilgan dumaloq belgi ATAYLAB olib
+            tashlandi: u bosilmasdi (oddiy `View` edi) va yonidagi do'kon
+            nomini takrorlardi — ya'ni tugmaga o'xshab turib hech narsa
+            qilmaydigan element edi.
+          */}
           <View className="flex-1">
             <Logo size={20} />
             {shop?.name ? (

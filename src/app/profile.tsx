@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,12 +10,10 @@ import { supabase } from "@/lib/supabase";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { logError } from "@/lib/logger";
 import { toast } from "@/lib/toast";
-import { formatDate } from "@/lib/format";
 import { pickAndCompress, type ImageSource } from "@/lib/pick-image";
 import { uploadAvatar, deleteAvatar } from "@/lib/storage";
 import { useColors } from "@/theme/theme-store";
 import { radius, text } from "@/theme/tokens";
-import { shadowGlow } from "@/theme/shadows";
 import { ScreenHeader } from "@/components/ui/screen";
 import { Card } from "@/components/ui/card";
 import { SectionLabel } from "@/components/ui/section-label";
@@ -25,8 +22,8 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { useAuth } from "@/features/auth/auth-context";
-import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
-import { unregisterPushToken } from "@/features/notifications/notify";
+import { useActivePermissions } from "@/features/auth/use-memberships";
+import { useMyInvites } from "@/features/auth/use-invites";
 import { useProfile, useUpdateProfile } from "@/features/profile/use-profile";
 import { displayName, initials } from "@/features/profile/display-name";
 import { ChangePasswordSheet } from "@/features/profile/change-password-sheet";
@@ -118,8 +115,11 @@ export default function ProfileScreen() {
   const { session } = useAuth();
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
-  const active = useActiveMembership();
   const { isOwner } = useActivePermissions();
+  // Menga kelgan takliflar — soni nishonda ko'rsatiladi. Bildirishnomalar
+  // markazi ham xuddi shu hook'ni ishlatadi, ya'ni kesh bitta.
+  const { data: myInvites } = useMyInvites();
+  const inviteCount = myInvites?.length ?? 0;
 
   const [photoOpen, setPhotoOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -131,16 +131,13 @@ export default function ProfileScreen() {
   const name = displayName(profile, email, t("profile.fallbackName"));
   const avatarUrl = profile?.avatar_url ?? null;
 
-  // Kirish usuli: parol bormi yoki faqat Google'mi. `identities` sessiyada
-  // keladi — qo'shimcha tarmoq so'rovi shart emas.
-  const providers = (user?.identities ?? []).map((i) => i.provider);
-  const hasPassword = providers.includes("email");
-  const hasGoogle = providers.includes("google");
-  const providerLabel = hasGoogle
-    ? hasPassword
-      ? t("profile.providerBoth")
-      : "Google"
-    : t("profile.providerEmail");
+  // Parol bormi — "Parolni o'zgartirish" qatori shunga qarab chiqadi.
+  // `identities` sessiyada keladi, qo'shimcha tarmoq so'rovi shart emas.
+  //
+  // "Kirish usuli" ma'lumot qatori ATAYLAB olib tashlandi: u bosilmasdi va
+  // hech narsa qilmasdi — parol yo'q foydalanuvchi buni pastdagi "Parol
+  // o'rnatish" qatoridan ham tushunadi.
+  const hasPassword = (user?.identities ?? []).some((i) => i.provider === "email");
 
   async function pickPhoto(source: ImageSource) {
     if (!user) return;
@@ -199,21 +196,12 @@ export default function ProfileScreen() {
     }
   }
 
-  function logout() {
-    Alert.alert(t("nav.logout"), t("menu.logoutConfirm"), [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("nav.logout"),
-        style: "destructive",
-        // `koproq.tsx` bilan bir xil tartib: token AVVAL o'chiriladi (signOut
-        // dan keyin RLS `auth.uid()` yo'q), so'ng lokal sessiya tozalanadi.
-        onPress: async () => {
-          await unregisterPushToken();
-          await supabase.auth.signOut({ scope: "local" });
-        },
-      },
-    ]);
-  }
+  /*
+    "Chiqish" bu ekrandan ATAYLAB olib tashlandi — u `koproq.tsx` da bor va
+    ikkita bir xil chiqish tugmasi ikkita boshqa narsadek ko'rinardi.
+    Xuddi shu sabab "Hisob" bo'limi ham yo'q: do'kon nomi, rol va
+    Sozlamalar havolasi — uchalasi ham Ko'proq tabida.
+  */
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
@@ -225,21 +213,14 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ══════════════════════════════════════════════
-            TEPA KARTA — rasm, ism, email, rol
+            KIMLIK — rasm, ism, rol
+
+            Kartasiz, to'g'ridan-to'g'ri sahifa fonida. Ilgari bu blok ko'k
+            gradient "hero" karta edi: u ekrandagi eng katta rangli sirt
+            bo'lib, hech qanday ma'lumot bermasdi. Endi rang faqat
+            avatarda — ya'ni ko'z avval ISMga tushadi.
         ══════════════════════════════════════════════ */}
-        <LinearGradient
-          colors={[colors.primary, colors.primaryDeep]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            borderRadius: radius.xl,
-            padding: 18,
-            marginBottom: 22,
-            alignItems: "center",
-            gap: 12,
-            ...shadowGlow(colors.primary),
-          }}
-        >
+        <View style={{ alignItems: "center", gap: 14, paddingTop: 12, paddingBottom: 28 }}>
           <Pressable
             onPress={() => setPhotoOpen(true)}
             accessibilityRole="button"
@@ -251,9 +232,7 @@ export default function ProfileScreen() {
                 width: 88,
                 height: 88,
                 borderRadius: radius.full,
-                backgroundColor: "rgba(255,255,255,0.18)",
-                borderWidth: 2,
-                borderColor: "rgba(255,255,255,0.35)",
+                backgroundColor: colors.primaryTint,
                 alignItems: "center",
                 justifyContent: "center",
                 overflow: "hidden",
@@ -268,7 +247,7 @@ export default function ProfileScreen() {
                   accessibilityIgnoresInvertColors
                 />
               ) : (
-                <Text style={{ fontSize: text.xl2, fontWeight: "800", color: "#fff" }}>
+                <Text style={{ fontSize: text.xl2, fontWeight: "700", color: colors.primary }}>
                   {initials(name)}
                 </Text>
               )}
@@ -279,14 +258,16 @@ export default function ProfileScreen() {
                     inset: 0,
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: "rgba(15,61,110,0.55)",
+                    backgroundColor: "rgba(15,23,42,0.45)",
                   }}
                 >
                   <ActivityIndicator color="#fff" />
                 </View>
               ) : null}
             </View>
-            {/* Kamera nishoni — rasm almashtirish mumkinligini ko'rsatadi */}
+            {/* Kamera nishoni — rasm almashtirish mumkinligini ko'rsatadi.
+                Chegara rangi `bg` (primaryDeep emas): nishon sahifa fonini
+                "kesib" turadi, ya'ni tungi rejimda ham to'g'ri ko'rinadi. */}
             <View
               style={{
                 position: "absolute",
@@ -297,50 +278,35 @@ export default function ProfileScreen() {
                 borderRadius: radius.full,
                 backgroundColor: colors.surface,
                 borderWidth: 2,
-                borderColor: colors.primaryDeep,
+                borderColor: colors.bg,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Ionicons name="camera" size={15} color={colors.primary} />
+              <Ionicons name="camera" size={15} color={colors.muted} />
             </View>
           </Pressable>
 
-          <View style={{ alignItems: "center", gap: 4 }}>
+          <View style={{ alignItems: "center", gap: 3 }}>
             <Text
-              style={{ fontSize: text.xl, fontWeight: "800", color: "#fff" }}
+              style={{ fontSize: text.xl, fontWeight: "700", color: colors.ink }}
               numberOfLines={1}
             >
               {name}
             </Text>
-            <Text style={{ fontSize: text.sm, color: "rgba(255,255,255,0.85)" }} numberOfLines={1}>
-              {email}
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 5,
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: radius.full,
-              backgroundColor: "rgba(255,255,255,0.18)",
-            }}
-          >
-            <Ionicons name={isOwner ? "shield-checkmark" : "person"} size={12} color="#fff" />
-            <Text style={{ fontSize: text.xs, fontWeight: "600", color: "#fff" }}>
+            {/* Rol — nishon EMAS, oddiy matn. To'ldirilgan pill bu yerda
+                hech narsani ta'kidlamasdi (rol o'zgarmaydi, bosilmaydi). */}
+            <Text style={{ fontSize: text.xs, color: colors.muted }}>
               {isOwner ? t("staff.owner") : t("staff.cashier")}
             </Text>
           </View>
-        </LinearGradient>
+        </View>
 
         {/* ══════════════════════════════════════════════
             SHAXSIY MA'LUMOT
         ══════════════════════════════════════════════ */}
         <SectionLabel label={t("profile.sectionPersonal")} />
-        <Card style={{ marginBottom: 22 }}>
+        <Card style={{ marginBottom: 24 }}>
           {isLoading ? (
             <View style={{ paddingVertical: 20, alignItems: "center" }}>
               <ActivityIndicator color={colors.primary} />
@@ -360,12 +326,7 @@ export default function ProfileScreen() {
             XAVFSIZLIK
         ══════════════════════════════════════════════ */}
         <SectionLabel label={t("profile.sectionSecurity")} />
-        <Card padded={false} elevated style={{ overflow: "hidden", marginBottom: 22 }}>
-          <SettingRow
-            icon={hasGoogle ? "logo-google" : "mail-outline"}
-            title={t("profile.signInMethod")}
-            subtitle={providerLabel}
-          />
+        <Card padded={false} style={{ overflow: "hidden", marginBottom: 24 }}>
           {hasPassword ? (
             <SettingRow
               icon="lock-closed-outline"
@@ -385,37 +346,42 @@ export default function ProfileScreen() {
         </Card>
 
         {/* ══════════════════════════════════════════════
-            HISOB
+            TAKLIFLAR
+
+            Doim ko'rinadi (faqat taklif kelganda emas): profil — uni
+            qidiradigan barqaror joy. Ilgari taklif faqat Bosh sahifadagi
+            qo'ng'iroqchada ko'rinardi, ya'ni o'qilgandan keyin yo'qolardi.
         ══════════════════════════════════════════════ */}
-        <SectionLabel label={t("profile.sectionAccount")} />
-        <Card padded={false} elevated style={{ overflow: "hidden", marginBottom: 22 }}>
+        <SectionLabel label={t("profile.sectionInvites")} />
+        <Card padded={false} style={{ overflow: "hidden" }}>
           <SettingRow
-            icon="storefront-outline"
-            title={active?.shop.name ?? t("common.appName")}
-            subtitle={isOwner ? t("staff.owner") : t("staff.cashier")}
-          />
-          {user?.created_at ? (
-            <SettingRow
-              icon="calendar-outline"
-              title={t("profile.memberSince")}
-              subtitle={formatDate(user.created_at)}
-              right={<View />}
-            />
-          ) : null}
-          <SettingRow
-            icon="settings-outline"
-            title={t("settings.title")}
-            subtitle={t("profile.settingsSub")}
-            onPress={() => router.push("/settings")}
+            icon="mail-open-outline"
+            title={t("myInvites.title")}
+            subtitle={t("myInvites.rowSub")}
+            onPress={() => router.push("/my-invites")}
+            right={
+              inviteCount > 0 ? (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <View
+                    style={{
+                      minWidth: 22,
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
+                      borderRadius: radius.full,
+                      backgroundColor: colors.danger,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: text.xs, fontWeight: "700", color: "#fff" }}>
+                      {inviteCount}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.tabInactive} />
+                </View>
+              ) : undefined
+            }
             last
           />
-        </Card>
-
-        {/* ══════════════════════════════════════════════
-            CHIQISH
-        ══════════════════════════════════════════════ */}
-        <Card padded={false} elevated style={{ overflow: "hidden" }}>
-          <SettingRow icon="log-out-outline" title={t("nav.logout")} onPress={logout} danger last />
         </Card>
       </ScrollView>
 

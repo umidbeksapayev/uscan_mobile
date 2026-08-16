@@ -49,7 +49,11 @@ const FAILURE_KEYS: Record<PushFailure, string> = {
   saveFailed: "notif.errSaveFailed",
 };
 
-export function DailySummaryCard({ shop }: { shop: Shop }) {
+/**
+ * @param bare — karta qobig'isiz (chegara/fon/sarlavha yo'q), BottomSheet
+ * ichida ishlatiladi: sarlavhani sheet o'zi beradi.
+ */
+export function DailySummaryCard({ shop, bare = false }: { shop: Shop; bare?: boolean }) {
   const colors = useColors();
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -114,56 +118,62 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
 
   return (
     <View
-      style={{
-        borderRadius: radius.lg,
-        borderWidth: 1,
-        borderColor: colors.line,
-        backgroundColor: colors.surface,
-        overflow: "hidden",
-      }}
+      style={
+        bare
+          ? undefined
+          : {
+              borderRadius: radius.lg,
+              borderWidth: 1,
+              borderColor: colors.line,
+              backgroundColor: colors.surface,
+              overflow: "hidden",
+            }
+      }
     >
       {/* Sarlavha */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 12,
-        }}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: radius.md,
-            backgroundColor: colors.primaryTint,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Ionicons name="notifications-outline" size={20} color={colors.primary} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: text.base, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
-            {t("notif.summaryTitle", "Kunlik xulosa")}
-          </Text>
-          <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
-            {t("notif.summaryHint", "Savdo va qarz yakuni belgilangan vaqtda yuboriladi")}
-          </Text>
-        </View>
-      </View>
-
-      <View style={{ height: 1, backgroundColor: colors.line }} />
+      {bare ? null : (
+        <>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              paddingHorizontal: 16,
+              paddingTop: 16,
+              paddingBottom: 12,
+            }}
+          >
+            <Ionicons name="notifications-outline" size={20} color={colors.muted} />
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{ fontSize: text.base, fontWeight: "600", color: colors.ink, lineHeight: 20 }}
+              >
+                {t("notif.summaryTitle", "Kunlik xulosa")}
+              </Text>
+              <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
+                {t("notif.summaryHint", "Savdo va qarz yakuni belgilangan vaqtda yuboriladi")}
+              </Text>
+            </View>
+          </View>
+          <View style={{ height: 1, backgroundColor: colors.line }} />
+        </>
+      )}
 
       {/* Vaqt */}
-      <View style={{ paddingHorizontal: 12, paddingTop: 10 }}>
+      <View style={{ paddingHorizontal: bare ? 0 : 12, paddingTop: bare ? 0 : 10 }}>
         <Text style={{ fontSize: text.xs, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 }}>
           {t("settings.summaryTimeLabel").toUpperCase()}
         </Text>
       </View>
-      <View style={{ flexDirection: "row", gap: 8, padding: 12, backgroundColor: colors.bg }}>
+      <View
+        style={{
+          flexDirection: "row",
+          gap: 8,
+          padding: bare ? 0 : 12,
+          paddingTop: bare ? 8 : 12,
+          backgroundColor: bare ? "transparent" : colors.bg,
+        }}
+      >
         {TIMES.map((opt) => {
           const active = time === opt.value;
           return (
@@ -217,14 +227,21 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
       </View>
 
       {/* Kanallar — vaqt "o'chiq" bo'lsa hech narsa yuborilmaydi, shuni aytamiz */}
-      <View style={{ height: 1, backgroundColor: colors.line }} />
-      <View style={{ paddingHorizontal: 12, paddingTop: 10 }}>
+      <View style={{ height: 1, backgroundColor: colors.line, marginTop: bare ? 16 : 0 }} />
+      <View style={{ paddingHorizontal: bare ? 0 : 12, paddingTop: bare ? 12 : 10 }}>
         <Text style={{ fontSize: text.xs, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 }}>
           {t("notif.channels", "Yetkazish kanallari").toUpperCase()}
         </Text>
       </View>
 
-      <View style={{ padding: 12, gap: 8, opacity: time === "off" ? 0.5 : 1 }}>
+      <View
+        style={{
+          padding: bare ? 0 : 12,
+          paddingTop: bare ? 10 : 12,
+          gap: 8,
+          opacity: time === "off" ? 0.5 : 1,
+        }}
+      >
         <ChannelRow
           icon="phone-portrait-outline"
           label={t("notif.channelPush", "Telefon bildirishnomasi")}
@@ -255,7 +272,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
           onPress={() => qc.invalidateQueries({ queryKey: ["memberships"] })}
           hitSlop={8}
           accessibilityRole="button"
-          style={{ paddingHorizontal: 12, paddingBottom: 12 }}
+          style={{ paddingHorizontal: bare ? 0 : 12, paddingBottom: 12, paddingTop: bare ? 8 : 0 }}
         >
           <Text style={{ fontSize: text.xs, color: colors.muted, lineHeight: 15 }}>
             {t("settings.tgRefreshHint")}
@@ -264,7 +281,7 @@ export function DailySummaryCard({ shop }: { shop: Shop }) {
       ) : null}
 
       {time === "off" ? (
-        <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
+        <View style={{ paddingHorizontal: bare ? 0 : 12, paddingBottom: 12, paddingTop: bare ? 8 : 0 }}>
           <Text style={{ fontSize: text.xs, color: colors.muted, lineHeight: 15 }}>
             {t("notif.summaryOffHint", "Vaqt tanlanmagan — xulosa yuborilmaydi.")}
           </Text>

@@ -31,7 +31,9 @@ import { useColors } from "@/theme/theme-store";
 import { useActiveShopId } from "@/features/auth/use-memberships";
 import { findProductsByBarcode } from "@/features/sell/lookup";
 import { useCart } from "@/features/sell/cart-store";
+import { cartTotal } from "@/features/sell/cart-total";
 import { useScanReturn } from "@/features/products/scan-return";
+import { formatCurrency } from "@/lib/format";
 import { radius, text } from "@/theme/tokens";
 import { easing } from "@/theme/motion";
 
@@ -73,11 +75,16 @@ export default function ScannerScreen() {
   const add = useCart((s) => s.add);
   const setPendingWeight = useCart((s) => s.setPendingWeight);
   const setScanCode = useScanReturn((s) => s.setCode);
+  // Savat paneli uchun — har skandan keyin qayta render bo'lishi KERAK
+  // (sanoq va summa darhol yangilanadi).
+  const cartItems = useCart((s) => s.items);
 
   const locked = useRef(false);
   const [active, setActive] = useState(true);
   const [torch, setTorch] = useState(false);
-  const [status, setStatus] = useState<{ text: string; error?: boolean } | null>(null);
+  const [status, setStatus] = useState<{ text: string; error?: boolean; ok?: boolean } | null>(
+    null,
+  );
 
   const WINDOW_W = Math.min(width * 0.74, 300);
   const WINDOW_H = Math.round(WINDOW_W * 0.68);
@@ -129,14 +136,36 @@ export default function ScannerScreen() {
         return;
       }
       const product = found[0];
-      // VAZN mahsulot → Sotuv ekrani tezkor oynada kg/so'm so'raydi.
+
+      /*
+        VAZN mahsulot → kg/so'm so'raydigan tezkor oyna SOTUV ekranida
+        yashaydi, shuning uchun bu yerda qolib bo'lmaydi: darhol o'sha
+        ekranga o'tamiz.
+
+        ⚠️ `router.back()` YETMAYDI. Skaner endi pastki navigatsiyaning
+        markaziy tugmasidan, ya'ni ISTALGAN ekrandan ochiladi — Bosh
+        sahifadan ochilganda `back()` Bosh sahifaga qaytarardi va vazn
+        oynasi umuman ochilmasdi (mahsulot jimgina yo'qolardi).
+      */
       if (product.sale_type === "weight") {
         setPendingWeight(product);
-      } else {
-        add(product);
+        setActive(false);
+        router.dismissTo("/sotuv");
+        return;
       }
-      setActive(false);
-      router.back();
+
+      /*
+        DONALI mahsulot → skanerdan CHIQMAYMIZ. Kassir odatda ketma-ket
+        bir nechta mahsulot skanerlaydi; har safar ekran almashishi shu
+        oqimni uzardi. Savat pastdagi panelda yangilanadi, "Savatga o'tish"
+        esa bir bosishda.
+      */
+      add(product);
+      setStatus({ text: `${product.name} · ${t("sell.addedToCart")}`, ok: true });
+      setTimeout(() => {
+        locked.current = false;
+        setStatus(null);
+      }, 900);
     } catch {
       setStatus({ text: t("common.loadError", "Xatolik yuz berdi"), error: true });
       setTimeout(() => {
@@ -296,7 +325,7 @@ export default function ScannerScreen() {
 
         <View style={{ flex: 1 }} pointerEvents="none" />
 
-        <View style={{ alignItems: "center", padding: 24, minHeight: 80 }} pointerEvents="none">
+        <View style={{ alignItems: "center", paddingHorizontal: 24, minHeight: 68 }} pointerEvents="none">
           {status ? (
             <Animated.View
               entering={FadeIn.duration(200)}
@@ -305,15 +334,73 @@ export default function ScannerScreen() {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 8,
-                backgroundColor: status.error ? colors.danger : "rgba(0,0,0,0.7)",
+                backgroundColor: status.error
+                  ? colors.danger
+                  : status.ok
+                    ? colors.success
+                    : "rgba(0,0,0,0.7)",
                 paddingHorizontal: 18,
                 paddingVertical: 12,
                 borderRadius: radius.lg,
               }}
             >
-              {!status.error ? <ActivityIndicator color={colors.primaryLight} size="small" /> : null}
-              <Text style={{ color: "#fff", fontWeight: "500", fontSize: text.base }}>{status.text}</Text>
+              {status.ok ? (
+                <Ionicons name="checkmark-circle" size={18} color="#fff" />
+              ) : !status.error ? (
+                <ActivityIndicator color={colors.primaryLight} size="small" />
+              ) : null}
+              <Text
+                numberOfLines={1}
+                style={{ color: "#fff", fontWeight: "500", fontSize: text.base, flexShrink: 1 }}
+              >
+                {status.text}
+              </Text>
             </Animated.View>
+          ) : null}
+        </View>
+
+        {/*
+          Savat paneli — skaner endi Sotuv ekranidan emas, pastki
+          navigatsiyadan ham ochiladi, ya'ni savatga qaytish yo'li shu
+          yerda bo'lishi SHART (aks holda to'lovga o'tish uchun majburan
+          biror narsa skanerlash kerak bo'lardi).
+        */}
+        <View style={{ padding: 16, paddingTop: 0 }} pointerEvents="box-none">
+          {/* "form" rejimida (mahsulot formasiga shtrix-kod tanlash) savat
+              umuman aloqasiz — panel ko'rsatilmaydi. */}
+          {mode !== "form" && cartItems.length > 0 ? (
+            <Pressable
+              onPress={() => {
+                setActive(false);
+                router.dismissTo("/sotuv");
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`${t("sell.goToCart")}: ${cartItems.length}`}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                height: 58,
+                paddingHorizontal: 18,
+                borderRadius: radius.lg,
+                backgroundColor: colors.primary,
+              }}
+            >
+              <Ionicons name="cart" size={22} color="#fff" />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: "#fff", fontSize: text.base, fontWeight: "600" }}>
+                  {t("sell.goToCart")}
+                </Text>
+                <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: text.xs }}>
+                  {/* Atayin `count` EMAS, `n`: i18next `count` ni ko'rsa
+                      ko'plik shakllarini (`_one`/`_few`/`_many`) qidiradi va
+                      rus tilida kalit topilmay qolardi. */}
+                  {t("sell.cartCount", { n: cartItems.length })} ·{" "}
+                  {formatCurrency(cartTotal(cartItems))}
+                </Text>
+              </View>
+              <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </Pressable>
           ) : null}
         </View>
       </SafeAreaView>

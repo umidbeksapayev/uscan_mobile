@@ -21,7 +21,12 @@ const OPTIONS: {
   { value: "off", labelKey: "notif.off", time: "—", icon: "notifications-off-outline" },
 ];
 
-export function LocalReminderCard() {
+/**
+ * @param bare — karta qobig'isiz (chegara/fon/sarlavha yo'q). BottomSheet
+ * ichida sarlavhani sheet o'zi beradi, ikkinchi ramka esa "karta ichida
+ * karta" bo'lib ko'rinardi.
+ */
+export function LocalReminderCard({ bare = false }: { bare?: boolean } = {}) {
   const colors = useColors();
   const { t } = useTranslation();
 
@@ -46,57 +51,54 @@ export function LocalReminderCard() {
 
   return (
     <View
-      style={{
-        borderRadius: radius.lg,
-        borderWidth: 1,
-        borderColor: colors.line,
-        backgroundColor: colors.surface,
-        overflow: "hidden",
-      }}
+      style={
+        bare
+          ? undefined
+          : {
+              borderRadius: radius.lg,
+              borderWidth: 1,
+              borderColor: colors.line,
+              backgroundColor: colors.surface,
+              overflow: "hidden",
+            }
+      }
     >
       {/* Sarlavha */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 12,
-        }}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: radius.md,
-            backgroundColor: "rgba(245,158,11,0.12)",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Ionicons name="alarm-outline" size={20} color="#d97706" />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: text.base, fontWeight: "600", color: colors.ink, lineHeight: 20 }}>
-            {t("notif.dailyTitle")}
-          </Text>
-          <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
-            {t("notif.dailyHint")}
-          </Text>
-        </View>
-      </View>
-
-      {/* Divider */}
-      <View style={{ height: 1, backgroundColor: colors.line }} />
+      {bare ? null : (
+        <>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              paddingHorizontal: 16,
+              paddingTop: 16,
+              paddingBottom: 12,
+            }}
+          >
+            <Ionicons name="alarm-outline" size={20} color={colors.muted} />
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{ fontSize: text.base, fontWeight: "600", color: colors.ink, lineHeight: 20 }}
+              >
+                {t("notif.dailyTitle")}
+              </Text>
+              <Text style={{ fontSize: text.xs, color: colors.muted, marginTop: 2, lineHeight: 16 }}>
+                {t("notif.dailyHint")}
+              </Text>
+            </View>
+          </View>
+          <View style={{ height: 1, backgroundColor: colors.line }} />
+        </>
+      )}
 
       {/* Chip tugmalar — gorizontal */}
       <View
         style={{
           flexDirection: "row",
           gap: 8,
-          padding: 12,
-          backgroundColor: colors.bg,
+          padding: bare ? 0 : 12,
+          backgroundColor: bare ? "transparent" : colors.bg,
         }}
       >
         {OPTIONS.map((o) => {

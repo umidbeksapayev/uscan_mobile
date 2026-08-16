@@ -210,6 +210,7 @@
   },
   "myInvites": {
     "title": "Приглашения",
+    "rowSub": "Здесь появятся приглашения в магазин",
     "empty": "Пока приглашений нет"
   },
   "billing": {
@@ -479,6 +480,8 @@
     "livePlaceholder": "Введите название товара (2+ символа)…",
     "searchAria": "Поиск товара",
     "addedToCart": "Добавлено в корзину",
+    "goToCart": "Перейти в корзину",
+    "cartCount": "Позиций: {{n}}",
     "addedNamed": "{{name}} — добавлено в корзину",
     "confirmTitle": "Подтвердите продажу",
     "confirmText": "{{count}} товаров, итого {{total}}. Продолжить?",
@@ -723,6 +726,8 @@
     "exportError": "Ошибка экспорта",
     "sectionGeneral": "Общее",
     "sectionNotifications": "Уведомления",
+    "sectionHelp": "Помощь",
+    "rowNotificationsSub": "Время ежедневной сводки и напоминания",
     "sectionCashiers": "Кассиры",
     "rowLanguage": "Язык интерфейса",
     "rowTheme": "Тема (Дизайн)",
@@ -807,7 +812,7 @@
     "fallbackName": "Пользователь",
     "sectionPersonal": "Личные данные",
     "sectionSecurity": "Безопасность",
-    "sectionAccount": "Аккаунт",
+    "sectionInvites": "Приглашения",
     "nameLabel": "Имя",
     "namePlaceholder": "Введите имя",
     "emailReadonly": "Email изменить нельзя — вход в аккаунт привязан к этому адресу.",
@@ -816,9 +821,6 @@
     "changePhoto": "Фото профиля",
     "removePhoto": "Удалить фото",
     "photoUpdated": "Фото обновлено",
-    "signInMethod": "Способ входа",
-    "providerEmail": "Email и пароль",
-    "providerBoth": "Google и пароль",
     "changePassword": "Сменить пароль",
     "changePasswordSub": "Нужно знать текущий пароль",
     "changePasswordHint": "Для безопасности сначала введите текущий пароль.",
@@ -832,9 +834,7 @@
     "resetLinkSub": "Ссылка придёт на вашу почту",
     "resetLinkSent": "Ссылка отправлена на {{email}}.",
     "setPassword": "Установить пароль",
-    "setPasswordSub": "Чтобы входить не только через Google",
-    "memberSince": "Дата регистрации",
-    "settingsSub": "Язык, тема, принтер и другое"
+    "setPasswordSub": "Чтобы входить не только через Google"
   },
   "customers": {
     "pickTitle": "Выбор клиента",
@@ -1277,7 +1277,9 @@
     "summaryOffHint": "Время не выбрано — сводка не отправляется.",
     "channels": "Каналы доставки",
     "channelPush": "Уведомление на телефон",
-    "channelTelegram": "Telegram"
+    "channelTelegram": "Telegram",
+    "sheetServer": "Ежедневная сводка",
+    "sheetLocal": "Напоминание на телефоне"
   },
   "alerts": {
     "title": "Уведомления",

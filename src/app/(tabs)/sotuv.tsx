@@ -289,54 +289,106 @@ export default function SotuvScreen() {
           ) : null}
         </View>
 
-        {/* Skaner (+ Tezkor narx — faqat manage_products ruxsati bor foydalanuvchiga) */}
-        <View className="mb-3 flex-row gap-2">
-          <Pressable
-            onPress={() => router.push("/scanner")}
-            className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-primary"
-            style={{ height: 56 }}
+        {/*
+          Qidiruv (skaner maydon ICHIDA) + Tezkor narx.
+
+          Ilgari bu yerda 56px balandlikdagi butun kenglikdagi "Skanerlash"
+          tugmasi turardi. Katta nishon yo'qolmadi — u pastki navigatsiyaning
+          markaziy tugmasiga ko'chdi (bosh barmoq zonasi, har ekrandan
+          yetib boriladi), bu yerda esa ~68px bo'shadi.
+
+          Belgi `scan-outline` (kadr burchaklari), `barcode-outline` EMAS:
+          chiziqlar "shtrix-kod" degan NARSANI bildiradi, kadr burchaklari
+          esa "skanerlash" AMALINI.
+        */}
+        <View className="mb-2 flex-row items-center gap-2">
+          <View
+            /*
+              Ichki chekkalar KENG (chap 24, o'ng 12). Maydon radiusi 16px —
+              ya'ni burchak egri chizig'i chekkadan ~16px ichkarigacha
+              cho'ziladi. 16px padding bilan ikonka aynan shu egrilikka
+              tegib turardi va "devorga tiralib qolgan" bo'lib ko'rinardi.
+
+              ⚠️ Padding ATAYLAB inline `style`da, `className`da EMAS.
+              `pl-6`/`pr-3` butun loyihada boshqa hech qayerda ishlatilmagan
+              — NativeWind bunday klassni kompilyatsiya qilingan CSS'ga
+              qo'shmaydi va uni jimgina E'TIBORSIZ qoldiradi (xato ham
+              bermaydi). Metro'da `r` bosilganda hech narsa o'zgarmasligining
+              sababi shu edi; kesh tozalash (`--clear`) kerak bo'lardi.
+              Inline qiymat esa har doim ishlaydi.
+            */
+            className="flex-1 flex-row items-center rounded-2xl border border-line bg-surface"
+            style={{ height: 58, paddingLeft: 24, paddingRight: 12, gap: 12 }}
           >
-            <Ionicons name="barcode-outline" size={26} color="#fff" />
-            <Text className="text-base font-medium text-white">{t("barcode.scanBtn")}</Text>
-          </Pressable>
+            <Ionicons name="search" size={22} color={colors.tabInactive} />
+            <TextInput
+              testID="sell-search"
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t("sell.searchPlaceholder")}
+              placeholderTextColor={colors.tabInactive}
+              // Shrift `className`da EMAS: NativeWind klassi va inline
+              // `style` bir xil xossani bersa qaysi biri yutishi aniq emas
+              // — `text-base` olib tashlanib, o'lcham tokendan beriladi.
+              className="flex-1 text-ink"
+              style={{ height: 58, fontSize: text.lg }}
+              autoCapitalize="none"
+            />
+            {search ? (
+              <Pressable
+                onPress={() => setSearch("")}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t("a11y.clearSearch", "Qidiruvni tozalash")}
+              >
+                <Ionicons name="close-circle" size={18} color={colors.tabInactive} />
+              </Pressable>
+            ) : null}
+            {/* Skaner — maydon ichida, TO'LDIRILGAN brend ko'kida.
+                Ilgari och tint fon + ko'k ikonka edi: nozik chiziqli belgi
+                oqish fonda so'nib ketardi. To'ldirilgan kvadrat esa
+                maydondagi yagona rangli element — ko'z darhol unga tushadi. */}
+            <Pressable
+              onPress={() => router.push("/scanner")}
+              accessibilityRole="button"
+              accessibilityLabel={t("barcode.scanBtn")}
+              className="items-center justify-center rounded-xl bg-primary"
+              style={{ width: 44, height: 44 }}
+            >
+              {/*
+                `scan-outline` — faqat to'rtta burchak, o'rtasida chiziq YO'Q.
+                Skaner nuri shu yerda qo'lda chiziladi: burchaklar "kadr",
+                chiziq esa "skanerlanyapti" degan ma'noni beradi (brend
+                belgisi `LogoMark` da ham xuddi shu nur bor).
+
+                Absolyut bola Yoga'da ota-onaning `alignItems`/
+                `justifyContent` iga bo'ysunadi — `top`/`left` hisoblash
+                shart emas, o'zi markazda turadi.
+              */}
+              <View style={{ width: 25, height: 25, alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="scan-outline" size={25} color="#fff" />
+                <View
+                  style={{
+                    position: "absolute",
+                    width: 13,
+                    height: 2,
+                    borderRadius: radius.full,
+                    backgroundColor: "#fff",
+                  }}
+                />
+              </View>
+            </Pressable>
+          </View>
+
           {canManageProducts ? (
             <Pressable
               onPress={() => setQuickPriceOpen(true)}
-              className="flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary-tint px-3"
-              style={{ height: 56 }}
-            >
-              <Ionicons name="cash-outline" size={22} color={colors.primary} />
-              <Text className="text-sm font-medium" style={{ color: colors.primary }}>
-                {t("sell.quickPriceShort")}
-              </Text>
-            </Pressable>
-          ) : null}
-        </View>
-
-        {/* Qidiruv */}
-        <View
-          className="mb-2 flex-row items-center gap-2 rounded-2xl border border-line bg-surface px-4"
-          style={{ height: 48 }}
-        >
-          <Ionicons name="search" size={18} color={colors.tabInactive} />
-          <TextInput
-            testID="sell-search"
-            value={search}
-            onChangeText={setSearch}
-            placeholder={t("sell.searchPlaceholder")}
-            placeholderTextColor={colors.tabInactive}
-            className="flex-1 text-base text-ink"
-            style={{ height: 48 }}
-            autoCapitalize="none"
-          />
-          {search ? (
-            <Pressable
-              onPress={() => setSearch("")}
-              hitSlop={8}
               accessibilityRole="button"
-              accessibilityLabel={t("a11y.clearSearch", "Qidiruvni tozalash")}
+              accessibilityLabel={t("sell.quickPrice")}
+              className="items-center justify-center rounded-2xl bg-primary-tint"
+              style={{ height: 58, width: 58 }}
             >
-              <Ionicons name="close-circle" size={18} color={colors.tabInactive} />
+              <Ionicons name="cash-outline" size={24} color={colors.primary} />
             </Pressable>
           ) : null}
         </View>

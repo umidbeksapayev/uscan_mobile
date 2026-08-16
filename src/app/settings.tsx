@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Pressable, Switch } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { meta, MetaKeys } from "@/lib/offline/mmkv";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,15 +8,13 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useThemeStore, useColors, type ThemeMode } from "@/theme/theme-store";
-import { shadowGlow } from "@/theme/shadows";
 import { LANGUAGES, setLanguage, type LangCode } from "@/i18n";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Card } from "@/components/ui/card";
 import { SectionLabel } from "@/components/ui/section-label";
 import { SettingRow } from "@/components/ui/setting-row";
 import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
-import { LocalReminderCard } from "@/features/notifications/local-reminder-card";
-import { DailySummaryCard } from "@/features/notifications/daily-summary-card";
+import { NotificationsSheet } from "@/features/notifications/notifications-sheet";
 import { FeedbackSheet } from "@/features/feedback/feedback-sheet";
 import { radius, text } from "@/theme/tokens";
 import { ScreenHeader } from "@/components/ui/screen";
@@ -174,6 +171,7 @@ export default function SettingsScreen() {
   const [aiWrites, setAiWrites] = useState(() => meta.getBoolOr(MetaKeys.aiWrites, true));
   const [langOpen, setLangOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const themeMode = useThemeStore((s) => s.themeMode);
@@ -184,8 +182,12 @@ export default function SettingsScreen() {
         ? t("settings.themeLight")
         : t("settings.themeSystem");
 
-  const initials = (active?.shop.name ?? "U").slice(0, 2).toUpperCase();
   const currentLangLabel = LANGUAGES.find((l) => l.code === i18n.language)?.label ?? LANGUAGES[0].label;
+
+  function toggleAiWrites(value: boolean) {
+    meta.setBool(MetaKeys.aiWrites, value);
+    setAiWrites(value);
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
@@ -196,93 +198,18 @@ export default function SettingsScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* ══════════════════════════════════════════════
-            DO'KON PROFILI — brend ko'ki gradient karta
-            (Bosh sahifadagi statistika kartalari bilan bir tilda)
-        ══════════════════════════════════════════════ */}
-        <LinearGradient
-          colors={[colors.primary, colors.primaryDeep]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            borderRadius: radius.xl,
-            padding: 18,
-            marginBottom: 22,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 14,
-            ...shadowGlow(colors.primary),
-          }}
-        >
-          <View style={{ position: "relative" }}>
-            <View
-              style={{
-                width: 54,
-                height: 54,
-                borderRadius: radius.lg,
-                backgroundColor: "rgba(255,255,255,0.18)",
-                borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.28)",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text style={{ fontSize: text.xl, fontWeight: "800", color: "#fff" }}>{initials}</Text>
-            </View>
-            {/* Faol do'kon belgisi */}
-            <View
-              style={{
-                position: "absolute",
-                bottom: -2,
-                right: -2,
-                width: 14,
-                height: 14,
-                borderRadius: radius.full,
-                backgroundColor: colors.success,
-                borderWidth: 2,
-                borderColor: colors.primaryDeep,
-              }}
-            />
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{ fontSize: text.lg, fontWeight: "800", color: "#fff", lineHeight: 22 }}
-              numberOfLines={1}
-            >
-              {active?.shop.name ?? t("common.appName")}
-            </Text>
-            {/* Rol nishoni — "kim sifatida kirganman" savoliga darhol javob */}
-            <View
-              style={{
-                alignSelf: "flex-start",
-                marginTop: 6,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 5,
-                paddingHorizontal: 9,
-                paddingVertical: 3,
-                borderRadius: radius.full,
-                backgroundColor: "rgba(255,255,255,0.18)",
-              }}
-            >
-              <Ionicons
-                name={isOwner ? "shield-checkmark" : "person"}
-                size={12}
-                color="#fff"
-              />
-              <Text style={{ fontSize: text.xs, fontWeight: "600", color: "#fff" }}>
-                {isOwner ? t("staff.owner") : t("staff.cashier")}
-              </Text>
-            </View>
-          </View>
-        </LinearGradient>
+        {/*
+          Do'kon nomi + rol kartasi ATAYLAB olib tashlandi: aynan shu
+          ma'lumot "Ko'proq" tabining tepasida turadi (u yerda bosilganda
+          do'kon almashtirish oynasi ochiladi, ya'ni foydali). Sozlamalarda
+          esa u faqat rangli sirt edi — hech qayerga olib bormasdi.
+        */}
 
         {/* ══════════════════════════════════════════════
-            UMUMIY SOZLAMALAR
+            UMUMIY
         ══════════════════════════════════════════════ */}
         <SectionLabel label={t("settings.sectionGeneral")} />
-        <Card padded={false} elevated style={{ overflow: "hidden", marginBottom: 22 }}>
+        <Card padded={false} style={{ overflow: "hidden", marginBottom: 24 }}>
           <SettingRow
             icon="language-outline"
             title={t("settings.rowLanguage")}
@@ -290,17 +217,62 @@ export default function SettingsScreen() {
             onPress={() => setLangOpen(true)}
           />
           <SettingRow
-            icon="color-palette-outline"
+            icon="moon-outline"
             title={t("settings.rowTheme")}
             subtitle={themeModeLabel}
             onPress={() => setThemeOpen(true)}
+          />
+          {/* Bildirishnomalar — ilgari ikkita katta karta ekran tanasida
+              turardi. Endi qator, tafsilot esa oynada. */}
+          <SettingRow
+            icon="notifications-outline"
+            title={t("settings.sectionNotifications")}
+            subtitle={t("settings.rowNotificationsSub")}
+            onPress={() => setNotifOpen(true)}
           />
           <SettingRow
             icon="print-outline"
             title={t("settings.rowPrinter")}
             subtitle={t("settings.rowPrinterSub")}
             onPress={() => router.push("/printer-settings")}
+            last
           />
+        </Card>
+
+        {/* ══════════════════════════════════════════════
+            AI YORDAMCHI — faqat egasi
+        ══════════════════════════════════════════════ */}
+        {isOwner ? (
+          <>
+            <SectionLabel label={t("ai.title")} />
+            <Card padded={false} style={{ overflow: "hidden", marginBottom: 24 }}>
+              {/* Butun qator bosiladi — ilgari faqat kichkina switch'ning
+                  o'ziga tegish kerak edi. */}
+              <SettingRow
+                icon="sparkles-outline"
+                title={t("ai.writesTitle")}
+                subtitle={t("ai.writesHint")}
+                onPress={() => toggleAiWrites(!aiWrites)}
+                right={
+                  <Switch
+                    value={aiWrites}
+                    onValueChange={toggleAiWrites}
+                    accessibilityLabel={t("ai.writesTitle")}
+                    trackColor={{ true: colors.primary, false: colors.line }}
+                    thumbColor="#fff"
+                  />
+                }
+                last
+              />
+            </Card>
+          </>
+        ) : null}
+
+        {/* ══════════════════════════════════════════════
+            YORDAM
+        ══════════════════════════════════════════════ */}
+        <SectionLabel label={t("settings.sectionHelp")} />
+        <Card padded={false} style={{ overflow: "hidden" }}>
           <SettingRow
             icon="chatbubble-ellipses-outline"
             title={t("settings.feedbackTitle")}
@@ -316,61 +288,16 @@ export default function SettingsScreen() {
             last
           />
         </Card>
-
-        {/* ══════════════════════════════════════════════
-            AI YORDAMCHI — faqat egasi
-        ══════════════════════════════════════════════ */}
-        {isOwner ? (
-          <>
-            <SectionLabel label={t("ai.title")} />
-            <Card style={{ marginBottom: 22, gap: 12 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: text.sm, fontWeight: "600", color: colors.ink }}>
-                    {t("ai.writesTitle")}
-                  </Text>
-                  <Text
-                    style={{ fontSize: text.xs, color: colors.muted, marginTop: 2, lineHeight: 16 }}
-                  >
-                    {t("ai.writesHint")}
-                  </Text>
-                </View>
-                <Switch
-                  value={aiWrites}
-                  onValueChange={(v) => {
-                    meta.setBool(MetaKeys.aiWrites, v);
-                    setAiWrites(v);
-                  }}
-                  accessibilityLabel={t("ai.writesTitle")}
-                  trackColor={{ true: colors.primary, false: colors.line }}
-                  thumbColor="#fff"
-                />
-              </View>
-            </Card>
-          </>
-        ) : null}
-
-        {/* ══════════════════════════════════════════════
-            BILDIRISHNOMALAR
-        ══════════════════════════════════════════════ */}
-        <SectionLabel label={t("settings.sectionNotifications")} />
-        {/*
-          Ega: xulosa vaqti va yetkazish kanallari (push + Telegram) BITTA
-          kartada. Ilgari uchta karta va ikkita alohida vaqt tanlagich bor edi.
-
-          Kassir: server xulosasi unga umuman yuborilmaydi
-          (`get_push_summaries` faqat `sh.owner_id` tokenlariga yuboradi),
-          shuning uchun unga faqat telefondagi lokal eslatma ko'rsatiladi.
-        */}
-        <View style={{ gap: 10, marginBottom: 22 }}>
-          {isOwner && active?.shop ? <DailySummaryCard shop={active.shop} /> : null}
-          <LocalReminderCard />
-        </View>
-
       </ScrollView>
 
       <LanguagePickerSheet visible={langOpen} onClose={() => setLangOpen(false)} />
       <ThemePickerSheet visible={themeOpen} onClose={() => setThemeOpen(false)} />
+      <NotificationsSheet
+        visible={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        shop={active?.shop}
+        isOwner={isOwner}
+      />
       <FeedbackSheet visible={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
     </SafeAreaView>
   );

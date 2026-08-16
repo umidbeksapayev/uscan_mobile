@@ -210,6 +210,7 @@
   },
   "myInvites": {
     "title": "Takliflar",
+    "rowSub": "Sizni do'konga taklif qilishsa shu yerda ko'rinadi",
     "empty": "Hozircha sizga taklif yo'q"
   },
   "billing": {
@@ -479,6 +480,8 @@
     "livePlaceholder": "Mahsulot nomini yozing (2+ harf)…",
     "searchAria": "Mahsulot qidirish",
     "addedToCart": "Savatga qo'shildi",
+    "goToCart": "Savatga o'tish",
+    "cartCount": "{{n}} ta mahsulot",
     "addedNamed": "{{name}} — savatga qo'shildi",
     "confirmTitle": "Sotuvni tasdiqlang",
     "confirmText": "{{count}} ta mahsulot, jami {{total}}. Davom etamizmi?",
@@ -723,6 +726,8 @@
     "exportError": "Eksport xatosi",
     "sectionGeneral": "Umumiy",
     "sectionNotifications": "Bildirishnomalar",
+    "sectionHelp": "Yordam",
+    "rowNotificationsSub": "Kunlik xulosa va eslatma vaqti",
     "sectionCashiers": "Kassirlar",
     "rowLanguage": "Interfeys tili",
     "rowTheme": "Mavzu (Dizayn)",
@@ -807,7 +812,7 @@
     "fallbackName": "Foydalanuvchi",
     "sectionPersonal": "Shaxsiy ma'lumot",
     "sectionSecurity": "Xavfsizlik",
-    "sectionAccount": "Hisob",
+    "sectionInvites": "Takliflar",
     "nameLabel": "Ism",
     "namePlaceholder": "Ismingizni yozing",
     "emailReadonly": "Email o'zgartirilmaydi — hisobingizga kirish shu manzil bilan bog'liq.",
@@ -816,9 +821,6 @@
     "changePhoto": "Profil rasmi",
     "removePhoto": "Rasmni o'chirish",
     "photoUpdated": "Rasm yangilandi",
-    "signInMethod": "Kirish usuli",
-    "providerEmail": "Email va parol",
-    "providerBoth": "Google va parol",
     "changePassword": "Parolni o'zgartirish",
     "changePasswordSub": "Joriy parolni bilishingiz kerak",
     "changePasswordHint": "Xavfsizlik uchun avval joriy parolni kiriting.",
@@ -832,9 +834,7 @@
     "resetLinkSub": "Emailingizga havola yuboriladi",
     "resetLinkSent": "{{email}} manziliga havola yuborildi.",
     "setPassword": "Parol o'rnatish",
-    "setPasswordSub": "Google'dan tashqari parol bilan ham kirish uchun",
-    "memberSince": "Ro'yxatdan o'tgan",
-    "settingsSub": "Til, mavzu, printer va boshqalar"
+    "setPasswordSub": "Google'dan tashqari parol bilan ham kirish uchun"
   },
   "customers": {
     "pickTitle": "Mijoz tanlash",
@@ -1277,7 +1277,9 @@
     "summaryOffHint": "Vaqt tanlanmagan — xulosa yuborilmaydi.",
     "channels": "Yetkazish kanallari",
     "channelPush": "Telefon bildirishnomasi",
-    "channelTelegram": "Telegram"
+    "channelTelegram": "Telegram",
+    "sheetServer": "Kunlik xulosa",
+    "sheetLocal": "Telefondagi eslatma"
   },
   "alerts": {
     "title": "Bildirishnomalar",

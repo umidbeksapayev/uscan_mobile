@@ -4,16 +4,17 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { useColors } from "@/theme/theme-store";
 import { text } from "@/theme/tokens";
-import { IconChip } from "@/components/ui/icon-chip";
 
 /**
- * Sozlama qatori (ikonka chipi + sarlavha + izoh + chevron).
+ * Sozlama qatori (ikonka + sarlavha + izoh + chevron).
  *
- * Ikonka chiplari ATAYIN bitta rangda (brend ko'ki): ilgari har qatorda
- * boshqa rang bor edi (binafsha/sariq/yashil) — bu ranglar hech qanday
- * ma'no bermasdi, faqat ekranni rang-barang qilardi va tungi rejimda
- * tekshirilmagan qattiq HEX qiymatlar edi. Qatorlarni ikonka SHAKLI
- * ajratadi, rang esa brendni ushlab turadi.
+ * Ikonka ATAYIN yalang'och va monoxrom — tintli `IconChip` kvadrati EMAS.
+ * Ilgari har qatorda ko'k kvadrat turardi (undan oldin esa har qatorda
+ * boshqa rang: binafsha/sariq/yashil). Ikkalasi ham bir xil muammoni
+ * hal qilmagan: qator ikonkasi hech qanday holat bildirmaydi, ya'ni rang
+ * u yerda ma'lumot tashimaydi — faqat ekranni shovqinli qiladi.
+ * Qatorlarni ikonka SHAKLI ajratadi; brend ko'ki esa faqat HAQIQIY urg'u
+ * uchun (faol tab, tugma, avatar) saqlab qo'yiladi.
  *
  * `settings.tsx` ichida yozilgan edi; profil ekrani ham xuddi shu naqshni
  * ishlatgani uchun umumiy komponentga chiqarildi.
@@ -35,7 +36,7 @@ export function SettingRow({
   /** Chevron o'rniga boshqa element (nishon, spinner). */
   right?: ReactNode;
   last?: boolean;
-  /** Ikkilamchi qator (Diagnostika) — brend ko'ki emas, neytral. */
+  /** Ikkilamchi qator (Diagnostika) — ikonka yanada bo'g'iq. */
   muted?: boolean;
   /** Xavfli amal (chiqish) — matn qizil, chevron yo'q. */
   danger?: boolean;
@@ -58,14 +59,18 @@ export function SettingRow({
           flexDirection: "row",
           alignItems: "center",
           paddingHorizontal: 16,
-          // 38px chip + 2×14px = 66px balandlik — a11y minimumidan (44px) yuqori
-          paddingVertical: 14,
+          // 20px ikonka + 2×16px = 52px balandlik — a11y minimumidan (44px)
+          // yuqori. Chip olib tashlangani uchun paddingni oshirish SHART edi.
+          paddingVertical: 16,
           backgroundColor: pressed && onPress ? colors.bg : colors.surface,
         }}
       >
-        <View style={{ marginRight: 14 }}>
-          <IconChip icon={icon} tone={danger ? "danger" : muted ? "neutral" : "brand"} />
-        </View>
+        <Ionicons
+          name={icon}
+          size={20}
+          color={danger ? colors.danger : muted ? colors.tabInactive : colors.muted}
+          style={{ width: 20, marginRight: 16 }}
+        />
         <View style={{ flex: 1, justifyContent: "center" }}>
           <Text
             style={{
@@ -90,7 +95,9 @@ export function SettingRow({
             <Ionicons name="chevron-forward" size={16} color={colors.tabInactive} style={{ marginLeft: 10 }} />
           ) : null)}
       </Pressable>
-      {!last && <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 68 }} />}
+      {/* Divider matn boshlanadigan joydan boshlanadi: 16 (padding) + 20
+          (ikonka) + 16 (oraliq) = 52. */}
+      {!last && <View style={{ height: 1, backgroundColor: colors.line, marginLeft: 52 }} />}
     </>
   );
 }

@@ -210,6 +210,7 @@
   },
   "myInvites": {
     "title": "Таклифлар",
+    "rowSub": "Сизни дўконга таклиф қилишса шу ерда кўринади",
     "empty": "Ҳозирча сизга таклиф йўқ"
   },
   "billing": {
@@ -479,6 +480,8 @@
     "livePlaceholder": "Маҳсулот номини ёзинг (2+ ҳарф)…",
     "searchAria": "Маҳсулот қидириш",
     "addedToCart": "Саватга қўшилди",
+    "goToCart": "Саватга ўтиш",
+    "cartCount": "{{n}} та маҳсулот",
     "addedNamed": "{{name}} — саватга қўшилди",
     "confirmTitle": "Сотувни тасдиқланг",
     "confirmText": "{{count}} та маҳсулот, жами {{total}}. Давом этамизми?",
@@ -723,6 +726,8 @@
     "exportError": "Экспорт хатоси",
     "sectionGeneral": "Умумий",
     "sectionNotifications": "Билдиришномалар",
+    "sectionHelp": "Ёрдам",
+    "rowNotificationsSub": "Кунлик хулоса ва эслатма вақти",
     "sectionCashiers": "Кассирлар",
     "rowLanguage": "Интерфейс тили",
     "rowTheme": "Мавзу (Дизайн)",
@@ -807,7 +812,7 @@
     "fallbackName": "Фойдаланувчи",
     "sectionPersonal": "Шахсий маълумот",
     "sectionSecurity": "Хавфсизлик",
-    "sectionAccount": "Ҳисоб",
+    "sectionInvites": "Таклифлар",
     "nameLabel": "Исм",
     "namePlaceholder": "Исмингизни ёзинг",
     "emailReadonly": "Емаил ўзгартирилмайди — ҳисобингизга кириш шу манзил билан боғлиқ.",
@@ -816,9 +821,6 @@
     "changePhoto": "Профил расми",
     "removePhoto": "Расмни ўчириш",
     "photoUpdated": "Расм янгиланди",
-    "signInMethod": "Кириш усули",
-    "providerEmail": "Емаил ва парол",
-    "providerBoth": "Google ва парол",
     "changePassword": "Паролни ўзгартириш",
     "changePasswordSub": "Жорий паролни билишингиз керак",
     "changePasswordHint": "Хавфсизлик учун аввал жорий паролни киритинг.",
@@ -832,9 +834,7 @@
     "resetLinkSub": "Емаилингизга ҳавола юборилади",
     "resetLinkSent": "{{email}} манзилига ҳавола юборилди.",
     "setPassword": "Парол ўрнатиш",
-    "setPasswordSub": "Google'дан ташқари парол билан ҳам кириш учун",
-    "memberSince": "Рўйхатдан ўтган",
-    "settingsSub": "Тил, мавзу, принтер ва бошқалар"
+    "setPasswordSub": "Google'дан ташқари парол билан ҳам кириш учун"
   },
   "customers": {
     "pickTitle": "Мижоз танлаш",
@@ -1277,7 +1277,9 @@
     "summaryOffHint": "Вақт танланмаган — хулоса юборилмайди.",
     "channels": "Етказиш каналлари",
     "channelPush": "Телефон билдиришномаси",
-    "channelTelegram": "Телеграм"
+    "channelTelegram": "Телеграм",
+    "sheetServer": "Кунлик хулоса",
+    "sheetLocal": "Телефондаги эслатма"
   },
   "alerts": {
     "title": "Билдиришномалар",
