@@ -15,20 +15,23 @@ function esc(s: string): string {
     .replace(/>/g, "&gt;");
 }
 
-/** Uzun nomni 20 belgiga kesadi (miqdor + summa uchun joy qoldiradi). */
-function truncateName(s: string): string {
-  return s.length > 20 ? `${s.slice(0, 19)}…` : s;
+/** Uzun nomni berilgan belgiga kesadi (miqdor + summa uchun joy qoldiradi). */
+function truncateName(s: string, maxLen: number): string {
+  return s.length > maxLen ? `${s.slice(0, maxLen - 1)}…` : s;
 }
 
 function qtyLabel(line: ReceiptLine): string {
   return line.saleType === "weight" ? `${line.quantity.toFixed(3)} kg` : `×${line.quantity}`;
 }
 
-export function buildReceiptHtml(data: ReceiptData): string {
+export function buildReceiptHtml(data: ReceiptData, paperWidth: 58 | 80 = 58): string {
+  const nameMaxLen = paperWidth === 80 ? 32 : 20;
+  const cssWidth = paperWidth === 80 ? "80mm" : "58mm";
+
   const rows = data.items
     .map(
       (l) => `<tr>
-        <td class="nm">${esc(truncateName(l.name))} <span class="q">${qtyLabel(l)}</span></td>
+        <td class="nm">${esc(truncateName(l.name, nameMaxLen))} <span class="q">${qtyLabel(l)}</span></td>
         <td class="amt">${formatNumber(l.lineTotal)}</td>
       </tr>`,
     )
@@ -50,7 +53,7 @@ export function buildReceiptHtml(data: ReceiptData): string {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   @page { margin: 0; }
-  body { font-family: 'Courier New', monospace; font-size: 12px; color: #000; width: 58mm; margin: 0 auto; padding: 6px 8px; }
+  body { font-family: 'Courier New', monospace; font-size: 12px; color: #000; width: ${cssWidth}; margin: 0 auto; padding: 6px 8px; }
   .center { text-align: center; }
   .shop { font-size: 15px; font-weight: bold; }
   .muted { color: #333; font-size: 11px; }

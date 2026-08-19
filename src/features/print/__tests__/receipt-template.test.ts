@@ -82,6 +82,30 @@ describe("buildReceiptHtml", () => {
     expect(html).toContain("…");
   });
 
+  it("paperWidth=80 → CSS 80mm, default (58) → 58mm", () => {
+    const html58 = buildReceiptHtml(base());
+    const html80 = buildReceiptHtml(base(), 80);
+    expect(html58).toContain("width: 58mm");
+    expect(html80).toContain("width: 80mm");
+    expect(html80).not.toContain("width: 58mm");
+  });
+
+  it("20+ belgili nom 58mm'da kesiladi, 80mm'da (32 belgigacha) kesilmaydi", () => {
+    const longName = "Uzunroq mahsulot nomi bu"; // 24 belgi — 20dan uzun, 32dan qisqa
+    const html58 = buildReceiptHtml(base({ items: [{ ...unitLine, name: longName }] }));
+    const html80 = buildReceiptHtml(base({ items: [{ ...unitLine, name: longName }] }), 80);
+    expect(html58).not.toContain(longName);
+    expect(html80).toContain(longName);
+  });
+
+  it("80mm'da ham summa ustuni siqilmaydi (nowrap) va nom qatordan chiqib ketmaydi (break-word)", () => {
+    // Regressiya: konteyner kengligi o'zgarganda ham CSS qoidalari yo'qolmasligi kerak —
+    // .amt/.nm nisbiy (%) layout bo'lgani uchun bu ikkalasi width'dan mustaqil.
+    const html80 = buildReceiptHtml(base(), 80);
+    expect(html80).toContain(".amt { text-align: right; white-space: nowrap;");
+    expect(html80).toContain(".nm { word-break: break-word; }");
+  });
+
   it("bo'sh savatda ham xato bermaydi", () => {
     expect(() => buildReceiptHtml(base({ items: [] }))).not.toThrow();
   });
