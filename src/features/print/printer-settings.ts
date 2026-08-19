@@ -18,6 +18,8 @@ export interface PrinterConfig {
    * boshqasini tanlaydi (`cp1251`), oxirgi chora `ascii`.
    */
   codepage: Codepage;
+  /** Qog'oz kengligi mm'da — 58 (standart) yoki 80. */
+  paperWidth: 58 | 80;
 }
 
 const KEY = "printerConfig";
@@ -26,6 +28,7 @@ const DEFAULT: PrinterConfig = {
   btAddress: null,
   btName: null,
   codepage: "cp866",
+  paperWidth: 58,
 };
 
 function load(): PrinterConfig {
@@ -50,6 +53,7 @@ interface PrinterStore extends PrinterConfig {
   setSystem: () => void;
   setBluetooth: (address: string, name: string) => void;
   setCodepage: (codepage: Codepage) => void;
+  setPaperWidth: (paperWidth: 58 | 80) => void;
 }
 
 export const usePrinterStore = create<PrinterStore>((set, get) => ({
@@ -57,13 +61,13 @@ export const usePrinterStore = create<PrinterStore>((set, get) => ({
   setSystem: () =>
     set(() => {
       // Kod sahifasi SAQLANADI — u printer turiga emas, do'kon tiliga bog'liq.
-      const c: PrinterConfig = { ...DEFAULT, codepage: get().codepage, type: "system" };
+      const c: PrinterConfig = { ...DEFAULT, codepage: get().codepage, paperWidth: get().paperWidth, type: "system" };
       save(c);
       return c;
     }),
   setBluetooth: (btAddress, btName) =>
     set(() => {
-      const c: PrinterConfig = { type: "bluetooth", btAddress, btName, codepage: get().codepage };
+      const c: PrinterConfig = { type: "bluetooth", btAddress, btName, codepage: get().codepage, paperWidth: get().paperWidth };
       save(c);
       return c;
     }),
@@ -74,6 +78,19 @@ export const usePrinterStore = create<PrinterStore>((set, get) => ({
         btAddress: s.btAddress,
         btName: s.btName,
         codepage,
+        paperWidth: s.paperWidth,
+      };
+      save(c);
+      return c;
+    }),
+  setPaperWidth: (paperWidth) =>
+    set((s) => {
+      const c: PrinterConfig = {
+        type: s.type,
+        btAddress: s.btAddress,
+        btName: s.btName,
+        codepage: s.codepage,
+        paperWidth,
       };
       save(c);
       return c;
