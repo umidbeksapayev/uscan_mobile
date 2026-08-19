@@ -13,6 +13,7 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Card } from "@/components/ui/card";
 import { SectionLabel } from "@/components/ui/section-label";
 import { SettingRow } from "@/components/ui/setting-row";
+import { useScannerStore } from "@/features/scanner/scanner-settings";
 import { useActiveMembership, useActivePermissions } from "@/features/auth/use-memberships";
 import { NotificationsSheet } from "@/features/notifications/notifications-sheet";
 import { FeedbackSheet } from "@/features/feedback/feedback-sheet";
@@ -184,6 +185,9 @@ export default function SettingsScreen() {
 
   const currentLangLabel = LANGUAGES.find((l) => l.code === i18n.language)?.label ?? LANGUAGES[0].label;
 
+  const externalScanner = useScannerStore((st) => st.externalScanner);
+  const setExternalScanner = useScannerStore((st) => st.setExternalScanner);
+
   function toggleAiWrites(value: boolean) {
     meta.setBool(MetaKeys.aiWrites, value);
     setAiWrites(value);
@@ -235,6 +239,24 @@ export default function SettingsScreen() {
             title={t("settings.rowPrinter")}
             subtitle={t("settings.rowPrinterSub")}
             onPress={() => router.push("/printer-settings")}
+          />
+          {/*
+            Tashqi (HID) skaner. Default YOQILGAN — skaner ulanmagan
+            qurilmada ko'rinmas maydon hech narsa qilmaydi, ya'ni xarajati
+            nol. O'chirgich fokus xatti-harakati qurilmadan qurilmaga farq
+            qilgani uchun kerak: noto'g'ri ishlasa chiqish yo'li bo'lsin.
+          */}
+          <SettingRow
+            icon="barcode-outline"
+            title={t("settings.rowExternalScanner")}
+            subtitle={t("settings.rowExternalScannerSub")}
+            right={
+              <Switch
+                value={externalScanner}
+                onValueChange={setExternalScanner}
+                accessibilityLabel={t("settings.rowExternalScanner")}
+              />
+            }
             last
           />
         </Card>

@@ -775,3 +775,62 @@ curl -X POST "$SUPABASE_URL/rest/v1/products" -H "apikey: $ANON" \
 
 Sozlamalar → **Diagnostika** ekranida oxirgi 50 ta xato jurnali bor —
 skrinshot yoki matnini yuboring, bu ildiz sababni topishni tezlashtiradi.
+
+---
+
+## 7. Printer ishonchliligi (B1–B5, 2026-08-18)
+
+Haqiqiy Bluetooth termal printer kerak. **Yangi EAS build shart emas** —
+`package.json` o'zgarmagan, `npx expo start --clear` yetarli.
+
+### 7.1 Ulanish va holat (B1, B5)
+
+- [ ] Sozlamalar → Printer → **Bluetooth termal** → qurilmani tanlash
+- [ ] Qurilma kartasida **🟢 Ulangan** ko'rsatkichi paydo bo'lishi
+- [ ] **Test chek chiqarish** → chek chiqishi
+- [ ] Printerni O'CHIRING → **Qayta ulanish** → 🔴 va **tushunarli xabar**
+      (⚠️ `BluetoothGattError: status 133` kabi TEXNIK matn CHIQMASLIGI kerak)
+- [ ] Printerni yoqing → **Qayta ulanish** → 🟢 ga qaytishi
+- [ ] **Printerni olib tashlash** → sozlama Tizim printeriga qaytishi
+
+### 7.2 Kirill (B3) — P0
+
+- [ ] Kirill nomli mahsulot qo'shing (masalan `Сув`) yoki do'kon nomini
+      kirillga o'zgartiring
+- [ ] Test chek → kirill **o'qiladigan** chiqishi (ilgari `?????` edi)
+- [ ] Buzilgan chiqsa → **CP1251** ga o'ting → qayta test
+- [ ] U ham buzilsa → **Faqat lotin** (eski xatti-harakat, oxirgi chora)
+- [ ] Lotin matn har uch rejimda ham bir xil chiqishi
+- [ ] Summalar o'ng chetga TEKIS turishi (kirill nomda ham)
+
+### 7.3 Chek navbati (B2) — P0, eng muhim
+
+- [ ] Printerni **O'CHIRING**
+- [ ] Sotuv qiling → **Chek** tugmasi → *"Chek navbatda"* xabari
+- [ ] **Sotuv SAQLANGAN** bo'lishi (Tarixda ko'rinadi) —
+      printer xatosi sotuvni BEKOR QILMASLIGI kerak
+- [ ] Sozlamalar → Printer → **CHIQMAGAN CHEKLAR** bo'limida ko'rinishi
+- [ ] Printerni **YOQING** → ilovani fon → old plan → chek **AVTOMATIK** chiqishi
+- [ ] Yoki **Qayta urinish** tugmasi bilan chiqishi
+- [ ] **O'chirish** tugmasi ishni navbatdan olib tashlashi (sotuv qolishi)
+
+### 7.4 Dublikat himoyasi (B2)
+
+- [ ] Sotuv → **Chek** tugmasini TEZ ikki marta bosing → **BITTA** chek
+      (ikkinchisida *"Bu chek allaqachon chiqarilgan"*)
+- [ ] Tarix → **qayta chiqarish** → **YANGI** chek chiqishi
+      (bu ataylab: ataylab so'ralgan nusxa to'silmaydi)
+
+### 7.5 Uzilish va tiklanish (B1, B2)
+
+- [ ] Printer uxlab qolgach (~5 daq) chek chiqarish → o'zi uyg'onib chiqarishi
+- [ ] Chek chiqayotganda ilovani **yopish** → qayta ochish →
+      chek **avtomatik QAYTA CHIQMASLIGI**, navbatda `failed` bo'lib turishi
+      (chiqdimi-yo'qmi noma'lum — qaror foydalanuvchiniki)
+- [ ] Bluetooth'ni butunlay o'chirib chek → tushunarli xabar
+
+### 7.6 Yorliqlar (B1)
+
+- [ ] Mahsulotlar → yorliq chiqarish → barcode chizilishi
+- [ ] Printer o'chiq holda → yorliq ham navbatga tushishi
+

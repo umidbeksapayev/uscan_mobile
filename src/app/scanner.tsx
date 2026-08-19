@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -28,8 +28,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
 import { useColors } from "@/theme/theme-store";
-import { useActiveShopId } from "@/features/auth/use-memberships";
-import { findProductsByBarcode } from "@/features/sell/lookup";
+import { useScanHandler } from "@/features/scanner/use-scan-handler";
 import { useCart } from "@/features/sell/cart-store";
 import { cartTotal } from "@/features/sell/cart-total";
 import { useScanReturn } from "@/features/products/scan-return";
@@ -71,20 +70,13 @@ export default function ScannerScreen() {
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice("back");
 
-  const shopId = useActiveShopId();
-  const add = useCart((s) => s.add);
-  const setPendingWeight = useCart((s) => s.setPendingWeight);
   const setScanCode = useScanReturn((s) => s.setCode);
   // Savat paneli uchun — har skandan keyin qayta render bo'lishi KERAK
   // (sanoq va summa darhol yangilanadi).
   const cartItems = useCart((s) => s.items);
 
-  const locked = useRef(false);
   const [active, setActive] = useState(true);
   const [torch, setTorch] = useState(false);
-  const [status, setStatus] = useState<{ text: string; error?: boolean; ok?: boolean } | null>(
-    null,
-  );
 
   const WINDOW_W = Math.min(width * 0.74, 300);
   const WINDOW_H = Math.round(WINDOW_W * 0.68);
@@ -109,10 +101,23 @@ export default function ScannerScreen() {
     if (!hasPermission) requestPermission();
   }, [hasPermission, requestPermission]);
 
-  async function onScan(raw: string) {
-    if (locked.current) return;
-    locked.current = true;
+  /*
+    Skanerlash mantiqi endi `features/scanner` da (kamera, HID va kelajakdagi
+    boshqa manbalar bitta quvurdan o'tadi). Bu ekran faqat UI va navigatsiya.
+  */
+  const { handleScan, status } = useScanHandler({
+    // VAZN mahsulot → kg so'raydigan oyna SOTUV ekranida yashaydi.
+    // ⚠️ `router.back()` YETMAYDI: skaner pastki navigatsiyaning markaziy
+    // tugmasidan, ya'ni ISTALGAN ekrandan ochiladi — Bosh sahifadan
+    // ochilganda `back()` Bosh sahifaga qaytarardi va oyna umuman
+    // ochilmasdi (mahsulot jimgina yo'qolardi).
+    onWeight: () => {
+      setActive(false);
+      router.dismissTo("/sotuv");
+    },
+  });
 
+  function onScan(raw: string) {
     // Forma rejimi: kodni qaytaramiz (savatga qo'shmaymiz).
     if (mode === "form") {
       setScanCode(raw);
@@ -120,59 +125,12 @@ export default function ScannerScreen() {
       router.back();
       return;
     }
-    if (!shopId) {
-      locked.current = false;
-      return;
-    }
-    setStatus({ text: t("scanner.searching", "Qidirilmoqda…") });
-    try {
-      const found = await findProductsByBarcode(raw, shopId);
-      if (found.length === 0) {
-        setStatus({ text: t("scanner.notFound", "Topilmadi: {{code}}", { code: raw }), error: true });
-        setTimeout(() => {
-          locked.current = false;
-          setStatus(null);
-        }, 1500);
-        return;
-      }
-      const product = found[0];
-
-      /*
-        VAZN mahsulot → kg/so'm so'raydigan tezkor oyna SOTUV ekranida
-        yashaydi, shuning uchun bu yerda qolib bo'lmaydi: darhol o'sha
-        ekranga o'tamiz.
-
-        ⚠️ `router.back()` YETMAYDI. Skaner endi pastki navigatsiyaning
-        markaziy tugmasidan, ya'ni ISTALGAN ekrandan ochiladi — Bosh
-        sahifadan ochilganda `back()` Bosh sahifaga qaytarardi va vazn
-        oynasi umuman ochilmasdi (mahsulot jimgina yo'qolardi).
-      */
-      if (product.sale_type === "weight") {
-        setPendingWeight(product);
-        setActive(false);
-        router.dismissTo("/sotuv");
-        return;
-      }
-
-      /*
-        DONALI mahsulot → skanerdan CHIQMAYMIZ. Kassir odatda ketma-ket
-        bir nechta mahsulot skanerlaydi; har safar ekran almashishi shu
-        oqimni uzardi. Savat pastdagi panelda yangilanadi, "Savatga o'tish"
-        esa bir bosishda.
-      */
-      add(product);
-      setStatus({ text: `${product.name} · ${t("sell.addedToCart")}`, ok: true });
-      setTimeout(() => {
-        locked.current = false;
-        setStatus(null);
-      }, 900);
-    } catch {
-      setStatus({ text: t("common.loadError", "Xatolik yuz berdi"), error: true });
-      setTimeout(() => {
-        locked.current = false;
-        setStatus(null);
-      }, 1500);
-    }
+    /*
+      DONALI mahsulotda skanerdan CHIQMAYMIZ — kassir odatda ketma-ket bir
+      nechta mahsulot skanerlaydi; har safar ekran almashishi shu oqimni
+      uzardi. Savat pastdagi panelda yangilanadi.
+    */
+    handleScan(raw);
   }
 
   const codeScanner = useCodeScanner({
@@ -189,7 +147,7 @@ export default function ScannerScreen() {
     ],
     onCodeScanned: (codes) => {
       const value = codes[0]?.value;
-      if (value) void onScan(value);
+      if (value) onScan(value);
     },
   });
 
@@ -242,7 +200,7 @@ export default function ScannerScreen() {
     );
   }
 
-  const cornerColor = status ? (status.error ? colors.danger : colors.primary) : "#fff";
+  const cornerColor = status ? (status.tone === "error" ? colors.danger : colors.primary) : "#fff";
 
   return (
     <View style={{ flex: 1, backgroundColor: "#000" }}>
@@ -334,19 +292,20 @@ export default function ScannerScreen() {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 8,
-                backgroundColor: status.error
-                  ? colors.danger
-                  : status.ok
-                    ? colors.success
-                    : "rgba(0,0,0,0.7)",
+                backgroundColor:
+                  status.tone === "error"
+                    ? colors.danger
+                    : status.tone === "ok"
+                      ? colors.success
+                      : "rgba(0,0,0,0.7)",
                 paddingHorizontal: 18,
                 paddingVertical: 12,
                 borderRadius: radius.lg,
               }}
             >
-              {status.ok ? (
+              {status.tone === "ok" ? (
                 <Ionicons name="checkmark-circle" size={18} color="#fff" />
-              ) : !status.error ? (
+              ) : status.tone === "info" ? (
                 <ActivityIndicator color={colors.primaryLight} size="small" />
               ) : null}
               <Text

@@ -753,7 +753,9 @@
     "permNone": "Ruxsat berilmagan",
     "cashierOnlyOwner": "Kassirlar va ruxsatlarni faqat do'kon egasi boshqaradi.",
     "removeStaffBtn": "Xodimni do'kondan chiqarish",
-    "permCountShort": "Kassir · {{count}} ta ruxsat"
+    "permCountShort": "Kassir · {{count}} ta ruxsat",
+    "rowExternalScanner": "Tashqi skaner",
+    "rowExternalScannerSub": "USB yoki Bluetooth shtrix-kod skaneri (klaviatura rejimi)"
   },
   "admin": {
     "title": "Super-admin paneli",
@@ -1172,7 +1174,31 @@
     "pairHint": "Printerni avval telefon Bluetooth sozlamasida ulang (paired), keyin shu yerda qidiring.",
     "testBtn": "Test chek chiqarish",
     "testItem": "Test mahsulot",
-    "testSugar": "Shakar"
+    "testSugar": "Shakar",
+    "statusConnected": "Ulangan",
+    "statusConnecting": "Ulanmoqda…",
+    "statusDisconnected": "Ulanmagan",
+    "statusPrinting": "Chiqarilmoqda…",
+    "statusError": "Xato",
+    "reconnect": "Qayta ulanish",
+    "remove": "Printerni olib tashlash",
+    "removeTitle": "Printerni olib tashlash",
+    "removeBody": "Bluetooth printer sozlamasi o'chiriladi.",
+    "codepageHeader": "MATN KODLASH",
+    "codepageHint": "Test chekda kirill matn buzilib chiqsa boshqasini tanlang.",
+    "cp866": "Kirill (CP866)",
+    "cp866Sub": "Ko'pchilik termal printer uchun",
+    "cp1251": "Kirill (CP1251)",
+    "cp1251Sub": "CP866 ishlamasa shuni sinang",
+    "ascii": "Faqat lotin",
+    "asciiSub": "Kirill ? bo'lib chiqadi — oxirgi chora",
+    "queueHeader": "CHIQMAGAN CHEKLAR",
+    "queueRetry": "Qayta urinish",
+    "queueRetryAll": "Hammasini qayta urinish",
+    "queueDiscard": "O'chirish",
+    "queueDiscardTitle": "Chekni o'chirish",
+    "queueDiscardBody": "Bu chek boshqa chiqarilmaydi. Sotuv o'chirilmaydi.",
+    "queueEmpty": "Barcha cheklar chiqarilgan"
   },
   "offlineSales": {
     "status_pending": "Kutilmoqda",
@@ -1377,5 +1403,31 @@
     "openHistory": "Suhbatlar tarixi",
     "deleteChatTitle": "Suhbatni o'chirish",
     "deleteChatMsg": "\"{{title}}\" o'chirilsinmi? Bu amalni ortga qaytarib bo'lmaydi."
+  },
+  "printError": {
+    "connection": "Printer bilan aloqa yo'q. Yoqilganini va Bluetooth ulanganini tekshiring.",
+    "device": "Printerda qog'oz tugagan yoki qopqoq ochiq.",
+    "cancelled": "Chop etish bekor qilindi.",
+    "unknown": "Chekni chiqarib bo'lmadi. Sozlamalar > Printer bo'limidan test qilib ko'ring.",
+    "queuedTitle": "Chek navbatda",
+    "queuedBody": "Printer ulanganda avtomatik chiqariladi.",
+    "duplicateTitle": "Chek",
+    "duplicateBody": "Bu chek allaqachon chiqarilgan.",
+    "labelQueuedTitle": "Yorliq navbatda",
+    "receiptErrorTitle": "Chek chiqarish",
+    "labelErrorTitle": "Yorliq chiqarish",
+    "testErrorTitle": "Test chek"
+  },
+  "scanner": {
+    "searching": "Qidirilmoqda…",
+    "notFound": "Topilmadi: {{code}}",
+    "invalidCode": "Kod o‘qilmadi",
+    "camPermTitle": "Kameraga ruxsat kerak",
+    "camPermSub": "Shtrix-kodni skanerlash uchun kamera ruxsatini bering.",
+    "permBtn": "Ruxsat berish",
+    "noCamTitle": "Kamera topilmadi",
+    "noCamSub": "Qurilmada orqa kamera aniqlanmadi.",
+    "frameHint": "Shtrix-kodni ramka ichiga joylang",
+    "torchBtn": "Chiroq"
   }
 }

@@ -1,6 +1,7 @@
 import {
   appendEntry,
   formatLogText,
+  redact,
   toMessage,
   LOG_BUFFER_MAX,
   LOG_MESSAGE_MAX,
@@ -79,10 +80,70 @@ describe("formatLogText", () => {
     expect(formatLogText([])).toBe("");
   });
 
-  it("har yozuv alohida qatorda, scope qavsda", () => {
-    const text = formatLogText([entry("sync.push", "500"), entry("notify", "yo'q")]);
+  it("har yozuv alohida qatorda: domen, keyin scope", () => {
+    const text = formatLogText([
+      { ...entry("sync.push", "500"), domain: "SYNC" },
+      { ...entry("print.bt", "yo'q"), domain: "PRINT" },
+    ]);
     expect(text).toBe(
-      "2026-08-04T10:00:00.000Z [sync.push] 500\n2026-08-04T10:00:00.000Z [notify] yo'q",
+      "2026-08-04T10:00:00.000Z [SYNC] [sync.push] 500\n" +
+        "2026-08-04T10:00:00.000Z [PRINT] [print.bt] yo'q",
     );
+  });
+
+  it("domensiz ESKI yozuvlarda ham yiqilmaydi (bufer versiyalanmagan)", () => {
+    expect(formatLogText([entry("sync.push", "500")])).toContain("[APP] [sync.push]");
+  });
+});
+
+describe("redact", () => {
+  it("Supabase/JWT tokenini o'chiradi", () => {
+    // ⚠️ Eng muhim holat: jurnal "Ulashish" bilan tashqariga chiqadi, ya'ni
+    // tozalanmasa sessiya tokeni ham birga ketardi. Muhimi — JWT YO'Q bo'lishi;
+    // qaysi marker qolgani ("<token>" yoki "token=<redacted>") ahamiyatsiz,
+    // chunki bu yerda ikkala qoida ham ishga tushadi.
+    const msg = redact("Invalid token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.abc.def");
+    expect(msg).not.toContain("eyJhbGci");
+  });
+
+  it("kalit so'zsiz kelgan JWT ham o'chadi", () => {
+    // Supabase xatolari tokenni ba'zan hech qanday kalitsiz qo'shadi.
+    const msg = redact("request failed eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.abc.def");
+    expect(msg).toContain("<token>");
+    expect(msg).not.toContain("eyJhbGci");
+  });
+
+  it("kalit=qiymat shaklidagi sirlarni o'chiradi", () => {
+    expect(redact('{"password":"Salom123"}')).not.toContain("Salom123");
+    expect(redact("token=abc123xyz")).not.toContain("abc123xyz");
+    expect(redact("apikey: sk_live_9f8e7d")).not.toContain("sk_live_9f8e7d");
+  });
+
+  it("Bearer sarlavhasini o'chiradi", () => {
+    expect(redact("Authorization: Bearer abc.def.ghi")).not.toContain("abc.def.ghi");
+  });
+
+  it("karta raqamini niqoblaydi, oxirgi 4 raqam qoladi", () => {
+    const out = redact("card 8600 1234 5678 9012 rad etildi");
+    expect(out).toContain("****9012");
+    expect(out).not.toContain("8600 1234");
+  });
+
+  it("EAN-13 shtrix-kodni SAQLAYDI (skaner nosozligini shusiz tekshirib bo'lmaydi)", () => {
+    // 13 raqam — karta emas, shtrix-kod. Niqob 14+ dan boshlanadi.
+    expect(redact("Topilmadi: 4780010012345")).toContain("4780010012345");
+  });
+
+  it("oddiy xato matnini o'zgartirmaydi", () => {
+    expect(redact("Network request failed")).toBe("Network request failed");
+  });
+});
+
+describe("toMessage + redact", () => {
+  it("token kesishdan OLDIN tozalanadi (yarim token qolmaydi)", () => {
+    const long = `xato ${"eyJ" + "A".repeat(LOG_MESSAGE_MAX)} oxiri`;
+    const out = toMessage(long);
+    expect(out).not.toContain("eyJA");
+    expect(out).toContain("<token>");
   });
 });

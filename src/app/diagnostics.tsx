@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
-import { View, Text, FlatList, Pressable, Alert } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import { View, Text, FlatList, Pressable, ScrollView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import { useColors } from "@/theme/theme-store";
 import { toast } from "@/lib/toast";
 import { clearLog, logAsText, readLog } from "@/lib/logger";
 import type { LogEntry } from "@/lib/log-buffer";
+import type { LogDomain } from "@/lib/log-domain";
 import { ScreenHeader } from "@/components/ui/screen";
 
 /**
@@ -18,11 +19,71 @@ import { ScreenHeader } from "@/components/ui/screen";
  * Ilgari jimgina yutilgan xatolar shu yerda ko'rinadi. Jurnal faqat qurilmada
  * saqlanadi (telemetriya yuborilmaydi) — foydalanuvchi o'zi ulashadi.
  */
+/** Domen filtri tugmasi — sanoq bilan (qaysi qism ko'p xato berayotgani ko'rinadi). */
+function DomainChip({
+  label,
+  count,
+  active,
+  onPress,
+}: {
+  label: string;
+  count: number;
+  active: boolean;
+  onPress: () => void;
+}) {
+  const colors = useColors();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={`${label}: ${count}`}
+      className="flex-row items-center gap-1.5 rounded-full px-3"
+      style={{
+        height: 32,
+        backgroundColor: active ? colors.primary : colors.surface,
+        borderWidth: 1,
+        borderColor: active ? colors.primary : colors.line,
+      }}
+    >
+      <Text
+        className="text-xs font-semibold"
+        style={{ color: active ? "#fff" : colors.ink }}
+      >
+        {label}
+      </Text>
+      <Text className="text-xs" style={{ color: active ? "#fff" : colors.muted }}>
+        {count}
+      </Text>
+    </Pressable>
+  );
+}
+
 export default function DiagnosticsScreen() {
   const colors = useColors();
   const { t } = useTranslation();
 
   const [entries, setEntries] = useState<LogEntry[]>(() => readLog());
+  const [filter, setFilter] = useState<LogDomain | null>(null);
+
+  /*
+    Filtr tugmalari MAVJUD yozuvlardan quriladi — bo'sh domenni ko'rsatish
+    foydalanuvchini "u yerda nimadir bor" deb adashtirardi. Sanoq bilan
+    birga: qaysi qism ko'p xato berayotgani darhol ko'rinadi.
+  */
+  const domains = useMemo(() => {
+    const counts = new Map<LogDomain, number>();
+    for (const e of entries) {
+      const d = e.domain ?? "APP";
+      counts.set(d, (counts.get(d) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  }, [entries]);
+
+  const visible = useMemo(
+    () => (filter ? entries.filter((e) => (e.domain ?? "APP") === filter) : entries),
+    [entries, filter],
+  );
 
   const onShare = useCallback(async () => {
     const text = logAsText();
@@ -70,16 +131,26 @@ export default function DiagnosticsScreen() {
         className="mb-2 rounded-2xl bg-surface p-3"
         style={{ borderWidth: 0.5, borderColor: colors.line }}
       >
-        <View className="flex-row items-center justify-between">
-          <Text className="text-xs font-semibold" style={{ color: colors.primary }}>
-            {item.scope}
-          </Text>
+        <View className="flex-row items-center justify-between gap-2">
+          <View className="flex-1 flex-row items-center gap-2">
+            <View
+              className="rounded-md px-1.5 py-0.5"
+              style={{ backgroundColor: colors.primaryTint }}
+            >
+              <Text className="text-xs font-semibold" style={{ color: colors.primary }}>
+                {item.domain ?? "APP"}
+              </Text>
+            </View>
+            <Text className="flex-1 text-xs text-muted" numberOfLines={1}>
+              {item.scope}
+            </Text>
+          </View>
           <Text className="text-xs text-muted">{item.at.replace("T", " ").slice(0, 19)}</Text>
         </View>
         <Text className="mt-1 text-sm text-ink">{item.message}</Text>
       </View>
     ),
-    [colors.line, colors.primary],
+    [colors.line, colors.primary, colors.primaryTint],
   );
 
   return (
@@ -125,12 +196,37 @@ export default function DiagnosticsScreen() {
           </Text>
         </View>
       ) : (
-        <FlatList
-          data={entries}
-          keyExtractor={(e, i) => `${e.at}-${i}`}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
-        />
+        <>
+          {domains.length > 1 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 10, gap: 6 }}
+            >
+              <DomainChip
+                label={t("diagnostics.all", "Hammasi")}
+                count={entries.length}
+                active={filter === null}
+                onPress={() => setFilter(null)}
+              />
+              {domains.map(([d, n]) => (
+                <DomainChip
+                  key={d}
+                  label={d}
+                  count={n}
+                  active={filter === d}
+                  onPress={() => setFilter(filter === d ? null : d)}
+                />
+              ))}
+            </ScrollView>
+          ) : null}
+          <FlatList
+            data={visible}
+            keyExtractor={(e, i) => `${e.at}-${i}`}
+            renderItem={renderItem}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+          />
+        </>
       )}
     </SafeAreaView>
   );

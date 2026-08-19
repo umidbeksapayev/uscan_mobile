@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { toast } from "@/lib/toast";
 import { assignBarcode } from "@/lib/products";
-import { useMemberships } from "@/features/auth/use-memberships";
+import { useActiveMembership, useActiveShopId } from "@/features/auth/use-memberships";
 import type { Product } from "@/types/database";
 
 import { printLabels } from "./print-labels";
@@ -16,12 +16,14 @@ import type { LabelData } from "./barcode-format";
  */
 export function useLabelPrint() {
   const qc = useQueryClient();
-  const { data: memberships } = useMemberships();
-  const shopName = memberships?.[0]?.shop?.name;
+  // ⚠️ Ilgari `memberships[0]` olinardi — bir nechta do'koni bor foydalanuvchida
+  // yorliqqa FAOL do'kon emas, ro'yxatdagi birinchisining nomi bosilardi.
+  const shopId = useActiveShopId();
+  const shopName = useActiveMembership()?.shop?.name;
   const [printing, setPrinting] = useState(false);
 
   async function print(products: Product[], copies = 1): Promise<boolean> {
-    if (products.length === 0 || printing) return false;
+    if (products.length === 0 || printing || !shopId) return false;
     setPrinting(true);
     try {
       const labels: LabelData[] = [];
@@ -36,7 +38,7 @@ export function useLabelPrint() {
         for (let i = 0; i < copies; i += 1) labels.push(label);
       }
 
-      const ok = await printLabels(labels, { showShopName: !!shopName });
+      const ok = await printLabels(labels, shopId, { showShopName: !!shopName });
       // Yangi barcode yozilgan bo'lsa katalog (["products"]) va forma (["product", id]) yangilanadi
       if (assignedAny) {
         qc.invalidateQueries({ queryKey: ["products"] });

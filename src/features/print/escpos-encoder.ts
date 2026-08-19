@@ -1,12 +1,15 @@
 import { formatNumber, formatCurrency, formatDateTimeFull } from "@/lib/format";
+import { shortReceiptId } from "./receipt-id";
+import { codepageCommand, encodeText, normalizeText, type Codepage } from "./escpos-codepage";
 import type { ReceiptData, ReceiptLine } from "./types";
 import type { LabelData } from "@/features/labels/barcode-format";
 
 /**
  * ESC-POS bayt enkoderi — termal printer (58/80mm) uchun. SOF funksiyalar
- * (native importsiz → test qilinadi, BT kutubxonasidan mustaqil). ASCII-safe:
- * lotin o'zbek apostroflari ' ga, maxsus belgilar tozalanadi (termal printerlar
- * default codepage'da faqat ASCII'ni ishonchli chizadi).
+ * (native importsiz → test qilinadi, transportdan mustaqil).
+ *
+ * Belgi → bayt aylantirish `escpos-codepage.ts` da: kirill matn tanlangan kod
+ * sahifasi bilan chiqadi, lotin esa har qanday sahifada bir xil.
  */
 const ESC = 0x1b;
 const GS = 0x1d;
@@ -21,13 +24,14 @@ const SIZE_DOUBLE = [GS, 0x21, 0x11]; // 2x bo'y + en
 const CUT = [GS, 0x56, 0x00]; // to'liq kesish (printer qo'llab-quvvatlasa)
 const feed = (n: number): number[] => [ESC, 0x64, n];
 
-/** Faqat printable ASCII (32–126) qoldiradi; o'zbek/maxsus belgilarni moslaydi. */
+/**
+ * ASCII rejimidagi tozalash — kod sahifasi `ascii` bo'lganda nima chiqishini
+ * ko'rsatadi (kirill `?` bo'ladi).
+ *
+ * ⚠️ Bu endi YAGONA yo'l EMAS: kirill uchun `encodeText(s, "cp866")` ishlatiladi.
+ */
 export function sanitize(s: string): string {
-  return s
-    .replace(/[ʻʼ‘’`]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/[–—]/g, "-")
-    .replace(/…/g, "...")
+  return normalizeText(s)
     .split("")
     .map((ch) => {
       const c = ch.charCodeAt(0);
@@ -37,42 +41,59 @@ export function sanitize(s: string): string {
     .join("");
 }
 
-/** Chap matn + o'ng matn (summa) ni `width` belgili qatorga joylaydi (o'ng tekis). */
+/**
+ * Chap matn + o'ng matn (summa) ni `width` belgili qatorga joylaydi (o'ng tekis).
+ *
+ * Kenglik NORMALIZATSIYA qilingan matn bo'yicha o'lchanadi (`sanitize` emas):
+ * kirill harf ham aynan bitta bayt egallaydi, shuning uchun uni `?` ga
+ * aylantirmasdan sanash to'g'ri natija beradi. Ilgari `sanitize` ishlatilganda
+ * ham uzunlik to'g'ri chiqardi (belgi soni o'zgarmasdi) — lekin endi bu
+ * bog'liqlik ATAYLAB uzildi, aks holda kirill qo'shilishi bilan tekislash
+ * jimgina buzilishi mumkin edi.
+ */
 export function padLine(left: string, right: string, width = 32): string {
-  const l = sanitize(left);
-  const r = sanitize(right);
+  const l = normalizeText(left);
+  const r = normalizeText(right);
   const maxLeft = Math.max(0, width - r.length - 1);
   const lt = l.length > maxLeft ? l.slice(0, maxLeft) : l;
   const gap = Math.max(1, width - lt.length - r.length);
   return lt + " ".repeat(gap) + r;
 }
 
-function shortId(id: string): string {
-  const clean = id.replace(/^offline-/, "").replace(/^qr-/, "");
-  return clean.length > 8 ? clean.slice(-6).toUpperCase() : clean.toUpperCase();
-}
-
 function itemLeft(it: ReceiptLine): string {
   return it.saleType === "weight" ? `${it.name} ${it.quantity.toFixed(3)}kg` : `${it.name} x${it.quantity}`;
 }
 
-function bytes(s: string): number[] {
-  const out: number[] = [];
-  for (const ch of sanitize(s)) out.push(ch.charCodeAt(0));
-  return out;
+/** Enkoder sozlamalari. Kod sahifasi printer konfiguratsiyasidan keladi. */
+export interface EncodeOptions {
+  /** Qator kengligi belgida — 58mm ≈ 32, 80mm ≈ 48. */
+  width?: number;
+  codepage?: Codepage;
 }
 
-function line(s: string): number[] {
-  return [...bytes(s), LF];
-}
+/**
+ * ⚠️ Default `cp866` (ASCII EMAS). Sabab: O'zbekiston bozorida chek matni
+ * ko'pincha kirillda bo'ladi va ASCII rejimida u `?` bo'lib chiqardi.
+ * Lotin matn uchun farq YO'Q — 0x00–0x7F barcha sahifalarda bir xil, faqat
+ * boshida `ESC t 17` buyrug'i qo'shiladi.
+ */
+const DEFAULT_CODEPAGE: Codepage = "cp866";
 
-/** ReceiptData → ESC-POS baytlar (number[], har biri 0–255). */
-export function encodeReceipt(data: ReceiptData, width = 32): number[] {
+/** ReceiptData → ESC-POS baytlar. */
+export function encodeReceipt(data: ReceiptData, opts: EncodeOptions = {}): Uint8Array {
+  const width = opts.width ?? 32;
+  const cp = opts.codepage ?? DEFAULT_CODEPAGE;
+  const bytes = (s: string): number[] => encodeText(s, cp);
+  const line = (s: string): number[] => [...bytes(s), LF];
+
   const out: number[] = [];
   const add = (...chunks: number[][]) => chunks.forEach((c) => out.push(...c));
   const divider = "-".repeat(width);
 
   add(INIT);
+  // Kod sahifasi INIT'dan KEYIN: `ESC @` printerni tiklaydi va tanlangan
+  // sahifani standart holatga qaytaradi — oldin yuborilsa bekor bo'lardi.
+  add(codepageCommand(cp));
   // Do'kon — markaz, bold, 2x
   add(ALIGN_CENTER, BOLD_ON, SIZE_DOUBLE, line(data.shopName), SIZE_NORMAL, BOLD_OFF);
   if (data.shopPhone) add(line(`Tel: ${data.shopPhone}`));
@@ -80,7 +101,7 @@ export function encodeReceipt(data: ReceiptData, width = 32): number[] {
 
   // Tana — chapga tekis
   add(ALIGN_LEFT, line(divider));
-  add(line(`Chek #${shortId(data.saleId)}`));
+  add(line(`Chek #${shortReceiptId(data.saleId)}`));
   add(line(formatDateTimeFull(data.soldAt)));
   if (data.cashierName) add(line(`Kassir: ${data.cashierName}`));
   add(line(divider));
@@ -102,7 +123,7 @@ export function encodeReceipt(data: ReceiptData, width = 32): number[] {
   }
 
   add(ALIGN_CENTER, feed(1), line("Rahmat! Xayrli kun!"), feed(3), CUT);
-  return out;
+  return Uint8Array.from(out);
 }
 
 // ── Yorliq (narx etiketkasi) ────────────────────────────────────────────────
@@ -118,6 +139,9 @@ const bcWidth = (n: number): number[] => [GS, 0x77, n]; // GS w — modul eni (2
  * aks holda "{B" (ASCII). Skaner baribir o'sha qiymatni o'qiydi.
  */
 function code128Bytes(value: string): number[] {
+  // Barcode ATAYLAB `sanitize` bilan — CODE128 ma'lumoti sof ASCII bo'lishi
+  // shart. Kod sahifasi bu yerda ishlatilmaydi: printer barcode baytlarini
+  // matn sifatida emas, grafik sifatida talqin qiladi.
   const v = sanitize(value);
   const useC = /^\d+$/.test(v) && v.length % 2 === 0;
   const data: number[] = [0x7b, useC ? 0x43 : 0x42]; // "{C" yoki "{B"
@@ -133,11 +157,15 @@ function code128Bytes(value: string): number[] {
  * Yorliqlar → ESC-POS baytlar. Har yorliq: (do'kon) nom + yirik narx + barcode
  * (printer GS k bilan o'zi chizadi — aniq/skanerlanadigan) + kesish. cost_price YO'Q.
  */
-export function encodeLabel(labels: LabelData[]): number[] {
+export function encodeLabel(labels: LabelData[], opts: EncodeOptions = {}): Uint8Array {
+  const cp = opts.codepage ?? DEFAULT_CODEPAGE;
+  const line = (s: string): number[] => [...encodeText(s, cp), LF];
+
   const out: number[] = [];
   const add = (...chunks: number[][]) => chunks.forEach((c) => out.push(...c));
 
   add(INIT);
+  add(codepageCommand(cp));
   for (const l of labels) {
     add(ALIGN_CENTER);
     if (l.shopName) add(line(l.shopName));
@@ -148,5 +176,5 @@ export function encodeLabel(labels: LabelData[]): number[] {
     }
     add(feed(1), CUT);
   }
-  return out;
+  return Uint8Array.from(out);
 }

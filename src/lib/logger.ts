@@ -1,5 +1,6 @@
 import { meta, MetaKeys } from "@/lib/offline/mmkv";
 import { appendEntry, formatLogText, toMessage, type LogEntry } from "./log-buffer";
+import { domainForScope } from "./log-domain";
 
 /**
  * Xatolik jurnali (A5) — ilgari `.catch(() => {})` bilan jimgina yutilgan
@@ -10,14 +11,19 @@ import { appendEntry, formatLogText, toMessage, type LogEntry } from "./log-buff
  * chaqiruvchi oqimni to'xtatmasligi kerak — shuning uchun o'zi ham himoyalangan.
  */
 export function logError(scope: string, err: unknown): void {
+  const domain = domainForScope(scope);
   const entry: LogEntry = {
     at: new Date().toISOString(),
     scope,
+    domain,
     message: toMessage(err),
   };
 
   if (__DEV__) {
-    console.warn(`[${scope}]`, err);
+    // ⚠️ Konsolga XOM xato chiqadi (stack bilan) — u faqat dasturchi
+    // mashinasida ko'rinadi va hech qayerga ulashilmaydi. Buferga esa
+    // tozalangan matn yoziladi.
+    console.warn(`[${domain}] [${scope}]`, err);
   }
 
   try {

@@ -13,7 +13,7 @@ backend qayta qurilmaydi, faqat yangi client.
 | Styling | NativeWind (Tailwind) — `tailwind.config.js` brend tokenlari |
 | State | Zustand + TanStack Query |
 | Backend | `@supabase/supabase-js` (web bilan bir xil loyiha) |
-| Barcode | expo-camera (F3) — ML Kit |
+| Barcode | react-native-vision-camera (F3) — ML Kit; tashqi HID skaner (search maydon orqali aniqlanadi) |
 | Offline | expo-sqlite + react-native-mmkv + NetInfo — F9 ✅ |
 | Build | EAS Build (bulut) |
 
@@ -103,6 +103,9 @@ birga ishlatish lint bilan taqiqlangan.
 primitivlar (`ui/screen · card · badge · icon-chip · skeleton ·
 pressable-scale`), harakat tili (`theme/motion.ts`).
 **Sprint 13 ✅** — kassir hisoboti (`/cashier-report`, migration 033).
+**POS ishonchliligi ✅ (2026-08-18)** — printer navbati, kirill, tashqi
+skaner, DB timeout (batafsil "POS ishonchliligi" bo'limida). Tarmoq
+printer (TCP 9100) ATAYLAB keyinga qoldirildi.
 
 **Qoidalar:** o'lchamlar `theme/tokens.ts` dan (xom raqam lint bilan
 taqiqlangan) · animatsiya `theme/motion.ts` dan (`useMotion()` ichida
@@ -161,6 +164,77 @@ faqat egasi (`isOwner`) uchun.
 
 Barcha sprintlar (Sprint 10 regressiyasi, 11, 12, 13) va AI 0–5-bosqich
 qurilmada sinovdan o'tdi 2026-08-14 (`docs/QURILMADA_SINOV.md`, hammasi ✅).
+
+## POS ishonchliligi — printer, skaner, DB (2026-08-18)
+
+`docs/AUDIT_POS_2026-08-16.md` auditi asosida qurilgan. Maqsad: kassa
+tizimi hech qachon printer, tarmoq yoki DB holatiga qaramay to'silmasin.
+
+**Printer arxitekturasi qatlamlangan, UI transportni bilmaydi:**
+```
+UI (payment-sheet, tarix, printer-settings)
+  → printReceipt() / reprintReceipt()      features/print/print-receipt.ts
+    → PrintQueue (SQLite, idempotent)      print-queue*.ts
+      → PrinterManager (holat, retry)      printer-manager.ts
+        → PrinterTransport (bluetooth/system/network) transports/*.ts
+          → ESC-POS encoder (transportdan MUSTAQIL) escpos-encoder.ts
+```
+- **Chek sotuvdan MUSTAQIL amal** — `printReceipt()` `void` bilan
+  chaqiriladi, natijasi savat/sotuv oqimini bloklamaydi.
+- **PrintQueue persistent** (`print_queue` jadvali, `sale_queue` naqshi
+  bo'yicha) — printer ishlamasa chek YO'QOLMAYDI, navbatda qoladi va
+  ilova old planga qaytganda/qo'lda avtomatik chiqadi.
+- **Idempotency**: `job_id = receipt:<saleId>` — "Chek" tugmasini ikki
+  marta bosish bitta chek beradi. Tarixdagi **qayta chiqarish** esa har
+  safar YANGI kalit — ataylab qilingan nusxa to'silmaydi.
+- **Kod sahifasi** (`escpos-codepage.ts`) — CP866/CP1251/ASCII, sozlamada
+  tanlanadi (printer modeliga qarab); default CP866 (kirill uchun).
+- Yangi transport (masalan tarmoq printeri) qo'shilsa **UI ham, encoder
+  ham o'zgarmaydi** — faqat `transports/` ga yangi fayl.
+
+**Scanner pipeline manbadan mustaqil:**
+```
+CameraScanner (vision-camera)  ─┐
+HID skaner (qidiruv maydoni)   ─┼→ resolveScan() → savat / vazn oynasi
+                                 │   features/scanner/scan-pipeline.ts
+```
+- Kamera va HID **bir xil** `useScanHandler()` orqali savatga qo'shadi —
+  mantiq ikki marta yozilmagan.
+- HID skaner **ko'rinmas maydon EMAS** — qidiruv maydonining o'zi
+  skaner-xabardor (`use-scan-detect.ts`, tezlik bo'yicha aniqlash).
+  Sabab: Android apparat klaviaturasidan kelgan kiritishni ekrandagi
+  BIRINCHI matn maydoniga yo'naltiradi — ko'rinmas maydon bilan fokus
+  talashish qurilmadan qurilmaga har xil ishlaydi.
+
+**DB (SQLite) hech qachon abadiy osilib qolmasligi kerak** —
+`lib/offline/db.ts` har bir amalni `withTimeout` bilan o'raydi (8s).
+Qurilmada topilgan real xato: "o'lik" native handle uchun `.catch()`
+YORDAM BERMAYDI (faqat RAD ETILGAN promise'ni tutadi, ABADIY OSILGANINI
+emas) — bu esa `decrementLocalQty` orqali TO'LOV tugmasini abadiy
+"yuklanmoqda" holatida ushlab qolgan edi. Timeout shu zanjirni uzadi.
+
+**Xato jurnali domenlarga bo'lingan** (`lib/log-domain.ts`):
+`PRINT/SALE/SYNC/SCANNER/CATALOG/AUTH/NOTIFY/AI/DB/APP` — Diagnostika
+ekranida filtrlanadi. Jurnal matni `redact()` bilan tozalanadi (JWT,
+parol, karta raqami) — chunki jurnal "Ulashish" bilan tashqariga chiqadi.
+
+**Arxitektura qoidalari:**
+- UI transport kutubxonasini (Bluetooth/tarmoq) BILMAYDI — faqat
+  `PrinterTransport` interfeysini.
+- Sale printerga BOG'LIQ EMAS — chek mustaqil, xatosi sotuvni bekor
+  qilmaydi.
+- ESC/POS encoder transportdan MUSTAQIL — native import yo'q, test
+  qilinadi.
+- `BottomSheet` bilan ro'yxat (FlatList/qidiruv) ko'rsatiladigan
+  oynalarda **dinamik o'lchash EMAS, aniq `snapPoints`** ishlatiladi —
+  `isLoading → FlatList` almashinganda dinamik o'lchash oynani qayta
+  o'lchamaydi (`customer-picker-sheet.tsx`, `supplier-picker-sheet.tsx`,
+  `add-supply-item-sheet.tsx`da qurilmada topilgan xato).
+
+Batafsil: `docs/AUDIT_POS_2026-08-16.md`. Tarmoq printeri (TCP 9100)
+ATAYLAB keyinga qoldirildi — `react-native-tcp-socket` legacy native
+modul (Yangi Arxitekturada moslik tekshirilmagan) va yangi EAS build
+talab qiladi.
 
 ## Auth · Onboarding · Obuna (4d-1/4d-2/4d-3 asosan qurilmada tasdiqlandi)
 

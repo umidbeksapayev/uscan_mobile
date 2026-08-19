@@ -1,4 +1,5 @@
 import { formatNumber, formatDateTimeFull } from "@/lib/format";
+import { shortReceiptId } from "./receipt-id";
 import type { ReceiptData, ReceiptLine } from "./types";
 
 /**
@@ -21,12 +22,6 @@ function truncateName(s: string): string {
 
 function qtyLabel(line: ReceiptLine): string {
   return line.saleType === "weight" ? `${line.quantity.toFixed(3)} kg` : `×${line.quantity}`;
-}
-
-/** Chek # — uzun id'dan qisqa ko'rinish. */
-function shortId(id: string): string {
-  const clean = id.replace(/^offline-/, "");
-  return clean.length > 8 ? clean.slice(-6).toUpperCase() : clean.toUpperCase();
 }
 
 export function buildReceiptHtml(data: ReceiptData): string {
@@ -74,7 +69,7 @@ export function buildReceiptHtml(data: ReceiptData): string {
   ${data.shopPhone ? `<div class="center muted">Tel: ${esc(data.shopPhone)}</div>` : ""}
   ${data.shopAddress ? `<div class="center muted">${esc(data.shopAddress)}</div>` : ""}
   <hr />
-  <div class="muted">Chek #${shortId(data.saleId)}</div>
+  <div class="muted">Chek #${shortReceiptId(data.saleId)}</div>
   <div class="muted">${formatDateTimeFull(data.soldAt)}</div>
   ${data.cashierName ? `<div class="muted">Kassir: ${esc(data.cashierName)}</div>` : ""}
   <hr />

@@ -68,7 +68,21 @@ export function SupplierPickerSheet({ visible, shopId, onSelect, onClose }: Prop
   }
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} contentStyle={{ maxHeight: "80%" }}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      keyboardAvoiding
+      // ANIQ balandlik — DINAMIK o'lchash EMAS.
+      //
+      // ⚠️ Qurilmada topilgan xato: oyna sarlavha+qidiruv+spinner
+      // ko'rinishida BIRINCHI o'lchanadi (ma'lumot hali `isLoading`),
+      // keyin ro'yxat kelganda ham OYNA O'SMAYDI — natijada ro'yxat
+      // ekran ostida, ko'rinmas holda qoladi. `settings.tsx`dagi
+      // ishlaydigan pikerlar ham aynan shu sabab aniq `snapPoints`
+      // ishlatadi, dinamik o'lchash emas.
+      enableDynamicSizing={false}
+      snapPoints={["75%"]}
+    >
           <Text className="mb-3 text-lg font-medium text-ink">{t("suppliers.pickTitle")}</Text>
 
           {adding ? (

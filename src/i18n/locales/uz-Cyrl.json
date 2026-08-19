@@ -753,7 +753,9 @@
     "permNone": "Рухсат берилмаган",
     "cashierOnlyOwner": "Кассирлар ва рухсатларни фақат дўкон эгаси бошқаради.",
     "removeStaffBtn": "Ходимни дўкондан чиқариш",
-    "permCountShort": "Кассир · {{count}} та рухсат"
+    "permCountShort": "Кассир · {{count}} та рухсат",
+    "rowExternalScanner": "Ташқи сканер",
+    "rowExternalScannerSub": "USB ёки Bluetooth штрих-код сканери (клавиатура режими)"
   },
   "admin": {
     "title": "Супер-админ панели",
@@ -1172,7 +1174,31 @@
     "pairHint": "Принтерни аввал телефон Bluetooth созламасида уланг (paired), кейин шу ерда қидиринг.",
     "testBtn": "Тест чек чиқариш",
     "testItem": "Тест маҳсулот",
-    "testSugar": "Шакар"
+    "testSugar": "Шакар",
+    "statusConnected": "Уланган",
+    "statusConnecting": "Уланмоқда…",
+    "statusDisconnected": "Уланмаган",
+    "statusPrinting": "Чиқарилмоқда…",
+    "statusError": "Хато",
+    "reconnect": "Қайта уланиш",
+    "remove": "Принтерни олиб ташлаш",
+    "removeTitle": "Принтерни олиб ташлаш",
+    "removeBody": "Bluetooth принтер созламаси ўчирилади.",
+    "codepageHeader": "МАТН КОДЛАШ",
+    "codepageHint": "Тест чекда кирилл матн бузилиб чиқса бошқасини танланг.",
+    "cp866": "Кирилл (CP866)",
+    "cp866Sub": "Кўпчилик термал принтер учун",
+    "cp1251": "Кирилл (CP1251)",
+    "cp1251Sub": "CP866 ишламаса шуни синанг",
+    "ascii": "Фақат лотин",
+    "asciiSub": "Кирилл ? бўлиб чиқади — охирги чора",
+    "queueHeader": "ЧИҚМАГАН ЧЕКЛАР",
+    "queueRetry": "Қайта уриниш",
+    "queueRetryAll": "Ҳаммасини қайта уриниш",
+    "queueDiscard": "Ўчириш",
+    "queueDiscardTitle": "Чекни ўчириш",
+    "queueDiscardBody": "Бу чек бошқа чиқарилмайди. Сотув ўчирилмайди.",
+    "queueEmpty": "Барча чеклар чиқарилган"
   },
   "offlineSales": {
     "status_pending": "Кутилмоқда",
@@ -1377,5 +1403,31 @@
     "openHistory": "Суҳбатлар тарихи",
     "deleteChatTitle": "Суҳбатни ўчириш",
     "deleteChatMsg": "\"{{title}}\" ўчирилсинми? Бу амални ортга қайтариб бўлмайди."
+  },
+  "printError": {
+    "connection": "Принтер билан алоқа йўқ. Ёқилганини ва Bluetooth уланганини текширинг.",
+    "device": "Принтерда қоғоз тугаган ёки қопқоқ очиқ.",
+    "cancelled": "Чоп этиш бекор қилинди.",
+    "unknown": "Чекни чиқариб бўлмади. Созламалар > Принтер бўлимидан тест қилиб кўринг.",
+    "queuedTitle": "Чек навбатда",
+    "queuedBody": "Принтер уланганда автоматик чиқарилади.",
+    "duplicateTitle": "Чек",
+    "duplicateBody": "Бу чек аллақачон чиқарилган.",
+    "labelQueuedTitle": "Ёрлиқ навбатда",
+    "receiptErrorTitle": "Чек чиқариш",
+    "labelErrorTitle": "Ёрлиқ чиқариш",
+    "testErrorTitle": "Тест чек"
+  },
+  "scanner": {
+    "searching": "Қидирилмоқда…",
+    "notFound": "Топилмади: {{code}}",
+    "invalidCode": "Код ўқилмади",
+    "camPermTitle": "Камерага рухсат керак",
+    "camPermSub": "Штрих-кодни сканерлаш учун камера рухсатини беринг.",
+    "permBtn": "Рухсат бериш",
+    "noCamTitle": "Камера топилмади",
+    "noCamSub": "Қурилмада орқа камера аниқланмади.",
+    "frameHint": "Штрих-кодни рамка ичига жойланг",
+    "torchBtn": "Чироқ"
   }
 }

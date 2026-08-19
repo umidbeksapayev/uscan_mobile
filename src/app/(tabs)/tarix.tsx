@@ -19,7 +19,7 @@ import {
 import { useSalesHistoryInfinite } from "@/features/history/use-history";
 import { ReturnSheet } from "@/features/history/return-sheet";
 import { buildSaleReceiptData } from "@/features/history/sale-receipt";
-import { printReceipt } from "@/features/print/print-receipt";
+import { reprintReceipt } from "@/features/print/print-receipt";
 import { radius, text } from "@/theme/tokens";
 
 const METHOD: Record<
@@ -80,12 +80,14 @@ const SaleCard = memo(function SaleCard({
   open,
   onToggle,
   onReturn,
+  shopId,
   shopName,
 }: {
   sale: Sale;
   open: boolean;
   onToggle: () => void;
   onReturn?: () => void;
+  shopId?: string;
   shopName: string;
 }) {
   const colors = useColors();
@@ -96,7 +98,9 @@ const SaleCard = memo(function SaleCard({
   const hasReturns = refunded > 0;
 
   function onReprint() {
-    void printReceipt(buildSaleReceiptData(sale, shopName));
+    // `reprintReceipt` — ATAYLAB qayta chiqarish: dublikat himoyasi bu yerda
+    // to'siq bo'lmasligi kerak, foydalanuvchi chindan ham nusxa so'rayapti.
+    if (shopId) void reprintReceipt(buildSaleReceiptData(sale, shopName), shopId);
   }
 
   return (
@@ -240,6 +244,7 @@ export default function TarixScreen() {
         open={openId === item.id}
         onToggle={() => setOpenId(openId === item.id ? null : item.id)}
         onReturn={isOwner && shopId ? () => setReturnSale(item) : undefined}
+        shopId={shopId}
         shopName={shopName}
       />
     ),

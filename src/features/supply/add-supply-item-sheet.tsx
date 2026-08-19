@@ -112,7 +112,16 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
   }
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAvoiding contentStyle={{ maxHeight: "82%" }}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      keyboardAvoiding
+      // ANIQ balandlik — sabab customer-picker-sheet.tsx dagi bilan bir xil:
+      // dinamik o'lchash ro'yxat ASYNC kelganda (isLoading -> FlatList)
+      // oynani qayta o'lchamaydi, ro'yxat ekran ostida ko'rinmas qolardi.
+      enableDynamicSizing={false}
+      snapPoints={["82%"]}
+    >
           {!picked ? (
             <>
               <Text className="mb-3 text-lg font-medium text-ink">{t("purchases.addProduct")}</Text>
@@ -145,7 +154,7 @@ export function AddSupplyItemSheet({ visible, shopId, onClose }: Props) {
                   data={results ?? []}
                   keyExtractor={(p) => p.id}
                   keyboardShouldPersistTaps="handled"
-                  style={{ maxHeight: 320 }}
+                  style={{ flex: 1 }}
                   ListEmptyComponent={
                     debounced.trim() ? (
                       <Text className="py-6 text-center text-sm text-muted">{t("catalog.notFound")}</Text>

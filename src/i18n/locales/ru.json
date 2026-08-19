@@ -753,7 +753,9 @@
     "permNone": "Разрешений нет",
     "cashierOnlyOwner": "Кассирами и разрешениями управляет только владелец магазина.",
     "removeStaffBtn": "Удалить сотрудника из магазина",
-    "permCountShort": "Кассир · разрешений: {{count}}"
+    "permCountShort": "Кассир · разрешений: {{count}}",
+    "rowExternalScanner": "Внешний сканер",
+    "rowExternalScannerSub": "USB или Bluetooth сканер штрих-кодов (режим клавиатуры)"
   },
   "admin": {
     "title": "Панель супер-админа",
@@ -1172,7 +1174,31 @@
     "pairHint": "Сначала выполните сопряжение (paired) в настройках Bluetooth телефона, затем ищите здесь.",
     "testBtn": "Печать тестового чека",
     "testItem": "Тестовый товар",
-    "testSugar": "Сахар"
+    "testSugar": "Сахар",
+    "statusConnected": "Подключён",
+    "statusConnecting": "Подключение…",
+    "statusDisconnected": "Не подключён",
+    "statusPrinting": "Печать…",
+    "statusError": "Ошибка",
+    "reconnect": "Переподключить",
+    "remove": "Убрать принтер",
+    "removeTitle": "Убрать принтер",
+    "removeBody": "Настройка Bluetooth-принтера будет удалена.",
+    "codepageHeader": "КОДИРОВКА ТЕКСТА",
+    "codepageHint": "Если кириллица в тестовом чеке искажена — выберите другую.",
+    "cp866": "Кириллица (CP866)",
+    "cp866Sub": "Подходит большинству термопринтеров",
+    "cp1251": "Кириллица (CP1251)",
+    "cp1251Sub": "Попробуйте, если CP866 не работает",
+    "ascii": "Только латиница",
+    "asciiSub": "Кириллица станет ? — крайний случай",
+    "queueHeader": "НЕНАПЕЧАТАННЫЕ ЧЕКИ",
+    "queueRetry": "Повторить",
+    "queueRetryAll": "Повторить все",
+    "queueDiscard": "Удалить",
+    "queueDiscardTitle": "Удалить чек",
+    "queueDiscardBody": "Этот чек больше не будет напечатан. Продажа не удаляется.",
+    "queueEmpty": "Все чеки напечатаны"
   },
   "offlineSales": {
     "status_pending": "Ожидание",
@@ -1377,5 +1403,31 @@
     "openHistory": "История чатов",
     "deleteChatTitle": "Удалить чат",
     "deleteChatMsg": "Удалить \"{{title}}\"? Это действие нельзя отменить."
+  },
+  "printError": {
+    "connection": "Нет связи с принтером. Проверьте, включён ли он и подключён ли Bluetooth.",
+    "device": "В принтере закончилась бумага или открыта крышка.",
+    "cancelled": "Печать отменена.",
+    "unknown": "Не удалось напечатать чек. Проверьте в Настройки > Принтер.",
+    "queuedTitle": "Чек в очереди",
+    "queuedBody": "Будет напечатан автоматически при подключении принтера.",
+    "duplicateTitle": "Чек",
+    "duplicateBody": "Этот чек уже напечатан.",
+    "labelQueuedTitle": "Этикетка в очереди",
+    "receiptErrorTitle": "Печать чека",
+    "labelErrorTitle": "Печать этикетки",
+    "testErrorTitle": "Тестовый чек"
+  },
+  "scanner": {
+    "searching": "Поиск…",
+    "notFound": "Не найдено: {{code}}",
+    "invalidCode": "Код не распознан",
+    "camPermTitle": "Нужен доступ к камере",
+    "camPermSub": "Разрешите доступ к камере для сканирования штрих-кодов.",
+    "permBtn": "Разрешить",
+    "noCamTitle": "Камера не найдена",
+    "noCamSub": "Задняя камера на устройстве не обнаружена.",
+    "frameHint": "Наведите штрих-код в рамку",
+    "torchBtn": "Фонарик"
   }
 }

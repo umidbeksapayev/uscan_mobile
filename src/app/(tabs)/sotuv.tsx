@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, memo } from "react";
+import { useCallback, useEffect, useRef, useState, memo } from "react";
 import { View, Text, TextInput, Pressable, FlatList, ScrollView, Alert } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,6 +24,8 @@ import { tabularNums } from "@/theme/typography";
 import type { Product } from "@/types/database";
 import { radius, text } from "@/theme/tokens";
 import { PressableScale } from "@/components/ui/pressable-scale";
+import { useScanDetect, type ScanDetect } from "@/features/scanner/use-scan-detect";
+import { useScanHandler } from "@/features/scanner/use-scan-handler";
 
 const FrequentTile = memo(function FrequentTile({
   product,
@@ -214,6 +216,49 @@ export default function SotuvScreen() {
     }
   }, [pendingWeight, setPendingWeight]);
 
+  /*
+    Tashqi (HID) skaner — kamera bilan BIR XIL quvurdan o'tadi.
+    VAZN mahsulotda `useScanHandler` `setPendingWeight` ni yozadi va
+    yuqoridagi effekt kg oynasini o'zi ochadi, shuning uchun bu ekranda
+    `onWeight` kerak emas (skaner ekranida esa u navigatsiya qiladi).
+  */
+  // `useScanHandler` va `useScanDetect` bir-biriga qarama-qarshi bog'liq
+  // (biri natijani beradi, ikkinchisi matnni qaytaradi) — halqani uzish
+  // uchun ref ishlatiladi.
+  const scanDetectRef = useRef<ScanDetect | null>(null);
+
+  const { handleScan } = useScanHandler({
+    onResult: (outcome) => {
+      // Kod MAHSULOTGA aylandi → qidiruvni tozalaymiz (kassir keyingi
+      // mahsulotga o'tadi). Topilmasa matn QOLADI — foydalanuvchi nima
+      // skanerlanganini ko'rsin va uni nom bo'yicha qidira olsin.
+      if (outcome.kind === "unit" || outcome.kind === "weight") setSearch("");
+      // Topilmadi → kod maydonga qaytariladi: kassir nima skanerlanganini
+      // ko'rsin va uni nom bo'yicha qidira olsin.
+      if (outcome.kind === "not-found") {
+        scanDetectRef.current?.restore(outcome.code);
+        toast.info(t("scanner.notFound", { code: outcome.code }));
+      }
+    },
+  });
+
+  /*
+    Qidiruv maydoni SKANER-XABARDOR. Qurilmada aniqlandi: Android apparat
+    klaviaturasidan (HID skaner) kelgan kiritishni ekrandagi BIRINCHI matn
+    maydoniga yo'naltiradi. Ko'rinmas maydonni fokusda ushlashga urinish
+    o'rniga kiritish qayerga tushsa o'sha yerda taniymiz.
+  */
+  const scanDetect = useScanDetect({
+    onScan: handleScan,
+    // Maydonga nima YOZILISHINI hook hal qiladi: skanerdan kelayotgan
+    // kod ekranda ko'rinmaydi, odam yozgani esa odatdagidek ko'rinadi.
+    onText: setSearch,
+  });
+  // Yozish EFFEKTDA: render paytida ref o'zgartirish React qoidasini buzadi.
+  useEffect(() => {
+    scanDetectRef.current = scanDetect;
+  });
+
   const { data: results } = useQuery({
     queryKey: ["sell-search", debounced.trim(), shopId],
     enabled: !!shopId && debounced.trim().length > 0,
@@ -324,7 +369,15 @@ export default function SotuvScreen() {
             <TextInput
               testID="sell-search"
               value={search}
-              onChangeText={setSearch}
+              onChangeText={(next) => {
+                setSearch(next);
+                scanDetect.onChangeText(next);
+              }}
+              onSubmitEditing={scanDetect.onSubmitEditing}
+              // Skaner Enter yuborganda maydon fokusni YO'QOTMASIN —
+              // aks holda keyingi skan boshqa joyga tushardi.
+              blurOnSubmit={false}
+              returnKeyType="search"
               placeholder={t("sell.searchPlaceholder")}
               placeholderTextColor={colors.tabInactive}
               // Shrift `className`da EMAS: NativeWind klassi va inline

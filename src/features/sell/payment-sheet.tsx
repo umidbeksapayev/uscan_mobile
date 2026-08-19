@@ -198,7 +198,8 @@ export function PaymentSheet({ visible, total, shopId: propShopId, items, onClos
       debtAmount: method === "debt" ? debtFromSale(effectiveTotal, debtPaid) : undefined,
       customerName: method === "debt" ? customer?.name ?? undefined : undefined,
     };
-    void printReceipt(data);
+    // shopId `canPay` da allaqachon tekshirilgan — bu ekranga shusiz kelinmaydi.
+    if (currentShopId) void printReceipt(data, currentShopId);
   }
 
   return (
