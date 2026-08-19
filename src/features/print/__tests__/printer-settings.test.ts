@@ -2,26 +2,29 @@
  * `printer-settings.ts` `@/lib/offline/mmkv` (react-native-mmkv) import
  * qiladi — loyihada bu modul uchun jest mock yo'q, shuning uchun shu yerda
  * xotiradagi soxta `storage` beriladi (faqat `getString`/`set` — modul
- * shu ikkitasidan boshqasini ishlatmaydi).
+ * shu ikkitasidan boshqasini ishlatmaydi). Xotira `Map`si `jest.mock`
+ * factory FUNKSIYASI ICHIDA yaratiladi va mock ob'ektining o'zida `__mem`
+ * sifatida e'lon qilinadi — shu bilan importlar odatdagidek fayl boshida
+ * qoladi, `import/first` buzilmaydi.
  */
-let mockMemStorage: Map<string, string>;
+import { storage } from "@/lib/offline/mmkv";
+import { usePrinterStore, getPrinterConfig } from "../printer-settings";
 
 jest.mock("@/lib/offline/mmkv", () => {
-  mockMemStorage = new Map<string, string>();
+  const mem = new Map<string, string>();
   return {
     storage: {
-      getString: (k: string) => mockMemStorage.get(k),
+      getString: (k: string) => mem.get(k),
       set: (k: string, v: string) => {
-        mockMemStorage.set(k, v);
+        mem.set(k, v);
       },
+      __mem: mem,
     },
   };
 });
 
-import { usePrinterStore, getPrinterConfig } from "../printer-settings";
-
 beforeEach(() => {
-  mockMemStorage.clear();
+  (storage as unknown as { __mem: Map<string, string> }).__mem.clear();
   usePrinterStore.setState({
     type: "system",
     btAddress: null,
@@ -34,14 +37,15 @@ beforeEach(() => {
 describe("printer-settings — legacy moslik", () => {
   it("paperWidth'siz eski JSON → effektiv qiymat 58, storage QAYTA YOZILMAYDI", () => {
     const legacy = { type: "bluetooth", btAddress: "AA:BB", btName: "POS-58", codepage: "cp1251" };
-    mockMemStorage.set("printerConfig", JSON.stringify(legacy));
+    const mem = (storage as unknown as { __mem: Map<string, string> }).__mem;
+    mem.set("printerConfig", JSON.stringify(legacy));
 
     const cfg = getPrinterConfig();
 
     expect(cfg.paperWidth).toBe(58);
     expect(cfg.btAddress).toBe("AA:BB"); // boshqa maydonlar saqlangan
     expect(cfg.codepage).toBe("cp1251");
-    expect(mockMemStorage.get("printerConfig")).toBe(JSON.stringify(legacy)); // o'zgarmagan
+    expect(mem.get("printerConfig")).toBe(JSON.stringify(legacy)); // o'zgarmagan
   });
 });
 

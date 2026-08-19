@@ -1,28 +1,28 @@
 /**
  * `documents.ts` `printer-settings.ts` orqali `@/lib/offline/mmkv`ga bog'liq —
  * shu sabab bu yerda ham xotiradagi soxta `storage` beriladi
- * (`printer-settings.test.ts`dagi bilan bir xil naqsh: `jest.mock` factory
- * ichida INITSIALIZATSIYA qilinadi, tashqarida faqat E'LON qilinadi — aks
- * holda babel-plugin-jest-hoist factory'ni o'zgaruvchi e'lonidan OLDIN
- * ko'taradi va "Cannot access before initialization" xatosi chiqadi).
+ * (`printer-settings.test.ts`dagi bilan bir xil naqsh: xotira `Map`si
+ * `jest.mock` factory FUNKSIYASI ICHIDA yaratiladi va mock ob'ektining o'zida
+ * `__mem` sifatida e'lon qilinadi — shu bilan importlar odatdagidek fayl
+ * boshida qoladi, `import/first` buzilmaydi).
  */
-let mockMemStorage: Map<string, string>;
-
-jest.mock("@/lib/offline/mmkv", () => {
-  mockMemStorage = new Map<string, string>();
-  return {
-    storage: {
-      getString: (k: string) => mockMemStorage.get(k),
-      set: (k: string, v: string) => {
-        mockMemStorage.set(k, v);
-      },
-    },
-  };
-});
-
+import { storage } from "@/lib/offline/mmkv";
 import { usePrinterStore } from "../printer-settings";
 import { receiptDocument } from "../documents";
 import type { ReceiptData } from "../types";
+
+jest.mock("@/lib/offline/mmkv", () => {
+  const mem = new Map<string, string>();
+  return {
+    storage: {
+      getString: (k: string) => mem.get(k),
+      set: (k: string, v: string) => {
+        mem.set(k, v);
+      },
+      __mem: mem,
+    },
+  };
+});
 
 const data: ReceiptData = {
   shopName: "Dilshod Market",
@@ -43,7 +43,7 @@ function asciiOf(b: Uint8Array): string {
 }
 
 beforeEach(() => {
-  mockMemStorage.clear();
+  (storage as unknown as { __mem: Map<string, string> }).__mem.clear();
   usePrinterStore.setState({ type: "system", btAddress: null, btName: null, codepage: "cp866", paperWidth: 58 });
 });
 

@@ -232,39 +232,6 @@ export default function PrinterSettingsScreen() {
           }}
         />
 
-        <View style={{ marginTop: 20 }}>
-          <SectionLabel>{t("printer.widthHeader")}</SectionLabel>
-          {(
-            [
-              [58, t("printer.width58"), t("printer.width58Sub")],
-              [80, t("printer.width80"), t("printer.width80Sub")],
-            ] as [58 | 80, string, string][]
-          ).map(([w, label, sub]) => (
-            <Pressable
-              key={w}
-              onPress={() => setPaperWidth(w)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: paperWidth === w }}
-              accessibilityLabel={label}
-              className="mb-2 flex-row items-center gap-3 rounded-2xl bg-surface p-3"
-              style={{
-                borderWidth: 1.5,
-                borderColor: paperWidth === w ? colors.primary : colors.line,
-              }}
-            >
-              <Ionicons
-                name={paperWidth === w ? "radio-button-on" : "radio-button-off"}
-                size={20}
-                color={paperWidth === w ? colors.primary : colors.tabInactive}
-              />
-              <View className="flex-1">
-                <Text className="text-base text-ink">{label}</Text>
-                <Text className="text-xs text-muted">{sub}</Text>
-              </View>
-            </Pressable>
-          ))}
-        </View>
-
         {btPanelOpen ? (
           <View className="mt-2">
             {btAddress ? (
@@ -403,6 +370,39 @@ export default function PrinterSettingsScreen() {
             </View>
           </View>
         ) : null}
+
+        <View style={{ marginTop: 20 }}>
+          <SectionLabel>{t("printer.widthHeader")}</SectionLabel>
+          {(
+            [
+              [58, t("printer.width58"), t("printer.width58Sub")],
+              [80, t("printer.width80"), t("printer.width80Sub")],
+            ] as [58 | 80, string, string][]
+          ).map(([w, label, sub]) => (
+            <Pressable
+              key={w}
+              onPress={() => setPaperWidth(w)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: paperWidth === w }}
+              accessibilityLabel={label}
+              className="mb-2 flex-row items-center gap-3 rounded-2xl bg-surface p-3"
+              style={{
+                borderWidth: 1.5,
+                borderColor: paperWidth === w ? colors.primary : colors.line,
+              }}
+            >
+              <Ionicons
+                name={paperWidth === w ? "radio-button-on" : "radio-button-off"}
+                size={20}
+                color={paperWidth === w ? colors.primary : colors.tabInactive}
+              />
+              <View className="flex-1">
+                <Text className="text-base text-ink">{label}</Text>
+                <Text className="text-xs text-muted">{sub}</Text>
+              </View>
+            </Pressable>
+          ))}
+        </View>
 
         <Pressable
           onPress={testPrint}
