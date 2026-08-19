@@ -236,6 +236,18 @@ ATAYLAB keyinga qoldirildi — `react-native-tcp-socket` legacy native
 modul (Yangi Arxitekturada moslik tekshirilmagan) va yangi EAS build
 talab qiladi.
 
+**58mm + 80mm qog'oz kengligi ✅ (2026-08-19).** `PrinterConfig.paperWidth:
+58 | 80` — domen darajasida (ESC-POS'dagi 32/48-belgi `getCharsPerLine()`
+orqali FAQAT `escpos-encoder.ts` ichida hisoblanadi, boshqa joyda
+takrorlanmaydi). Printer sozlamalarida tanlanadi, Bluetooth/Tizim
+printeridan MUSTAQIL (`btPanelOpen` shartidan tashqarida). ESC-POS
+(`escpos-encoder.ts`) va Tizim printeri/PDF (`receipt-template.ts`)
+ikkalasi ham hurmat qiladi. Default 58mm — eski foydalanuvchiga ta'sir
+yo'q (`load()`ning mavjud `{...DEFAULT, ...parsed}` xatti-harakati
+bilan). Moslik jadvali: `docs/PRINTER_COMPATIBILITY.md` (hali bo'sh —
+faqat qurilmada sinalgan modellar qo'shiladi). Qurilmada haqiqiy 80mm
+printer bilan hali sinalmagan (`docs/QURILMADA_SINOV.md` 7-bo'lim).
+
 ## Auth · Onboarding · Obuna (4d-1/4d-2/4d-3 asosan qurilmada tasdiqlandi)
 
 **Autentifikatsiya (4d-1) — 2026-08-15 qurilmada TO'LIQ tasdiqlandi**

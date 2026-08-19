@@ -793,6 +793,23 @@ Haqiqiy Bluetooth termal printer kerak. **Yangi EAS build shart emas** —
 - [ ] Printerni yoqing → **Qayta ulanish** → 🟢 ga qaytishi
 - [ ] **Printerni olib tashlash** → sozlama Tizim printeriga qaytishi
 
+### 7.7 Qog'oz kengligi (58mm/80mm)
+
+- [ ] Sozlamalar → Printer → "Qog'oz kengligi" bo'limi **Bluetooth VA
+      Tizim printeri** holatlarining ikkalasida ham ko'rinishi
+- [ ] **80mm** tanlang → test chek chiqarish → qatorlar kengroq (48 belgi)
+      joylashishi, summalar hamon o'ng chetga tekis turishi
+- [ ] Uzunroq mahsulot nomi (21–32 belgi) 80mm'da **kesilmasligi**
+      (58mm'da kesilardi)
+- [ ] **58mm**ga qaytaring → eski xatti-harakat aynan tiklanishi
+- [ ] Tizim printeri (PDF) tanlangan holatda ham 80mm ta'sir qilishi —
+      "Ulashish" orqali PDF'ni oching, kengligi mos kelishi
+- [ ] Oddiy chek, ko'p mahsulotli chek, uzun nom, miqdor, narx, jami,
+      chiziq (divider), qalin (bold) — barchasi 80mm'da to'g'ri
+      joylashishi
+- [ ] Sinovdan o'tgan model topilsa `docs/PRINTER_COMPATIBILITY.md`ga
+      qator qo'shing
+
 ### 7.2 Kirill (B3) — P0
 
 - [ ] Kirill nomli mahsulot qo'shing (masalan `Сув`) yoki do'kon nomini
