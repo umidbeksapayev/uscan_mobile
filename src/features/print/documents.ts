@@ -30,8 +30,11 @@ export interface LabelPayload {
 export function receiptDocument(data: ReceiptData): PrintDocument {
   return {
     title: `Chek #${shortReceiptId(data.saleId)}`,
-    escpos: () => encodeReceipt(data, { codepage: getPrinterConfig().codepage }),
-    html: () => buildReceiptHtml(data),
+    escpos: () => {
+      const cfg = getPrinterConfig();
+      return encodeReceipt(data, { codepage: cfg.codepage, paperWidth: cfg.paperWidth });
+    },
+    html: () => buildReceiptHtml(data, getPrinterConfig().paperWidth),
   };
 }
 
