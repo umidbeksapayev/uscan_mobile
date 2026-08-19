@@ -60,14 +60,19 @@ export function padLine(left: string, right: string, width = 32): string {
   return lt + " ".repeat(gap) + r;
 }
 
+/** 58/80mm → ESC-POS qatordagi belgi soni. Yagona xarita — boshqa joyda takrorlanmasin. */
+export function getCharsPerLine(paperWidth: 58 | 80): 32 | 48 {
+  return paperWidth === 80 ? 48 : 32;
+}
+
 function itemLeft(it: ReceiptLine): string {
   return it.saleType === "weight" ? `${it.name} ${it.quantity.toFixed(3)}kg` : `${it.name} x${it.quantity}`;
 }
 
 /** Enkoder sozlamalari. Kod sahifasi printer konfiguratsiyasidan keladi. */
 export interface EncodeOptions {
-  /** Qator kengligi belgida — 58mm ≈ 32, 80mm ≈ 48. */
-  width?: number;
+  /** Qog'oz kengligi mm'da — domen darajasi. ESC-POS belgi soni `getCharsPerLine()` orqali. */
+  paperWidth?: 58 | 80;
   codepage?: Codepage;
 }
 
@@ -81,7 +86,7 @@ const DEFAULT_CODEPAGE: Codepage = "cp866";
 
 /** ReceiptData → ESC-POS baytlar. */
 export function encodeReceipt(data: ReceiptData, opts: EncodeOptions = {}): Uint8Array {
-  const width = opts.width ?? 32;
+  const width = getCharsPerLine(opts.paperWidth ?? 58);
   const cp = opts.codepage ?? DEFAULT_CODEPAGE;
   const bytes = (s: string): number[] => encodeText(s, cp);
   const line = (s: string): number[] => [...bytes(s), LF];

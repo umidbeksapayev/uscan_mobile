@@ -1,4 +1,4 @@
-import { sanitize, padLine, encodeReceipt, encodeLabel } from "../escpos-encoder";
+import { sanitize, padLine, encodeReceipt, encodeLabel, getCharsPerLine } from "../escpos-encoder";
 import { encodeText } from "../escpos-codepage";
 import type { ReceiptData } from "../types";
 import type { LabelData } from "@/features/labels/barcode-format";
@@ -34,6 +34,15 @@ describe("sanitize", () => {
   });
 });
 
+describe("getCharsPerLine", () => {
+  it("58mm → 32 belgi", () => {
+    expect(getCharsPerLine(58)).toBe(32);
+  });
+  it("80mm → 48 belgi", () => {
+    expect(getCharsPerLine(80)).toBe(48);
+  });
+});
+
 describe("padLine", () => {
   it("natija aniq width belgili", () => {
     expect(padLine("Non", "6 000", 32)).toHaveLength(32);
@@ -47,6 +56,12 @@ describe("padLine", () => {
     const l = padLine("Juda juda uzun mahsulot nomi", "24 000", 24);
     expect(l).toHaveLength(24);
     expect(l.endsWith("24 000")).toBe(true);
+  });
+  it("80mm (48 belgi) uchun ham to'g'ri ishlaydi", () => {
+    const l = padLine("Kartoshka", "12 000", 48);
+    expect(l).toHaveLength(48);
+    expect(l.startsWith("Kartoshka")).toBe(true);
+    expect(l.endsWith("12 000")).toBe(true);
   });
 });
 
@@ -146,6 +161,15 @@ describe("encodeReceipt", () => {
     expect(line).toHaveLength(32);
     expect(line.endsWith("10 000")).toBe(true);
     expect(encodeText(line, "cp866")).toHaveLength(32);
+  });
+
+  it("paperWidth: 80 → divider 48 ta '-'; default (58) → 32 ta '-'", () => {
+    const b58 = encodeReceipt(data);
+    const b80 = encodeReceipt(data, { paperWidth: 80 });
+    expect(asciiOf(b58)).toContain("-".repeat(32));
+    expect(asciiOf(b58)).not.toContain("-".repeat(33));
+    expect(asciiOf(b80)).toContain("-".repeat(48));
+    expect(asciiOf(b80)).not.toContain("-".repeat(49));
   });
 });
 
